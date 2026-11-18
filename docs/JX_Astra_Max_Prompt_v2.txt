@@ -1,0 +1,588 @@
+# JX — Java eXtended UI
+## Implementation prompt for Astra Max — revised application architecture and tooling
+
+You are acting as a principal Java engineer, language-tooling engineer, and frontend runtime architect.
+
+Design and implement JX: a language extension and application framework for building complete React applications with Java and JSX-like markup in .jx files.
+
+This specification incorporates the full project scope and replaces the earlier server-first, class-only MVP plan. Preserve useful existing work, but align architecture and acceptance criteria with the requirements below.
+
+Start working in the repository. Deliver executable code, tested integration, installable tooling, and clear documentation.
+
+## 1. Product goal
+
+Application authors should be able to build an interactive browser application using:
+
+- Java for components, application state, event handlers, business logic, and reusable hooks.
+- Declarative markup embedded in .jx source.
+- React component composition and hook semantics.
+- An optional Elm-style Model–View–Update architecture with typed messages, commands, and subscriptions.
+- Maven as the normal application build entry point.
+- VS Code and IntelliJ plugins that understand .jx source.
+- Spring Boot for backend services when a backend is needed.
+
+The first counter is a proof of the complete compilation and execution path. The product must grow into a complete application framework supporting routing, forms, async data, shared state, composition, and reusable components.
+
+Application authors must not need JavaScript or TypeScript for ordinary UI and application logic. Framework-maintained JavaScript adapters, npm dependencies, and build tooling are allowed.
+
+“Elm-capable” means support for Elm's architectural model. It does not mean compiling Elm source or promising Elm's language-level guarantees for arbitrary Java.
+
+“React application in Java” means Java-authored components running through the real React browser runtime in the preferred implementation. Compatibility with individual JavaScript libraries must be demonstrated through explicit typed bindings.
+
+## 2. Architectural direction and feasibility gate
+
+Use this preferred compilation path:
+
+1. Parse .jx and generate ordinary Java plus source mappings and component metadata.
+2. Compile generated and handwritten Java with javac.
+3. Compile browser-compatible bytecode to JavaScript using TeaVM.
+4. Bundle the result with a typed React/React DOM adapter.
+5. Execute client components, hooks, and browser event handlers in the browser.
+
+Investigate TeaVM's JavaScript target first. Verify the selected released versions, Java 25 support, module imports/exports, callbacks, records, sealed types, and the Java APIs actually required by the example.
+
+The architectural recommendation is to reuse React for reconciliation, component invocation, scheduling, hooks, effects, context, and DOM behavior. Put Java-facing APIs and representation conversions in a small, well-tested bridge.
+
+Before building broad infrastructure, prove that generated Java can:
+
+- Be called by React as a component.
+- Call React hooks synchronously during that component render.
+- Preserve component identity and state.
+- Exchange typed props and callbacks with JavaScript.
+- Run effect setup and cleanup correctly.
+- Produce a reproducible browser bundle.
+
+Document the evidence in an architecture decision record. If a specific TeaVM limitation blocks this integration, reproduce it and evaluate a targeted alternative such as J2CL. Maintain one working backend at a time.
+
+A custom renderer and independent hook engine would be a substantial change in scope. Do not silently substitute one while claiming React runtime compatibility.
+
+Keep the browser target independent from the JVM server target. Shared models and pure Java utilities may be reused when they satisfy the browser compatibility profile. Spring beans, JDBC connections, server secrets, and JVM-only services belong on the server.
+
+Define a supported Java-facing asynchronous abstraction, cancellation, and completion scheduling on the browser execution context. Document browser event-loop semantics explicitly. Avoid blocking waits, sleeps, blocking I/O, or assumptions that ordinary JVM threads are available to client components.
+
+A browser counter must continue working when networking is disabled after its assets have loaded. Spring Boot is not required to process its clicks.
+
+## 3. Functional components and Java-compatible hooks
+
+Make functional components a first-class authoring model.
+
+Use this proposed shape as the initial design target. The annotation and runtime APIs below are APIs to implement, not existing Java APIs.
+
+    // Counter.jx
+    import jx.JxComponent;
+    import jx.Hooks;
+    import jx.State;
+    import jx.View;
+
+    @JxComponent
+    public final class Counter {
+
+        public record Props(int initial, String label) {}
+
+        public static View render(Props props) {
+            State<Integer> count = Hooks.useState(props.initial());
+
+            return <button onClick={event ->
+                    count.update(previous -> previous + 1)}>
+                {props.label()}: {count.value()}
+            </button>;
+        }
+    }
+
+    // App.jx
+    import jx.JxComponent;
+    import jx.View;
+
+    @JxComponent
+    public final class App {
+
+        public static View render() {
+            return <main>
+                <h1>JX application</h1>
+                <Counter initial={0} label="First" />
+                <Counter initial={10} label="Second" />
+            </main>;
+        }
+    }
+
+The compiler must resolve Counter as a component, validate its properties, and generate a stable component descriptor and correctly typed Props construction.
+
+Using a Java class as the namespace for a static rendering function does not mean state is stored in static fields. Hook state belongs to each mounted component instance.
+
+Define a State<T> API with:
+
+- value(): the state snapshot associated with this render.
+- set(T next): schedule a state replacement.
+- update(UnaryOperator<T> updater): schedule a functional update.
+
+The underlying dispatch function must have stable identity. The state snapshot must not become a mutable live getter that silently changes values inside an older closure.
+
+Java's ordinary lambda capture rules remain in effect. A captured State<T> handle can be effectively final while its dispatch operations schedule updates. Do not add JavaScript destructuring or change local-variable assignment semantics merely to imitate React syntax.
+
+Immutable props and render snapshots are the default. Document the policy for nested collections and mutable objects: Java records alone do not guarantee deep immutability.
+
+The original instance-field counter style may be supported later through a separately documented class-component adapter. Functional components and hooks define the initial client architecture.
+
+## 4. Language and component contract
+
+Specify a coherent .jx grammar and implement it incrementally.
+
+The required language surface includes:
+
+- Java packages, imports, classes, records, generics, lambdas, and method references within the chosen Java profile.
+- HTML and SVG elements.
+- Nested elements, fragments, and self-closing component tags.
+- Text and Java interpolations.
+- Typed component props and event callbacks.
+- Component children and composition.
+- Conditional rendering through valid Java expressions.
+- Collections of children and stable keys.
+
+For conditionals, preserve Java typing. For example, use a ternary returning a View or null. Do not copy a JavaScript expression such as boolean && element if it is invalid Java.
+
+Define exactly how null, strings, numbers, booleans, Views, and collections behave as children. Document whitespace handling and escaping.
+
+Define a consistent mapping for HTML attribute names, boolean attributes, class/className, for/htmlFor, data-* and aria-* attributes, SVG attributes, and styles. Keep key and ref as framework metadata where appropriate.
+
+Resolve component property names against a declared typed props contract. Let generated Java and javac enforce property types and callback signatures. Produce useful errors for unknown, missing, or duplicate properties.
+
+Use stable keys for stateful children in lists. Document identity and duplicate-key behavior.
+
+The parser must distinguish markup from Java generics, comparisons, strings, character literals, comments, text blocks, nested braces, and lambdas. Avoid global regex substitution as the compiler strategy.
+
+Share parser structures, source ranges, diagnostics, component metadata, and relevant semantic services between the compiler and editor tooling.
+
+Preserve readable generated Java. Keep source generation deterministic.
+
+## 5. React bridge correctness
+
+React must own component invocation.
+
+Lower a component tag to a React element referencing a stable registered component function. Do not directly call a child's Java render method while executing its parent's render.
+
+Register or cache each JavaScript component type outside the render path. Creating a new component function on each render would change its identity.
+
+Define Java-to-JavaScript conversion rules for:
+
+- Primitive values, strings, null, and nullable fields.
+- Records and ordinary Java objects.
+- Arrays, collections, and child lists.
+- Functional interfaces, callbacks, and event values.
+- Refs and browser elements.
+- Props, keys, and context values.
+
+Specify where Java objects remain opaque identity-bearing values and where a binding explicitly converts them to JavaScript records. Avoid serializing every render value through JSON.
+
+React's dependency and state comparisons are not Java's general equals contract. Normalize supported primitive values consistently and preserve object identity where React requires it. Fresh adapter wrappers must not accidentally invalidate all effects, context consumers, or memoized values.
+
+Use one compatible React/React DOM installation in the browser bundle. Keep React module resolution consistent between JX and any external React host.
+
+Provide usable component names and errors for development diagnostics.
+
+Define exception translation across the bridge, preserving useful messages, causes, and source information. Prove that a Java exception thrown during rendering reaches a React error boundary. Give event-handler failures, asynchronous failures, and command failures their own explicit reporting paths.
+
+Do not assume React Compiler or JavaScript linting can analyze generated Java semantics. Implement JX-specific checks and test the bridge's actual behavior.
+
+## 6. Hooks and lifecycle semantics
+
+Implement the foundation hooks in the first application milestone:
+
+- useState, including lazy initialization and functional updates.
+- useReducer for pure local reducers.
+- useEffect with dependency tracking and cleanup.
+- useRef.
+- createContext and useContext.
+- Custom hooks composed from these primitives.
+
+Complete the application toolkit with:
+
+- useMemo and useCallback.
+- useSyncExternalStore or an equivalent typed wrapper over React's API.
+- useId.
+- useLayoutEffect for browser layout integrations.
+- Typed transition/deferred rendering APIs when the underlying backend supports them.
+
+Keep newer or advanced APIs explicitly tracked in a compatibility matrix rather than declaring blanket React parity.
+
+Specify and test:
+
+1. Hook ownership and stable call order for each component.
+2. State preservation across parent renders.
+3. Functional update ordering and batching.
+4. Pure rendering and pure state updaters/reducers.
+5. Effect execution after committed rendering.
+6. Cleanup on dependency change and unmount.
+7. Stale closure behavior and async cancellation.
+8. Ref identity and the fact that changing a ref does not itself trigger rendering.
+9. Context propagation and provider scoping.
+10. Correct behavior under development Strict Mode.
+
+For ordinary hooks, diagnose calls in conditionals, loops, callbacks, or unsupported execution contexts. Combine practical source analysis with development-time checks. Do not claim complete static verification of arbitrary Java control flow.
+
+Define dependency-list semantics, including omitted dependencies versus an empty list. If API overloads would make this ambiguous, use explicit Java types or named helper methods.
+
+Distinguish stored function values from React initializer/updater callbacks. For example, a separate useStateLazy(Supplier<T>) operation can distinguish lazy initialization from useState(T). Likewise, set(T) must store a callable T as a value, while update(UnaryOperator<T>) must execute an updater. Test these cases through the actual JavaScript bridge.
+
+Memoization is an optimization. Application correctness must not depend on a memoized value being retained forever.
+
+A component effect that starts an async request must dispose or ignore stale work when dependencies change or the component unmounts.
+
+## 7. Elm-style Model–View–Update
+
+Provide a first-class, optional MVU layer using the same component renderer.
+
+Use a typed program contract along these lines:
+
+    public interface Program<M, Msg> {
+        Transition<M, Msg> init();
+        Transition<M, Msg> update(M model, Msg message);
+        View view(M model, Dispatch<Msg> dispatch);
+        List<Subscription<Msg>> subscriptions(M model);
+    }
+
+    public record Transition<M, Msg>(
+        M model,
+        List<Command<Msg>> commands
+    ) {}
+
+The exact public API may be refined, but preserve these semantics:
+
+- Model is an immutable application snapshot.
+- Msg is a typed message, preferably expressed with sealed interfaces and records.
+- update is pure and returns a new model plus descriptions of commands.
+- view produces UI from the current model and a typed dispatcher.
+- Commands describe effects interpreted by the runtime.
+- Completed effects return new messages.
+- Subscriptions describe ongoing sources of messages and have managed lifetimes.
+
+Implement a serialized program store and a command interpreter outside React rendering.
+
+Commit each model transition before executing its commands. React components subscribe to immutable committed snapshots through useSyncExternalStore. Keep snapshots cached while the model is unchanged, and dispose subscriptions correctly.
+
+Do not execute commands inside a React render, state updater, or reducer. Those computations must remain safe to evaluate repeatedly.
+
+Define command identities, cancellation, stale-result protection, subscription keys, lifecycle ownership, and replay behavior. Repeated renders must not duplicate commands. Do not promise exactly-once network effects.
+
+If store ownership is tied to component mounting, define and test start/dispose behavior under development remounts and Strict Mode. Program initialization must not accidentally perform I/O during rendering.
+
+Use one owner for each state value. Local hooks may manage local interaction state while an MVU store manages application/domain state. Avoid mirroring the same model into two competing state systems.
+
+Include:
+
+- A pure reducer/model test.
+- An Elm-style counter or todo flow.
+- An async command with success and failure messages.
+- A cancellation or stale-response example.
+- A subscription with observable cleanup.
+
+## 8. Capabilities needed for complete applications
+
+Build a coherent application toolkit with an explicit implementation matrix.
+
+Required for the complete application milestone:
+
+- Typed props, children, fragments, conditional rendering, and keyed collections.
+- Hooks, reusable custom hooks, reducers, context, and MVU state.
+- Client routing with history navigation, back/forward behavior, parameters, and query strings.
+- Controlled form inputs, submission, validation, loading, and field/server errors.
+- Async HTTP/JSON access, cancellation, and stale-response protection.
+- Loading, empty, success, and error UI states.
+- Error boundaries with an appropriate Java API.
+- Refs and a controlled browser/DOM interoperation boundary.
+- CSS and asset loading.
+- Accessibility-friendly semantic HTML, labels, keyboard behavior, and focus handling.
+- A documented mechanism for wrapping external React components.
+
+Track portals, lazy loading, code splitting, Suspense integration, advanced transitions, SSR, hydration, and debug stepping as follow-on capabilities with explicit acceptance criteria.
+
+Do not claim Suspense-based data loading simply because a loading flag exists. Do not claim SSR/hydration compatibility from a client rendering test.
+
+Build a realistic todo or small dashboard application after the counter. It must exercise routing, forms, shared state, a custom hook, async data, error handling, and persistence through an example backend where appropriate.
+
+## 9. Project organization
+
+Use a repository with clear implementation boundaries. Suggested modules/directories:
+
+- jx-core: public component, view, prop, event, and hook-facing types.
+- jx-compiler: .jx parsing, lowering, diagnostics, generated source, and mappings.
+- jx-react: typed React/React DOM bridge and browser component registration.
+- jx-browser: browser-compatible services and async HTTP support.
+- jx-elm: MVU store, transition types, commands, and subscriptions.
+- jx-router: routing and navigation.
+- jx-maven-plugin: source generation, validation, browser build, and development commands.
+- jx-language-server: shared .jx language services over LSP.
+- jx-spring-boot-starter: optional backend/static-asset integration.
+- tooling/vscode: VS Code extension.
+- tooling/intellij: IntelliJ plugin.
+- examples/counter-app: smallest complete browser example.
+- examples/todo-app: realistic application.
+- examples/interop-host: a small ordinary React host for interoperability verification.
+- docs: architecture, language specification, compatibility, development, and roadmap.
+
+These are logical boundaries. Merge tiny modules where that improves maintainability, and explain substantial changes.
+
+Use Maven for Java artifacts and application builds. Allow the VS Code extension to use its normal npm tooling and the IntelliJ plugin to use the supported IntelliJ Platform Gradle tooling. Provide documented wrapper commands and CI for the combined repository.
+
+Do not create disconnected empty modules simply to match this list.
+
+## 10. Maven plugin — required deliverable
+
+Deliver a real jx-maven-plugin and a reproducible sample POM.
+
+Use conventional source roots:
+
+- src/main/jx for application components.
+- src/test/jx for component test fixtures where applicable.
+- target/generated-sources/jx for generated production Java.
+- target/generated-test-sources/jx for generated test Java.
+- target/jx for mappings and owned intermediate metadata.
+- A documented target directory for browser assets.
+
+Provide source-generation goals bound to generate-sources and generate-test-sources through explicit POM executions. Register generated roots automatically. Let the normal Java compilation lifecycle compile the generated sources.
+
+Provide a documented Java semantic-validation path that can map diagnostics to .jx. If it requires a check goal, compiler integration, or a Java diagnostic listener, implement that explicitly; source-root registration alone does not remap javac errors.
+
+Integrate the selected Java-to-JavaScript compiler and npm bundler at the correct later lifecycle stage. Pin versions, use lockfiles, and document the Node/JDK requirements.
+
+Provide a development command that watches source changes, rebuilds, serves the application, and reports original-source diagnostics. A reliable rebuild-and-reload loop is sufficient initially. State-preserving hot reload is a separate capability.
+
+Incremental correctness requirements:
+
+- Preserve package paths.
+- Do not rewrite unchanged outputs.
+- Track source/configuration/dependency changes.
+- Remove only generated files owned by the plugin.
+- Handle source rename/deletion and stale classes correctly.
+- Avoid cross-module mutable state during parallel Maven builds.
+- Document a clean-rebuild fallback where incremental dependency tracking is incomplete.
+
+Verify clean builds and repeated builds, source edits, renames/deletions, and intentional failures.
+
+Publish exact build/run commands that were actually executed. Do not imply the artifacts already exist on Maven Central.
+
+## 11. Shared language server and source mappings
+
+Build one shared language-services foundation and an LSP server for .jx.
+
+Support incomplete source during editing, document versions, cancellation, project discovery, and stale-diagnostic suppression.
+
+Initial useful features must include:
+
+- Syntax diagnostics.
+- Component and property completion.
+- Embedded Java type diagnostics within the implemented subset.
+- Hover and definition navigation.
+- Document symbols.
+- Useful diagnostics for unsupported or invalid hook usage.
+
+Choose and demonstrate a practical Java analysis strategy, such as generated/shadow Java documents with javac or another suitable Java semantic engine. Connecting LSP does not automatically provide Java completion.
+
+Preserve mappings for .jx to generated Java. Compose browser mappings through JavaScript when the chosen compiler exposes the information.
+
+Mappings must cover embedded expressions, component references, props, handler signatures, and generated scaffolding. Prefer original .jx locations in user-facing diagnostics.
+
+Test multiline source, CRLF, Unicode, and the negotiated LSP position encoding.
+
+Diagnostic source maps, IDE navigation, browser stack traces, and debugger breakpoints are distinct deliverables. Track and verify each one separately.
+
+Advertise only implemented LSP capabilities. Project-wide rename, import management, advanced refactoring, formatting, and debugger support need their own implementation and verification.
+
+## 12. VS Code extension — required deliverable
+
+Produce an installable .vsix with:
+
+- .jx file association.
+- Java/markup/interpolation syntax highlighting.
+- Bracket matching, comments, indentation, and folding.
+- Language-server startup, shutdown, logging, and restart.
+- Clear JDK/toolchain configuration and missing-runtime errors.
+- Diagnostics pointing to original .jx source.
+- HTML/component/property completion for the supported subset.
+- Navigation from <Counter /> to its source declaration.
+- Java-aware hover/type feedback through the shared semantic service.
+- Commands for creating a component and starting the documented dev workflow.
+
+Respect VS Code workspace trust and remote workspace execution boundaries. Do not execute a project's build scripts merely because an untrusted file was opened.
+
+Use the shared compiler/language server for semantic behavior. A TextMate grammar is only the highlighting layer.
+
+Provide extension tests, packaging instructions, and installation instructions. Test the packaged extension, not only its source.
+
+## 13. IntelliJ plugin — required deliverable
+
+Produce an installable IntelliJ plugin ZIP with an equivalent practical baseline:
+
+- JX language/file-type registration.
+- Highlighting and editor basics.
+- Shared diagnostics and component/property completion.
+- Definition navigation and Java-aware type feedback.
+- Project/Maven integration and clear generated-source handling.
+- Language-service lifecycle and toolchain settings.
+- Useful error reporting and logging.
+
+Verify current IntelliJ product/version compatibility before choosing the integration.
+
+For a supported unified IntelliJ distribution, prefer the documented LSP integration where it satisfies the baseline. Native PSI integration or another LSP integration may be needed for additional targets or deeper Java refactoring.
+
+Document exactly which distributions and versions are supported and whether a subscription is needed. Do not infer compatibility with open-source builds or older Community versions from support in a current unified distribution.
+
+Keep the compiler and semantic rules shared. IDE-specific syntax and UX adapters may remain native to each editor.
+
+Use plugin verification and an IDE test instance. If the environment cannot launch the IDE, report that verification gap explicitly instead of claiming the plugin was exercised interactively.
+
+## 14. Backend integration and runtime safety
+
+Provide a Spring Boot example exposing typed JSON endpoints and optionally serving generated browser assets.
+
+Document serialization contracts and client/server boundaries. Keep credentials and server authorization logic outside the browser bundle.
+
+Use safe text rendering and typed event handlers. Define an explicit restricted escape hatch if raw HTML is ever supported; do not make untrusted HTML the default interpolation behavior.
+
+Apply normal backend authentication/authorization and CSRF defenses where cookie-based state-changing endpoints require them. A route guard is user-interface behavior, not server authorization.
+
+If server-interactive components are added later, give them their own session, event authorization, concurrency, expiration, and cleanup model. They must not silently change the execution location or semantics of client components.
+
+## 15. Implementation milestones and acceptance criteria
+
+Work through milestones while keeping the repository buildable.
+
+### Milestone A — browser execution proof
+
+- Java-authored function component mounted by React.
+- Real useState behavior and typed event callback.
+- Stable component identity.
+- Working effect cleanup.
+- Tested Java/JavaScript value conversions.
+- Compatible pinned toolchain and reproducible build.
+- Counter remains interactive with networking disabled after asset load.
+
+### Milestone B — .jx compiler and Maven vertical slice
+
+- Counter.jx and App.jx compile through Maven into the browser application.
+- Typed props and event handlers work.
+- Invalid markup produces an original-source diagnostic.
+- An invalid prop type is rejected with a useful .jx location.
+- Normal Java generics, comparisons, comments, strings, and lambdas survive transformation.
+- Clean and incremental build scenarios behave correctly.
+
+### Milestone C — hooks, composition, and Elm
+
+- Two counters maintain independent state.
+- Parent rerenders preserve child state.
+- Reordering keyed children preserves each child's state.
+- Changing a key or unmounting resets/disposes the intended instance.
+- Three functional increments in one handler produce a net increment of three.
+- Context and a custom hook work.
+- Effects clean up on dependency changes and unmount.
+- MVU messages update immutable models.
+- An async command returns a typed success/failure message.
+- Stale results are ignored or cancelled.
+- Repeated rendering does not duplicate commands.
+- Strict Mode lifecycle tests pass.
+
+### Milestone D — installable development tooling
+
+- Maven builds the example through the documented entry point.
+- The VS Code .vsix is built and tested.
+- The IntelliJ ZIP is built and verified for declared targets.
+- Both editors recognize .jx, show useful diagnostics/completion, and navigate component references.
+- Shared fixtures demonstrate consistent .jx source locations.
+- Tooling works with incomplete code and does not crash on malformed input.
+
+### Milestone E — complete application demonstration
+
+- A routed todo/dashboard application is written in Java/.jx.
+- It includes controlled forms, validation, async data, loading/errors, shared state, and a reusable hook.
+- It calls a Spring Boot example API.
+- At least one JX component renders inside an ordinary React host.
+- At least one bound JavaScript React component renders inside JX.
+- The browser bundle contains a single compatible React runtime.
+- No application-authored TypeScript or JavaScript is needed for the Java/.jx demonstration app.
+
+Keep framework-authored bridge code and the explicit interoperability test host clearly identified.
+
+## 16. Verification and engineering standards
+
+Use Java 25 as the intended language/toolchain baseline and verify the actual browser compilation profile.
+
+Pin released dependency versions after checking compatibility. Prefer supported APIs and a small dependency set. Document any necessary language/library restriction precisely.
+
+Use meaningful tests at the correct layers:
+
+- Compiler fixtures and generated-Java compilation.
+- Negative syntax/type tests and source-location assertions.
+- Unit tests for pure MVU updates.
+- Bridge/hook tests exercising the actual React runtime.
+- Browser tests for DOM behavior, events, state, cleanup, and async races.
+- Maven integration tests for reactor and incremental behavior.
+- Language-server protocol tests.
+- Editor extension packaging and supported-IDE verification.
+- End-to-end tests for the complete application.
+
+Use JUnit for Java tests and appropriate browser/IDE tooling where required. Execute browser semantics tests in a real browser; JVM-only tests cannot prove browser behavior.
+
+Record bundle size and a basic development rebuild measurement once a representative example exists. Describe the measured setup. Avoid performance claims based on the counter alone.
+
+Document architecture, language syntax, compatibility, tooling setup, build commands, implemented capabilities, and remaining work.
+
+## 17. Working instructions and final report
+
+Inspect the repository and existing instructions first. Preserve unrelated changes.
+
+Begin with the browser/React interoperability proof, then build the compiler, application semantics, and tooling around the verified path.
+
+Do not stop after an architecture document or a set of empty modules. Progress through the milestones, fix observed failures, and keep examples executable.
+
+If the environment blocks a step, report the exact missing capability, the observed error, and the next reproducible command. Mark unverified features honestly.
+
+In your final implementation report, include:
+
+1. Chosen architecture and evidence for the browser compiler/React bridge.
+2. Implemented modules and public APIs.
+3. Exact commands to build, run, test, and package both editor plugins.
+4. Tests executed and their results.
+5. Verified IDE versions and any untested installation paths.
+6. The React capability/binding matrix.
+7. Browser-Java limitations, known issues, and prioritized follow-up work.
+
+Do not publish to Maven Central, npm, or editor marketplaces unless publication has been separately requested. Produce reviewable local packages.
+
+## 18. Primary technical references
+
+Check current official documentation and pin the versions actually used:
+
+- React component invocation: https://react.dev/reference/rules/react-calls-components-and-hooks
+- React hooks: https://react.dev/reference/react/hooks
+- State semantics: https://react.dev/reference/react/useState
+- Effect lifecycle: https://react.dev/reference/react/useEffect
+- Component identity: https://react.dev/learn/preserving-and-resetting-state
+- External stores: https://react.dev/reference/react/useSyncExternalStore
+- Elm architecture: https://guide.elm-lang.org/architecture/
+- Elm commands/subscriptions: https://guide.elm-lang.org/effects/
+- TeaVM overview/limitations: https://www.teavm.org/docs/intro/overview.html
+- TeaVM JavaScript interop: https://www.teavm.org/docs/runtime/jso.html
+- TeaVM modules: https://teavm.org/docs/runtime/js-modules.html
+- TeaVM Maven integration: https://www.teavm.org/docs/tooling/maven.html
+- TeaVM Java 25 release notes: https://teavm.org/docs/release-notes/0.13.0.html
+- Maven source generation: https://maven.apache.org/guides/mini/guide-generating-sources.html
+- Maven plugin development: https://maven.apache.org/guides/plugin/guide-java-plugin-development.html
+- VS Code language servers: https://code.visualstudio.com/api/language-extensions/language-server-extension-guide
+- VS Code embedded languages: https://code.visualstudio.com/api/language-extensions/embedded-languages
+- IntelliJ language servers: https://plugins.jetbrains.com/docs/intellij/language-server-protocol.html
+- IntelliJ custom languages: https://plugins.jetbrains.com/docs/intellij/custom-language-support.html
+- IntelliJ unified distribution compatibility: https://blog.jetbrains.com/platform/2025/11/intellij-platform-2025-3-what-plugin-developers-should-know/
+
+## Final instruction
+
+Build JX as a coherent Java application authoring platform:
+
+- Java and declarative markup for the developer.
+- React's browser runtime behind a typed, verified bridge.
+- Hooks for component logic.
+- Elm-style programs for explicit application state and effects.
+- Maven, VS Code, and IntelliJ as supported development workflows.
+
+Prove the complete path with the counter, then demonstrate the architecture with a realistic application.
+
+Proceed with implementation.
+

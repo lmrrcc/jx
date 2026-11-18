@@ -1,0 +1,8 @@
+---
+description: JX repository policy and portable engineering skill routing.
+alwaysApply: true
+---
+
+Read [the repository guide](../../AGENTS.md) before working on JX. Load only its
+matching skills from `.agents/skills/`; `.cursor/skills/` is a compatibility link.
+The root guide owns JX-specific choices and the actual command inventory.

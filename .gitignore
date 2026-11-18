@@ -1,0 +1,16 @@
+.DS_Store
+.idea/
+*.iml
+.cache/
+target/
+*.class
+*.log
+.env
+.env.*
+!.env.example
+node_modules/
+test-results/
+playwright-report/
+.gradle/
+build/
+dist/

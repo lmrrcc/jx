@@ -1,0 +1,13 @@
+{
+  "name": "jx-development",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build:proof": "esbuild proof/react-bridge/browser-entry.js --bundle --format=esm --sourcemap --outfile=proof/react-bridge/target/site/application.js",
+    "test:proof": "playwright test -c proof/react-bridge/playwright.config.js"
+  },
+  "dependencies": { "react": "19.3.1", "react-dom": "19.3.1" },
+  "devDependencies": { "@playwright/test": "1.65.1", "esbuild": "0.28.2" }
+}
