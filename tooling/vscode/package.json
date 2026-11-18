@@ -1,0 +1,54 @@
+{
+  "name": "jx-language",
+  "displayName": "JX Java Components",
+  "description": "Java and .jx component editing through the shared JX language server.",
+  "version": "0.1.0",
+  "publisher": "lmrrcc",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/lmrrcc/jx.git" },
+  "engines": { "vscode": "^1.138.0", "node": ">=22" },
+  "categories": ["Programming Languages"],
+  "extensionKind": ["workspace"],
+  "main": "./out/extension.cjs",
+  "activationEvents": ["onLanguage:jx"],
+  "capabilities": {
+    "untrustedWorkspaces": { "supported": "limited", "description": "Syntax highlighting is available; the language server and build commands require a trusted workspace." },
+    "virtualWorkspaces": { "supported": false }
+  },
+  "contributes": {
+    "languages": [{ "id": "jx", "aliases": ["JX", "jx"], "extensions": [".jx"], "configuration": "./language-configuration.json" }],
+    "grammars": [{ "language": "jx", "scopeName": "source.jx", "path": "./syntaxes/jx.tmLanguage.json" }],
+    "commands": [
+      { "command": "jx.restartServer", "title": "JX: Restart Language Server" },
+      { "command": "jx.showOutput", "title": "JX: Show Language Server Output" },
+      { "command": "jx.createComponent", "title": "JX: Create Component" },
+      { "command": "jx.build", "title": "JX: Build Application" },
+      { "command": "jx.dev", "title": "JX: Start Development Server" }
+    ],
+    "configuration": {
+      "title": "JX",
+      "properties": {
+        "jx.javaPath": { "type": "string", "default": "java", "scope": "machine", "description": "Java 25 executable on the extension host. Use an absolute path when Java is not on PATH." },
+        "jx.classpath": { "type": "array", "items": { "type": "string" }, "default": [], "scope": "resource", "description": "Additional Java classpath entries for semantic checks, relative to the workspace folder or absolute." },
+        "jx.devArguments": { "type": "array", "items": { "type": "string" }, "default": ["dev.jx:jx-maven-plugin:0.1.0-SNAPSHOT:dev"], "scope": "resource", "description": "Maven Wrapper arguments used only by the explicit Start Development Server command." }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc --noEmit && esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=out/extension.cjs && esbuild src/test/suite.ts --bundle --platform=node --format=cjs --external:vscode --outfile=out/test/suite.cjs",
+    "prepare:server": "java PrepareServer.java",
+    "vscode:prepublish": "npm run prepare:server && npm run compile",
+    "package": "vsce package --no-dependencies --out jx-language-0.1.0.vsix",
+    "test": "npm run compile && node test/run.cjs"
+  },
+  "dependencies": { "vscode-languageclient": "11.0.0" },
+  "overrides": { "minimatch": "11.0.1" },
+  "devDependencies": {
+    "@types/node": "20.19.43",
+    "@types/vscode": "1.138.0",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "4.1.1",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  }
+}

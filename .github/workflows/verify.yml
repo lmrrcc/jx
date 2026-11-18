@@ -5,7 +5,7 @@ on:
 permissions:
   contents: read
 jobs:
-  browser-proof:
+  framework:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,8 +18,12 @@ jobs:
           node-version: '22'
           cache: npm
       - run: java tools/CheckAgentSetup.java
-      - run: ./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository package
       - run: npm ci
+      - run: ./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository install
       - run: npx playwright install --with-deps chrome
       - run: npm run build:proof
       - run: npm run test:proof
+      - run: npm run build:runtime
+      - run: npm run test:runtime
+      - run: npm run test:counter
+      - run: npm run test:todo

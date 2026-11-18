@@ -1,0 +1,21 @@
+package jx.example.todo;
+
+import jx.*;
+import jx.elm.Dispatch;
+
+@JxComponent
+public final class TodoRow {
+    public record Props(Todo todo, boolean busy, Dispatch<TodoProgram.Message> dispatch) {}
+    public static View render(Props props) {
+        Services services = Hooks.useContext(Services.CONTEXT);
+        String labelId = Hooks.useId();
+        String destination = "/todos/" + props.todo().id();
+        return <li className={props.todo().completed() ? "todo completed" : "todo"}>
+            <input type="checkbox" checked={props.todo().completed()} aria-labelledby={labelId} disabled={props.busy()}
+                   onChange={event -> props.dispatch().send(new TodoProgram.Toggle(props.todo()))} />
+            <a id={labelId} href={destination} onClick={event -> { event.preventDefault(); services.router().navigate(destination); }}>{props.todo().title()}</a>
+            <button className="delete" aria-label={"Delete " + props.todo().title()} disabled={props.busy()}
+                    onClick={event -> props.dispatch().send(new TodoProgram.Remove(props.todo()))}>Delete</button>
+        </li>;
+    }
+}

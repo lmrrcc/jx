@@ -1,0 +1,21 @@
+{
+  "name": "JX",
+  "scopeName": "source.jx",
+  "patterns": [
+    { "include": "#tag" },
+    { "include": "source.java" }
+  ],
+  "repository": {
+    "tag": {
+      "begin": "(</?)([A-Za-z][A-Za-z0-9_.:-]*)",
+      "beginCaptures": { "1": { "name": "punctuation.definition.tag.begin.jx" }, "2": { "name": "entity.name.tag.jx" } },
+      "end": "(/?>)",
+      "endCaptures": { "1": { "name": "punctuation.definition.tag.end.jx" } },
+      "patterns": [
+        { "begin": "\\{", "end": "\\}", "patterns": [{ "include": "source.java" }] },
+        { "name": "entity.other.attribute-name.jx", "match": "[A-Za-z_][A-Za-z0-9_:-]*(?=\\s*=)" },
+        { "name": "string.quoted.double.jx", "begin": "\"", "end": "\"", "patterns": [{ "name": "constant.character.escape.jx", "match": "\\\\." }] }
+      ]
+    }
+  }
+}

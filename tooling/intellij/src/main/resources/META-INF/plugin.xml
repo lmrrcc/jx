@@ -1,0 +1,20 @@
+<idea-plugin>
+    <id>dev.jx.language</id>
+    <name>JX Java Components</name>
+    <vendor url="https://github.com/lmrrcc/jx">JX contributors</vendor>
+    <description><![CDATA[Java and .jx component editing through the shared JX language server. Requires Java 25. Provides highlighting, compiler diagnostics, completion, hover, navigation, and document symbols.]]></description>
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lsp</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="JX" language="JX" implementationClass="jx.intellij.JxFileType" fieldName="INSTANCE" extensions="jx"/>
+        <lang.parserDefinition language="JX" implementationClass="jx.intellij.JxParserDefinition"/>
+        <lang.syntaxHighlighterFactory language="JX" implementationClass="jx.intellij.JxSyntaxHighlighterFactory"/>
+        <platform.lsp.serverSupportProvider implementation="jx.intellij.JxLspSupportProvider"/>
+        <applicationConfigurable id="jx.settings" displayName="JX" parentId="language" instance="jx.intellij.JxConfigurable"/>
+    </extensions>
+    <actions>
+        <action id="JX.RestartLanguageServer" class="jx.intellij.RestartServerAction" text="Restart JX Language Server" description="Restart the shared JX language server for the current trusted project">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

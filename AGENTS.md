@@ -101,21 +101,27 @@ does not discover a skill automatically, read its linked `SKILL.md` directly.
 
 ## Verification available now
 
-Run from the repository root with JDK 25, Node.js 20 or later, npm, and Google
+Run from the repository root with JDK 25, Node.js 22 or later, npm, and Google
 Chrome installed for the browser test:
 
 ```sh
 java tools/CheckAgentSetup.java
-./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository package
 npm ci
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository install
 npm run build:proof
 npm run test:proof
+npm run build:runtime
+npm run test:runtime
+npm run test:counter
+npm run test:todo
 ```
 
 The first command checks skill metadata, routing, documentation links, and
-compatibility links. The Maven and npm commands build and exercise the real React
-browser proof. These checks do not establish completion of later specification
-milestones. Update this list as additional tested targets become available.
+compatibility links. Maven runs compiler, plugin, language-server, Elm/model, and
+backend checks; npm runs real browser checks and the complete examples. Editor
+package verification commands and supported targets live in
+[the tooling guide](docs/tooling.md). Follow the documented compatibility limits;
+these tests do not establish blanket React or IDE parity.
 
 The [source audit](docs/agent-sources.md) records origins and adaptations. It is
 historical reference, not another instruction hierarchy.

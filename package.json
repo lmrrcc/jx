@@ -6,7 +6,11 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "build:proof": "esbuild proof/react-bridge/browser-entry.js --bundle --format=esm --sourcemap --outfile=proof/react-bridge/target/site/application.js",
-    "test:proof": "playwright test -c proof/react-bridge/playwright.config.js"
+    "test:proof": "playwright test -c proof/react-bridge/playwright.config.js",
+    "build:runtime": "esbuild tests/runtime-browser/browser-entry.js --bundle --format=esm --sourcemap --outfile=tests/runtime-browser/target/site/application.js",
+    "test:runtime": "playwright test -c tests/runtime-browser/playwright.config.js",
+    "test:counter": "playwright test -c examples/counter-app/playwright.config.js",
+    "test:todo": "playwright test -c examples/todo-app/playwright.config.js"
   },
   "dependencies": { "react": "19.3.1", "react-dom": "19.3.1" },
   "devDependencies": { "@playwright/test": "1.65.1", "esbuild": "0.28.2" }

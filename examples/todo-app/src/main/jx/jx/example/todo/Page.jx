@@ -1,0 +1,62 @@
+package jx.example.todo;
+
+import jx.*;
+import jx.react.React;
+import jx.router.Route;
+
+@JxComponent
+public final class Page {
+    private static final Route DETAILS = new Route("/todos/:id");
+
+    public static View render() {
+        Services services = Hooks.useContext(Services.CONTEXT);
+        var model = Hooks.useSyncExternalStore(services.store());
+        var location = Hooks.useSyncExternalStore(services.router());
+        DomRef heading = Hooks.useDomRef();
+        Hooks.useEffect(() -> {
+            services.store().start();
+            return services.store()::stop;
+        }, Dependencies.of(services.store()));
+        Hooks.useEffect(() -> {
+            if (heading.current() != null) heading.current().focus();
+            return () -> {};
+        }, Dependencies.of(location.path()));
+        View content;
+        if ("/about".equals(location.path())) {
+            content = <section className="about"><h2>A little room to think.</h2>
+                <p>Keep the next step simple. Add a task, finish it, and carry on.</p>
+                <p>Your tasks are saved on this device's local workspace server.</p></section>;
+        } else if (DETAILS.match(location).isPresent()) {
+            String id = DETAILS.match(location).orElseThrow().parameter("id");
+            Todo selected = model.todos().stream().filter(todo -> todo.id().equals(id)).findFirst().orElse(null);
+            content = <section className="detail">
+                <a href="/todos" onClick={event -> { event.preventDefault(); services.router().navigate("/todos"); }}>← All tasks</a>
+                {model.phase() == TodoProgram.Phase.ERROR ? <div role="alert" className="error"><p>{model.error()}</p>
+                    <button onClick={event -> services.store().dispatch(new TodoProgram.Reload())}>Retry loading</button></div> :
+                 model.busy() ? <p role="status">Loading task…</p> : selected == null ? <h2>Task not found</h2> :
+                    <><h2>{selected.title()}</h2><p>{selected.completed() ? "Completed" : "Ready when you are"}</p>
+                      <button onClick={event -> services.store().dispatch(new TodoProgram.Toggle(selected))}>{selected.completed() ? "Mark active" : "Mark done"}</button></>}
+            </section>;
+        } else if ("/".equals(location.path()) || "/todos".equals(location.path())) {
+            content = services.program().view(model, services.store()::dispatch);
+        } else {
+            content = <section className="empty"><h2>Page not found</h2><a href="/todos">Return to your tasks</a></section>;
+        }
+        return <main className="shell">
+            <header className="topbar">
+                <a className="brand" href="/todos" aria-label="JX tasks" onClick={event -> { event.preventDefault(); services.router().navigate("/todos"); }}>J<span>X</span></a>
+                <nav aria-label="Main navigation">
+                    <a href="/todos" onClick={event -> { event.preventDefault(); services.router().navigate("/todos"); }}>Workspace</a>
+                    <a href="/about" onClick={event -> { event.preventDefault(); services.router().navigate("/about"); }}>About</a>
+                </nav>
+            </header>
+            <div className="hero">
+                <p className="eyebrow">A little room to think</p>
+                <h1 ref={heading} tabIndex={-1}>{"/about".equals(location.path()) ? "Small steps. Clear days." : "One thing at a time."}</h1>
+                <p>A quiet place for the things you want to get done.</p>
+            </div>
+            {React.boundary(content, failure -> <div role="alert" className="error"><h2>Something went wrong</h2><p>{failure.getMessage()}</p><a href="/todos">Reload workspace</a></div>)}
+            <footer>Made with JX · Your tasks, at your pace.</footer>
+        </main>;
+    }
+}

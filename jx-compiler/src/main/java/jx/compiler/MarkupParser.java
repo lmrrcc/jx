@@ -1,0 +1,252 @@
+package jx.compiler;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import static jx.compiler.Syntax.*;
+
+/** A lexical Java scanner coupled to a recursive markup parser; no Java text is rewritten by regex. */
+final class MarkupParser {
+    private static final int MAX_DEPTH = 128;
+    private static final Set<String> EXPRESSION_PREFIX = Set.of("return", "yield", "throw", "case");
+    private final SourceFile source;
+    private final String text;
+    private final List<Diagnostic> diagnostics = new ArrayList<>();
+    private int cursor;
+    private int depth;
+
+    MarkupParser(SourceFile source) { this.source = source; this.text = source.content(); }
+
+    ParsedSource parse() {
+        if (text.length() > 4 * 1024 * 1024) {
+            diagnostics.add(Diagnostic.error(source, "JX001", "Source exceeds the 4 MiB limit", new SourceSpan(0, 0)));
+            return new ParsedSource(source, List.of(), diagnostics);
+        }
+        List<Node> nodes;
+        try { nodes = java(false); }
+        catch (ParseFailure failure) {
+            diagnostics.add(Diagnostic.error(source, failure.code, failure.getMessage(),
+                    new SourceSpan(failure.offset, Math.min(text.length(), failure.offset + 1))));
+            nodes = List.of();
+        }
+        return new ParsedSource(source, nodes, diagnostics);
+    }
+
+    private List<Node> java(boolean untilBrace) {
+        List<Node> result = new ArrayList<>();
+        int start = cursor, braces = 0;
+        boolean expressionExpected = true;
+        while (cursor < text.length()) {
+            char c = text.charAt(cursor);
+            if (Character.isWhitespace(c)) { cursor++; continue; }
+            if (starts("//")) { skipLineComment(); continue; }
+            if (starts("/*")) { skipBlockComment(); continue; }
+            if (c == '"' || c == '\'') { skipQuoted(); expressionExpected = false; continue; }
+            if (untilBrace && braces == 0 && (starts("/>") || starts("</")))
+                fail("JX002", "Unterminated Java interpolation; expected '}' before tag delimiter", Math.max(0, start - 1));
+            if (c == '}' && braces == 0 && untilBrace) break;
+            if (c == '<' && expressionExpected && markupAhead()) {
+                if (cursor > start) result.add(new JavaText(new SourceSpan(start, cursor)));
+                result.add(element());
+                start = cursor;
+                expressionExpected = false;
+                continue;
+            }
+            if (Character.isJavaIdentifierStart(c)) {
+                int wordStart = cursor++;
+                while (cursor < text.length() && Character.isJavaIdentifierPart(text.charAt(cursor))) cursor++;
+                expressionExpected = EXPRESSION_PREFIX.contains(text.substring(wordStart, cursor));
+                continue;
+            }
+            if (Character.isDigit(c)) {
+                cursor++;
+                while (cursor < text.length() && (Character.isJavaIdentifierPart(text.charAt(cursor))
+                        || text.charAt(cursor) == '.')) cursor++;
+                expressionExpected = false;
+                continue;
+            }
+            if (starts("->")) { cursor += 2; expressionExpected = true; continue; }
+            if (starts("::")) { cursor += 2; expressionExpected = false; continue; }
+            if (starts("++") || starts("--")) { cursor += 2; continue; }
+            if (c == '{') braces++;
+            if (c == '}') braces--;
+            expressionExpected = switch (c) {
+                case '(', '[', '{', '=', ',', ';', ':', '?', '!', '~', '+', '-', '*', '/', '%', '&', '|', '^' -> true;
+                default -> false;
+            };
+            cursor++;
+        }
+        if (cursor > start) result.add(new JavaText(new SourceSpan(start, cursor)));
+        if (untilBrace && cursor == text.length()) fail("JX002", "Unterminated Java interpolation; expected '}'", cursor);
+        return result;
+    }
+
+    private boolean markupAhead() {
+        return cursor + 1 < text.length() && (text.charAt(cursor + 1) == '>'
+                || Character.isJavaIdentifierStart(text.charAt(cursor + 1)));
+    }
+
+    private Element element() {
+        if (++depth > MAX_DEPTH) fail("JX003", "Markup nesting exceeds " + MAX_DEPTH, cursor);
+        int start = cursor++;
+        int nameStart = cursor;
+        String name = starts(">") ? "" : name();
+        SourceSpan nameSpan = new SourceSpan(nameStart, cursor);
+        List<Attribute> attributes = new ArrayList<>();
+        if (!name.isEmpty()) {
+            while (true) {
+                boolean separated = whitespace();
+                if (starts("/>")) {
+                    cursor += 2; depth--;
+                    return new Element(new SourceSpan(start, cursor), name, nameSpan, attributes, List.of());
+                }
+                if (starts(">")) break;
+                if (!separated) fail("JX004", "Expected whitespace, '>' or '/>' after " + name, cursor);
+                int attributeStart = cursor;
+                String attribute = name();
+                SourceSpan attributeName = new SourceSpan(attributeStart, cursor);
+                int afterName = cursor;
+                whitespace();
+                String literal = null;
+                Interpolation expression = null;
+                if (starts("=")) {
+                    cursor++; whitespace();
+                    if (starts("{")) expression = interpolation();
+                    else if (starts("\"") || starts("'")) {
+                        char quote = text.charAt(cursor++);
+                        int valueStart = cursor;
+                        while (cursor < text.length() && text.charAt(cursor) != quote) cursor++;
+                        if (cursor == text.length()) fail("JX005", "Unterminated attribute string", valueStart);
+                        literal = entities(text.substring(valueStart, cursor), valueStart);
+                        cursor++;
+                    } else fail("JX006", "Attribute values require quotes or a Java expression in braces", cursor);
+                } else cursor = afterName;
+                attributes.add(new Attribute(attribute, new SourceSpan(attributeStart, cursor), attributeName, literal, expression));
+            }
+        }
+        expect(">", "Expected '>'");
+        List<Node> children = new ArrayList<>();
+        while (cursor < text.length()) {
+            if (starts("</")) {
+                cursor += 2;
+                String close = name.isEmpty() && starts(">") ? "" : name();
+                whitespace();
+                expect(">", "Expected '>' after closing tag");
+                if (!name.equals(close)) fail("JX007", "Closing tag '" + close + "' does not match '" + name + "'", cursor - close.length() - 1);
+                depth--;
+                return new Element(new SourceSpan(start, cursor), name, nameSpan, attributes, children);
+            }
+            if (starts("<")) children.add(element());
+            else if (starts("{")) children.add(interpolation());
+            else {
+                int textStart = cursor;
+                while (cursor < text.length() && text.charAt(cursor) != '<' && text.charAt(cursor) != '{') cursor++;
+                children.add(new Text(new SourceSpan(textStart, cursor), entities(text.substring(textStart, cursor), textStart)));
+            }
+        }
+        fail("JX008", "Unterminated " + (name.isEmpty() ? "fragment" : "element '" + name + "'"), start);
+        throw new AssertionError();
+    }
+
+    private Interpolation interpolation() {
+        int start = cursor++;
+        if (++depth > MAX_DEPTH) fail("JX003", "Markup nesting exceeds " + MAX_DEPTH, start);
+        List<Node> expression = java(true);
+        if (text.substring(start + 1, cursor).isBlank()) fail("JX009", "Java interpolation cannot be empty", start);
+        cursor++; depth--;
+        return new Interpolation(new SourceSpan(start, cursor), expression);
+    }
+
+    private String name() {
+        int start = cursor;
+        if (cursor >= text.length() || !Character.isJavaIdentifierStart(text.charAt(cursor)))
+            fail("JX010", "Expected element or property name", cursor);
+        cursor++;
+        while (cursor < text.length()) {
+            char c = text.charAt(cursor);
+            if (Character.isJavaIdentifierPart(c) || c == '-' || c == ':' || c == '.') cursor++;
+            else break;
+        }
+        return text.substring(start, cursor);
+    }
+
+    private void skipLineComment() {
+        cursor += 2;
+        while (cursor < text.length() && text.charAt(cursor) != '\n') cursor++;
+    }
+
+    private void skipBlockComment() {
+        int start = cursor;
+        int end = text.indexOf("*/", cursor + 2);
+        if (end < 0) fail("JX011", "Unterminated Java block comment", start);
+        cursor = end + 2;
+    }
+
+    private void skipQuoted() {
+        int start = cursor;
+        if (starts("\"\"\"")) {
+            cursor += 3;
+            while (cursor < text.length()) {
+                if (text.charAt(cursor) == '\\') { cursor = Math.min(text.length(), cursor + 2); continue; }
+                if (starts("\"\"\"")) { cursor += 3; return; }
+                cursor++;
+            }
+        } else {
+            char quote = text.charAt(cursor++);
+            while (cursor < text.length()) {
+                char c = text.charAt(cursor++);
+                if (c == '\\') cursor = Math.min(text.length(), cursor + 1);
+                else if (c == quote) return;
+                else if (c == '\n' || c == '\r') break;
+            }
+        }
+        fail("JX012", "Unterminated Java string, character literal, or text block", start);
+    }
+
+    private String entities(String value, int sourceStart) {
+        StringBuilder decoded = new StringBuilder();
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (c != '&') { decoded.append(c); continue; }
+            int end = value.indexOf(';', i + 1);
+            if (end < 0) fail("JX013", "Escape literal '&' as &amp;", sourceStart + i);
+            String entity = value.substring(i + 1, end);
+            String replacement = switch (entity) {
+                case "amp" -> "&"; case "lt" -> "<"; case "gt" -> ">";
+                case "quot" -> "\""; case "apos" -> "'"; case "nbsp" -> "\u00a0";
+                default -> null;
+            };
+            if (replacement == null && entity.startsWith("#")) {
+                try {
+                    int cp = Integer.parseInt(entity.substring(entity.startsWith("#x") || entity.startsWith("#X") ? 2 : 1),
+                            entity.startsWith("#x") || entity.startsWith("#X") ? 16 : 10);
+                    if (!Character.isValidCodePoint(cp) || cp >= 0xD800 && cp <= 0xDFFF || cp == 0)
+                        throw new NumberFormatException();
+                    replacement = new String(Character.toChars(cp));
+                } catch (NumberFormatException ex) { fail("JX013", "Invalid numeric entity '&" + entity + ";'", sourceStart + i); }
+            }
+            if (replacement == null) fail("JX013", "Unknown entity '&" + entity + ";'", sourceStart + i);
+            decoded.append(replacement); i = end;
+        }
+        return decoded.toString();
+    }
+
+    private boolean whitespace() {
+        int before = cursor;
+        while (cursor < text.length() && Character.isWhitespace(text.charAt(cursor))) cursor++;
+        return cursor != before;
+    }
+    private boolean starts(String token) { return text.startsWith(token, cursor); }
+    private void expect(String token, String message) {
+        if (!starts(token)) fail("JX014", message, cursor);
+        cursor += token.length();
+    }
+    private void fail(String code, String message, int offset) {
+        throw new ParseFailure(code, message, Math.clamp(offset, 0, text.length()));
+    }
+    private static final class ParseFailure extends RuntimeException {
+        final String code;
+        final int offset;
+        ParseFailure(String code, String message, int offset) { super(message); this.code = code; this.offset = offset; }
+    }
+}

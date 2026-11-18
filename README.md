@@ -4,37 +4,76 @@ JX is a Java application authoring platform for the browser: Java and `.jx` mark
 the actual React runtime, functional components and hooks, and optional Elm-style
 Model–View–Update state. Spring Boot provides backend services when needed.
 
-**Status: early implementation.** A Java 25 → TeaVM → React browser proof runs and
-has passed a real browser test. The full `.jx` language, application toolkit, Maven
-plugin, language server, and installable editor plugins are required milestones,
-not capabilities already delivered by this initial proof.
+**Status: working prototype.** The repository implements a `.jx` compiler,
+Maven generation and browser builds, a typed React bridge, hooks, Elm-style state,
+browser HTTP and routing, and a shared language server. Counter and todo examples
+exercise the complete Java → TeaVM → React path. See the documented compatibility
+limits before treating this as a production framework.
 
 The [v2 specification](docs/JX_Astra_Max_Prompt_v2.txt) defines the complete scope.
 The [baseline decision](docs/decisions/0001-java-framework-baseline.md) records the
 architecture and distinguishes product requirements from verified behavior.
 
-## Run the browser proof
+## Build and run
 
-Requirements: JDK 25, Node.js 20 or later, npm, and Google Chrome for the browser
-test. Maven Wrapper downloads Maven 3.9.11. Dependencies are pinned: TeaVM 0.16.0,
+Requirements: JDK 25, Node.js 22 or later, npm, and Google Chrome for browser
+tests. Maven Wrapper downloads Maven 3.9.11. Dependencies are pinned: TeaVM 0.16.0,
 React/React DOM 19.3.1, esbuild 0.28.2, and Playwright 1.65.1.
 
 ```sh
-./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository package
 npm ci
-npm run build:proof
-npm run test:proof
-node proof/react-bridge/serve.js
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository install
+java -jar examples/todo-api/target/todo-api-0.1.0-SNAPSHOT.jar
 ```
 
-Open http://127.0.0.1:4173/. Each counter click queues three functional increments.
-The test verifies independent component state, captured render snapshots, cleanup,
-and interaction with networking disabled after the assets load. Tests use port
-4273, so the interactive proof can stay open on 4173.
+Open http://127.0.0.1:8181/todos. Run the server from the repository root so it can
+serve `examples/todo-app/target/site`. The Java/.jx app includes a controlled form,
+validation, route parameters and filters, browser history, context, a custom hook,
+an Elm store, cancellable HTTP, loading/error states, and a Spring Boot API. H2
+persists tasks under `.local/`; Flyway owns schema changes. This is a single-workspace
+demo bound to loopback, without accounts or multi-user authorization.
 
-Application behavior in this proof lives in Java. Its JavaScript files are
-framework-owned bundling and browser-test fixtures. No artifacts are published to
-Maven Central, npm, or editor marketplaces.
+For the small counter and its rebuild/reload workflow:
+
+```sh
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -f examples/counter-app/pom.xml dev.jx:jx-maven-plugin:0.1.0-SNAPSHOT:dev -Djx.port=4180
+```
+
+Open http://127.0.0.1:4180. Saving Java, `.jx`, or web assets rebuilds the application;
+successful builds reload the page. This resets state.
+
+## Verification and tooling
+
+After the Maven build:
+
+```sh
+java tools/CheckAgentSetup.java
+npm run build:proof
+npm run test:proof
+npm run build:runtime
+npm run test:runtime
+npm run test:counter
+npm run test:todo
+```
+
+Maven runs compiler, plugin, language-server, Elm-model, and backend tests. Browser
+tests exercise actual React semantics, offline interaction, both interoperability
+directions, HTTP cancellation, history, and the todo application. The initial
+handwritten Java proof remains under `proof/react-bridge` as a small diagnostic
+fixture; `node proof/react-bridge/serve.js` serves it on port 4173.
+
+- [Language and source mappings](docs/language.md)
+- [Maven builds and development workflow](docs/maven.md)
+- [Runtime, hooks, Elm, and React compatibility](docs/runtime.md)
+- [Browser services and routing](docs/browser.md)
+- [Language-server behavior and limits](docs/language-server.md)
+- [VS Code and IntelliJ packages, installation, and verification](docs/tooling.md)
+- [Implementation status and follow-up work](docs/status.md)
+
+Application behavior lives in Java and `.jx`. JavaScript/TypeScript files are
+framework adapters, editor implementation, and explicit browser/interop fixtures.
+Artifacts use local snapshot versions; none is published to Maven Central, npm,
+or editor marketplaces.
 
 ## Repository policy and portable skills
 

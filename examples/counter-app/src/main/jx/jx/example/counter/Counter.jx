@@ -1,0 +1,31 @@
+package jx.example.counter;
+
+import jx.Hooks;
+import jx.JxComponent;
+import jx.State;
+import jx.View;
+
+@JxComponent
+public final class Counter {
+    public record Props(int initial, String label) {}
+
+    public static View render(Props props) {
+        State<Integer> count = Hooks.useState(props.initial());
+        return (
+            <section class="counter" aria-label={props.label()}>
+                <h2>{props.label()}</h2>
+                <p role="status">{count.value()}</p>
+                <button onClick={event -> count.update(previous -> previous + 1)}>
+                    Increment {props.label()}
+                </button>
+                <button onClick={event -> {
+                    count.update(previous -> previous + 1);
+                    count.update(previous -> previous + 1);
+                    count.update(previous -> previous + 1);
+                }}>
+                    Add three to {props.label()}
+                </button>
+            </section>
+        );
+    }
+}

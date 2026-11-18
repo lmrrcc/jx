@@ -8,7 +8,21 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <teavm.version>0.16.0</teavm.version>
   </properties>
-  <modules><module>proof/react-bridge</module></modules>
+  <modules>
+    <module>jx-core</module>
+    <module>jx-react</module>
+    <module>jx-elm</module>
+    <module>jx-browser</module>
+    <module>jx-router</module>
+    <module>jx-compiler</module>
+    <module>jx-maven-plugin</module>
+    <module>jx-language-server</module>
+    <module>proof/react-bridge</module>
+    <module>tests/runtime-browser</module>
+    <module>examples/todo-api</module>
+    <module>examples/counter-app</module>
+    <module>examples/todo-app</module>
+  </modules>
   <build><pluginManagement><plugins>
     <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.14.1</version></plugin>
     <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.5.4</version></plugin>

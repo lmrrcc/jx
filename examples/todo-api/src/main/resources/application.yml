@@ -1,0 +1,19 @@
+server:
+  address: 127.0.0.1
+  port: 8181
+  error:
+    include-stacktrace: never
+spring:
+  datasource:
+    url: jdbc:h2:file:./.local/jx-todos;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: ''
+  mvc:
+    problemdetails:
+      enabled: true
+  web:
+    resources:
+      static-locations: file:examples/todo-app/target/site/
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true

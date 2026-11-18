@@ -1,0 +1,31 @@
+package jx.example.counter;
+
+import jx.Hooks;
+import jx.JxComponent;
+import jx.State;
+import jx.View;
+
+@JxComponent
+public final class App {
+    public static View render() {
+        State<Integer> parent = Hooks.useState(0);
+        State<Boolean> showFirst = Hooks.useState(true);
+        return (
+            <main>
+                <p class="eyebrow">JAVA IN THE BROWSER</p>
+                <h1>Two counters. One Java application.</h1>
+                <p>Each counter owns its state. React renders the Java-authored components.</p>
+                <div class="toolbar">
+                    <button onClick={event -> parent.update(previous -> previous + 1)}>Rerender parent</button>
+                    <button onClick={event -> showFirst.update(previous -> !previous)}>Toggle first counter</button>
+                    <span>Parent renders requested: {parent.value()}</span>
+                </div>
+                <div class="counters">
+                    {showFirst.value() ? <Counter key="first" initial={0} label="First counter" /> : null}
+                    <Counter key="second" initial={10} label="Second counter" />
+                </div>
+                <p>After loading, disconnect the network. Both counters keep working.</p>
+            </main>
+        );
+    }
+}

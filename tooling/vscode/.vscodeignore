@@ -1,0 +1,8 @@
+**
+!package.json
+!README.md
+!LICENSE
+!language-configuration.json
+!syntaxes/**
+!out/extension.cjs
+!server/jx-language-server.jar

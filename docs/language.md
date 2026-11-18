@@ -1,0 +1,162 @@
+# JX language and compiler contract
+
+JX adds markup expressions to Java 25 compilation units. The compiler scans Java
+lexical contexts, parses markup recursively, uses javac's syntax trees for Java
+declarations, and generates readable Java. It does not evaluate application code.
+The [counter application](../examples/counter-app/src/main/jx/jx/example/counter/)
+is a compiling consumer of this contract.
+
+## Components and properties
+
+A component is a non-generic top-level class annotated with `@JxComponent`.
+It declares exactly one `public static View render()` method, or a
+`public static View render(Props props)` method with a public nested record:
+
+```java
+@JxComponent
+public final class Counter {
+    public record Props(int initial, String label) {}
+
+    public static View render(Props props) {
+        State<Integer> count = Hooks.useState(props.initial());
+        return <button onClick={event -> count.update(previous -> previous + 1)}>
+            {props.label()}: {count.value()}
+        </button>;
+    }
+}
+```
+
+`<Counter initial={0} label="Count" />` constructs the typed record in its
+declared field order and references the generated `Counter.JX` descriptor.
+React invokes the render function. A parent does not call a child's render method
+during lowering. `JX` is a reserved static field name.
+
+Every record field is required. Unknown, missing, and duplicate properties are
+compiler errors. javac checks property value types and functional interface
+signatures. Attributes can appear in any order. Boolean shorthand means `true`;
+there are no implicit property defaults or spread attributes. Nested record fields
+can use ordinary Java generics; generic component classes themselves are currently
+rejected. Props records themselves must also be concrete, without type parameters;
+raw generic Props must not erase property type checking.
+
+Component lookup supports the current package, explicit imports, wildcard imports,
+and fully qualified names. All component declarations used in markup must be
+included in the source batch. Importing component metadata from dependency JARs
+is not implemented. Explicit Java React bindings can be passed to
+`Views.component(...)` inside an interpolation.
+
+A component can declare a property named `children` with type `View` (or another
+type accepting a `View`). Nested markup is supplied as one fragment. Declaring
+both a children attribute and nested content is an error. An empty nested body
+does not supply a missing required children property; pass `children={Views.fragment()}`
+explicitly.
+
+`key` is reserved component identity metadata, typed as a nullable Java
+`String`, and is not a Props field. Keep keys stable among siblings in a dynamic
+list. React owns keyed reconciliation. Unkeyed collection entries and duplicate
+keys follow React's warnings and behavior; the compiler does not prove uniqueness
+of computed keys. Component ref forwarding has no markup contract yet.
+
+Records are shallowly immutable. Application authors must defensively copy mutable
+collections and nested values when props ownership requires immutable snapshots.
+
+## Markup expressions
+
+Supported forms include:
+
+```java
+<main class="page"><h1>Hello</h1></main>
+<input disabled />
+<svg viewBox="0 0 20 20"><path strokeWidth={2} d="M0 0L20 20" /></svg>
+<><span>First</span><span>Second</span></>
+<Panel title="Content"><Counter initial={0} label="Nested" /></Panel>
+condition ? <span>Ready</span> : null
+items.stream().map(item -> <Counter key={item.id()} initial={0} label={item.label()} />).toList()
+```
+
+Markup may appear in Java expression positions, including returns, parentheses,
+ternaries, lambda bodies, and expressions nested within markup braces. Normal Java
+strings, character literals, text blocks, comments, comparisons, generic type
+arguments, and method references are retained. Conditions use Java typing: a
+boolean-and-View expression is invalid Java.
+
+Lowercase names are intrinsic HTML/SVG tags; uppercase or dotted names are
+components. All tags require an explicit matching close or `/>`, including HTML
+void elements. Fragments use `<>...</>`. A Java interpolation uses balanced braces.
+An empty interpolation is an error; comments alone do not constitute a Java value.
+
+The compiler limits each source snapshot to 4 MiB of UTF-16 content and markup /
+interpolation nesting to 128 levels. Incomplete documents yield an original-source
+diagnostic. Editor services can retain metadata from other valid documents.
+
+## Text, children, attributes, and escaping
+
+A single-line text node retains its spaces. For multiline text, indentation is
+removed from interior lines, trailing layout spaces are removed before newlines,
+empty layout lines are discarded, and remaining lines are joined with one space.
+Use a Java string interpolation for exact whitespace, such as `{" "}`.
+
+Text and quoted attribute values decode `&amp;`, `&lt;`, `&gt;`, `&quot;`,
+`&apos;`, `&nbsp;`, and valid decimal/hexadecimal numeric entities. Escape a
+literal ampersand; unknown entities are errors. Literal markup delimiters can use
+entities or Java string interpolations. Quoted markup values are strings; Java
+backslash escapes belong inside a Java expression, not a markup quoted value.
+
+`Views` normalizes children as follows:
+
+| Java value | Rendering |
+| --- | --- |
+| null or boolean | No child |
+| String, Character, Number | Text, escaped by React |
+| View | Its declared view |
+| Iterable or object array | Recursively flattened children |
+| Other objects or primitive arrays | Explicit runtime error |
+
+A Java string containing HTML remains text. Raw HTML is not accepted by the ordinary
+attribute API. Children need finite, bounded collections; streaming an unbounded
+Iterable is not a rendering contract.
+
+HTML attributes otherwise use React DOM spelling. `class` aliases `className`
+and `for` aliases `htmlFor`; specifying both aliases is a duplicate error.
+Use names such as `tabIndex`, `readOnly`, `viewBox`, and `strokeWidth`.
+`data-*` and `aria-*` names retain their spelling. Boolean attributes use Java
+booleans. `style` accepts the typed `Style` API. `ref` on intrinsic elements
+accepts `Hooks.useDomRef()`; it is React metadata, not a string DOM attribute.
+DOM event names such as `onClick` target `EventHandler`, so lambda parameters
+are typed. Event strings are rejected. Other attribute values must be scalar or
+an explicitly supported typed value. These runtime checks do not constitute a
+complete static HTML attribute schema.
+
+## Hooks and source diagnostics
+
+Hooks belong to mounted component instances. `State.value()` is the current
+render's immutable snapshot; setters schedule future rendering. Functional
+updaters queue in order. Effects and external operations belong outside render.
+
+The compiler checks conventional `useX` calls in render/custom-hook methods for
+placement inside branches, loops, callbacks, try/switch constructs, and after a
+possible early return. These are conservative syntax checks. They do not analyze
+arbitrary helper call graphs, prove render purity, verify effect dependencies, or
+replace React lifecycle testing. Helpers named `useX` are treated as hooks by this
+naming convention.
+
+`JxCompiler.parse`, `compile`, and `check` expose immutable source snapshots,
+syntax nodes, component/property ranges, generated Java, and source maps.
+Offsets and columns are UTF-16; diagnostic lines and columns are one-based.
+Copied Java expressions map character-for-character. Generated scaffolding maps
+to its owning tag, attribute, or declaration.
+
+The Maven `check` / `check-test` goals run javac with annotation processors
+disabled and report errors at the original `.jx` position, for example:
+
+```text
+Counter.jx:12:18: error [compiler.err.prob.found.req] incompatible types: java.lang.String cannot be converted to int
+```
+
+Normal Maven Java compilation still runs afterward. Registering generated source
+roots alone does not remap errors. Projects relying on annotation-generated Java
+must make those generated sources available before this separate check.
+
+Diagnostic maps are implemented and tested. TeaVM/esbuild JavaScript maps are
+generated separately. Mapping JavaScript stack traces or debugger breakpoints
+through generated Java back to the original `.jx` markup is not yet implemented.

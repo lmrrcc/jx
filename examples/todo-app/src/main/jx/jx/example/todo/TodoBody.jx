@@ -1,0 +1,68 @@
+package jx.example.todo;
+
+import java.util.List;
+import jx.*;
+import jx.elm.Dispatch;
+
+@JxComponent
+public final class TodoBody {
+    public record Props(TodoProgram.Model model, Dispatch<TodoProgram.Message> dispatch) {}
+    private record Form(State<String> title, State<String> error, DomRef input) {}
+
+    private static Form useTodoForm(int createdCount) {
+        State<String> title = Hooks.useState("");
+        State<String> error = Hooks.useState("");
+        DomRef input = Hooks.useDomRef();
+        Hooks.useEffect(() -> {
+            if (createdCount > 0) {
+                title.set(""); error.set("");
+                if (input.current() != null) input.current().focus();
+            }
+            return () -> {};
+        }, Dependencies.of(createdCount));
+        return new Form(title, error, input);
+    }
+
+    public static View render(Props props) {
+        Services services = Hooks.useContext(Services.CONTEXT);
+        var location = Hooks.useSyncExternalStore(services.router());
+        Form form = useTodoForm(props.model().createdCount());
+        String filter = location.queryParameter("filter").orElse("all");
+        List<Todo> visible = props.model().todos().stream().filter(todo ->
+                "done".equals(filter) ? todo.completed() : !"active".equals(filter) || !todo.completed()).toList();
+        return <section aria-label="Todo workspace">
+            <form className="composer" onSubmit={event -> {
+                event.preventDefault();
+                String title = form.title().value().strip();
+                if (title.isEmpty() || title.length() > 200) form.error().set("Enter a title between 1 and 200 characters.");
+                else { form.error().set(""); props.dispatch().send(new TodoProgram.Create(title)); }
+            }}>
+                <label htmlFor="todo-title">What needs doing?</label>
+                <div className="input-row">
+                    <input id="todo-title" ref={form.input()} value={form.title().value()} maxLength={200}
+                           aria-describedby="title-error" disabled={props.model().busy()}
+                           onChange={event -> form.title().set(event.targetValue())} placeholder="Write the next small step" />
+                    <button className="primary" type="submit" disabled={props.model().busy()}>Add task</button>
+                </div>
+                <p id="title-error" className="field-error" role="alert">{form.error().value()}</p>
+            </form>
+            <nav className="filters" aria-label="Filter tasks">
+                <a href="/todos?filter=all" aria-current={filter == null || "all".equals(filter) ? "page" : null}
+                   onClick={event -> { event.preventDefault(); services.router().navigate("/todos?filter=all"); }}>All</a>
+                <a href="/todos?filter=active" aria-current={"active".equals(filter) ? "page" : null}
+                   onClick={event -> { event.preventDefault(); services.router().navigate("/todos?filter=active"); }}>Active</a>
+                <a href="/todos?filter=done" aria-current={"done".equals(filter) ? "page" : null}
+                   onClick={event -> { event.preventDefault(); services.router().navigate("/todos?filter=done"); }}>Done</a>
+                <span className="task-count">{props.model().todos().size()} tasks</span>
+            </nav>
+            {props.model().phase() == TodoProgram.Phase.LOADING ? <p className="notice" role="status">Loading tasks…</p> : null}
+            {props.model().phase() == TodoProgram.Phase.SAVING ? <p className="notice" role="status">Saving…</p> : null}
+            {!props.model().error().isEmpty() ? <div className="error" role="alert">
+                <p>{props.model().error()}</p>
+                <button onClick={event -> props.dispatch().send(new TodoProgram.Reload())}>Retry loading</button>
+            </div> : null}
+            {visible.isEmpty() && props.model().phase() == TodoProgram.Phase.READY ? <div className="empty"><h2>A clear desk</h2><p>No tasks in this view. Add one when you are ready.</p></div> : null}
+            <ul className="todos">{visible.stream().map(todo -> <TodoRow key={todo.id()} todo={todo} busy={props.model().busy()} dispatch={props.dispatch()} />).toList()}</ul>
+        </section>;
+    }
+}

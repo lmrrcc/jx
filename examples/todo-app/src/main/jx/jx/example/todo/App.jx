@@ -1,0 +1,11 @@
+package jx.example.todo;
+
+import jx.*;
+
+@JxComponent
+public final class App {
+    public record Props(Services services) {}
+    public static View render(Props props) {
+        return Services.CONTEXT.provide(props.services(), <Page />);
+    }
+}
