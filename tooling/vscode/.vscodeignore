@@ -6,3 +6,4 @@
 !syntaxes/**
 !out/extension.cjs
 !server/jx-language-server.jar
+!server/jx-java-bridge.jar

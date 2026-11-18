@@ -2,13 +2,24 @@
     <id>dev.jx.language</id>
     <name>JX Java Components</name>
     <vendor url="https://github.com/lmrrcc/jx">JX contributors</vendor>
-    <description><![CDATA[Java and .jx component editing through the shared JX language server. Requires Java 25. Provides highlighting, compiler diagnostics, completion, hover, navigation, and document symbols.]]></description>
+    <description><![CDATA[Java components and HTML-style markup in .jx files. Integrates IntelliJ's Java plugin for native Java completion, navigation, inspections and mapped source edits, with shared JX compiler services for markup. Requires Java 25. See the project tooling guide for the tested feature and IDE compatibility matrix.]]></description>
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
     <depends>com.intellij.modules.lsp</depends>
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="JX" language="JX" implementationClass="jx.intellij.JxFileType" fieldName="INSTANCE" extensions="jx"/>
         <lang.parserDefinition language="JX" implementationClass="jx.intellij.JxParserDefinition"/>
         <lang.syntaxHighlighterFactory language="JX" implementationClass="jx.intellij.JxSyntaxHighlighterFactory"/>
+        <multiHostInjector implementation="jx.intellij.JxJavaInjector"/>
+        <java.elementFinder implementation="jx.intellij.JxJavaElementFinder" order="first"/>
+        <java.shortNamesCache implementation="jx.intellij.JxShortNamesCache"/>
+        <psi.referenceContributor language="JX" implementation="jx.intellij.JxMarkupReferences"/>
+        <renamePsiElementProcessor implementation="jx.intellij.JxRenameClassProcessor" order="first"/>
+        <highlightVisitor implementation="jx.intellij.JxJavaHighlightVisitor"/>
+        <lang.substitutor language="JAVA" implementationClass="jx.intellij.JxGeneratedJavaLanguageSubstitutor"/>
+        <lang.findUsagesProvider language="JX" implementationClass="jx.intellij.JxFindUsagesProvider"/>
+        <useScopeEnlarger implementation="jx.intellij.JxUseScopeEnlarger"/>
+        <resolveScopeEnlarger implementation="jx.intellij.JxResolveScopeEnlarger"/>
         <platform.lsp.serverSupportProvider implementation="jx.intellij.JxLspSupportProvider"/>
         <applicationConfigurable id="jx.settings" displayName="JX" parentId="language" instance="jx.intellij.JxConfigurable"/>
         <notificationGroup id="JX Development" displayType="BALLOON" isLogByDefault="true"/>

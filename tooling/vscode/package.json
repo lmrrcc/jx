@@ -2,7 +2,7 @@
   "name": "jx-language",
   "displayName": "JX Java Components",
   "description": "Java and .jx component editing through the shared JX language server.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "lmrrcc",
   "license": "MIT",
   "repository": {
@@ -20,8 +20,10 @@
     "workspace"
   ],
   "main": "./out/extension.cjs",
+  "extensionDependencies": ["redhat.java"],
   "activationEvents": [
-    "onLanguage:jx"
+    "onLanguage:jx",
+    "workspaceContains:**/*.jx"
   ],
   "capabilities": {
     "untrustedWorkspaces": {
@@ -33,6 +35,7 @@
     }
   },
   "contributes": {
+    "javaExtensions": ["./server/jx-java-bridge.jar"],
     "languages": [
       {
         "id": "jx",
@@ -78,8 +81,14 @@
       {
         "command": "jx.stopDev",
         "title": "JX: Stop Development Server"
+      },
+      {
+        "command": "jx.goToDefinition",
+        "title": "JX: Go to Definition"
       }
     ],
+    "keybindings": [{ "command": "jx.goToDefinition", "key": "f12", "when": "editorTextFocus && editorLangId == java && jx.javaNavigation && isWorkspaceTrusted" }],
+    "menus": { "editor/context": [{ "command": "jx.goToDefinition", "when": "editorLangId == java && jx.javaNavigation && isWorkspaceTrusted", "group": "navigation@1" }] },
     "configuration": {
       "title": "JX",
       "properties": {
@@ -120,10 +129,11 @@
   },
   "scripts": {
     "compile": "tsc --noEmit && esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=out/extension.cjs && esbuild src/test/suite.ts --bundle --platform=node --format=cjs --external:vscode --external:vscode-oniguruma/release/onig.wasm --outfile=out/test/suite.cjs",
-    "prepare:server": "java PrepareServer.java",
+    "prepare:server": "java PrepareServer.java && java PrepareJavaBridge.java",
     "vscode:prepublish": "npm run prepare:server && npm run compile",
-    "package": "vsce package --no-dependencies --out jx-language-0.1.0.vsix",
-    "test": "npm run compile && node test/run.cjs"
+    "package": "vsce package --no-dependencies --out jx-language-0.2.0.vsix",
+    "test": "npm run compile && node test/run.cjs",
+    "test:native": "java PrepareJavaBridge.java && node test/native-probe.cjs"
   },
   "dependencies": {
     "vscode-languageclient": "11.0.0"

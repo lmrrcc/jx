@@ -16,7 +16,7 @@ browser, or editor distribution.
 | Elm | Immutable transitions, pure updates, serialized committed store snapshots, keyed commands/subscriptions, cancellation, stale-response protection, and Strict Mode lifecycle tests. |
 | Browser services | Same-origin asynchronous bounded JSON HTTP, typed outcomes, cancellation/timeouts, history, route parameters, query strings, and back/forward navigation. |
 | Shared LSP | Compiler diagnostics, component/property completion, declared Java type hover, definition navigation, symbols, incomplete markup, UTF-16 positions, cancellation, and version handling. |
-| Editor packages | Local VSIX and IntelliJ ZIP with mixed Java/HTML highlighting and module-aware development start/stop; tested distributions and remaining editor limits are in the [tooling guide](tooling.md). |
+| Editor packages | Version 0.2.0 integrates IntelliJ Java PSI and Red Hat Java/JDT LS for native Java editing, alongside mixed Java/HTML highlighting and module-aware development start/stop; tested operations and remaining limits are in the [tooling guide](tooling.md). |
 | Complete example | A Java/.jx todo application with controlled forms, keyboard submission/focus, custom hook, context, MVU workflows, async states, routing, filters, and Spring Boot persistence. |
 
 `jx-core` has no Spring, database, or browser implementation dependency.
@@ -47,7 +47,7 @@ Framework JavaScript/TypeScript and explicit
 interop/browser fixtures are separated from Java/.jx application logic.
 
 On 2026-11-18, the fourteen-module Maven reactor install passed after the
-state-preserving development changes. The Java test run contained 49 passing
+native editor and `@Component` changes. The Java test run contained 69 passing
 tests; all 17 Chrome tests passed. Browser checks include source edits during a build, compile failure and
 recovery, runtime failure and checkpoint recovery, incompatible-hook resets,
 unchanged document identity, stable renderer listeners, and Todo draft/model/focus
@@ -81,9 +81,10 @@ need their own measurements.
 2. Source locations for compiler and IDE diagnostics are implemented. TeaVM and
    esbuild emit their own maps. End-to-end `.jx` browser stack mapping and debugger
    breakpoints still need composed maps and dedicated acceptance tests.
-3. The [LSP](language-server.md) follows Maven conventions and explicit classpaths;
-   full Java expression completion, rename, import management, and arbitrary Maven
-   profile resolution remain separate work.
+3. The [JX LSP](language-server.md) follows Maven conventions and explicit
+   classpaths; native Java services use the editors' Java engines. Whole-file
+   formatting, arbitrary refactorings and additional IDE versions need their own
+   verification. See the [editor matrix](tooling.md) for supported operations.
 4. The runtime matrix explicitly tracks unimplemented portals, lazy/code-split
    components, Suspense, transitions/deferred values, ref forwarding, SSR, and
    hydration. Loading flags do not constitute Suspense support.

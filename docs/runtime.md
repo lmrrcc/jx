@@ -8,7 +8,7 @@ commits DOM updates, and schedules effects. There is no alternate renderer.
 
 ## Components and ownership
 
-Declare a `Component<Props>` once, normally as a static final descriptor. Compose
+Declare a `ComponentType<Props>` once, normally as a static final descriptor. Compose
 children through `Views.component`, rather than calling a child's `render` method.
 The compiler generates descriptors for `.jx` components. A descriptor maps to a
 stable native React function through a WeakMap. A mounted instance owns its state;
@@ -146,7 +146,7 @@ runtime with portable checkpoints. This replaces React roots without reloading
 the document. It does not pass Java instances between independently compiled TeaVM
 bundles: their class identities and representations can differ.
 
-The compiler supplies `Component(name, stateSignature, render)` metadata. Logical
+The compiler supplies `ComponentType(name, stateSignature, render)` metadata. Logical
 component paths include their parent/container position and explicit list keys.
 Unchanged component fingerprints preserve compatible state slots. A changed or
 missing fingerprint resets that component's state. The two-argument descriptor

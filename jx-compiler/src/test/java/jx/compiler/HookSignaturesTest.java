@@ -57,7 +57,7 @@ class HookSignaturesTest {
         String source = """
                 import jx.*;
                 import static jx.Hooks.useState;
-                @JxComponent public class App {
+                @Component public class App {
                     public static View render() {
                         State<Integer> count = useState(0);
                         return <span>{count.value()}</span>;
@@ -71,7 +71,7 @@ class HookSignaturesTest {
     @Test void propsSchemaChangesAndInitializersResetConservatively() {
         String source = """
                 import jx.*;
-                @JxComponent public class App {
+                @Component public class App {
                     public record Props(int initial) {}
                     public static View render(Props props) {
                         var count = Hooks.useState(props.initial());
@@ -88,12 +88,12 @@ class HookSignaturesTest {
         Compilation compilation = new JxCompiler().compile(List.of(new SourceFile(Path.of("App.jx"), source)));
         assertTrue(compilation.successful(), compilation.diagnostics().toString());
         String signature = HookSignatures.compute(compilation.generatedSources(), compilation.components()).get("App");
-        assertTrue(compilation.generatedSources().getFirst().javaSource().contains("new jx.Component<>(\"App\", \"" + signature + "\","));
+        assertTrue(compilation.generatedSources().getFirst().javaSource().contains("new jx.ComponentType<>(\"App\", \"" + signature + "\","));
         return signature;
     }
 
     private String component(String render, String helpers) {
-        return "import jx.*; @JxComponent public class App { public static View render() { " + render + " } " + helpers + " }";
+        return "import jx.*; @Component public class App { public static View render() { " + render + " } " + helpers + " }";
     }
 }
 

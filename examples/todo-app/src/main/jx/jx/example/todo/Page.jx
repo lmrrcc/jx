@@ -4,7 +4,7 @@ import jx.*;
 import jx.react.React;
 import jx.router.Route;
 
-@JxComponent
+@Component
 public final class Page {
     private static final Route DETAILS = new Route("/todos/:id");
 

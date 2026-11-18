@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import * as path from 'node:path';
 import { readFile, realpath } from 'node:fs/promises';
 import { verifyHighlighting } from './highlighting';
+import { verifyJavaEditing } from './javaEditing';
 
 async function eventually(check: () => boolean | Promise<boolean>, message: string, timeout = 20_000): Promise<void> {
   const until = Date.now() + timeout;
@@ -79,6 +80,7 @@ export async function run(): Promise<void> {
   const restore = new vscode.WorkspaceEdit();
   restore.replace(appUri, new vscode.Range(app.positionAt(value), app.positionAt(value + '"bad"'.length)), '0');
   assert.equal(await vscode.workspace.applyEdit(restore), true);
+  await verifyJavaEditing(root.uri);
   const counterAppUri = vscode.Uri.joinPath(root.uri, 'apps/counter-app/src/main/jx/jx/example/counter/App.jx');
   const counterApp = await vscode.workspace.openTextDocument(counterAppUri);
   await vscode.window.showTextDocument(counterApp);

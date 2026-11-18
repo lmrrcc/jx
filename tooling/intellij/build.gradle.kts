@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "dev.jx"
-version = "0.1.0"
+version = "0.2.0"
 
 repositories {
     mavenCentral()
@@ -14,10 +14,13 @@ repositories {
 }
 
 dependencies {
+    implementation(files("../../jx-compiler/target/jx-compiler-0.1.0-SNAPSHOT.jar"))
     intellijPlatform {
         val localIde = providers.gradleProperty("ideaLocalPath")
         if (localIde.isPresent) local(localIde.get()) else intellijIdea("2026.1.3")
+        bundledPlugin("com.intellij.java")
         testFramework(TestFrameworkType.Platform)
+        testFramework(TestFrameworkType.Plugin.Java)
         pluginVerifier("1.411")
     }
     testImplementation("junit:junit:4.13.2")
@@ -36,7 +39,12 @@ intellijPlatform {
 
 val serverJar = layout.projectDirectory.file("../../jx-language-server/target/jx-language-server-0.1.0-SNAPSHOT.jar")
 tasks.processResources {
-    doFirst { check(serverJar.asFile.isFile) { "Build the shared language server with ./mvnw package first." } }
+    doFirst {
+        check(serverJar.asFile.isFile) { "Build the shared language server with ./mvnw package first." }
+        check(file("../../jx-compiler/target/jx-compiler-0.1.0-SNAPSHOT.jar").isFile) {
+            "Build the shared compiler with ./mvnw package first."
+        }
+    }
     from(serverJar) { into("server"); rename { "jx-language-server.jar" } }
     from("../../LICENSE") { into("META-INF") }
 }

@@ -9,8 +9,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,7 +39,7 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 /** Compiler-backed UTF-16 language services. Project code and annotation processors are never executed. */
 public final class JxLanguageServer implements LanguageServer, TextDocumentService, WorkspaceService, AutoCloseable {
     private record Document(Path path, String text, int version) {}
-    private record Analysis(ProjectSources.Snapshot project, Compilation compilation) {}
+    private record Analysis(ProjectSources.Snapshot project, Compilation compilation, Map<String, Document> documents) {}
     private record Reference(ComponentMetadata component, ComponentMetadata.Prop property, SourceSpan span) {}
     private record TagContext(String name, boolean namePosition) {}
     private static final List<String> HTML = List.of("a", "article", "aside", "button", "div", "form", "h1", "h2", "header", "input", "label", "li", "main", "nav", "ol", "option", "p", "section", "select", "span", "svg", "path", "textarea", "ul");
@@ -44,7 +47,8 @@ public final class JxLanguageServer implements LanguageServer, TextDocumentServi
     private final Object lock = new Object();
     private final Map<String, Document> documents = new LinkedHashMap<>();
     private final Map<String, Integer> latestVersions = new LinkedHashMap<>();
-    private final ExecutorService analysisExecutor = Executors.newSingleThreadExecutor(Thread.ofPlatform().name("jx-analysis").daemon().factory());
+    private final ExecutorService analysisExecutor;
+    private final Set<CompletableFuture<?>> pendingRequests = new LinkedHashSet<>();
     private final Runnable exitAction;
     private List<Path> roots = List.of();
     private List<Path> classpath = List.of();
@@ -54,7 +58,14 @@ public final class JxLanguageServer implements LanguageServer, TextDocumentServi
     private volatile boolean closed;
 
     public JxLanguageServer() { this(() -> {}); }
-    public JxLanguageServer(Runnable exitAction) { this.exitAction = java.util.Objects.requireNonNull(exitAction); }
+    public JxLanguageServer(Runnable exitAction) {
+        this(exitAction, Executors.newSingleThreadExecutor(Thread.ofPlatform().name("jx-analysis").daemon().factory()));
+    }
+    /** The server owns this executor; package scope permits deterministic cancellation boundary tests. */
+    JxLanguageServer(Runnable exitAction, ExecutorService analysisExecutor) {
+        this.exitAction = java.util.Objects.requireNonNull(exitAction);
+        this.analysisExecutor = java.util.Objects.requireNonNull(analysisExecutor);
+    }
     public void connect(LanguageClient client) { this.client = java.util.Objects.requireNonNull(client); }
 
     @Override public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
@@ -87,6 +98,31 @@ public final class JxLanguageServer implements LanguageServer, TextDocumentServi
     @Override public void exit() { close(); exitAction.run(); }
     @Override public TextDocumentService getTextDocumentService() { return this; }
     @Override public WorkspaceService getWorkspaceService() { return this; }
+
+    /** Project current unsaved sources for the native Java engine used by an editor adapter. */
+    @org.eclipse.lsp4j.jsonrpc.services.JsonRequest("jx/editorProjection")
+    public CompletableFuture<EditorProjectionResult> editorProjection(EditorProjectionParams params) {
+        String uri = params.uri();
+        return request(uri, analysis -> {
+            Document open = analysis.documents().get(uri);
+            if (params.version() != null && (open == null || params.version() != open.version()))
+                throw new ResponseErrorException(new ResponseError(
+                        ResponseErrorCode.ContentModified, "The authored document version changed", null));
+            var files = new ArrayList<EditorProjectionResult.File>();
+            for (var generated : jx.compiler.EditorProjection.project(analysis.project().sources())) {
+                String sourceUri = generated.source().path().toAbsolutePath().normalize().toUri().toString();
+                Document sourceDocument = analysis.documents().values().stream()
+                        .filter(document -> document.path().equals(generated.source().path())).findFirst().orElse(null);
+                files.add(new EditorProjectionResult.File(sourceUri, sourceDocument == null ? null : sourceDocument.version(),
+                        generated.source().content(), generated.relativePath().toString().replace('\\', '/'),
+                        generated.javaSource(), generated.sourceMap().segments(), generated.sourceMap().sourceLength(), generated.topLevelTypes()));
+            }
+            var represented = files.stream().map(EditorProjectionResult.File::sourceUri).collect(java.util.stream.Collectors.toSet());
+            var unavailable = analysis.project().sources().stream().map(source -> source.path().toAbsolutePath().normalize().toUri().toString())
+                    .filter(source -> !represented.contains(source)).toList();
+            return new EditorProjectionResult(1, ProjectSources.projectRoot(filePath(uri), roots).toUri().toString(), files, unavailable);
+        });
+    }
     @Override public void didChangeConfiguration(DidChangeConfigurationParams params) { /* restart applies classpath changes */ }
     @Override public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) { scheduleDiagnostics(); }
 
@@ -114,7 +150,10 @@ public final class JxLanguageServer implements LanguageServer, TextDocumentServi
             if (oversized) {
                 documents.remove(uri); epoch++;
                 publish(uri, version, List.of(new Diagnostic(new Range(new Position(0, 0), new Position(0, 1)), "Document exceeds the 1 MiB analysis limit", DiagnosticSeverity.Error, "jx")));
-            } else documents.put(uri, new Document(path, text, version));
+            } else {
+                documents.put(uri, new Document(path, text, version));
+                epoch++;
+            }
         }
         if (oversized) { log(MessageType.Error, "JX document exceeds the 1 MiB analysis limit: " + uri); return; }
         scheduleDiagnostics();
@@ -136,17 +175,19 @@ public final class JxLanguageServer implements LanguageServer, TextDocumentServi
         synchronized (lock) {
             if (closed) return;
             long revision = ++epoch;
-            if (diagnosticsTask != null) diagnosticsTask.cancel(true);
+            // javac's shared platform-file caches are not interrupt-safe (including ct.sym release
+            // discovery). Superseded work stops cooperatively between compiler calls instead.
+            if (diagnosticsTask != null) diagnosticsTask.cancel(false);
             var captured = Map.copyOf(documents);
             diagnosticsTask = analysisExecutor.submit(() -> {
                 var projects = new LinkedHashMap<Path, Analysis>();
                 for (var entry : captured.entrySet()) {
-                    if (Thread.currentThread().isInterrupted()) return;
                     try {
+                        checkpoint(revision, null);
                         Path project = ProjectSources.projectRoot(entry.getValue().path(), roots);
                         Analysis analysis = projects.get(project);
                         if (analysis == null) {
-                            analysis = analyze(project, captured, true);
+                            analysis = analyze(project, captured, true, () -> checkpoint(revision, null));
                             projects.put(project, analysis);
                         }
                         SourceFile source = new SourceFile(entry.getValue().path(), entry.getValue().text());
@@ -162,8 +203,9 @@ public final class JxLanguageServer implements LanguageServer, TextDocumentServi
                             if (closed || revision != epoch) return;
                             publish(entry.getKey(), entry.getValue().version(), result);
                         }
+                    } catch (CancellationException cancelled) {
+                        return;
                     } catch (IOException | RuntimeException failure) {
-                        if (Thread.currentThread().isInterrupted()) return;
                         synchronized (lock) {
                             if (closed || revision != epoch) return;
                             publish(entry.getKey(), entry.getValue().version(), List.of(new Diagnostic(new Range(new Position(0, 0), new Position(0, 1)),
@@ -176,16 +218,21 @@ public final class JxLanguageServer implements LanguageServer, TextDocumentServi
         }
     }
 
-    private Analysis analyze(Path project, Map<String, Document> captured, boolean semantic) throws IOException {
+    private Analysis analyze(Path project, Map<String, Document> captured, boolean semantic, Runnable checkpoint) throws IOException {
+        checkpoint.run();
         Map<Path, String> overlays = new LinkedHashMap<>();
         captured.values().forEach(document -> overlays.put(document.path(), document.text()));
         var snapshot = ProjectSources.discover(project, overlays, classpath, roots);
+        checkpoint.run();
         var compiler = new JxCompiler();
         Compilation compilation = compiler.compile(snapshot.sources());
-        if (semantic && compilation.successful() && !Thread.currentThread().isInterrupted()) {
+        checkpoint.run();
+        if (semantic && compilation.successful()) {
             Path classes = Files.createTempDirectory("jx-lsp-check-");
             try {
+                checkpoint.run();
                 var diagnostics = compiler.check(compilation, snapshot.javaSources(), snapshot.classpath(), classes);
+                checkpoint.run();
                 compilation = new Compilation(compilation.generatedSources(), compilation.components(), diagnostics);
             } finally {
                 try (var paths = Files.walk(classes)) {
@@ -193,33 +240,47 @@ public final class JxLanguageServer implements LanguageServer, TextDocumentServi
                 }
             }
         }
-        return new Analysis(snapshot, compilation);
+        return new Analysis(snapshot, compilation, captured);
+    }
+
+    private void checkpoint(long revision, CompletableFuture<?> request) {
+        synchronized (lock) {
+            if (closed || revision != epoch || (request != null && request.isCancelled())
+                    || Thread.currentThread().isInterrupted()) throw new CancellationException("Analysis superseded");
+        }
     }
 
     private <T> CompletableFuture<T> request(String uri, Function<Analysis, T> operation) {
         final Map<String, Document> captured;
         final long revision;
+        var result = new CompletableFuture<T>();
+        final Future<?> task;
         synchronized (lock) {
+            if (closed) return CompletableFuture.failedFuture(new IllegalStateException("Language server is shut down"));
             if (latestVersions.containsKey(uri) && !documents.containsKey(uri))
                 return CompletableFuture.failedFuture(new ResponseErrorException(new ResponseError(ResponseErrorCode.InvalidParams,
                         "Document exceeds the analysis limit: " + uri, null)));
             captured = Map.copyOf(documents); revision = epoch;
+            pendingRequests.add(result);
+            task = analysisExecutor.submit(() -> {
+                try {
+                    checkpoint(revision, result);
+                    Path project = ProjectSources.projectRoot(filePath(uri), roots);
+                    Analysis analysis = analyze(project, captured, false, () -> checkpoint(revision, result));
+                    checkpoint(revision, result);
+                    T value = operation.apply(analysis);
+                    synchronized (lock) {
+                        if (revision != epoch || closed) { result.cancel(false); return; }
+                        if (!result.isCancelled()) result.complete(value);
+                    }
+                } catch (CancellationException cancelled) { result.cancel(false); }
+                catch (IOException | RuntimeException failure) { result.completeExceptionally(failure); }
+            });
         }
-        if (closed) return CompletableFuture.failedFuture(new IllegalStateException("Language server is shut down"));
-        var result = new CompletableFuture<T>();
-        Future<?> task = analysisExecutor.submit(() -> {
-            if (result.isCancelled()) return;
-            try {
-                Path project = ProjectSources.projectRoot(filePath(uri), roots);
-                Analysis analysis = analyze(project, captured, false);
-                T value = operation.apply(analysis);
-                synchronized (lock) {
-                    if (revision != epoch || closed) { result.cancel(false); return; }
-                    if (!result.isCancelled()) result.complete(value);
-                }
-            } catch (IOException | RuntimeException failure) { result.completeExceptionally(failure); }
+        result.whenComplete((ignored, failure) -> {
+            synchronized (lock) { pendingRequests.remove(result); }
+            if (result.isCancelled()) task.cancel(false);
         });
-        result.whenComplete((ignored, failure) -> { if (result.isCancelled()) task.cancel(true); });
         return result;
     }
 
@@ -378,10 +439,13 @@ public final class JxLanguageServer implements LanguageServer, TextDocumentServi
         synchronized (lock) {
             if (closed) return;
             closed = true; epoch++;
-            if (diagnosticsTask != null) diagnosticsTask.cancel(true);
+            if (diagnosticsTask != null) diagnosticsTask.cancel(false);
+            for (CompletableFuture<?> request : List.copyOf(pendingRequests)) request.cancel(false);
             documents.clear();
             latestVersions.clear();
         }
-        analysisExecutor.shutdownNow();
+        // Running javac must finish its current call; checkpoints then suppress work/publication.
+        // Queued request futures are cancelled above, so callers never wait for abandoned work.
+        analysisExecutor.shutdown();
     }
 }

@@ -9,7 +9,12 @@ Inside `.jx`, HTML/component tags, attributes, quoted attribute values, entities
 and `{Java expressions}` use the IDE theme's markup and Java colors. Nested
 components and fragments keep their surrounding Java context; text, comments,
 and Java strings containing angle brackets stay text. Highlighting is lexical;
-compiler diagnostics and navigation come from the shared language server.
+ordinary Java editing uses the bundled IntelliJ Java plugin. The compiler creates
+a complete Java PSI projection through the platform's language-injection API,
+preserving lexical variables and callback types inside markup expressions.
+Native Java completion, navigation, references and safe rename edits map back to
+the `.jx` source. Shared language-server services provide JX component/prop
+semantics and compiler diagnostics. Install the updated **0.2.0** package.
 
 Open a `.jx` file in a trusted Maven project and choose **Tools → Start JX
 Development Server**. JX selects the nearest `pom.xml` above that file and finds

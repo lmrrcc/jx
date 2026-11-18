@@ -1,26 +1,13 @@
 package jx;
 
-import java.util.Objects;
-import java.util.function.Function;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/** Stable component identity. Declare descriptors once, normally as a static final field.
- * The renderer invokes the render function; applications compose descriptors through Views. */
-public final class Component<P> {
-    private final String name;
-    private final String stateSignature;
-    private final Function<P, View> render;
-    public Component(String name, Function<P, View> render) {
-        this(name, "", render);
-    }
-    /** Compiler-supplied hook/type fingerprint. Empty fingerprints safely disable hot-state restoration. */
-    public Component(String name, String stateSignature, Function<P, View> render) {
-        this.name = Objects.requireNonNull(name);
-        this.stateSignature = Objects.requireNonNull(stateSignature);
-        if (name.isBlank()) throw new IllegalArgumentException("Component name is empty");
-        this.render = Objects.requireNonNull(render);
-    }
-    public String name() { return name; }
-    public String stateSignature() { return stateSignature; }
-    /** Renderer entry point; do not call another component directly from application rendering. */
-    public View render(P props) { return Objects.requireNonNull(render.apply(props), "Component returned null; use Views.fragment()"); }
-}
+/** Marks a Java-authored JX component with a public static render entry point.
+ * This is a browser component declaration, independent of Spring's component annotation.
+ * The compiler generates a stable {@link ComponentType} descriptor for the declaration. */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.SOURCE)
+public @interface Component {}

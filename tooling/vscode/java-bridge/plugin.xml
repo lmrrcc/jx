@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+  <extension point="org.eclipse.jdt.ls.core.delegateCommandHandler">
+    <delegateCommandHandler class="jx.editor.JavaBridge">
+      <command id="jx.java.info"/>
+      <command id="jx.java.sync"/>
+      <command id="jx.java.close"/>
+      <command id="jx.java.completion"/>
+      <command id="jx.java.resolveCompletion"/>
+      <command id="jx.java.hover"/>
+      <command id="jx.java.definition"/>
+      <command id="jx.java.signatureHelp"/>
+      <command id="jx.java.references"/>
+      <command id="jx.java.prepareRename"/>
+      <command id="jx.java.rename"/>
+      <command id="jx.java.diagnostics"/>
+    </delegateCommandHandler>
+  </extension>
+</plugin>

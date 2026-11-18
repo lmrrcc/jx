@@ -15,7 +15,7 @@ class JxCompilerTest {
     private static final String COUNTER = """
             package demo;
             import jx.*;
-            @JxComponent
+            @Component
             public final class Counter {
                 public record Props(int initial, String label) {}
                 public static View render(Props props) {
@@ -33,7 +33,7 @@ class JxCompilerTest {
         var compilation = compiler.compile(List.of(source("Counter.jx", COUNTER), source("App.jx", """
                 package demo;
                 import jx.*;
-                @JxComponent public final class App {
+                @Component public final class App {
                     public static View render() {
                         return <main><h1>JX application</h1>
                             <Counter initial={0} label="First" />
@@ -53,12 +53,43 @@ class JxCompilerTest {
         assertEquals(List.of(), check(compilation));
     }
 
+    @Test void acceptsComponentAnnotationAndDeprecatedSourceAlias() throws Exception {
+        for (String declaration : List.of(
+                "import jx.Component; @Component",
+                "import jx.*; @Component",
+                "@jx.Component",
+                "import jx.JxComponent; @JxComponent",
+                "@jx.JxComponent")) {
+            var compilation = compiler.compile(List.of(source("Example.jx", declaration
+                    + " public final class Example { public static jx.View render() { return <span>Typed component</span>; } }")));
+            assertTrue(compilation.successful(), compilation.diagnostics().toString());
+            assertEquals(1, compilation.components().size(), declaration);
+            assertTrue(compilation.generatedSources().getFirst().javaSource().contains("jx.ComponentType<Void> JX = new jx.ComponentType<>("));
+            assertTrue(check(compilation).stream().noneMatch(diagnostic -> diagnostic.severity() == Diagnostic.Severity.ERROR), declaration);
+        }
+    }
+
+    @Test void doesNotTreatSpringOrOtherComponentAnnotationsAsJx() {
+        for (String declaration : List.of(
+                "import org.springframework.stereotype.Component; @Component",
+                "import org.springframework.stereotype.Component; import jx.*; @Component",
+                "import org.springframework.stereotype.*; @Component",
+                "@org.springframework.stereotype.Component",
+                "import another.Component; @Component",
+                "import jx.*; @interface Component {} @Component")) {
+            var compilation = compiler.compile(List.of(source("Service.jx", declaration + " public class Service {}")));
+            assertTrue(compilation.successful(), compilation.diagnostics().toString());
+            assertTrue(compilation.components().isEmpty(), declaration);
+            assertFalse(compilation.generatedSources().getFirst().javaSource().contains("ComponentType"));
+        }
+    }
+
     @Test void preservesJavaLexicalContextsAndSupportsNestedMarkupInJava() throws Exception {
         String app = """
                 package demo;
                 import jx.*;
                 import java.util.*;
-                @JxComponent public final class App {
+                @Component public final class App {
                     public static View render() {
                         String string = "<Unknown initial={false}/>";
                         char less = '<';
@@ -124,7 +155,7 @@ class JxCompilerTest {
         var panel = source("Panel.jx", """
                 package widgets;
                 import jx.*;
-                @JxComponent public final class Panel {
+                @Component public final class Panel {
                     public record Props(String title, View children) {}
                     public static View render(Props props) {
                         return <section><h2>{props.title()}</h2>{props.children()}</section>;
@@ -135,7 +166,7 @@ class JxCompilerTest {
                 package demo;
                 import jx.*;
                 import widgets.Panel;
-                @JxComponent public final class App {
+                @Component public final class App {
                     public static View render() {
                         return <Panel title="Nested"><span>one</span><span>two</span></Panel>;
                     }
@@ -172,21 +203,21 @@ class JxCompilerTest {
     @Test void validatesTheComponentContractBeforeGeneratingDescriptors() {
         var source = source("Bad.jx", """
                 import jx.*;
-                @JxComponent public class Bad {
+                @Component public class Bad {
                     public View render() { return <span/>; }
                 }
                 """);
         assertEquals("JX100", compiler.compile(List.of(source)).diagnostics().getFirst().code());
-        SourceFile reserved = source("Bad.jx", "import jx.*; @JxComponent public class Bad { public record Props(String key) {} public static View render(Props props) { return <span/>; } }");
+        SourceFile reserved = source("Bad.jx", "import jx.*; @Component public class Bad { public record Props(String key) {} public static View render(Props props) { return <span/>; } }");
         assertTrue(compiler.compile(List.of(reserved)).diagnostics().stream().anyMatch(d -> d.message().contains("reserved")));
-        SourceFile generic = source("Bad.jx", "import jx.*; @JxComponent public class Bad { public record Props<T>(T value) {} public static View render(Props props) { return <span/>; } }");
+        SourceFile generic = source("Bad.jx", "import jx.*; @Component public class Bad { public record Props<T>(T value) {} public static View render(Props props) { return <span/>; } }");
         assertTrue(compiler.compile(List.of(generic)).diagnostics().stream().anyMatch(d -> d.message().contains("concrete record")));
     }
 
     @Test void explicitImportsResolveBeforeAnotherTypeInTheSamePackage() throws Exception {
-        SourceFile local = source("demo/Counter.jx", "package demo; import jx.*; @JxComponent public class Counter { public record Props(int initial) {} public static View render(Props props) { return <span/>; } }");
-        SourceFile imported = source("widgets/Counter.jx", "package widgets; import jx.*; @JxComponent public class Counter { public record Props(String label) {} public static View render(Props props) { return <span/>; } }");
-        SourceFile consumer = source("demo/App.jx", "package demo; import widgets.Counter; import jx.*; @JxComponent public class App { public static View render() { return <Counter label=\"imported\"/>; } }");
+        SourceFile local = source("demo/Counter.jx", "package demo; import jx.*; @Component public class Counter { public record Props(int initial) {} public static View render(Props props) { return <span/>; } }");
+        SourceFile imported = source("widgets/Counter.jx", "package widgets; import jx.*; @Component public class Counter { public record Props(String label) {} public static View render(Props props) { return <span/>; } }");
+        SourceFile consumer = source("demo/App.jx", "package demo; import widgets.Counter; import jx.*; @Component public class App { public static View render() { return <Counter label=\"imported\"/>; } }");
         var compilation = compiler.compile(List.of(local, imported, consumer));
         assertTrue(compilation.successful(), compilation.diagnostics().toString());
         assertEquals(List.of(), check(compilation));
@@ -202,7 +233,7 @@ class JxCompilerTest {
                 "for (int i = 0; i < 2; i++) { Hooks.useState(i); } return <span/>;",
                 "return <button onClick={event -> Hooks.useState(0)}>bad</button>;",
                 "return true ? <span>{Hooks.useState(0).value()}</span> : null;")) {
-            SourceFile source = source("App.jx", "import jx.*; @JxComponent public class App { public static View render() { " + body + " } }");
+            SourceFile source = source("App.jx", "import jx.*; @Component public class App { public static View render() { " + body + " } }");
             var compilation = compiler.compile(List.of(source));
             assertTrue(compilation.diagnostics().stream().anyMatch(d -> d.code().equals("JX200")), compilation.diagnostics().toString());
         }
@@ -213,21 +244,52 @@ class JxCompilerTest {
         return """
                 package demo;
                 import jx.*;
-                @JxComponent public final class App {
+                @Component public final class App {
                     public static View render() {
                         return %s;
                     }
                 }
                 """.formatted(markup);
     }
+    @Test void orderedEditorProjectionPreservesRealPropLambdaAndPrimitiveTypes() throws Exception {
+        SourceFile pair = source("Pair.jx", """
+                package demo;
+                import jx.*;
+                import java.util.function.Consumer;
+                import java.lang.annotation.*;
+                @Target(ElementType.TYPE_USE) @interface Note {}
+                @Component public final class Pair {
+                    public record Props(@Note byte small, short count, char marker, boolean active,
+                                        long total, float ratio, double amount, Consumer<String> onChange,
+                                        String label, View children) {}
+                    public static View render(Props props) { return <div/>; }
+                }
+                """);
+        SourceFile app = source("App.jx", app("""
+                <Pair key={"key"} label={"hello"} onChange={value -> value.length()}
+                      amount={2D} ratio={1F} total={3L} active={true} marker={'a'} count={(short) 2} small={(byte) 1}>
+                    <span>Child</span>
+                </Pair>
+                """));
+        List<SourceFile> sources = List.of(pair, app);
+        var projected = new Compilation(EditorProjection.project(sources), List.of(), List.of());
+        List<Diagnostic> checked = check(projected);
+        assertTrue(checked.isEmpty(), checked.toString());
+        SourceFile invalid = source("App.jx", app.content().replace("value.length()", "value.missingMember()"));
+        var broken = new Compilation(EditorProjection.project(List.of(pair, invalid)), List.of(), List.of());
+        assertTrue(check(broken).stream().anyMatch(diagnostic -> diagnostic.source().equals(invalid.path())
+                && diagnostic.message().contains("missingMember")), "Callback must still be attributed as java.lang.String");
+    }
+
     private List<Diagnostic> check(Compilation compilation) throws Exception {
         // Compile-signature fixtures isolate compiler behavior. The browser sample also compiles against the real core.
         List<Path> files = new ArrayList<>();
         Map<String, String> signatures = Map.of(
                 "View", "public interface View {}",
-                "JxComponent", "public @interface JxComponent {}",
-                "Component", "public record Component<P>(String name, String stateSignature, java.util.function.Function<P,View> render) {}",
-                "Views", "public final class Views { public static View element(String tag, Attributes attrs, Object... children) { return null; } public static View fragment(Object... children) { return null; } public static <P> View component(Component<P> type, P props) { return null; } public static <P> View component(Component<P> type, P props, String key) { return null; } }",
+                "Component", "public @interface Component {}",
+                "JxComponent", "@Deprecated public @interface JxComponent {}",
+                "ComponentType", "public record ComponentType<P>(String name, String stateSignature, java.util.function.Function<P,View> render) {}",
+                "Views", "public final class Views { public static View element(String tag, Attributes attrs, Object... children) { return null; } public static View fragment(Object... children) { return null; } public static <P> View component(ComponentType<P> type, P props) { return null; } public static <P> View component(ComponentType<P> type, P props, String key) { return null; } }",
                 "Attributes", "public final class Attributes { public static Attributes create() { return new Attributes(); } public Attributes attr(String name, Object value) { return this; } public Attributes on(String name, java.util.function.Consumer<Event> handler) { return this; } }",
                 "Event", "public interface Event { void preventDefault(); }",
                 "Hooks", "public final class Hooks { public static <T> State<T> useState(T value) { return null; } }",

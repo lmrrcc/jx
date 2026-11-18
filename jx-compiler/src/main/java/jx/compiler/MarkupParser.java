@@ -8,14 +8,21 @@ import static jx.compiler.Syntax.*;
 /** A lexical Java scanner coupled to a recursive markup parser; no Java text is rewritten by regex. */
 final class MarkupParser {
     private static final int MAX_DEPTH = 128;
+    private static final int MAX_RECOVERY_DIAGNOSTICS = 128;
     private static final Set<String> EXPRESSION_PREFIX = Set.of("return", "yield", "throw", "case");
     private final SourceFile source;
     private final String text;
+    private final boolean editor;
     private final List<Diagnostic> diagnostics = new ArrayList<>();
     private int cursor;
     private int depth;
 
-    MarkupParser(SourceFile source) { this.source = source; this.text = source.content(); }
+    MarkupParser(SourceFile source) { this(source, false); }
+
+    /** Editor recovery retains authored Java slices; it never inserts characters into the source. */
+    MarkupParser(SourceFile source, boolean editor) {
+        this.source = source; this.text = source.content(); this.editor = editor;
+    }
 
     ParsedSource parse() {
         if (text.length() > 4 * 1024 * 1024) {
@@ -34,7 +41,7 @@ final class MarkupParser {
 
     private List<Node> java(boolean untilBrace) {
         List<Node> result = new ArrayList<>();
-        int start = cursor, braces = 0;
+        int start = cursor, braces = 0, parentheses = 0, brackets = 0;
         boolean expressionExpected = true;
         while (cursor < text.length()) {
             char c = text.charAt(cursor);
@@ -42,8 +49,14 @@ final class MarkupParser {
             if (starts("//")) { skipLineComment(); continue; }
             if (starts("/*")) { skipBlockComment(); continue; }
             if (c == '"' || c == '\'') { skipQuoted(); expressionExpected = false; continue; }
-            if (untilBrace && braces == 0 && (starts("/>") || starts("</")))
+            if (untilBrace && braces == 0 && (starts("/>") || starts("</"))) {
+                if (editor) break;
                 fail("JX002", "Unterminated Java interpolation; expected '}' before tag delimiter", Math.max(0, start - 1));
+            }
+            // A missing interpolation brace must not consume the enclosing return statement/class.
+            // Nested calls, array expressions and block lambdas keep their own delimiters.
+            if (editor && untilBrace && braces == 0 && parentheses == 0 && brackets == 0
+                    && (c == ';' || c == ')' || c == ']' || (c == '>' && previousNonWhitespace(cursor) == '.'))) break;
             if (c == '}' && braces == 0 && untilBrace) break;
             if (c == '<' && expressionExpected && markupAhead()) {
                 if (cursor > start) result.add(new JavaText(new SourceSpan(start, cursor)));
@@ -70,6 +83,10 @@ final class MarkupParser {
             if (starts("++") || starts("--")) { cursor += 2; continue; }
             if (c == '{') braces++;
             if (c == '}') braces--;
+            if (c == '(') parentheses++;
+            if (c == ')') parentheses--;
+            if (c == '[') brackets++;
+            if (c == ']') brackets--;
             expressionExpected = switch (c) {
                 case '(', '[', '{', '=', ',', ';', ':', '?', '!', '~', '+', '-', '*', '/', '%', '&', '|', '^' -> true;
                 default -> false;
@@ -77,7 +94,8 @@ final class MarkupParser {
             cursor++;
         }
         if (cursor > start) result.add(new JavaText(new SourceSpan(start, cursor)));
-        if (untilBrace && cursor == text.length()) fail("JX002", "Unterminated Java interpolation; expected '}'", cursor);
+        if (untilBrace && cursor == text.length() && !editor)
+            fail("JX002", "Unterminated Java interpolation; expected '}'", cursor);
         return result;
     }
 
@@ -96,12 +114,27 @@ final class MarkupParser {
         if (!name.isEmpty()) {
             while (true) {
                 boolean separated = whitespace();
+                if (editor && (cursor == text.length() || javaTail())) {
+                    report("JX008", "Unterminated element '" + name + "'", start);
+                    depth--;
+                    return new Element(new SourceSpan(start, cursor), name, nameSpan, attributes, List.of());
+                }
                 if (starts("/>")) {
                     cursor += 2; depth--;
                     return new Element(new SourceSpan(start, cursor), name, nameSpan, attributes, List.of());
                 }
                 if (starts(">")) break;
-                if (!separated) fail("JX004", "Expected whitespace, '>' or '/>' after " + name, cursor);
+                if (!separated) {
+                    if (!editor) fail("JX004", "Expected whitespace, '>' or '/>' after " + name, cursor);
+                    report("JX004", "Expected whitespace, '>' or '/>' after " + name, cursor);
+                }
+                if (editor && !Character.isJavaIdentifierStart(text.charAt(cursor))) {
+                    // A partial property/tag delimiter is markup, not editable Java. Leave a new
+                    // opening tag to the child parser; consume other punctuation to make progress.
+                    if (starts("<")) break;
+                    cursor++;
+                    continue;
+                }
                 int attributeStart = cursor;
                 String attribute = name();
                 SourceSpan attributeName = new SourceSpan(attributeStart, cursor);
@@ -116,44 +149,74 @@ final class MarkupParser {
                         char quote = text.charAt(cursor++);
                         int valueStart = cursor;
                         while (cursor < text.length() && text.charAt(cursor) != quote) cursor++;
-                        if (cursor == text.length()) fail("JX005", "Unterminated attribute string", valueStart);
+                        if (cursor == text.length() && !editor) fail("JX005", "Unterminated attribute string", valueStart);
                         literal = entities(text.substring(valueStart, cursor), valueStart);
-                        cursor++;
-                    } else fail("JX006", "Attribute values require quotes or a Java expression in braces", cursor);
+                        if (cursor < text.length()) cursor++;
+                        else report("JX005", "Unterminated attribute string", valueStart);
+                    } else {
+                        if (!editor) fail("JX006", "Attribute values require quotes or a Java expression in braces", cursor);
+                        report("JX006", "Attribute values require quotes or a Java expression in braces", cursor);
+                    }
                 } else cursor = afterName;
                 attributes.add(new Attribute(attribute, new SourceSpan(attributeStart, cursor), attributeName, literal, expression));
             }
         }
-        expect(">", "Expected '>'");
+        if (editor && !starts(">")) report("JX014", "Expected '>'", cursor);
+        else expect(">", "Expected '>'");
         List<Node> children = new ArrayList<>();
         while (cursor < text.length()) {
+            if (editor && javaTail()) break;
             if (starts("</")) {
+                int closeStart = cursor;
                 cursor += 2;
-                String close = name.isEmpty() && starts(">") ? "" : name();
+                String close;
+                if (name.isEmpty() && starts(">")) close = "";
+                else if (editor && (cursor == text.length() || !Character.isJavaIdentifierStart(text.charAt(cursor)))) close = "";
+                else close = name();
                 whitespace();
-                expect(">", "Expected '>' after closing tag");
-                if (!name.equals(close)) fail("JX007", "Closing tag '" + close + "' does not match '" + name + "'", cursor - close.length() - 1);
+                if (editor && !starts(">")) report("JX014", "Expected '>' after closing tag", cursor);
+                else expect(">", "Expected '>' after closing tag");
+                if (!name.equals(close)) {
+                    if (!editor) fail("JX007", "Closing tag '" + close + "' does not match '" + name + "'", cursor - close.length() - 1);
+                    report("JX007", "Closing tag '" + close + "' does not match '" + name + "'", closeStart);
+                    // Let an ancestor consume its own closing tag instead of discarding its subtree.
+                    if (!close.isEmpty()) cursor = closeStart;
+                }
                 depth--;
                 return new Element(new SourceSpan(start, cursor), name, nameSpan, attributes, children);
             }
-            if (starts("<")) children.add(element());
-            else if (starts("{")) children.add(interpolation());
+            if (starts("<")) {
+                if (editor && !markupAhead()) {
+                    report("JX010", "Expected element or property name", cursor++);
+                    continue;
+                }
+                children.add(element());
+            } else if (starts("{")) children.add(interpolation());
             else {
                 int textStart = cursor;
-                while (cursor < text.length() && text.charAt(cursor) != '<' && text.charAt(cursor) != '{') cursor++;
+                while (cursor < text.length() && text.charAt(cursor) != '<' && text.charAt(cursor) != '{'
+                        && !(editor && javaTail())) cursor++;
                 children.add(new Text(new SourceSpan(textStart, cursor), entities(text.substring(textStart, cursor), textStart)));
             }
         }
-        fail("JX008", "Unterminated " + (name.isEmpty() ? "fragment" : "element '" + name + "'"), start);
-        throw new AssertionError();
+        String message = "Unterminated " + (name.isEmpty() ? "fragment" : "element '" + name + "'");
+        if (!editor) fail("JX008", message, start);
+        report("JX008", message, start);
+        depth--;
+        return new Element(new SourceSpan(start, cursor), name, nameSpan, attributes, children);
     }
 
     private Interpolation interpolation() {
         int start = cursor++;
         if (++depth > MAX_DEPTH) fail("JX003", "Markup nesting exceeds " + MAX_DEPTH, start);
         List<Node> expression = java(true);
-        if (text.substring(start + 1, cursor).isBlank()) fail("JX009", "Java interpolation cannot be empty", start);
-        cursor++; depth--;
+        if (text.substring(start + 1, cursor).isBlank()) {
+            if (!editor) fail("JX009", "Java interpolation cannot be empty", start);
+            report("JX009", "Java interpolation cannot be empty", start);
+        }
+        if (starts("}")) cursor++;
+        else report("JX002", "Unterminated Java interpolation; expected '}'", cursor);
+        depth--;
         return new Interpolation(new SourceSpan(start, cursor), expression);
     }
 
@@ -178,7 +241,12 @@ final class MarkupParser {
     private void skipBlockComment() {
         int start = cursor;
         int end = text.indexOf("*/", cursor + 2);
-        if (end < 0) fail("JX011", "Unterminated Java block comment", start);
+        if (end < 0) {
+            if (!editor) fail("JX011", "Unterminated Java block comment", start);
+            report("JX011", "Unterminated Java block comment", start);
+            cursor = text.length();
+            return;
+        }
         cursor = end + 2;
     }
 
@@ -200,7 +268,8 @@ final class MarkupParser {
                 else if (c == '\n' || c == '\r') break;
             }
         }
-        fail("JX012", "Unterminated Java string, character literal, or text block", start);
+        if (!editor) fail("JX012", "Unterminated Java string, character literal, or text block", start);
+        report("JX012", "Unterminated Java string, character literal, or text block", start);
     }
 
     private String entities(String value, int sourceStart) {
@@ -209,7 +278,12 @@ final class MarkupParser {
             char c = value.charAt(i);
             if (c != '&') { decoded.append(c); continue; }
             int end = value.indexOf(';', i + 1);
-            if (end < 0) fail("JX013", "Escape literal '&' as &amp;", sourceStart + i);
+            if (end < 0) {
+                if (!editor) fail("JX013", "Escape literal '&' as &amp;", sourceStart + i);
+                // No remaining entity can terminate; copy once instead of rescanning every '&'.
+                decoded.append(value, i, value.length());
+                break;
+            }
             String entity = value.substring(i + 1, end);
             String replacement = switch (entity) {
                 case "amp" -> "&"; case "lt" -> "<"; case "gt" -> ">";
@@ -223,9 +297,14 @@ final class MarkupParser {
                     if (!Character.isValidCodePoint(cp) || cp >= 0xD800 && cp <= 0xDFFF || cp == 0)
                         throw new NumberFormatException();
                     replacement = new String(Character.toChars(cp));
-                } catch (NumberFormatException ex) { fail("JX013", "Invalid numeric entity '&" + entity + ";'", sourceStart + i); }
+                } catch (NumberFormatException ex) {
+                    if (!editor) fail("JX013", "Invalid numeric entity '&" + entity + ";'", sourceStart + i);
+                }
             }
-            if (replacement == null) fail("JX013", "Unknown entity '&" + entity + ";'", sourceStart + i);
+            if (replacement == null) {
+                if (!editor) fail("JX013", "Unknown entity '&" + entity + ";'", sourceStart + i);
+                replacement = value.substring(i, end + 1);
+            }
             decoded.append(replacement); i = end;
         }
         return decoded.toString();
@@ -237,6 +316,18 @@ final class MarkupParser {
         return cursor != before;
     }
     private boolean starts(String token) { return text.startsWith(token, cursor); }
+    private char previousNonWhitespace(int offset) {
+        while (offset > 0 && Character.isWhitespace(text.charAt(offset - 1))) offset--;
+        return offset == 0 ? '\0' : text.charAt(offset - 1);
+    }
+    private boolean javaTail() {
+        return starts(";") || starts(")") || starts("]") || starts("}");
+    }
+    private void report(String code, String message, int offset) {
+        if (diagnostics.size() >= MAX_RECOVERY_DIAGNOSTICS) return;
+        int start = Math.clamp(offset, 0, text.length());
+        diagnostics.add(Diagnostic.error(source, code, message, new SourceSpan(start, Math.min(text.length(), start + 1))));
+    }
     private void expect(String token, String message) {
         if (!starts(token)) fail("JX014", message, cursor);
         cursor += token.length();

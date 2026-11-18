@@ -17,12 +17,12 @@ public final class HotApplication {
         public Model decode(String text) { Json json = Json.parse(text); return new Model(json.get("count").intValue(), json.get("labels").items().stream().map(Json::stringValue).toList()); }
     };
     private static Store<Model, Integer> store;
-    private static final Component<String> COUNTER = new Component<>("hot.Counter", signature(), label -> {
+    private static final ComponentType<String> COUNTER = new ComponentType<>("hot.Counter", signature(), label -> {
         State<Integer> count = Hooks.useState(0);
         Hooks.useEffect(() -> { report("setup", label); return () -> report("cleanup", label); }, Dependencies.none());
         return button("hot-counter-" + label, label + ": " + count.value(), event -> count.update(old -> old + 1));
     });
-    private static final Component<Void> APP = new Component<>("hot.Application", "app:state,string,reducer,model,external,ref,effect:1", ignored -> {
+    private static final ComponentType<Void> APP = new ComponentType<>("hot.Application", "app:state,string,reducer,model,external,ref,effect:1", ignored -> {
         if (failStartup()) throw new IllegalStateException("Hot fixture startup failed");
         State<Boolean> reverse = Hooks.useState(false);
         State<String> draft = Hooks.useState("");

@@ -20,7 +20,10 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
         for (Node node : parsed.nodes()) if (node instanceof Element element) {
             for (int i = element.span().start(); i < element.span().end(); i++)
                 if (shadow.charAt(i) != '\n' && shadow.charAt(i) != '\r') shadow.setCharAt(i, ' ');
-            shadow.replace(element.span().start(), element.span().start() + 4, "null");
+            // An unfinished editor tag can be shorter than "null". Keep all offsets stable even
+            // for that partial tree; this shadow is parsed only for declarations, never executed.
+            String placeholder = element.span().end() - element.span().start() >= 4 ? "null" : "0";
+            shadow.replace(element.span().start(), element.span().start() + placeholder.length(), placeholder);
         }
         DiagnosticCollector<JavaFileObject> collector = new DiagnosticCollector<>();
         try (StandardJavaFileManager manager = compiler().getStandardFileManager(collector, null, java.nio.charset.StandardCharsets.UTF_8)) {
@@ -36,8 +39,7 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
             for (Tree declaration : unit.getTypeDecls()) {
                 if (!(declaration instanceof ClassTree type)) continue;
                 boolean annotated = type.getModifiers().getAnnotations().stream().anyMatch(annotation ->
-                        annotation.getAnnotationType().toString().equals("JxComponent")
-                                || annotation.getAnnotationType().toString().equals("jx.JxComponent"));
+                        isComponentAnnotation(annotation.getAnnotationType().toString(), packageName, imports, unit));
                 if (!annotated) continue;
                 SourceSpan declarationSpan = span(positions, unit, type, shadow.length());
                 List<MethodTree> renders = type.getMembers().stream().filter(MethodTree.class::isInstance)
@@ -45,7 +47,7 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
                 if (renders.size() != 1 || !renders.getFirst().getModifiers().getFlags().containsAll(Set.of(Modifier.PUBLIC, Modifier.STATIC))
                         || renders.getFirst().getParameters().size() > 1) {
                     diagnostics.add(Diagnostic.error(parsed.source(), "JX100",
-                            "@JxComponent requires one public static render() or render(Props) method", declarationSpan));
+                            "@Component requires one public static render() or render(Props) method", declarationSpan));
                     continue;
                 }
                 MethodTree render = renders.getFirst();
@@ -87,9 +89,14 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
                     }
                 }
                 String simpleName = type.getSimpleName().toString();
+                int descriptorOffset = declarationSpan.end() - 1;
+                // javac ends an unterminated class at EOF. That is not an insertion point: the
+                // authored final character can belong to an unfinished interpolation or Java call.
+                if (descriptorOffset < declarationSpan.start() || shadow.charAt(descriptorOffset) != '}')
+                    descriptorOffset = -1;
                 components.add(new ComponentMetadata(packageName.isEmpty() ? simpleName : packageName + "." + simpleName,
                         simpleName, packageName, imports, hasProps, properties, parsed.source().path(),
-                        declarationSpan, Math.max(declarationSpan.start(), declarationSpan.end() - 1)));
+                        declarationSpan, descriptorOffset));
             }
             for (javax.tools.Diagnostic<? extends JavaFileObject> diagnostic : collector.getDiagnostics())
                 if (diagnostic.getKind() == javax.tools.Diagnostic.Kind.ERROR) {
@@ -104,6 +111,21 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
         } catch (IOException ex) { throw new IllegalStateException("Cannot parse Java source", ex); }
     }
 
+    /** Resolve supported annotation spellings from authored imports, without treating Spring or other
+     * same-named component annotations as JX. Full javac attribution still validates ambiguous Java. */
+    private static boolean isComponentAnnotation(String annotation, String packageName, List<String> imports, CompilationUnitTree unit) {
+        if (annotation.equals("jx.Component") || annotation.equals("jx.JxComponent")) return true;
+        if (!annotation.equals("Component") && !annotation.equals("JxComponent")) return false;
+        List<String> explicit = imports.stream().filter(name -> name.endsWith("." + annotation)).toList();
+        if (!explicit.isEmpty()) return explicit.size() == 1 && explicit.getFirst().equals("jx." + annotation);
+        boolean localType = unit.getTypeDecls().stream().anyMatch(declaration -> declaration instanceof ClassTree type
+                && type.getSimpleName().contentEquals(annotation));
+        if (localType) return false;
+        if (packageName.equals("jx")) return true;
+        if (annotation.equals("Component") && imports.contains("org.springframework.stereotype.*")) return false;
+        return imports.contains("jx.*");
+    }
+
     private static SourceSpan span(SourcePositions positions, CompilationUnitTree unit, Tree tree, int length) {
         int start = (int) Math.clamp(positions.getStartPosition(unit, tree), 0, length);
         int end = (int) Math.clamp(positions.getEndPosition(unit, tree), start, length);
@@ -111,6 +133,12 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
     }
     static JavaCompiler compiler() {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        if (compiler == null) {
+            // IntelliJ's system classloader does not expose all boot-layer service providers.
+            compiler = java.util.ServiceLoader.load(ModuleLayer.boot(), JavaCompiler.class).stream()
+                    .filter(provider -> "jdk.compiler".equals(provider.type().getModule().getName()))
+                    .map(java.util.ServiceLoader.Provider::get).findFirst().orElse(null);
+        }
         if (compiler == null) throw new IllegalStateException("The JX compiler requires a JDK, not a JRE");
         return compiler;
     }

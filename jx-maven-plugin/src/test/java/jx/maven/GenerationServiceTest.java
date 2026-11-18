@@ -76,14 +76,14 @@ class GenerationServiceTest {
     @Test void testSourcesResolveMainComponentsWithoutCopyingThem() throws Exception {
         write("src/main/jx/Counter.jx", """
                 package demo;
-                @jx.JxComponent public class Counter {
+                @jx.Component public class Counter {
                     public record Props(int initial) {}
                     public static jx.View render(Props props) { return <span>{props.initial()}</span>; }
                 }
                 """);
         write("src/test/jx/Fixture.jx", """
                 package demo;
-                @jx.JxComponent public class Fixture {
+                @jx.Component public class Fixture {
                     public static jx.View render() { return <Counter initial={2}/>; }
                 }
                 """);

@@ -18,17 +18,17 @@ public final class RuntimeApplication {
     private record Value(int value) {}
     private static final Context<String> THEME = Hooks.createContext("default");
     private static final Context<Integer> SCALAR_CONTEXT = Hooks.createContext(0);
-    private static final Component<CounterProps> COUNTER = new Component<>("Counter", RuntimeApplication::counter);
-    private static final Component<Void> CHECKS = new Component<>("HookChecks", ignored -> checks());
-    private static final Component<Void> BROWSER = new Component<>("Browser", ignored -> browser());
-    private static final Component<Void> ELM = new Component<>("Elm", ignored -> elm());
-    private static final Component<Void> BROKEN = new Component<>("Broken", ignored -> {
+    private static final ComponentType<CounterProps> COUNTER = new ComponentType<>("Counter", RuntimeApplication::counter);
+    private static final ComponentType<Void> CHECKS = new ComponentType<>("HookChecks", ignored -> checks());
+    private static final ComponentType<Void> BROWSER = new ComponentType<>("Browser", ignored -> browser());
+    private static final ComponentType<Void> ELM = new ComponentType<>("Elm", ignored -> elm());
+    private static final ComponentType<Void> BROKEN = new ComponentType<>("Broken", ignored -> {
         State<Boolean> broken = Hooks.useState(false);
         if (broken.value()) throw new IllegalStateException("render exploded");
         return button("throw-render", "Throw during render", event -> broken.set(true));
     });
-    private static final Component<String> FOREIGN = React.binding("ForeignBadge", foreign(), RuntimeApplication::foreignProps);
-    private static final Component<Void> APP = new Component<>("Application", ignored -> {
+    private static final ComponentType<String> FOREIGN = React.binding("ForeignBadge", foreign(), RuntimeApplication::foreignProps);
+    private static final ComponentType<Void> APP = new ComponentType<>("Application", ignored -> {
         State<Boolean> reverse = Hooks.useState(false);
         State<Boolean> hidden = Hooks.useState(false);
         State<Integer> parent = Hooks.useState(0);

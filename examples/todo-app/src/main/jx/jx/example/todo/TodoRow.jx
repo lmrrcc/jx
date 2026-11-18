@@ -3,7 +3,7 @@ package jx.example.todo;
 import jx.*;
 import jx.elm.Dispatch;
 
-@JxComponent
+@Component
 public final class TodoRow {
     public record Props(Todo todo, boolean busy, Dispatch<TodoProgram.Message> dispatch) {}
     public static View render(Props props) {

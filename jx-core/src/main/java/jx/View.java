@@ -19,7 +19,7 @@ public sealed interface View permits View.Element, View.Text, View.Fragment, Vie
     record Fragment(List<View> children) implements View {
         public Fragment { children = List.copyOf(children); }
     }
-    record ComponentView<P>(Component<P> component, P props, String key) implements View {
+    record ComponentView<P>(ComponentType<P> component, P props, String key) implements View {
         public ComponentView { Objects.requireNonNull(component); }
     }
     record Provider<T>(Context<T> context, T value, List<View> children) implements View {

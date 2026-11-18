@@ -2,7 +2,7 @@ package jx.example.todo;
 
 import jx.*;
 
-@JxComponent
+@Component
 public final class App {
     public record Props(Services services) {}
     public static View render(Props props) {

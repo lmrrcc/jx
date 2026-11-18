@@ -21,6 +21,10 @@ in Java and `.jx` markup. The governing specification is
 - Both editors highlight mixed Java/HTML and launch the selected Maven module's
   development server. Hot updates preserve compatible state through typed
   checkpoints; never reuse opaque Java objects across rebuilt TeaVM generations.
+- Use `jx.Component` for component annotations (`jx.ComponentType<P>` is the
+  runtime descriptor). Java editing inside `.jx` delegates to the native Java
+  engine in each IDE; highlighting alone does not prove Java language support.
+  Follow the [native editor decision](docs/decisions/0002-native-java-editor-services.md).
 - Keep the core independent of Spring, persistence, and a particular server.
   Spring Boot support belongs in an optional integration.
 - Ordinary application logic is Java-only. Framework-maintained JavaScript/TypeScript

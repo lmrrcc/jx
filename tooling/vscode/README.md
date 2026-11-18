@@ -1,16 +1,32 @@
 # JX Java Components
 
-JX editing through the shared Java language server: `.jx` highlighting, diagnostics,
-completion, hover, definition navigation, and document symbols. The extension
+JX combines the compiler's markup services with native Java editing from
+**Language Support for Java by Red Hat 1.58.0**. Java completion, hover, overload
+signature help, definitions, references, local-variable and method rename, and diagnostics
+work in ordinary Java code and Java expressions inside `.jx` attributes and
+children. Event lambda parameters retain their Java types. Component tags and
+props use the shared JX language server. The extension
 colors HTML/SVG tag names, attribute names, quoted values, entities, and nested
 markup inside `.jx`, while Java expressions in braces retain Java highlighting.
 Java strings, comments, and ordinary generic types retain their Java scopes.
 The colors follow the selected VS Code theme.
+In ordinary `.java` files within a Maven module containing JX source, **F12** and
+**JX: Go to Definition** map native Java definitions back to authored `.jx`.
+The shortcut remains unchanged outside those modules. The ordinary Java extension's
+separate **Go to Definition** context-menu action does not remap JX projections;
+use the JX action when navigating from Java into JX.
 The extension
-bundles its language server and requires a Java 25 executable. Set `jx.javaPath`
+bundles its language server and a small JDT bridge, and requires a Java 25 executable. Set `jx.javaPath`
 in user settings when `java` is not available on the extension host's PATH.
 
-The language server starts only in trusted workspaces. In remote workspaces Java
+Native Java editing requires the Maven project to be imported by the official
+Java extension in Standard mode. Its runtime must also be Java 25 or newer; the
+verified Java extension includes a suitable runtime. An explicit
+`java.jdt.ls.java.home` override must satisfy that requirement. The bridge is
+versioned against Red Hat Java 1.58.0 / JDT LS 1.63.0; other versions require a
+compatibility check before support is advertised.
+
+JX launches its language server and requests native Java analysis only in trusted workspaces. In remote workspaces Java
 and Maven run on the remote extension host. Additional semantic classpath entries
 can be set with `jx.classpath`. The Output panel's **JX Language Server** channel
 and **JX: Restart Language Server** command provide diagnostics and recovery.
@@ -49,20 +65,47 @@ workspace folder. Otherwise an existing `.cache/maven-repository` beside the
 wrapper is used; if absent, Maven uses its normal default. An explicit
 `-Dmaven.repo.local=...` in the argument list takes precedence.
 
+The JDT bridge keeps lowered Java in owned in-memory working copies in the imported
+Maven project. It does not write Java mirrors, change project classpaths, or create
+hidden dirty editors. Existing generated Java is overlaid only when the generator's
+output manifest and source map both prove ownership; the files remain unchanged.
+Main and test projections retain their separate Maven source scopes. References
+and edits map back to `.jx`. Edits that would
+change generated markup fail atomically; ordinary Java targets must be open before
+renaming a method from JX so their versions can be checked. Local-variable and method
+rename use native JDT references. Class/file rename, generated component
+references, formatting, and arbitrary Java refactorings are not advertised.
+Closed sessions release their working copies. The bridge accepts up to 256 files
+and 16 Mi UTF-16 code units per project, with a 1 Mi code-unit limit per file and
+32 concurrent project sessions. Changed document versions invalidate pending results.
+
 Build the repository's language-server JAR first, then use Node 22 or newer and run `npm ci` and
-`npm run package` in this directory. Install `jx-language-0.1.0.vsix` using VS
+`npm run package` in this directory. Install `jx-language-0.2.0.vsix` using VS
 Code's **Extensions: Install from VSIX** action. This is a local development
 package; no marketplace publication is implied.
 
-Rename refactoring, formatting, debugger stepping, and complete embedded-Java IDE
-semantics are not advertised. Feature depth is defined by the shared compiler and
-language server. See the repository's tooling documentation for verified coverage.
+Packaging compiles the small Java bridge against an installed Red Hat Java 1.58.0
+SDK, or `JX_JAVA_EXTENSION` when explicitly set. On a fresh checkout it downloads
+the official pinned Linux VSIX as a platform-independent compile SDK, verifies
+SHA-256 `45049a2273c78814287fb31a45255e5ce1fdbe34161bb9f1ba8f62a6aa84bdfc`,
+and extracts only metadata and Java compiler dependencies to `.cache/java-sdk`.
+The SDK and its bundled runtime are not redistributed in the JX VSIX. The first
+download requires Marketplace network access; subsequent builds use the cache.
+Debugger stepping and complete Java IDE parity are not advertised. See the
+repository's tooling documentation for verified coverage.
 
 The packaged-extension tests use the installed VS Code executable and an isolated
 copy of the real Counter application. They cover module/wrapper discovery, saved
 edits, argument boundaries in paths with spaces, repository configuration,
 duplicate Start commands, real Maven/HTTP startup, Stop/restart, and workspace
-trust, alongside completion, diagnostics, hover, definitions, and symbols.
+trust, alongside completion, diagnostics, hover, definitions, and symbols. The
+native editing fixture first builds the application and explicitly imports its
+generated source root with Maven's build-helper plugin. It verifies that native
+editing preserves generated files, maps Java-to-JX navigation, and renames a method
+across JX and an open ordinary Java file.
+The installed Red Hat Java extension is included in the isolated test environment.
+`npm run test:native` separately exercises the native JDT bridge, including
+ordinary-Java source collision protection, separate main/test scopes, and working-copy cleanup.
 TextMate/Oniguruma tokenization tests also check the installed grammar against
 the editor's real Java grammar, including nested tags, fragments, quoted
 attributes, and Java lambdas with nested braces.

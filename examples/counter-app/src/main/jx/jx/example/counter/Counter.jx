@@ -1,11 +1,11 @@
 package jx.example.counter;
 
 import jx.Hooks;
-import jx.JxComponent;
+import jx.Component;
 import jx.State;
 import jx.View;
 
-@JxComponent
+@Component
 public final class Counter {
     public record Props(int initial, String label) {}
 

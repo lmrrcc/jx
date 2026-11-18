@@ -11,6 +11,10 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 
 public final class JxEditorTest extends BasePlatformTestCase {
+    @Override protected void setUp() throws Exception {
+        super.setUp();
+        myFixture.setCaresAboutInjection(false);
+    }
     @Override protected com.intellij.testFramework.fixtures.TempDirTestFixture createTempDirTestFixture() {
         return new com.intellij.testFramework.fixtures.impl.TempDirTestFixtureImpl();
     }
@@ -44,7 +48,7 @@ public final class JxEditorTest extends BasePlatformTestCase {
     }
     public void testBundledServerStartsThroughIntellijAndCompletes() {
         TrustedProjects.setTrusted(getProject(), true);
-        var file = myFixture.addFileToProject("src/main/jx/EditorProof.jx", "import jx.JxComponent;\nimport jx.View;\n@JxComponent\npublic final class EditorProof { public static View render() { return (<div>Hello</div>); } }");
+        var file = myFixture.addFileToProject("src/main/jx/EditorProof.jx", "import jx.Component;\nimport jx.View;\n@Component\npublic final class EditorProof { public static View render() { return (<div>Hello</div>); } }");
         myFixture.configureFromExistingVirtualFile(file.getVirtualFile());
         var manager = LspServerManager.getInstance(getProject());
         manager.ensureServerStarted(JxLspSupportProvider.class, new JxLspServerDescriptor(getProject()));

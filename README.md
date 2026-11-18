@@ -31,7 +31,7 @@ tests exercise the complete Java → TeaVM → React path. The
 ## Components
 
 A `.jx` file is a Java compilation unit with markup expressions.
-`@JxComponent` marks a component; a nested record defines its typed props.
+`@Component` marks a component; a nested record defines its typed props.
 
 **Counter.jx**
 
@@ -40,11 +40,11 @@ package jx.example.counter;
 
 import jx.EventHandler;
 import jx.Hooks;
-import jx.JxComponent;
+import jx.Component;
 import jx.State;
 import jx.View;
 
-@JxComponent
+@Component
 public final class Counter {
     public record Props(int initial, String label) {}
 
@@ -69,10 +69,10 @@ public final class Counter {
 ```java
 package jx.example.counter;
 
-import jx.JxComponent;
+import jx.Component;
 import jx.View;
 
-@JxComponent
+@Component
 public final class App {
     public static View render() {
         return (
@@ -183,8 +183,10 @@ for details. Ctrl+C stops the server and its active build.
 
 Both editor packages color HTML/component markup alongside Java: tags,
 attributes, quoted values, and embedded expressions have distinct highlighting.
-They share the compiler-backed Java language server for diagnostics,
-component/property completion, hover, navigation, and document symbols.
+Java editing delegates to **IntelliJ's Java plugin** and **VS Code's Red Hat Java
+extension**, including Java expressions inside markup. The shared JX language
+server adds component/property semantics and compiler diagnostics. Updated editor
+packages are version **0.2.0**; see the tested operations and limits below.
 
 | Tool | Build, edit, and run |
 | --- | --- |
@@ -229,9 +231,10 @@ Current boundaries are explicit:
 - React interop works through typed bindings. Individual component libraries
   need bindings and tests; portals, Suspense, SSR, hydration, and other advanced
   features remain tracked work.
-- Source-mapped compiler diagnostics are implemented. Full Java expression
-  completion, refactoring, and end-to-end `.jx` browser debugging remain work
-  in progress.
+- Native Java completion, navigation and mapped source edits are integrated with
+  the editors' Java engines. Supported rename/refactoring operations are bounded
+  by the [editor compatibility profile](docs/tooling.md#java-editing-matrix); whole-file formatting
+  and end-to-end `.jx` browser debugging remain work in progress.
 
 See the [compatibility and implementation status](docs/status.md) before choosing
 features for an application.

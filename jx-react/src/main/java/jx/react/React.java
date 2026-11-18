@@ -33,25 +33,25 @@ public final class React {
         return event -> { try { handler.handle(event); } catch (RuntimeException error) { failure.accept(error); } };
     }
     /** Typed external React binding. The binding owns deliberate conversion of its known props schema. */
-    public static <P> Component<P> binding(String name, JSObject nativeComponent, Function<P, JSObject> props) {
+    public static <P> ComponentType<P> binding(String name, JSObject nativeComponent, Function<P, JSObject> props) {
         Objects.requireNonNull(nativeComponent); Objects.requireNonNull(props);
-        return new Component<>(name, value -> new NativeView(external(nativeComponent, Objects.requireNonNull(props.apply(value)))));
+        return new ComponentType<>(name, value -> new NativeView(external(nativeComponent, Objects.requireNonNull(props.apply(value)))));
     }
     /** Export once for use in an ordinary React tree. The decoder validates the foreign props schema. */
-    public static <P> JSObject exportComponent(Component<P> component, Function<JSObject, P> decode) {
+    public static <P> JSObject exportComponent(ComponentType<P> component, Function<JSObject, P> decode) {
         Objects.requireNonNull(component); Objects.requireNonNull(decode);
         Hooks.installRuntime(ReactHooks.INSTANCE);
         Render render = props -> element(component.render(decode.apply(props)));
         return nativeFunction(render);
     }
-    public static <P> Root mount(String elementId, Component<P> component, P props) {
+    public static <P> Root mount(String elementId, ComponentType<P> component, P props) {
         return mount(elementId, component, props, false);
     }
     /** Enables React development checks, including repeated effect setup/cleanup. */
-    public static <P> Root mountStrict(String elementId, Component<P> component, P props) {
+    public static <P> Root mountStrict(String elementId, ComponentType<P> component, P props) {
         return mount(elementId, component, props, true);
     }
-    private static <P> Root mount(String elementId, Component<P> component, P props, boolean strict) {
+    private static <P> Root mount(String elementId, ComponentType<P> component, P props, boolean strict) {
         Hooks.installRuntime(ReactHooks.INSTANCE);
         JSObject root = createRoot(Objects.requireNonNull(elementId));
         JSObject child = component(new View.ComponentView<>(component, props, null), HotReload.rootPath(elementId, component.name()), true);
@@ -104,7 +104,7 @@ public final class React {
         return result;
     }
     private static <P> JSObject component(View.ComponentView<P> view, String path, boolean root) {
-        Component<P> descriptor = view.component();
+        ComponentType<P> descriptor = view.component();
         Render render = props -> {
             JSObject frame = HotReload.begin(readPath(props), descriptor.stateSignature(), readRoot(props));
             try {

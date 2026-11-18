@@ -27,9 +27,38 @@ LSP notifications or standard error, never the protocol stream.
 - Conservative hook-placement diagnostics from the compiler. These do not prove
   purity or correct control flow through arbitrary Java helper methods.
 
-Java type feedback covers the compiler's generated/shadow Java subset. General
-Java expression completion, Java method navigation, rename, import organization,
-formatting, debugger stepping, and browser stack-map composition are not advertised.
+The server owns JX syntax and component semantics. Native Java expression
+completion, Java navigation and source edits are delegated by the editor adapters
+to IntelliJ's Java plugin or VS Code's Red Hat Java extension. Their verified
+operations and compatibility limits are listed in [the tooling guide](tooling.md).
+The server does not implement a second general-purpose Java language engine.
+
+## Native Java projection protocol
+
+Editor adapters request `jx/editorProjection` with `{uri, version?}`. Protocol
+version 1 returns `projectUri`, `files`, and `unavailable`. Each file contains its
+`sourceUri`, nullable open-document `version`, `sourceText`, `relativeJavaPath`,
+`javaText`, `segments`, `sourceLength`, and `topLevelTypes`. Offsets and lengths are
+UTF-16. The version is null for a source read from disk. The response includes
+current sibling `.jx` snapshots from the same Maven module.
+
+Editor recovery retains incomplete markup and typed Java expression contexts.
+Its per-file expansion budget is 65,536 prop-constructor slots and 16,777,216
+generated UTF-16 code units. A source exceeding either budget is unavailable;
+other sources in the module still receive projections. These editor-only recovery
+rules do not relax build validation. Adapters also enforce their own working-copy
+and session bounds.
+
+The requested version must match the analyzed open document. Older versions fail
+with LSP `ContentModified`; concurrent changes cancel an obsolete request. No
+generated source is written by this operation. An unavailable projection must
+invalidate any older native Java copy, rather than keeping stale Java semantics.
+
+Each source-map segment has `generatedStart`, `length`, `sourceStart`, and
+`linear`. Only a range entirely contained in a linear segment can authorize an
+authored Java edit. Synthetic mappings are diagnostic anchors. Adapters must also
+verify the source snapshot before applying edits. See the
+[editor architecture decision](decisions/0002-native-java-editor-services.md).
 
 ## Project and classpath discovery
 

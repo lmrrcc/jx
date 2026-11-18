@@ -28,15 +28,15 @@ jobs:
       - name: Test and verify IntelliJ plugin against pinned IDEA
         working-directory: tooling/intellij
         run: ./gradlew --no-daemon test buildPlugin verifyPlugin
-      - name: Check bundled language-server identity
+      - name: Check bundled compiler, language server and Java bridge identity
         run: java tooling/vscode/VerifyPackages.java
       - uses: actions/upload-artifact@v4
         with:
           name: jx-editor-packages
           if-no-files-found: error
           path: |
-            tooling/vscode/jx-language-0.1.0.vsix
-            tooling/intellij/build/distributions/jx-intellij-0.1.0.zip
+            tooling/vscode/jx-language-0.2.0.vsix
+            tooling/intellij/build/distributions/jx-intellij-0.2.0.zip
       - uses: actions/upload-artifact@v4
         if: always()
         with:

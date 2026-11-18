@@ -26,7 +26,7 @@ class ViewContractTest {
         var children = new ArrayList<View>(); children.add(new View.Text("one"));
         View.Fragment fragment = new View.Fragment(children); children.clear();
         assertEquals(1, fragment.children().size());
-        Component<String> component = new Component<>("Deferred", props -> { fail("Composition must not invoke render"); return Views.fragment(); });
+        ComponentType<String> component = new ComponentType<>("Deferred", props -> { fail("Composition must not invoke render"); return Views.fragment(); });
         View composed = Views.component(component, "props", "stable");
         assertInstanceOf(View.ComponentView.class, composed);
         assertThrows(IllegalArgumentException.class, () -> new View.Element("bad<tag", initial, List.of()));

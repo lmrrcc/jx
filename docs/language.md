@@ -8,12 +8,19 @@ is a compiling consumer of this contract.
 
 ## Components and properties
 
-A component is a non-generic top-level class annotated with `@JxComponent`.
+A component is a non-generic top-level class annotated with `@jx.Component`
+(normally imported as `@Component`). This annotation is independent of Spring's
+`org.springframework.stereotype.Component` and does not enable dependency injection.
 It declares exactly one `public static View render()` method, or a
 `public static View render(Props props)` method with a public nested record:
 
 ```java
-@JxComponent
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+@Component
 public final class Counter {
     public record Props(int initial, String label) {}
 
@@ -30,6 +37,28 @@ public final class Counter {
 declared field order and references the generated `Counter.JX` descriptor.
 React invokes the render function. A parent does not call a child's render method
 during lowering. `JX` is a reserved static field name.
+
+### Pre-release component naming migration
+
+Use `import jx.Component;` and `@Component` for new declarations. The original
+`@JxComponent` spelling remains a deprecated source-compatible alias; both forms
+generate the same component metadata. The original implementation prompt is a
+historical specification and retains its original examples.
+
+The runtime descriptor previously named `jx.Component<P>` is now
+`jx.ComponentType<P>`, leaving `Component` available for the annotation. Handwritten
+descriptor declarations and constructors must use `ComponentType`; rebuild generated
+sources and dependent modules together. For example:
+
+```java
+public static final jx.ComponentType<Props> JX =
+    new jx.ComponentType<>("example.Counter", Counter::render);
+```
+
+This descriptor rename is a pre-release source/binary API change. Only the old
+annotation spelling retains compatibility. An explicit Spring or other `Component`
+import is not interpreted as a JX annotation; use `@jx.Component` when qualification
+is necessary.
 
 Every record field is required. Unknown, missing, and duplicate properties are
 compiler errors. javac checks property value types and functional interface

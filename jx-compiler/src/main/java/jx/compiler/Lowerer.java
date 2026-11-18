@@ -10,6 +10,8 @@ import java.util.Set;
 import static jx.compiler.Syntax.*;
 
 final class Lowerer {
+    private static final int MAX_EDITOR_CHARS = 16 * 1024 * 1024;
+    private static final long MAX_EDITOR_PROP_SLOTS = 65_536;
     private final JavaModel model;
     private final List<ComponentMetadata> components;
     private final List<Diagnostic> diagnostics;
@@ -17,15 +19,27 @@ final class Lowerer {
     private final MappedBuilder out;
     private final Set<Integer> inserted = new HashSet<>();
     private final Map<String, String> signatures;
+    private final boolean orderedEditor;
+    private long editorPropSlots;
 
     Lowerer(JavaModel model, List<ComponentMetadata> components, List<Diagnostic> diagnostics) {
         this(model, components, diagnostics, Map.of());
     }
 
     Lowerer(JavaModel model, List<ComponentMetadata> components, List<Diagnostic> diagnostics, Map<String, String> signatures) {
+        this(model, components, diagnostics, signatures, false);
+    }
+
+    static Lowerer editor(JavaModel model, List<ComponentMetadata> components) {
+        return new Lowerer(model, components, new ArrayList<>(), Map.of(), true);
+    }
+
+    private Lowerer(JavaModel model, List<ComponentMetadata> components, List<Diagnostic> diagnostics,
+                    Map<String, String> signatures, boolean orderedEditor) {
         this.model = model; this.components = components; this.diagnostics = diagnostics;
         this.signatures = signatures;
-        this.source = model.parsed().source(); this.out = new MappedBuilder(source);
+        this.orderedEditor = orderedEditor;
+        this.source = model.parsed().source(); this.out = new MappedBuilder(source, orderedEditor);
     }
 
     GeneratedSource lower() {
@@ -56,7 +70,7 @@ final class Lowerer {
             String type = component.hasProps() ? "Props" : "Void";
             String function = component.hasProps() ? component.simpleName() + "::render" : "ignored -> " + component.simpleName() + ".render()";
             out.synthetic("\n    /** Stable React component identity generated from this declaration. */\n"
-                    + "    public static final jx.Component<" + type + "> JX = new jx.Component<>("
+                    + "    public static final jx.ComponentType<" + type + "> JX = new jx.ComponentType<>("
                     + quote(component.qualifiedName()) + ", " + quote(signatures.getOrDefault(component.qualifiedName(), ""))
                     + ", " + function + ");\n", component.declaration().start());
             start = offset;
@@ -106,6 +120,10 @@ final class Lowerer {
         int anchor = element.nameSpan().start();
         ComponentMetadata component = resolve(element.name(), element.nameSpan());
         if (component == null) { out.synthetic("null", anchor); return; }
+        if (orderedEditor) {
+            editorComponent(element, component);
+            return;
+        }
         Set<String> declared = new HashSet<>();
         for (ComponentMetadata.Prop prop : component.props()) declared.add(prop.name());
         for (Attribute attribute : attributes.values())
@@ -138,6 +156,91 @@ final class Lowerer {
         Attribute key = attributes.get("key");
         if (key != null) { out.synthetic(", ", key.nameSpan().start()); value(key); }
         out.synthetic(")", anchor);
+    }
+
+    /** Native IDE injection edits require monotonically ordered authored slices. Build lowering
+     * orders props by constructor slot, which can reverse their source order. For analysis only,
+     * each attribute gets its own real Props constructor context, with synthetic defaults in other
+     * slots. This preserves exact lambda target types without introducing fake public helper APIs.
+     * This projection is never executed; ordinary compilation retains its original semantics. */
+    private void editorComponent(Element element, ComponentMetadata component) {
+        List<Node> children = meaningfulChildren(element.children());
+        long calls = Math.max(1L, element.attributes().size() + (children.isEmpty() ? 0 : 1));
+        long slots = calls * Math.max(1, component.props().size());
+        if (slots > MAX_EDITOR_PROP_SLOTS - editorPropSlots) throw new EditorLimitException();
+        editorPropSlots += slots;
+        int anchor = element.nameSpan().start();
+        out.synthetic("jx.Views.fragment(", anchor);
+        boolean first = true;
+        for (Attribute attribute : element.attributes()) {
+            if (!first) out.synthetic(", ", attribute.nameSpan().start());
+            first = false;
+            boolean declared = component.props().stream().anyMatch(prop -> prop.name().equals(attribute.name()));
+            if (!declared && !attribute.name().equals("key")) {
+                // Keep invalid-property expressions available to Java editing; the shared JX
+                // diagnostics still report the unknown property against the authored tag.
+                out.synthetic("jx.Views.fragment(", attribute.nameSpan().start());
+                value(attribute);
+                out.synthetic(")", attribute.span().end());
+                continue;
+            }
+            editorComponentCall(element, component, attribute, List.of());
+        }
+        if (!children.isEmpty()) {
+            if (!first) out.synthetic(", ", anchor);
+            first = false;
+            boolean declared = component.props().stream().anyMatch(prop -> prop.name().equals("children"));
+            if (declared) editorComponentCall(element, component, null, children);
+            else {
+                out.synthetic("jx.Views.fragment(", anchor);
+                children(children);
+                out.synthetic(")", anchor);
+            }
+        }
+        if (first) editorComponentCall(element, component, null, List.of());
+        out.synthetic(")", anchor);
+    }
+
+    private void editorComponentCall(Element element, ComponentMetadata component, Attribute active, List<Node> children) {
+        int anchor = element.nameSpan().start();
+        out.synthetic("jx.Views.component(" + element.name() + ".JX, ", anchor);
+        if (!component.hasProps()) out.synthetic("null", anchor);
+        else {
+            out.synthetic("new " + element.name() + ".Props(", anchor);
+            boolean first = true;
+            boolean copied = false;
+            for (ComponentMetadata.Prop prop : component.props()) {
+                if (!first) out.synthetic(", ", anchor);
+                first = false;
+                if (!copied && active != null && !active.name().equals("key") && prop.name().equals(active.name())) {
+                    value(active); copied = true;
+                } else if (!copied && active == null && prop.name().equals("children") && !children.isEmpty()) {
+                    out.synthetic("jx.Views.fragment(", anchor); children(children); out.synthetic(")", anchor);
+                    copied = true;
+                } else out.synthetic(editorDefault(prop.javaType()), anchor);
+            }
+            out.synthetic(")", anchor);
+        }
+        if (active != null && active.name().equals("key")) {
+            out.synthetic(", ", active.nameSpan().start()); value(active);
+        }
+        out.synthetic(")", anchor);
+    }
+
+    private static String editorDefault(String type) {
+        String stripped = type.stripTrailing();
+        // javac's type spelling may start with type-use annotations. Array and reference spellings
+        // never end in a standalone primitive token; their constructor-compatible default is null.
+        for (String primitive : List.of("boolean", "byte", "short", "char", "int", "long", "float", "double")) {
+            int start = stripped.length() - primitive.length();
+            if (start < 0 || !stripped.endsWith(primitive) || (start > 0 && !Character.isWhitespace(stripped.charAt(start - 1)))) continue;
+            return switch (primitive) {
+                case "boolean" -> "false"; case "byte" -> "(byte) 0"; case "short" -> "(short) 0";
+                case "char" -> "'\\0'"; case "long" -> "0L"; case "float" -> "0F"; case "double" -> "0D";
+                default -> "0";
+            };
+        }
+        return "null";
     }
 
     private ComponentMetadata resolve(String name, SourceSpan span) {
@@ -208,18 +311,28 @@ final class Lowerer {
 
     private static final class MappedBuilder {
         final SourceFile source;
+        final boolean editor;
         final StringBuilder text = new StringBuilder();
         final List<SourceMap.Segment> segments = new ArrayList<>();
-        MappedBuilder(SourceFile source) { this.source = source; }
+        MappedBuilder(SourceFile source, boolean editor) { this.source = source; this.editor = editor; }
         void copy(int start, int end) {
             if (end <= start) return;
+            checkBudget(end - start);
             segments.add(new SourceMap.Segment(text.length(), end - start, start, true));
             text.append(source.content(), start, end);
         }
         void synthetic(String value, int anchor) {
             if (value.isEmpty()) return;
+            checkBudget(value.length());
             segments.add(new SourceMap.Segment(text.length(), value.length(), anchor, false));
             text.append(value);
         }
+        private void checkBudget(int additional) {
+            if (editor && additional > MAX_EDITOR_CHARS - text.length()) throw new EditorLimitException();
+        }
+    }
+
+    static final class EditorLimitException extends RuntimeException {
+        EditorLimitException() { super("Editor projection exceeds its expansion budget"); }
     }
 }

@@ -23,7 +23,7 @@ Both assets use the palette from the
 | Dividers | `#d9dfd5` |
 
 The serif monogram and headline, quiet surfaces, and light code panel follow the
-Todo app's visual direction. The counter uses the current `@JxComponent` annotation.
+Todo app's visual direction. The counter uses the current `@Component` annotation.
 Its markup uses `onClick={increment(count)}` with the extracted `EventHandler`
 helper shown below `render()`, matching the README's event-handler pattern.
 

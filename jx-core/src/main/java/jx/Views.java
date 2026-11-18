@@ -11,8 +11,8 @@ public final class Views {
         if (!Objects.requireNonNull(tag).matches("[A-Za-z][A-Za-z0-9:_-]*")) throw new IllegalArgumentException("Invalid element name: " + tag);
         return new View.Element(tag, attributes, children(children));
     }
-    public static <P> View component(Component<P> component, P props) { return component(component, props, null); }
-    public static <P> View component(Component<P> component, P props, String key) { return new View.ComponentView<>(component, props, key); }
+    public static <P> View component(ComponentType<P> component, P props) { return component(component, props, null); }
+    public static <P> View component(ComponentType<P> component, P props, String key) { return new View.ComponentView<>(component, props, key); }
     public static View fragment(Object... children) { return new View.Fragment(children(children)); }
     static List<View> children(Object[] children) {
         var result = new ArrayList<View>();

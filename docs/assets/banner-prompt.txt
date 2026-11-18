@@ -4,7 +4,7 @@ Input image 1 is the EDIT TARGET: the existing finished JX banner with an ivory 
 Primary request: update ONLY the code inside the Counter.jx editor card to show the extracted Java click-handler helper, matching the current project documentation.
 Preserve every other element: the composition, landscape aspect ratio (1731:909), image size where supported, palette, fonts, JX wordmark, "Java eXtended UI", header rule, "OPEN SOURCE / MIT", headline "React apps. Written in Java.", supporting copy, three feature pills, card header, "BROWSER PREVIEW", green "Count: 3" button, footer URL "github.com/lmrrcc/jx", footer tooling labels and all margins.
 The old inline event lambda inside the button tag must be replaced with onClick={increment(count)}. Include the complete private static EventHandler helper below render(), inside the Counter class. Adjust ONLY code font size/line spacing modestly if needed so the following complete code fits legibly in the existing code area; no cropping, ellipses or missing lines. Keep the restrained forest/terracotta/olive syntax highlighting and genuine monospace typography. Use exactly this code:
-@JxComponent
+@Component
 public final class Counter {
     public static View render() {
         State<Integer> count = Hooks.useState(0);
@@ -21,3 +21,6 @@ public final class Counter {
     }
 }
 Critical exact text: "EventHandler", "increment(count)", "State<Integer>", "count.update(value -> value + 1)". Preserve every brace, angle bracket, semicolon and parenthesis. No extra text or redesign. High-resolution, sharp editorial graphic suitable for LinkedIn.
+
+Final built-in image-generation edit prompt (2026-11-18):
+Use case: text-localization. Edit target: the existing finished JX LinkedIn banner. Change ONLY the annotation text at the first code line in the Counter.jx card from '@JxComponent' to '@Component'. Exact replacement is '@Component' (capital C). Preserve every other character of the code, every word, number, brace, arrow, and all other artwork. Preserve the image's 1731:909 landscape aspect ratio, ivory background, forest green / terracotta / olive colors, serif headings, JX wordmark, layout, font sizes, code spacing, extracted increment helper, URL, feature pills and Count: 3 preview button. Do not redesign, crop, add, remove or rewrite any other element. Sharp high-resolution output.

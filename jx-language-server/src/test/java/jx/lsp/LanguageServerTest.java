@@ -36,14 +36,14 @@ class LanguageServerTest {
         Path counter = directory.resolve("Counter.jx");
         Path app = directory.resolve("App.jx");
         String counterText = """
-                import jx.JxComponent;
+                import jx.Component;
                 import jx.View;
-                @JxComponent public final class Counter {
+                @Component public final class Counter {
                     public record Props(int initial, String label) {}
                     public static View render(Props props) { return <button>{props.label()}: {props.initial()}</button>; }
                 }
                 """;
-        String valid = "import jx.*;\r\n// 😀 source location\r\n@JxComponent public final class App {\r\n"
+        String valid = "import jx.*;\r\n// 😀 source location\r\n@Component public final class App {\r\n"
                 + " public static View render() { return <Counter initial={1} label=\"Count\" />; }\r\n}\r\n";
         Files.writeString(counter, counterText);
         Files.writeString(app, valid);
@@ -104,13 +104,56 @@ class LanguageServerTest {
         assertEquals(List.of("Own.jx"), snapshot.sources().stream().map(source -> source.path().getFileName().toString()).toList());
     }
 
+    @Test void nativeJavaProjectionProtocolUsesUnsavedVersionsAndExactEditableMappings() throws Exception {
+        Path app = directory.resolve("App.jx");
+        Path sibling = directory.resolve("Other.jx");
+        String disk = "import jx.*; @Component public class App { public static View render() { return <div>Disk</div>; } }";
+        String text = disk.replace("<div>Disk</div>", "<button onClick={event -> System.out.println(\"😀 unsaved\")}>Unsaved</button>");
+        Files.writeString(app, disk);
+        Files.writeString(sibling, "import jx.*; @Component public class Other { public static View render() { return <span/>; } }");
+        try (var session = new Session()) {
+            var init = new InitializeParams();
+            init.setWorkspaceFolders(List.of(new WorkspaceFolder(directory.toUri().toString(), "fixture")));
+            session.remote.initialize(init).get(5, TimeUnit.SECONDS);
+            String uri = app.toUri().toString();
+            session.remote.getTextDocumentService().didOpen(new DidOpenTextDocumentParams(new TextDocumentItem(uri, "jx", 7, text)));
+            session.client.await(d -> uri.equals(d.getUri()) && Integer.valueOf(7).equals(d.getVersion()));
+            EditorProjectionResult result = session.remote.editorProjection(new EditorProjectionParams(uri, 7)).get(5, TimeUnit.SECONDS);
+            assertEquals(1, result.protocolVersion());
+            assertEquals(directory.toUri().toString(), result.projectUri());
+            assertEquals(2, result.files().size());
+            assertTrue(result.unavailable().isEmpty());
+            var projection = result.files().stream().filter(file -> file.sourceUri().equals(uri)).findFirst().orElseThrow();
+            assertEquals(7, projection.version());
+            assertEquals(text, projection.sourceText());
+            assertEquals("App.java", projection.relativeJavaPath());
+            assertEquals(List.of("App"), projection.topLevelTypes());
+            assertTrue(projection.javaText().contains("😀 unsaved"));
+            var map = new jx.compiler.SourceMap(projection.segments(), projection.sourceLength());
+            String expression = "event -> System.out.println(\"😀 unsaved\")";
+            int authored = text.indexOf(expression);
+            int generated = map.generatedOffset(authored).orElseThrow();
+            assertEquals(expression, projection.javaText().substring(generated, generated + expression.length()));
+            assertEquals(new jx.compiler.SourceSpan(authored, authored + expression.length()),
+                    map.editableSourceSpan(new jx.compiler.SourceSpan(generated, generated + expression.length())).orElseThrow());
+            assertTrue(map.generatedOffset(text.indexOf("<button") + 1).isEmpty());
+            assertNull(result.files().stream().filter(file -> file.sourceUri().equals(sibling.toUri().toString())).findFirst().orElseThrow().version());
+            var failure = assertThrows(java.util.concurrent.ExecutionException.class,
+                    () -> session.remote.editorProjection(new EditorProjectionParams(uri, 6)).get(5, TimeUnit.SECONDS));
+            var protocolFailure = assertInstanceOf(org.eclipse.lsp4j.jsonrpc.ResponseErrorException.class, failure.getCause());
+            assertEquals(org.eclipse.lsp4j.jsonrpc.messages.ResponseErrorCode.ContentModified.getValue(), protocolFailure.getResponseError().getCode());
+            assertEquals(disk, Files.readString(app));
+            assertFalse(Files.exists(directory.resolve("App.java")));
+        }
+    }
+
     @Test void protocolResolvesImportedNamesAndRetainsOversizedDocumentVersions() throws Exception {
         Path local = directory.resolve("local/Counter.jx"), external = directory.resolve("external/Counter.jx");
         Files.createDirectories(local.getParent()); Files.createDirectories(external.getParent());
-        Files.writeString(local, "package local; import jx.*; @JxComponent public class Counter { public record Props(int initial) {} public static View render(Props props) { return <span/>; } }");
-        Files.writeString(external, "package external; import jx.*; @JxComponent public class Counter { public record Props(String label) {} public static View render(Props props) { return <span/>; } }");
+        Files.writeString(local, "package local; import jx.*; @Component public class Counter { public record Props(int initial) {} public static View render(Props props) { return <span/>; } }");
+        Files.writeString(external, "package external; import jx.*; @Component public class Counter { public record Props(String label) {} public static View render(Props props) { return <span/>; } }");
         Path app = directory.resolve("local/App.jx");
-        String valid = "package local; import external.Counter; import jx.*; @JxComponent public class App { public static View render() { return <Counter label=\"hello\"/>; } }";
+        String valid = "package local; import external.Counter; import jx.*; @Component public class App { public static View render() { return <Counter label=\"hello\"/>; } }";
         Files.writeString(app, valid);
         try (var session = new Session()) {
             InitializeParams init = new InitializeParams();
@@ -154,6 +197,11 @@ class LanguageServerTest {
         }
     }
 
+    public interface EditorServer extends LanguageServer {
+        @org.eclipse.lsp4j.jsonrpc.services.JsonRequest("jx/editorProjection")
+        CompletableFuture<EditorProjectionResult> editorProjection(EditorProjectionParams params);
+    }
+
     static final class Session implements AutoCloseable {
         final PipedInputStream serverInput = new PipedInputStream(65_536);
         final PipedInputStream clientInput = new PipedInputStream(65_536);
@@ -161,7 +209,7 @@ class LanguageServerTest {
         final PipedOutputStream serverOutput;
         final JxLanguageServer server = new JxLanguageServer();
         final Client client = new Client();
-        final LanguageServer remote;
+        final EditorServer remote;
         final java.util.concurrent.Future<Void> serverListening;
         final java.util.concurrent.Future<Void> clientListening;
         Session() throws Exception {
@@ -169,7 +217,7 @@ class LanguageServerTest {
             serverOutput = new PipedOutputStream(clientInput);
             var serverLauncher = LSPLauncher.createServerLauncher(server, serverInput, serverOutput);
             server.connect(serverLauncher.getRemoteProxy());
-            var clientLauncher = Launcher.createLauncher(client, LanguageServer.class, clientInput, clientOutput);
+            var clientLauncher = Launcher.createLauncher(client, EditorServer.class, clientInput, clientOutput);
             remote = clientLauncher.getRemoteProxy();
             serverListening = serverLauncher.startListening();
             clientListening = clientLauncher.startListening();
