@@ -1,55 +1,257 @@
-# JX
+<p align="center">
+  <img src="docs/assets/jx-banner.png" width="1120" alt="JX — Java eXtended UI: React apps, written in Java. A Java Counter.jx component and its browser button, presented in ivory, forest green, and terracotta.">
+</p>
 
-JX is a Java application authoring platform for the browser: Java and `.jx` markup,
-the actual React runtime, functional components and hooks, and optional Elm-style
-Model–View–Update state. Spring Boot provides backend services when needed.
+<h1 align="center">JX — Java eXtended UI</h1>
 
-**Status: working prototype.** The repository implements a `.jx` compiler,
-Maven generation and browser builds, a typed React bridge, hooks, Elm-style state,
-browser HTTP and routing, and a shared language server. Counter and todo examples
-exercise the complete Java → TeaVM → React path. See the documented compatibility
-limits before treating this as a production framework.
+<p align="center">
+  <strong>React applications, authored in Java.</strong><br>
+  Typed components. Familiar hooks. Expressive markup.
+</p>
 
-The [v2 specification](docs/JX_Astra_Max_Prompt_v2.txt) defines the complete scope.
-The [baseline decision](docs/decisions/0001-java-framework-baseline.md) records the
-architecture and distinguishes product requirements from verified behavior.
+<p align="center">
+  <a href="#components">Components</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#development">Development</a> ·
+  <a href="#tooling">Tooling</a> ·
+  <a href="#documentation">Documentation</a>
+</p>
 
-## Build and run
+JX brings Java classes, records, and lambdas to interactive browser applications.
+Write your interface in `.jx`, keep application behavior in Java, and let the
+actual React runtime render it in the browser. Use hooks for local state,
+an optional Elm-style architecture for application workflows, and Spring Boot
+when you need a backend.
 
-Requirements: JDK 25, Node.js 22 or later, npm, and Google Chrome for browser
-tests. Maven Wrapper downloads Maven 3.9.11. Dependencies are pinned: TeaVM 0.16.0,
-React/React DOM 19.3.1, esbuild 0.28.2, and Playwright 1.65.1.
+**Working prototype.** The compiler, browser runtime, Maven plugin, language
+server, and local editor packages are implemented. Runnable examples and Chrome
+tests exercise the complete Java → TeaVM → React path. The
+[implementation status](docs/status.md) records verified behavior and open work.
+
+## Components
+
+A `.jx` file is a Java compilation unit with markup expressions.
+`@JxComponent` marks a component; a nested record defines its typed props.
+
+**Counter.jx**
+
+```java
+package jx.example.counter;
+
+import jx.Hooks;
+import jx.JxComponent;
+import jx.State;
+import jx.View;
+
+@JxComponent
+public final class Counter {
+    public record Props(int initial, String label) {}
+
+    public static View render(Props props) {
+        State<Integer> count = Hooks.useState(props.initial());
+
+        return (
+            <button onClick={event -> count.update(value -> value + 1)}>
+                {props.label()}: {count.value()}
+            </button>
+        );
+    }
+}
+```
+
+**App.jx**
+
+```java
+package jx.example.counter;
+
+import jx.JxComponent;
+import jx.View;
+
+@JxComponent
+public final class App {
+    public static View render() {
+        return (
+            <main>
+                <Counter initial={0} label="First counter" />
+                <Counter initial={10} label="Second counter" />
+            </main>
+        );
+    }
+}
+```
+
+Each mounted counter owns its state. `count.value()` is the current render's
+snapshot; `count.update(...)` queues a functional update. React invokes the
+components and schedules their renders.
+
+The [runnable counter](examples/counter-app) also demonstrates queued updates,
+parent rerenders, and remounting. Read the [language guide](docs/language.md) for
+children, keys, fragments, collections, Java expressions, and source diagnostics.
+
+## Quick start
+
+Install **JDK 25**, **Node.js 22 or later**, and **npm**. Google Chrome is needed
+for browser tests. The checked-in Maven Wrapper downloads Maven 3.9.11.
 
 ```sh
+git clone https://github.com/lmrrcc/jx.git
+cd jx
 npm ci
 ./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository install
+```
+
+This builds and installs the framework's current snapshot artifacts locally.
+Run the following commands from the repository root.
+
+### Counter
+
+```sh
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository \
+  -f examples/counter-app/pom.xml \
+  dev.jx:jx-maven-plugin:0.1.0-SNAPSHOT:dev -Djx.port=4180
+```
+
+Open [127.0.0.1:4180](http://127.0.0.1:4180). After loading, both counters
+continue working with networking disabled: their event handlers execute in the
+browser.
+
+### Todo application
+
+The [Todo example](examples/todo-app) combines controlled forms, validation,
+filters, route parameters, browser history, context, a custom hook, an Elm store,
+and cancellable HTTP. Its [Spring Boot API](examples/todo-api) persists tasks in H2
+under `.local/`, with Flyway managing schema changes.
+
+Stop the counter server first; these development commands also use port 4180.
+
+**Terminal 1 — start the API:**
+
+```sh
 java -jar examples/todo-api/target/todo-api-0.1.0-SNAPSHOT.jar
 ```
 
-Open http://127.0.0.1:8181/todos. Run the server from the repository root so it can
-serve `examples/todo-app/target/site`. The Java/.jx app includes a controlled form,
-validation, route parameters and filters, browser history, context, a custom hook,
-an Elm store, cancellable HTTP, loading/error states, and a Spring Boot API. H2
-persists tasks under `.local/`; Flyway owns schema changes. This is a single-workspace
-demo bound to loopback, without accounts or multi-user authorization.
-
-For the small counter and its state-preserving development workflow:
+**Terminal 2 — start the frontend development server:**
 
 ```sh
-./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -f examples/counter-app/pom.xml dev.jx:jx-maven-plugin:0.1.0-SNAPSHOT:dev -Djx.port=4180
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository \
+  -f examples/todo-app/pom.xml \
+  dev.jx:jx-maven-plugin:0.1.0-SNAPSHOT:dev \
+  -Djx.port=4180 -Djx.apiOrigin=http://127.0.0.1:8181
 ```
 
-Open http://127.0.0.1:4180. Saving Java, `.jx`, or web assets rebuilds the application;
-successful builds preserve compatible component state while applying the new code.
-Scalar hooks are automatic; complex Java models use typed codecs. Effects restart,
-and incompatible hook changes reset affected state. See [development details](docs/maven.md).
+Open [127.0.0.1:4180/todos](http://127.0.0.1:4180/todos). The development server
+proxies `/api/` requests to the backend on port 8181 and applies frontend updates
+as you save. The backend also serves the normally packaged application at
+[127.0.0.1:8181/todos](http://127.0.0.1:8181/todos).
 
-## Verification and tooling
+The example is a local, single-workspace application bound to loopback, without
+accounts or multi-user authorization. See the [Maven guide](docs/maven.md) for
+the proxy's behavior, limits, and configuration.
 
-After the Maven build:
+## Development
+
+Save Java, `.jx`, or CSS to trigger a Maven rebuild. A successful build applies
+the new application while preserving compatible component state. Failed builds
+report diagnostics at the original `.jx` location and leave the last successful
+application interactive.
+
+- **Scalar hook state is preserved automatically.** Records, collections, and
+  application stores use a typed `StateCodec`; the Todo example includes one.
+- **Effects clean up and restart.** State moves into the rebuilt Java generation;
+  existing Java service objects are not carried across.
+- **Incompatible hooks or codec schemas reset affected state.** The development
+  client reports the reset. Uncontrolled DOM state is outside this contract.
+
+The browser document and URL stay in place during supported updates. Restart
+development and reload after changing vendor dependencies or the HTML document
+shell. Production assets remain separate from development output.
+
+Read the [development workflow](docs/maven.md#development-loop) and
+[state-preservation contract](docs/runtime.md#state-preserving-development-replacement)
+for details. Ctrl+C stops the server and its active build.
+
+## Tooling
+
+Both editor packages color HTML/component markup alongside Java: tags,
+attributes, quoted values, and embedded expressions have distinct highlighting.
+They share the compiler-backed Java language server for diagnostics,
+component/property completion, hover, navigation, and document symbols.
+
+| Tool | Build, edit, and run |
+| --- | --- |
+| **Maven** | Generate Java, report mapped diagnostics, bundle browser assets, and run the development loop. [Build guide](docs/maven.md) |
+| **VS Code** | Install the local VSIX. Use **JX: Start Development Server** and **JX: Stop Development Server** from the Command Palette. [Setup](docs/tooling.md#vs-code) |
+| **IntelliJ IDEA** | Install the local plugin ZIP. Use **Tools → Start JX Development Server** and **Stop JX Development Server**, with Stop/Rerun in the Run console. [Setup](docs/tooling.md#intellij-idea) |
+
+Open a `.jx` file in a trusted project to select its nearest Maven module.
+The editor finds the ancestor Maven Wrapper, saves files before starting, and
+avoids duplicate development processes. Development arguments and the Java
+executable are configurable.
+
+Verified editor targets are **VS Code 1.138.0** on macOS ARM64 and unified
+**IntelliJ IDEA 2026.1.3** (`IU-261.25134.95`). The
+[tooling guide](docs/tooling.md) describes installation, tested features, and
+compatibility boundaries. Editor packages and framework artifacts currently use
+local versions; Maven Central, npm, and editor marketplaces have no JX release yet.
+
+## Architecture and scope
+
+`.jx` → generated Java → `javac` → TeaVM → React + React DOM
+
+JX lowers markup into ordinary Java and retains source mappings. TeaVM compiles
+browser-compatible bytecode to JavaScript. The typed bridge connects Java
+components, props, events, and hooks to React, which owns component invocation,
+reconciliation, lifecycle, and scheduling.
+
+Use `useState` or `useReducer` for component state, context for shared
+dependencies, and the optional Elm Model–View–Update layer for application
+workflows. Pure updates produce immutable models and commands; commands execute
+outside rendering, while subscriptions have managed lifetimes. React observes
+the store's committed snapshots.
+
+The core has no Spring or persistence dependency. Separate modules provide the
+React bridge, browser HTTP, routing, and Elm state. The baseline is Java 25,
+TeaVM 0.16.0, and React/React DOM 19.3.1.
+
+Current boundaries are explicit:
+
+- Browser Java follows the [supported runtime profile](docs/runtime.md);
+  JVM threading, blocking I/O, reflection, and server libraries are outside it.
+- React interop works through typed bindings. Individual component libraries
+  need bindings and tests; portals, Suspense, SSR, hydration, and other advanced
+  features remain tracked work.
+- Source-mapped compiler diagnostics are implemented. Full Java expression
+  completion, refactoring, and end-to-end `.jx` browser debugging remain work
+  in progress.
+
+See the [compatibility and implementation status](docs/status.md) before choosing
+features for an application.
+
+## Documentation
+
+| Guide | Covers |
+| --- | --- |
+| [Language](docs/language.md) | Components, props, markup, expressions, and diagnostics |
+| [Maven](docs/maven.md) | Build configuration, generated files, and hot updates |
+| [Runtime](docs/runtime.md) | Hooks, Elm state, React interop, and state migration |
+| [Browser services](docs/browser.md) | Typed JSON HTTP, cancellation, routing, and history |
+| [Editor tooling](docs/tooling.md) | VSIX/ZIP packaging, installation, and verification |
+| [Language server](docs/language-server.md) | Analysis, project discovery, and editor feature limits |
+| [Implementation status](docs/status.md) | Delivered capabilities, evidence, and next work |
+| [Architecture](docs/decisions/0001-java-framework-baseline.md) | Accepted design and module boundaries |
+| [Project specification](docs/JX_Astra_Max_Prompt_v2.txt) | Complete intended scope and acceptance criteria |
+
+## Contributing
+
+Start with [AGENTS.md](AGENTS.md) for repository conventions and
+[implementation status](docs/status.md) for open work. Keep public contracts
+typed, include a compiling consumer example for new capabilities, and add checks
+that exercise observable behavior.
+
+The Maven build runs compiler, plugin, language-server, model, and backend tests.
+After building, run the browser suites relevant to your change:
 
 ```sh
-java tools/CheckAgentSetup.java
 npm run build:proof
 npm run test:proof
 npm run build:runtime
@@ -59,82 +261,15 @@ npm run test:todo
 npm run test:hot
 ```
 
-Maven runs compiler, plugin, language-server, Elm-model, and backend tests. Browser
-tests exercise actual React semantics, offline interaction, both interoperability
-directions, HTTP cancellation, history, and the todo application. The initial
-handwritten Java proof remains under `proof/react-bridge` as a small diagnostic
-fixture; `node proof/react-bridge/serve.js` serves it on port 4173.
+These checks cover real React behavior, offline interaction, interoperability,
+HTTP and routing, the complete examples, and actual Maven-driven hot updates.
+Editor verification has separate commands in the [tooling guide](docs/tooling.md).
 
-- [Language and source mappings](docs/language.md)
-- [Maven builds and development workflow](docs/maven.md)
-- [Runtime, hooks, Elm, and React compatibility](docs/runtime.md)
-- [Browser services and routing](docs/browser.md)
-- [Language-server behavior and limits](docs/language-server.md)
-- [VS Code and IntelliJ packages, installation, and verification](docs/tooling.md)
-- [Implementation status and follow-up work](docs/status.md)
-
-Application behavior lives in Java and `.jx`. JavaScript/TypeScript files are
-framework adapters, editor implementation, and explicit browser/interop fixtures.
-Artifacts use local snapshot versions; none is published to Maven Central, npm,
-or editor marketplaces.
-
-## Repository policy and portable skills
-
-[AGENTS.md](AGENTS.md) contains JX-specific decisions. The twelve skills in
-[.agents/skills](.agents/skills) are reusable across Java, Kotlin, Rust, Spring Boot,
-and React projects; none has a project-name prefix.
-
-| Category | Skills |
-| --- | --- |
-| Languages/frameworks | java, kotlin, rust, spring-boot, react |
-| Design | architecture, api-design, components |
-| Delivery and quality | testing, security, build-engineering, code-review |
-
-Each skill follows the consuming repository's versions, build tools, architecture,
-language restrictions, and operational permissions. Its presence does not change
-that repository's stack. JX remains Java-only for application authoring.
-
-- Codex: root guide plus canonical skills; `.codex/skills` is a compatibility link.
-- Claude Code: [CLAUDE.md](CLAUDE.md) imports the root guide; `.claude/skills` links
-  to the same pack.
-- Cursor: [the JX rule](.cursor/rules/jx.mdc) points to the root guide;
-  `.cursor/skills` links to the same pack.
-
-Skill discovery differs between clients. The guide also links each SKILL.md for
-direct reading. No global agent settings or permission bypasses are installed.
-
-Example tasks: “Use `$java` and `$testing` to fix this state transition,” “Use
-`$spring-boot` to add an optional integration,” or “Use `$code-review` to assess
-this API change.”
-
-## Reuse in another project
-
-Copy the canonical `.agents/skills/` tree into the destination, preserving each
-skill's references and sibling links. Inspect an existing pack before merging;
-do not overwrite its custom skills blindly. Keep one canonical copy and recreate
-relative compatibility links only for the clients the project uses.
-
-Add task routing to that project's own AGENTS.md. Keep its JDK/compiler targets,
-build commands, language policy, frozen paths, deployment rules, and product design
-there. Do not copy JX's guide as a universal policy. The skills do not reference
-this checkout or require the sibling source repositories.
-
-## Validate
-
-From the repository root with the Java 25 baseline installed:
-
-```sh
-java tools/CheckAgentSetup.java
-```
-
-This dependency-free checker validates skill metadata, routing, internal file
-links, and compatibility links. It checks instruction-pack structure, not framework
-correctness, architecture compliance, or application tests.
-
-The [source audit](docs/agent-sources.md) records what was found in Tetra, Stack Sensei,
-TurboJ, Medusa, and Gandalf and how their rules were adapted.
+The [contributor tooling guide](docs/contributor-tooling.md) explains the portable
+skill pack, Codex/Claude Code/Cursor integration, reuse in other projects, and
+validation of repository instructions.
 
 ## License
 
-JX is available under the [MIT License](LICENSE). Third-party dependencies and
-the Maven Wrapper retain their respective licenses.
+[MIT](LICENSE). Third-party dependencies and the Maven Wrapper retain their
+respective licenses.
