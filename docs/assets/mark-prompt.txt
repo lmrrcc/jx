@@ -1,0 +1,6 @@
+Use case: logo-brand.
+Asset type: project icon for the centered hero of the open-source JX GitHub README. This is a compact identity mark, NOT a social media banner.
+Create a refined, minimal, perfectly legible uppercase "JX" monogram in a square image, using the existing JX Todo visual identity.
+Square composition, 1024 x 1024 pixels. One flat warm ivory (#f5f4ef) tile with softly rounded corners and an extremely fine sage (#d9dfd5) border, centered with transparent space outside the tile. Tile fills about 85 percent of the image. No drop shadow.
+Place ONLY the two uppercase letters "JX" at the center of the tile, optically aligned and very large, filling about 70 percent of the tile width. The "J" is deep forest green #24352d and the "X" is terracotta #bd713d. Refined bold Georgia-like serif letterforms, precise crisp flat shapes, balanced spacing with the letters close but not overlapping. Preserve a clear capital J with a graceful lower hook and a clear capital X. No additional symbols or text.
+The result must look like a finished timeless developer-library identity mark: calm, editorial, warm, intentional, clean at 144px display size. No code sample, tagline, URL, browser frame, mascot, gradients, texture, highlights, 3D, bevel, photographic lighting or mockup. Actual transparent background outside the ivory tile.

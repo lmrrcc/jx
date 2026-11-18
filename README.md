@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/jx-banner.png" width="1120" alt="JX — Java eXtended UI: React apps, written in Java. A Java Counter.jx component and its browser button, presented in ivory, forest green, and terracotta.">
+  <img src="docs/assets/jx-mark.png" width="160" height="160" alt="JX project mark: forest-green J and terracotta X on an ivory tile.">
 </p>
 
 <h1 align="center">JX — Java eXtended UI</h1>
@@ -38,6 +38,7 @@ A `.jx` file is a Java compilation unit with markup expressions.
 ```java
 package jx.example.counter;
 
+import jx.EventHandler;
 import jx.Hooks;
 import jx.JxComponent;
 import jx.State;
@@ -51,10 +52,14 @@ public final class Counter {
         State<Integer> count = Hooks.useState(props.initial());
 
         return (
-            <button onClick={event -> count.update(value -> value + 1)}>
+            <button onClick={increment(count)}>
                 {props.label()}: {count.value()}
             </button>
         );
+    }
+
+    private static EventHandler increment(State<Integer> count) {
+        return event -> count.update(value -> value + 1);
     }
 }
 ```
@@ -83,6 +88,10 @@ public final class App {
 Each mounted counter owns its state. `count.value()` is the current render's
 snapshot; `count.update(...)` queues a functional update. React invokes the
 components and schedules their renders.
+
+`increment(count)` creates the event handler during rendering; the returned
+handler increments the counter only when clicked. The helper captures that
+component instance's `State`, so the two counters stay independent.
 
 The [runnable counter](examples/counter-app) also demonstrates queued updates,
 parent rerenders, and remounting. Read the [language guide](docs/language.md) for
