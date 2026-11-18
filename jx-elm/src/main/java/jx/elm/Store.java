@@ -1,6 +1,7 @@
 package jx.elm;
 
 import jx.ExternalStore;
+import jx.StateTransfer;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,7 +15,7 @@ import java.util.Set;
  * Snapshots retain identity until a different model is committed. Effects run after commit/notification,
  * never inside update. A failure is propagated and stops active work. No exactly-once I/O guarantee.
  * stop preserves the model; restarting reinterprets init commands and current subscriptions. */
-public final class Store<S, M> implements ExternalStore<S>, AutoCloseable {
+public final class Store<S, M> implements ExternalStore<S>, StateTransfer<S>, AutoCloseable {
     private final Program<S, M> program;
     private final List<Command<M>> initialCommands;
     private final int limit;
@@ -26,6 +27,8 @@ public final class Store<S, M> implements ExternalStore<S>, AutoCloseable {
     private boolean active;
     private boolean draining;
     private boolean closed;
+    private boolean started;
+    private boolean restored;
 
     public Store(Program<S, M> program) { this(program, 1024); }
     public Store(Program<S, M> program, int capacity) {
@@ -40,8 +43,9 @@ public final class Store<S, M> implements ExternalStore<S>, AutoCloseable {
         if (closed) throw new IllegalStateException("Store is closed");
         if (active) return;
         active = true;
+        started = true;
         draining = true;
-        try { reconcile(); execute(initialCommands); }
+        try { reconcile(); if (!restored) execute(initialCommands); }
         catch (RuntimeException | Error failure) { stop(); throw failure; }
         finally { draining = false; }
         drain();
@@ -56,6 +60,14 @@ public final class Store<S, M> implements ExternalStore<S>, AutoCloseable {
     }
     @Override public void close() { stop(); listeners.clear(); closed = true; }
     @Override public S snapshot() { return model; }
+    /** Restore a validated, immutable hot checkpoint before first activation. Initial commands are
+     * suppressed after restoration, including Strict Mode restarts; current subscriptions still start.
+     * The codec must normalize transient states whose pending work cannot be resumed. */
+    @Override public void restore(S snapshot) {
+        if (started || closed) throw new IllegalStateException("Restore requires a fresh inactive store");
+        model = Objects.requireNonNull(snapshot);
+        restored = true;
+    }
     @Override public Runnable subscribe(Runnable listener) {
         if (closed) throw new IllegalStateException("Store is closed");
         Objects.requireNonNull(listener);

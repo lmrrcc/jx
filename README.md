@@ -33,14 +33,16 @@ an Elm store, cancellable HTTP, loading/error states, and a Spring Boot API. H2
 persists tasks under `.local/`; Flyway owns schema changes. This is a single-workspace
 demo bound to loopback, without accounts or multi-user authorization.
 
-For the small counter and its rebuild/reload workflow:
+For the small counter and its state-preserving development workflow:
 
 ```sh
 ./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -f examples/counter-app/pom.xml dev.jx:jx-maven-plugin:0.1.0-SNAPSHOT:dev -Djx.port=4180
 ```
 
 Open http://127.0.0.1:4180. Saving Java, `.jx`, or web assets rebuilds the application;
-successful builds reload the page. This resets state.
+successful builds preserve compatible component state while applying the new code.
+Scalar hooks are automatic; complex Java models use typed codecs. Effects restart,
+and incompatible hook changes reset affected state. See [development details](docs/maven.md).
 
 ## Verification and tooling
 
@@ -54,6 +56,7 @@ npm run build:runtime
 npm run test:runtime
 npm run test:counter
 npm run test:todo
+npm run test:hot
 ```
 
 Maven runs compiler, plugin, language-server, Elm-model, and backend tests. Browser

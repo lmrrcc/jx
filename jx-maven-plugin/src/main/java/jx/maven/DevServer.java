@@ -8,57 +8,83 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
-/** Loopback development asset server. Never part of a production application's dependencies. */
+/** Loopback development server. Publishes complete successful builds atomically. */
 final class DevServer implements AutoCloseable {
     record Status(long version, String state) {}
+    private record Assets(Map<String, byte[]> files, Set<String> forbidden) {}
     private static final long MAX_ASSET_BYTES = 32L * 1024 * 1024;
-    private static final String RELOAD_SCRIPT = """
-            <script>
-            (() => {
-              let version;
-              async function check() {
-                try {
-                  const response = await fetch('/__jx_dev/version', {cache: 'no-store'});
-                  const next = await response.json();
-                  if (version === undefined) version = next.version;
-                  if (next.state === 'ready' && next.version !== version) { location.reload(); return; }
-                  let notice = document.getElementById('__jx_dev_notice');
-                  if (next.state === 'failed') {
-                    if (!notice) { notice = document.createElement('div'); notice.id = '__jx_dev_notice';
-                      notice.setAttribute('role', 'alert');
-                      notice.style.cssText = 'position:fixed;inset:0 0 auto;background:#8b1020;color:white;padding:12px;z-index:2147483647;font:16px sans-serif';
-                      document.body.appendChild(notice); }
-                    notice.textContent = 'JX build failed. See original-source diagnostics in the Maven terminal.';
-                  } else if (notice) notice.remove();
-                } catch (_) {}
-                setTimeout(check, 500);
-              }
-              check();
-            })();
-            </script>
-            """;
+    private final String session = UUID.randomUUID().toString();
     private final HttpServer server;
     private final ExecutorService executor = Executors.newFixedThreadPool(4);
     private final Path assets;
+    private final AtomicReference<Assets> published = new AtomicReference<>(new Assets(Map.of(), Set.of()));
     private final AtomicReference<Status> status;
+    private final String client;
+    private final DevelopmentProxy proxy;
+
     DevServer(Path assets, int port, AtomicReference<Status> status) throws IOException {
+        this(assets, port, status, null);
+    }
+    DevServer(Path assets, int port, AtomicReference<Status> status, String apiOrigin) throws IOException {
         this.assets = assets.toAbsolutePath().normalize(); this.status = status;
-        this.server = HttpServer.create(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port), 32);
+        try (var input = DevServer.class.getResourceAsStream("/jx-dev-client.js")) {
+            if (input == null) throw new IOException("Missing JX development client");
+            client = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        if (status.get().state().equals("ready")) publish();
+        proxy = apiOrigin == null || apiOrigin.isBlank() ? null : new DevelopmentProxy(apiOrigin);
+        try { this.server = HttpServer.create(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port), 32); }
+        catch (IOException | RuntimeException failure) { if (proxy != null) proxy.close(); executor.shutdownNow(); throw failure; }
         server.setExecutor(executor);
         server.createContext("/", this::handle);
         server.start();
     }
     int port() { return server.getAddress().getPort(); }
+
+    /** No partial build output is visible; failed publication leaves the previous generation running. */
+    void publish() throws IOException {
+        Map<String, byte[]> next = new HashMap<>();
+        Set<String> forbidden = new java.util.HashSet<>();
+        Path realRoot = assets.toRealPath();
+        try (var paths = Files.walk(assets)) {
+            var files = paths.filter(Files::isRegularFile).limit(10_001).toList();
+            if (files.size() > 10_000) throw new IOException("Development assets exceed 10,000 files");
+            long total = 0;
+            for (Path file : files) {
+                String name = "/" + assets.relativize(file).toString().replace('\\', '/');
+                if (!file.toRealPath().startsWith(realRoot)) { forbidden.add(name); continue; }
+                long size = Files.size(file);
+                total += size;
+                if (size > MAX_ASSET_BYTES || total > 128L * 1024 * 1024)
+                    throw new IOException("Development assets exceed 32 MiB per file or 128 MiB total: " + name);
+                next.put(name, Files.readAllBytes(file));
+            }
+        }
+        if (!next.containsKey("/index.html")) throw new IOException("Development build did not produce index.html");
+        published.set(new Assets(Map.copyOf(next), Set.copyOf(forbidden)));
+    }
+
+    private String statusJson() {
+        Status current = status.get();
+        return "{\"version\":" + current.version() + ",\"state\":\"" + current.state() + "\",\"session\":\"" + session + "\"}";
+    }
     private void handle(HttpExchange exchange) throws IOException {
         try (exchange) {
             String host = exchange.getRequestHeaders().getFirst("Host");
             if (!("127.0.0.1:" + port()).equals(host) && !("localhost:" + port()).equals(host)) {
                 respond(exchange, 403, "text/plain", "Unexpected development host".getBytes(StandardCharsets.UTF_8)); return;
+            }
+            if (proxy != null && exchange.getRequestURI().getPath().startsWith("/api/")) {
+                proxy.handle(exchange, port()); return;
             }
             if (!exchange.getRequestMethod().equals("GET") && !exchange.getRequestMethod().equals("HEAD")) {
                 exchange.getResponseHeaders().set("Allow", "GET, HEAD");
@@ -66,38 +92,45 @@ final class DevServer implements AutoCloseable {
             }
             String requested = exchange.getRequestURI().getPath();
             if (requested.equals("/__jx_dev/version")) {
-                Status current = status.get();
-                respond(exchange, 200, "application/json", ("{\"version\":" + current.version() + ",\"state\":\"" + current.state() + "\"}").getBytes(StandardCharsets.UTF_8));
-                return;
+                respond(exchange, 200, "application/json", statusJson().getBytes(StandardCharsets.UTF_8)); return;
+            }
+            if (requested.equals("/__jx_dev/client.js")) {
+                respond(exchange, 200, "text/javascript", client.replace("__JX_INITIAL_STATUS__", statusJson()).getBytes(StandardCharsets.UTF_8)); return;
             }
             Path file;
             try { file = assets.resolve(requested.substring(1)).normalize(); }
             catch (RuntimeException ex) { respond(exchange, 400, "text/plain", new byte[0]); return; }
             if (!file.startsWith(assets)) { respond(exchange, 403, "text/plain", new byte[0]); return; }
-            if (requested.endsWith("/")) file = file.resolve("index.html");
-            if (!Files.isRegularFile(file) && !file.getFileName().toString().contains(".")) file = assets.resolve("index.html");
-            if (!Files.isRegularFile(file)) {
-                respond(exchange, status.get().state().equals("ready") ? 404 : 503, "text/html", ("<!doctype html><title>JX development build</title><p>Asset unavailable. See Maven diagnostics.</p>" + reloadScript()).getBytes(StandardCharsets.UTF_8));
+            Assets current = published.get();
+            String name = "/" + assets.relativize(file).toString().replace('\\', '/');
+            if (current.forbidden().contains(name)) { respond(exchange, 403, "text/plain", new byte[0]); return; }
+            if (requested.endsWith("/")) name = name.endsWith("/") ? name + "index.html" : name + "/index.html";
+            if (!current.files().containsKey(name) && !file.getFileName().toString().contains(".")) name = "/index.html";
+            byte[] bytes = current.files().get(name);
+            if (bytes == null) {
+                respond(exchange, current.files().isEmpty() ? 503 : 404, "text/html",
+                        ("<!doctype html><head>" + script() + "<title>JX development build</title></head><body data-jx-waiting><p>Waiting for a successful JX build. See Maven diagnostics.</p></body>").getBytes(StandardCharsets.UTF_8));
                 return;
             }
-            if (!file.toRealPath().startsWith(assets.toRealPath())) { respond(exchange, 403, "text/plain", new byte[0]); return; }
-            if (Files.size(file) > MAX_ASSET_BYTES) { respond(exchange, 413, "text/plain", new byte[0]); return; }
-            String type = contentType(file);
-            byte[] bytes = Files.readAllBytes(file);
+            String type = contentType(name);
             if (type.equals("text/html")) {
                 String html = new String(bytes, StandardCharsets.UTF_8);
-                int body = html.toLowerCase(Locale.ROOT).lastIndexOf("</body>");
-                html = body < 0 ? html + reloadScript() : html.substring(0, body) + reloadScript() + html.substring(body);
+                int head = html.toLowerCase(Locale.ROOT).indexOf("<head>");
+                int offset = head < 0 ? 0 : head + "<head>".length();
+                html = html.substring(0, offset) + script() + html.substring(offset);
                 bytes = html.getBytes(StandardCharsets.UTF_8);
             }
             respond(exchange, 200, type, bytes);
         } catch (IOException ex) {
-            // A disconnected browser owns its failed exchange; the watcher and other clients continue.
+            // A disconnected browser owns its failed exchange; other clients and the watcher continue.
         }
     }
-    private String reloadScript() { return RELOAD_SCRIPT.replace("let version;", "let version = " + status.get().version() + ";"); }
-    private static String contentType(Path file) {
-        String name = file.getFileName().toString().toLowerCase(Locale.ROOT);
+    private String script() {
+        return "<script src=\"/__jx_dev/client.js\"></script>"
+                + (published.get().files().containsKey("/jx-vendor.js") ? "<script src=\"/jx-vendor.js\"></script>" : "");
+    }
+    private static String contentType(String file) {
+        String name = file.toLowerCase(Locale.ROOT);
         if (name.endsWith(".html")) return "text/html";
         if (name.endsWith(".js") || name.endsWith(".mjs")) return "text/javascript";
         if (name.endsWith(".css")) return "text/css";
@@ -121,5 +154,5 @@ final class DevServer implements AutoCloseable {
             exchange.getResponseBody().write(body);
         }
     }
-    @Override public void close() { server.stop(0); executor.shutdownNow(); }
+    @Override public void close() { server.stop(0); executor.shutdownNow(); if (proxy != null) proxy.close(); }
 }

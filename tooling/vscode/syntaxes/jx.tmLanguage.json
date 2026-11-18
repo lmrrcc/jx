@@ -2,19 +2,255 @@
   "name": "JX",
   "scopeName": "source.jx",
   "patterns": [
-    { "include": "#tag" },
-    { "include": "source.java" }
+    {
+      "include": "#expressionMarkup"
+    },
+    {
+      "include": "source.java"
+    }
   ],
-  "repository": {
-    "tag": {
-      "begin": "(</?)([A-Za-z][A-Za-z0-9_.:-]*)",
-      "beginCaptures": { "1": { "name": "punctuation.definition.tag.begin.jx" }, "2": { "name": "entity.name.tag.jx" } },
-      "end": "(/?>)",
-      "endCaptures": { "1": { "name": "punctuation.definition.tag.end.jx" } },
+  "injections": {
+    "L:source.jx -comment -string": {
       "patterns": [
-        { "begin": "\\{", "end": "\\}", "patterns": [{ "include": "source.java" }] },
-        { "name": "entity.other.attribute-name.jx", "match": "[A-Za-z_][A-Za-z0-9_:-]*(?=\\s*=)" },
-        { "name": "string.quoted.double.jx", "begin": "\"", "end": "\"", "patterns": [{ "name": "constant.character.escape.jx", "match": "\\\\." }] }
+        {
+          "include": "#expressionMarkup"
+        }
+      ]
+    }
+  },
+  "repository": {
+    "expressionMarkup": {
+      "patterns": [
+        {
+          "include": "#expressionFragment"
+        },
+        {
+          "include": "#expressionElement"
+        }
+      ]
+    },
+    "expressionElement": {
+      "name": "meta.element.jx",
+      "contentName": "text.html.jx",
+      "begin": "(?:(?<=\\breturn)|(?<=\\byield)|(?<==)|(?<=\\()|(?<=,)|(?<=:)|(?<=\\?)|(?<=->)|(?<=\\[)|(?<=\\{)|^)\\s*(<)([A-Za-z][A-Za-z0-9_.:-]*)(?=[\\s/>])",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "2": {
+          "name": "entity.name.tag.html"
+        }
+      },
+      "end": "(/>)|(</)(\\2)(\\s*>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.end.html"
+        },
+        "2": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "3": {
+          "name": "entity.name.tag.html"
+        },
+        "4": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#attributes"
+        },
+        {
+          "include": "#children"
+        }
+      ]
+    },
+    "element": {
+      "name": "meta.element.jx",
+      "contentName": "text.html.jx",
+      "begin": "(<)([A-Za-z][A-Za-z0-9_.:-]*)(?=[\\s/>])",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "2": {
+          "name": "entity.name.tag.html"
+        }
+      },
+      "end": "(/>)|(</)(\\2)(\\s*>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.end.html"
+        },
+        "2": {
+          "name": "punctuation.definition.tag.begin.html"
+        },
+        "3": {
+          "name": "entity.name.tag.html"
+        },
+        "4": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#attributes"
+        },
+        {
+          "include": "#children"
+        }
+      ]
+    },
+    "expressionFragment": {
+      "name": "meta.fragment.jx",
+      "contentName": "text.html.jx",
+      "begin": "(?:(?<=\\breturn)|(?<=\\byield)|(?<==)|(?<=\\()|(?<=,)|(?<=:)|(?<=\\?)|(?<=->)|(?<=\\[)|(?<=\\{)|^)\\s*(<>)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.html"
+        }
+      },
+      "end": "(</>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.html"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#children"
+        }
+      ]
+    },
+    "fragment": {
+      "name": "meta.fragment.jx",
+      "contentName": "text.html.jx",
+      "begin": "(<>)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.html"
+        }
+      },
+      "end": "(</>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.html"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#children"
+        }
+      ]
+    },
+    "attributes": {
+      "name": "meta.tag.attributes.jx",
+      "begin": "\\G",
+      "end": "(?=/>)|(>)",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.definition.tag.end.html"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#interpolation"
+        },
+        {
+          "name": "entity.other.attribute-name.html",
+          "match": "[A-Za-z_][A-Za-z0-9_:-]*"
+        },
+        {
+          "name": "punctuation.separator.key-value.html",
+          "match": "="
+        },
+        {
+          "name": "string.quoted.double.html",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "include": "#entity"
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.html",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "include": "#entity"
+            }
+          ]
+        }
+      ]
+    },
+    "children": {
+      "patterns": [
+        {
+          "include": "#fragment"
+        },
+        {
+          "include": "#element"
+        },
+        {
+          "include": "#interpolation"
+        },
+        {
+          "include": "#entity"
+        },
+        {
+          "name": "text.html.jx",
+          "match": "[^<{&]+"
+        }
+      ]
+    },
+    "entity": {
+      "name": "constant.character.entity.html",
+      "match": "&(?:[A-Za-z][A-Za-z0-9]*|#[0-9]+|#[xX][0-9A-Fa-f]+);"
+    },
+    "interpolation": {
+      "name": "meta.embedded.expression.java",
+      "contentName": "source.java",
+      "begin": "(\\{)",
+      "beginCaptures": {
+        "1": {
+          "name": "punctuation.section.embedded.begin.jx"
+        }
+      },
+      "end": "(\\})",
+      "endCaptures": {
+        "1": {
+          "name": "punctuation.section.embedded.end.jx"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#expressionMarkup"
+        },
+        {
+          "include": "#javaBraces"
+        },
+        {
+          "include": "source.java"
+        }
+      ]
+    },
+    "javaBraces": {
+      "name": "meta.block.java",
+      "begin": "\\{",
+      "end": "\\}",
+      "patterns": [
+        {
+          "include": "#expressionMarkup"
+        },
+        {
+          "include": "#javaBraces"
+        },
+        {
+          "include": "source.java"
+        }
       ]
     }
   }

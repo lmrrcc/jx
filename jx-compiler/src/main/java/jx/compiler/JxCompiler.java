@@ -66,7 +66,10 @@ public final class JxCompiler {
             generated.add(source);
             HookRules.check(source, diagnostics);
         }
-        return new Compilation(generated, components, diagnostics);
+        Map<String, String> signatures = HookSignatures.compute(generated, components);
+        List<GeneratedSource> finalSources = models.stream()
+                .map(model -> new Lowerer(model, components, new ArrayList<>(), signatures).lower()).toList();
+        return new Compilation(finalSources, components, diagnostics);
     }
 
     /**

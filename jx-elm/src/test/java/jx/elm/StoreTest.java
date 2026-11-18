@@ -111,4 +111,24 @@ class StoreTest {
             assertEquals(1, notifications.get());
         }
     }
+    @Test void restoredStoreRecreatesSubscriptionsWithoutReplayingInitialCommands() {
+        AtomicInteger commands = new AtomicInteger();
+        AtomicInteger subscriptions = new AtomicInteger();
+        AtomicInteger stops = new AtomicInteger();
+        var program = new TestProgram() {
+            @Override public Transition<Model, Integer> init() { return new Transition<>(new Model(0), List.of(new Command<>("load", reply -> { commands.incrementAndGet(); return Cancellation.NONE; }))); }
+            @Override public Transition<Model, Integer> update(Model model, Integer message) { return Transition.stay(new Model(message)); }
+            @Override public List<Subscription<Integer>> subscriptions(Model model) { return List.of(new Subscription<>("current:" + model.value(), reply -> { subscriptions.incrementAndGet(); return stops::incrementAndGet; })); }
+        };
+        try (var store = new Store<>(program)) {
+            store.restore(new Model(42));
+            store.start(); store.stop(); store.start();
+            assertEquals(42, store.snapshot().value());
+            assertEquals(0, commands.get());
+            assertEquals(2, subscriptions.get());
+            assertEquals(1, stops.get());
+            assertThrows(IllegalStateException.class, () -> store.restore(new Model(0)));
+        }
+        assertEquals(2, stops.get());
+    }
 }

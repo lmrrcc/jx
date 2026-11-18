@@ -31,7 +31,7 @@ consumer configuration. It explicitly binds these plugin goals:
 | generate-test | generate-test-sources | Compile src/test/jx using production component metadata |
 | check-test | process-test-sources | Validate production/test Java with test classpath |
 | browser | prepare-package | Bundle TeaVM's ES module and copy web assets |
-| dev | Explicit command only | Rebuild, serve loopback assets, and reload the browser |
+| dev | Explicit command only | Rebuild, serve loopback assets, and preserve compatible browser state |
 
 A minimal plugin execution configuration is:
 
@@ -71,6 +71,7 @@ Application behavior requires no authored JavaScript.
 | HTML/CSS/static assets | src/main/web |
 | Bundled application and copied assets | target/site |
 | Framework bootstrap, bundler metadata | target/jx/browser |
+| Development assets and metadata | target/jx/dev-site and target/jx/dev-browser |
 
 Declared Java packages determine generated output paths. Each invocation reads and
 reanalyzes the complete source batch, so component signature edits are propagated.
@@ -98,7 +99,8 @@ This is deterministic regeneration with selective writes, not a complete depende
 incremental compiler. Use a normal Maven `clean package` after changing Java build
 options, processors, module structure, or external generators if stale output
 from those tools is possible. TeaVM and esbuild rebuild through their configured
-lifecycle on each package. No state-preserving hot reload is claimed.
+lifecycle on each package. The development client migrates compatible committed
+state into the new Java generation; see [the runtime contract](runtime.md).
 
 The compiler/plugin regression tests run real javac compilation and exercise
 repeated builds, source edits, nested-class removal, rename/deletion, malformed
@@ -117,17 +119,37 @@ After the local artifact install and npm setup:
 
 Open http://127.0.0.1:4173. The goal performs an initial package build and watches
 `src`, `browser`, `public`, and `pom.xml` in the selected module.
-Saving Java, JX, or assets triggers a debounced rebuild. Successful builds reload
-the page, resetting browser state. Failed builds print the original-source
-diagnostics and display an error notice over the last successful page. Fixing and
-saving retries automatically. Ctrl+C stops the server and its active Maven child.
+Saving Java, JX, or assets triggers a debounced rebuild. Successful builds replace
+the Java application while retaining compatible counters, controlled inputs, and
+explicitly coded application models. The browser document and URL remain in
+place; CSS, focus, text selection, and scroll update with the application. Effects
+clean up and restart. Failed builds print original-source diagnostics and leave
+the last successful application interactive. Fixing and saving retries
+automatically. Ctrl+C stops the server and its active Maven child.
+
+Scalar hook values are automatic. Records, collections, and Elm stores need a
+typed `StateCodec`; the Todo application demonstrates this. Changed hook structure,
+codec schema, or unsupported external custom hooks reset affected state with a
+development notice. Uncontrolled DOM state and arbitrary service objects are not
+checkpointed. This is state migration across rebuilt Java bundles, with deliberate
+effect remounting; see [the decision](decisions/0003-state-preserving-development.md).
+
+Development builds share a single React vendor bundle and use removable scripts
+for new Java generations. Restart development and reload the page after changing
+React or other vendor dependencies, or changing the HTML document shell (including
+adding/removing stylesheet links). Existing stylesheets refresh on every update.
+Production `package` emits the normal bundle without the client or development
+bootstrap. Development writes `target/jx/dev-site`, leaving packaged `target/site`
+assets intact for a separately running backend. Do not serve development output
+as a production artifact.
 
 Useful properties:
 
 | Property | Default / behavior |
 | --- | --- |
 | jx.port | 4173; loopback binding only |
-| jx.browserDirectory | target/site |
+| jx.apiOrigin | Optional loopback HTTP backend, e.g. http://127.0.0.1:8181; forwards /api/ only |
+| jx.browserDirectory | target/jx/dev-site for dev; target/site for package |
 | jx.buildGoal | package; verify is also accepted |
 | jx.buildTimeoutSeconds | 180, allowed range 10–1800 |
 | jx.mavenExecutable | Find Maven Wrapper in project or ancestor |
@@ -142,7 +164,29 @@ configuration. Watch inputs are bounded to 10,000 files, 32 MiB per file, and
 128 MiB total. Builds have a timeout and terminate owned child processes on
 shutdown. The HTTP server serves only the selected asset directory, validates its
 loopback Host header, rejects path traversal/symlink escapes, and uses no-store
-responses. Its `/__jx_dev/version` endpoint supports reload polling.
+responses. Its `/__jx_dev/version` endpoint supports update polling. Successful
+builds publish a bounded immutable asset snapshot; partially written or failed
+builds cannot replace the served application. The development client is served
+at `/__jx_dev/client.js` and is injected only by this server.
+
+For the Todo application, keep its Spring API running on port 8181 and start the
+frontend separately:
+
+```sh
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository \
+  -f examples/todo-app/pom.xml \
+  dev.jx:jx-maven-plugin:0.1.0-SNAPSHOT:dev \
+  -Djx.port=4180 -Djx.apiOrigin=http://127.0.0.1:8181
+```
+
+Open http://127.0.0.1:4180/todos for hot updates. The development proxy forwards
+only `/api/` to that loopback backend, with bounded bodies and timeouts. It rejects
+cross-origin mutations and does not forward cookies or authorization headers.
+The page served directly by the backend on 8181 is the normal packaged app.
+
+`npm run test:hot` copies the Counter and Todo sources into isolated cache
+directories, edits `.jx` and CSS, and verifies actual Maven-driven state-preserving
+updates in Chrome. It does not edit the examples or use the developer's Todo data.
 
 The dev command rebuilds only the selected Maven project using locally installed
 dependencies. When changing another framework module, rebuild/install that module

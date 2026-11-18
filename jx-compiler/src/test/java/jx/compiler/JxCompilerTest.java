@@ -226,7 +226,7 @@ class JxCompilerTest {
         Map<String, String> signatures = Map.of(
                 "View", "public interface View {}",
                 "JxComponent", "public @interface JxComponent {}",
-                "Component", "public record Component<P>(String name, java.util.function.Function<P,View> render) {}",
+                "Component", "public record Component<P>(String name, String stateSignature, java.util.function.Function<P,View> render) {}",
                 "Views", "public final class Views { public static View element(String tag, Attributes attrs, Object... children) { return null; } public static View fragment(Object... children) { return null; } public static <P> View component(Component<P> type, P props) { return null; } public static <P> View component(Component<P> type, P props, String key) { return null; } }",
                 "Attributes", "public final class Attributes { public static Attributes create() { return new Attributes(); } public Attributes attr(String name, Object value) { return this; } public Attributes on(String name, java.util.function.Consumer<Event> handler) { return this; } }",
                 "Event", "public interface Event { void preventDefault(); }",

@@ -22,7 +22,7 @@ public final class JxParserDefinition implements ParserDefinition {
     }
     @Override public @NotNull IFileElementType getFileNodeType() { return FILE; }
     @Override public @NotNull TokenSet getCommentTokens() { return TokenSet.create(JxLexer.COMMENT); }
-    @Override public @NotNull TokenSet getStringLiteralElements() { return TokenSet.create(JxLexer.STRING); }
+    @Override public @NotNull TokenSet getStringLiteralElements() { return TokenSet.create(JxLexer.STRING, JxLexer.ATTRIBUTE_VALUE); }
     @Override public @NotNull PsiElement createElement(ASTNode node) { return new com.intellij.extapi.psi.ASTWrapperPsiElement(node); }
     @Override public @NotNull PsiFile createFile(@NotNull FileViewProvider provider) {
         return new PsiFileBase(provider, JxLanguage.INSTANCE) { @Override public @NotNull FileType getFileType() { return JxFileType.INSTANCE; } };

@@ -27,3 +27,4 @@ jobs:
       - run: npm run test:runtime
       - run: npm run test:counter
       - run: npm run test:todo
+      - run: npm run test:hot

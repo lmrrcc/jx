@@ -11,6 +11,15 @@ public final class Json {
     final JSObject value;
     Json(JSObject value) { this.value = value; }
     public static Json nil() { return new Json(null); }
+    /** Parse an explicit JSON checkpoint. Invalid JSON fails as a Java IllegalArgumentException;
+     * the eight-million-character bound also applies before allocating the parsed value. */
+    public static Json parse(String text) {
+        Objects.requireNonNull(text);
+        if (text.length() > 8_388_608) throw new IllegalArgumentException("JSON text exceeds limit");
+        JSObject parsed = parseNative(text);
+        if (!parseValid(parsed)) throw new IllegalArgumentException("Invalid JSON text");
+        return new Json(getNative(parsed, "value"));
+    }
     public static Json string(String value) { return new Json(stringNative(Objects.requireNonNull(value))); }
     public static Json number(int value) { return new Json(numberNative(value)); }
     public static Json bool(boolean value) { return new Json(boolNative(value)); }
@@ -62,4 +71,6 @@ public final class Json {
     @JSBody(params = "value", script = "return value.length;") private static native int length(JSObject value);
     @JSBody(params = {"value", "index"}, script = "return value[index];") private static native JSObject item(JSObject value, int index);
     @JSBody(params = "value", script = "return JSON.stringify(value);") private static native String stringify(JSObject value);
+    @JSBody(params = "text", script = "try { return {valid: true, value: JSON.parse(text)}; } catch (error) { return {valid: false}; }") private static native JSObject parseNative(String text);
+    @JSBody(params = "parsed", script = "return parsed.valid;") private static native boolean parseValid(JSObject parsed);
 }

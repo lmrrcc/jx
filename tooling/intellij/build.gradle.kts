@@ -44,4 +44,5 @@ tasks.processResources {
 tasks.test {
     systemProperty("java.awt.headless", "true")
     systemProperty("idea.load.plugins.id", "dev.jx.language")
+    systemProperty("jx.repositoryRoot", layout.projectDirectory.dir("../..").asFile.absolutePath)
 }

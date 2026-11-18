@@ -11,12 +11,12 @@ browser, or editor distribution.
 | --- | --- |
 | Java/browser feasibility | Java 25, TeaVM 0.16.0, actual React/React DOM 19.3.1; real Chrome tests include offline clicks, independent instances, captured snapshots, and cleanup. |
 | `.jx` compiler | Java lexical scanning plus javac component metadata; typed record props, markup lowering, fragments/children/keys, source maps, original-source syntax/type diagnostics, and practical hook-placement checks. |
-| Maven | `generate`, `generate-test`, `check`, `check-test`, `browser`, and `dev`; owned output cleanup, deterministic generation, normal Java compilation, TeaVM, locked npm bundling, and rebuild/reload. |
+| Maven | `generate`, `generate-test`, `check`, `check-test`, `browser`, and `dev`; output ownership, TeaVM and locked bundling, isolated development assets, atomic successful-build publication, state-preserving updates, and optional loopback API proxy. |
 | Runtime | Typed components, events, hooks, context, refs, error boundaries, safe text rendering, and explicitly bound React interoperability in both directions. |
 | Elm | Immutable transitions, pure updates, serialized committed store snapshots, keyed commands/subscriptions, cancellation, stale-response protection, and Strict Mode lifecycle tests. |
 | Browser services | Same-origin asynchronous bounded JSON HTTP, typed outcomes, cancellation/timeouts, history, route parameters, query strings, and back/forward navigation. |
 | Shared LSP | Compiler diagnostics, component/property completion, declared Java type hover, definition navigation, symbols, incomplete markup, UTF-16 positions, cancellation, and version handling. |
-| Editor packages | Local VSIX and IntelliJ ZIP; exact tested distributions, packaging commands, plugin verification, and remaining editor limits are in the [tooling guide](tooling.md). |
+| Editor packages | Local VSIX and IntelliJ ZIP with mixed Java/HTML highlighting and module-aware development start/stop; tested distributions and remaining editor limits are in the [tooling guide](tooling.md). |
 | Complete example | A Java/.jx todo application with controlled forms, keyboard submission/focus, custom hook, context, MVU workflows, async states, routing, filters, and Spring Boot persistence. |
 
 `jx-core` has no Spring, database, or browser implementation dependency.
@@ -32,7 +32,7 @@ The root README gives the combined build and browser commands. Maven includes
 negative compiler fixtures, mapped javac errors, source deletion/rename ownership,
 pure model and Elm lifecycle tests, real LSP JSON-RPC tests, and an actual HTTP/H2
 restart test. Playwright exercises the initial proof, runtime contracts, generated
-counter, and complete todo application in Google Chrome.
+counter, complete todo application, and real Maven-driven `.jx` edits in Google Chrome.
 
 The backend test proves that invalid fields produce a structured 400 response,
 successful updates increment a version, stale updates cannot overwrite them, and
@@ -41,18 +41,23 @@ creation, completion, deletion, direct routed reload, back/forward, controlled
 input, keyboard submission, focus, loading, server failure, and retry.
 
 The npm dependency tree contains one deduplicated React 19.3.1 installation shared
-by React DOM and the Java bridge. Framework JavaScript/TypeScript and explicit
+by React DOM and the Java bridge. Hot development generations reuse one renderer
+vendor bundle, avoiding repeated React root/document listener registration.
+Framework JavaScript/TypeScript and explicit
 interop/browser fixtures are separated from Java/.jx application logic.
 
-On 2026-11-18, the clean fourteen-module Maven reactor and final incremental
-install passed. The final Java test run contained 34 passing tests; the four Chrome
-suites contained 11 passing tests. Packaged VS Code and IntelliJ evidence is
+On 2026-11-18, the fourteen-module Maven reactor install passed after the
+state-preserving development changes. The Java test run contained 49 passing
+tests; all 17 Chrome tests passed. Browser checks include source edits during a build, compile failure and
+recovery, runtime failure and checkpoint recovery, incompatible-hook resets,
+unchanged document identity, stable renderer listeners, and Todo draft/model/focus
+preservation without replayed HTTP. Packaged VS Code and IntelliJ evidence is
 recorded separately in the tooling guide. These counts describe the checked
 revision, rather than replacing the commands and assertions in the repository.
 
 ## Development build measurement
 
-One warm, unchanged-input todo rebuild on macOS ARM64, Apple M5, Corretto
+Before the hot-reload change, one warm, unchanged-input todo rebuild on macOS ARM64, Apple M5, Corretto
 25.0.4.1, with dependencies already cached and other development tools open,
 took 5.16 seconds wall time:
 

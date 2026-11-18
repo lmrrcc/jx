@@ -5,5 +5,8 @@ globalThis.ForeignBadge = function ForeignBadge({ label }) {
   const [count, setCount] = React.useState(0);
   return React.createElement('button', {id: 'foreign', onClick: () => setCount(n => n + 1)}, `${label}: ${count}`);
 };
-main([]);
-createRoot(document.getElementById('export')).render(React.createElement(globalThis.ExportedCounter, {initial: 20}));
+export { main };
+if (!globalThis.__JX_HOT__?.deferMain) {
+  main([]);
+  createRoot(document.getElementById('export')).render(React.createElement(globalThis.ExportedCounter, {initial: 20}));
+}

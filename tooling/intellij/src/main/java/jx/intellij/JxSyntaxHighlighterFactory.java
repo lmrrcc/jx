@@ -19,7 +19,13 @@ public final class JxSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
                 if (type == JxLexer.KEYWORD) return pack(DefaultLanguageHighlighterColors.KEYWORD);
                 if (type == JxLexer.STRING) return pack(DefaultLanguageHighlighterColors.STRING);
                 if (type == JxLexer.COMMENT) return pack(DefaultLanguageHighlighterColors.BLOCK_COMMENT);
-                if (type == JxLexer.TAG) return pack(DefaultLanguageHighlighterColors.CLASS_NAME);
+                if (type == JxLexer.TAG) return pack(DefaultLanguageHighlighterColors.MARKUP_TAG);
+                if (type == JxLexer.ATTRIBUTE) return pack(DefaultLanguageHighlighterColors.MARKUP_ATTRIBUTE);
+                if (type == JxLexer.ATTRIBUTE_VALUE) return pack(DefaultLanguageHighlighterColors.STRING);
+                if (type == JxLexer.MARKUP_DELIMITER) return pack(DefaultLanguageHighlighterColors.MARKUP_TAG);
+                if (type == JxLexer.EXPRESSION_DELIMITER) return pack(DefaultLanguageHighlighterColors.BRACES);
+                if (type == JxLexer.ENTITY) return pack(DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE);
+                if (type == JxLexer.OPERATOR) return pack(DefaultLanguageHighlighterColors.OPERATION_SIGN);
                 if (type == JxLexer.NUMBER) return pack(DefaultLanguageHighlighterColors.NUMBER);
                 return TextAttributesKey.EMPTY_ARRAY;
             }

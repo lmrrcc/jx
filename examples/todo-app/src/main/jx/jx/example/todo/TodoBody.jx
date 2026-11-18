@@ -13,11 +13,13 @@ public final class TodoBody {
         State<String> title = Hooks.useState("");
         State<String> error = Hooks.useState("");
         DomRef input = Hooks.useDomRef();
+        Ref<Integer> previousCreatedCount = Hooks.useRef(createdCount);
         Hooks.useEffect(() -> {
-            if (createdCount > 0) {
+            if (createdCount > previousCreatedCount.current()) {
                 title.set(""); error.set("");
                 if (input.current() != null) input.current().focus();
             }
+            previousCreatedCount.set(createdCount);
             return () -> {};
         }, Dependencies.of(createdCount));
         return new Form(title, error, input);

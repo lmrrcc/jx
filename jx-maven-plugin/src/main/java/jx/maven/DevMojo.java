@@ -19,19 +19,23 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 /**
- * Explicit development command: watch source/assets, run the project's package lifecycle, and reload a loopback page.
- * Requires a Maven wrapper in this project or an ancestor. It never preserves application state across rebuilds.
+ * Watch sources/assets, build the application and publish state-preserving browser updates on loopback.
+ * Requires a Maven wrapper in this project or an ancestor.
  */
 @Mojo(name = "dev", threadSafe = false)
 public final class DevMojo extends AbstractMojo {
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
 
-    @Parameter(defaultValue = "${project.build.directory}/site", property = "jx.browserDirectory", required = true)
+    @Parameter(defaultValue = "${project.build.directory}/jx/dev-site", property = "jx.browserDirectory", required = true)
     private File browserDirectory;
 
     @Parameter(defaultValue = "4173", property = "jx.port")
     private int port;
+
+    /** Optional loopback API backend. Only /api/ requests are forwarded. */
+    @Parameter(property = "jx.apiOrigin")
+    private String apiOrigin;
 
     @Parameter(defaultValue = "package", property = "jx.buildGoal")
     private String buildGoal;
@@ -66,11 +70,11 @@ public final class DevMojo extends AbstractMojo {
             stopProcess();
         }, "jx-dev-shutdown");
         Runtime.getRuntime().addShutdownHook(shutdown);
-        try (DevServer server = new DevServer(browserDirectory.toPath(), port, status)) {
+        try (DevServer server = new DevServer(browserDirectory.toPath(), port, status, apiOrigin)) {
             Path wrapper = mavenExecutable == null ? findWrapper(basedir) : mavenExecutable.toPath().toAbsolutePath();
             getLog().info("JX development server: http://127.0.0.1:" + server.port() + " (Ctrl+C stops the server and build)");
             String observed = fingerprint(watched);
-            build(wrapper, status);
+            build(wrapper, status, server);
             String built = observed;
             long lastChange = System.nanoTime();
             while (!Thread.currentThread().isInterrupted()) {
@@ -79,7 +83,7 @@ public final class DevMojo extends AbstractMojo {
                 if (!current.equals(observed)) { observed = current; lastChange = System.nanoTime(); }
                 if (!observed.equals(built) && System.nanoTime() - lastChange >= 300_000_000L) {
                     built = observed;
-                    build(wrapper, status);
+                    build(wrapper, status, server);
                 }
             }
         } catch (InterruptedException ex) {
@@ -94,7 +98,7 @@ public final class DevMojo extends AbstractMojo {
         }
     }
 
-    private void build(Path wrapper, AtomicReference<DevServer.Status> status) throws IOException, InterruptedException {
+    private void build(Path wrapper, AtomicReference<DevServer.Status> status, DevServer server) throws IOException, InterruptedException {
         status.updateAndGet(previous -> new DevServer.Status(previous.version(), "building"));
         List<String> command = new ArrayList<>();
         boolean windows = System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("win");
@@ -103,6 +107,9 @@ public final class DevMojo extends AbstractMojo {
         command.addAll(List.of("-B", "-ntp", "-f", project.getFile().getAbsolutePath()));
         String repository = System.getProperty("maven.repo.local");
         if (repository != null) command.add("-Dmaven.repo.local=" + Path.of(repository).toAbsolutePath());
+        command.add("-Djx.hotReload=true");
+        command.add("-Djx.browserDirectory=" + browserDirectory.toPath().toAbsolutePath());
+        command.add("-Djx.browserMetadataDirectory=" + Path.of(project.getBuild().getDirectory(), "jx", "dev-browser").toAbsolutePath());
         command.add(buildGoal);
         getLog().info("Building JX browser assets with the project's " + buildGoal + " lifecycle");
         Process process = new ProcessBuilder(command).directory(project.getBasedir()).inheritIO().start();
@@ -111,7 +118,10 @@ public final class DevMojo extends AbstractMojo {
             boolean exited = process.waitFor(buildTimeoutSeconds, TimeUnit.SECONDS);
             if (!exited) { stopProcess(); getLog().error("JX build timed out after " + buildTimeoutSeconds + " seconds"); }
             boolean success = exited && process.exitValue() == 0;
-            status.updateAndGet(previous -> new DevServer.Status(previous.version() + (success ? 1 : 0), success ? "ready" : "failed"));
+            if (success) try { server.publish(); }
+            catch (IOException ex) { success = false; getLog().error("Cannot publish browser assets: " + ex.getMessage()); }
+            DevServer.Status previous = status.get();
+            status.set(new DevServer.Status(previous.version() + (success ? 1 : 0), success ? "ready" : "failed"));
             if (!success) getLog().error("JX build failed; fix the source and save to retry");
         } finally {
             if (process.isAlive()) stopProcess();

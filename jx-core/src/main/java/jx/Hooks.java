@@ -11,8 +11,11 @@ public final class Hooks {
     private static HookRuntime runtime;
     private Hooks() {}
     public static <T> State<T> useState(T initial) { return useStateLazy(() -> initial); }
-    public static <T> State<T> useStateLazy(Supplier<T> initial) { return runtime().state(Objects.requireNonNull(initial)); }
-    public static <S, A> ReducerState<S, A> useReducer(BiFunction<S, A, S> reducer, S initial) { return runtime().reducer(Objects.requireNonNull(reducer), initial); }
+    public static <T> State<T> useState(T initial, StateCodec<T> codec) { return useStateLazy(() -> initial, codec); }
+    public static <T> State<T> useStateLazy(Supplier<T> initial) { return runtime().state(Objects.requireNonNull(initial), null); }
+    public static <T> State<T> useStateLazy(Supplier<T> initial, StateCodec<T> codec) { return runtime().state(Objects.requireNonNull(initial), Objects.requireNonNull(codec)); }
+    public static <S, A> ReducerState<S, A> useReducer(BiFunction<S, A, S> reducer, S initial) { return runtime().reducer(Objects.requireNonNull(reducer), initial, null); }
+    public static <S, A> ReducerState<S, A> useReducer(BiFunction<S, A, S> reducer, S initial, StateCodec<S> codec) { return runtime().reducer(Objects.requireNonNull(reducer), initial, Objects.requireNonNull(codec)); }
     public static void useEffect(Effect effect, Dependencies dependencies) { runtime().effect(Objects.requireNonNull(effect), Objects.requireNonNull(dependencies), false); }
     public static void useLayoutEffect(Effect effect, Dependencies dependencies) { runtime().effect(Objects.requireNonNull(effect), Objects.requireNonNull(dependencies), true); }
     public static <T> Ref<T> useRef(T initial) { return runtime().ref(initial); }

@@ -3,6 +3,7 @@ import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 const assets = new Map([
   ['/', ['tests/runtime-browser/index.html', 'text/html']],
+  ['/hot', ['tests/runtime-browser/hot.html', 'text/html']],
   ['/application.js', ['tests/runtime-browser/target/site/application.js', 'text/javascript']],
   ['/application.js.map', ['tests/runtime-browser/target/site/application.js.map', 'application/json']]
 ]);

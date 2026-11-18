@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class DevelopmentToolsTest {
     @TempDir Path root;
 
-    @Test void servesOnlyLoopbackAssetsWithReloadStatusAndBlocksTraversal() throws Exception {
+    @Test void servesOnlyPublishedLoopbackAssetsWithHotStatusAndBlocksTraversal() throws Exception {
         Path assets = root.resolve("site");
         Files.createDirectories(assets);
         Files.writeString(assets.resolve("index.html"), "<!doctype html><body>Java application</body>");
@@ -29,15 +29,25 @@ class DevelopmentToolsTest {
             var index = get(client, url + "/");
             assertEquals(200, index.statusCode());
             assertTrue(index.body().contains("Java application"));
-            assertTrue(index.body().contains("let version = 1;"));
-            assertTrue(index.body().contains("/__jx_dev/version"));
+            assertTrue(index.body().contains("/__jx_dev/client.js"));
+            var script = get(client, url + "/__jx_dev/client.js");
+            assertTrue(script.body().contains("\"version\":1"));
+            assertTrue(script.body().contains("hot.capture()"));
+            assertFalse(script.body().contains("location.reload()"));
             assertEquals("no-store", index.headers().firstValue("Cache-Control").orElseThrow());
             assertEquals(200, get(client, url + "/todos/42").statusCode());
             assertEquals(403, get(client, url + "/%2e%2e/private.txt").statusCode());
             assertEquals(403, get(client, url + "/escape.txt").statusCode());
             assertEquals(404, get(client, url + "/missing.js").statusCode());
             status.set(new DevServer.Status(2, "failed"));
-            assertEquals("{\"version\":2,\"state\":\"failed\"}", get(client, url + "/__jx_dev/version").body());
+            assertTrue(get(client, url + "/__jx_dev/version").body().startsWith("{\"version\":2,\"state\":\"failed\",\"session\":\""));
+            Files.writeString(assets.resolve("index.html"), "<body>Partial build</body>");
+            assertTrue(get(client, url + "/").body().contains("Java application"));
+            server.publish();
+            assertTrue(get(client, url + "/").body().contains("Partial build"));
+            Files.delete(assets.resolve("index.html"));
+            assertThrows(java.io.IOException.class, server::publish);
+            assertTrue(get(client, url + "/").body().contains("Partial build"));
         }
     }
 
@@ -75,5 +85,25 @@ class DevelopmentToolsTest {
     private static HttpResponse<String> get(HttpClient client, String url) throws Exception {
         return client.send(HttpRequest.newBuilder(URI.create(url)).timeout(java.time.Duration.ofSeconds(5)).build(),
                 HttpResponse.BodyHandlers.ofString());
+    }
+
+    @Test void generatedVendorOwnershipPreventsCollisionsAndCleansProductionOutput() throws Exception {
+        Path input = root.resolve("vendor-build"), output = root.resolve("site"), manifest = root.resolve("metadata/vendor-assets.txt");
+        Files.createDirectories(input); Files.createDirectories(output);
+        Files.writeString(input.resolve("jx-vendor.js"), "shared renderer");
+        Files.writeString(input.resolve("jx-vendor.js.map"), "{}");
+        Files.writeString(output.resolve("jx-vendor.js"), "user file");
+        assertThrows(java.io.IOException.class, () -> BrowserMojo.publishVendor(input, output, manifest));
+        assertEquals("user file", Files.readString(output.resolve("jx-vendor.js")));
+        Files.delete(output.resolve("jx-vendor.js"));
+        BrowserMojo.publishVendor(input, output, manifest);
+        assertEquals("shared renderer", Files.readString(output.resolve("jx-vendor.js")));
+        BrowserMojo.removeVendor(output, manifest);
+        assertFalse(Files.exists(output.resolve("jx-vendor.js")));
+        assertFalse(Files.exists(output.resolve("jx-vendor.js.map")));
+        assertFalse(Files.exists(manifest));
+        Path web = root.resolve("web"); Files.createDirectories(web);
+        Files.writeString(web.resolve("jx-vendor.js"), "reserved source");
+        assertThrows(java.io.IOException.class, () -> BrowserMojo.copyAssets(web, output, root.resolve("metadata/assets.txt")));
     }
 }

@@ -54,33 +54,40 @@ public final class React {
     private static <P> Root mount(String elementId, Component<P> component, P props, boolean strict) {
         Hooks.installRuntime(ReactHooks.INSTANCE);
         JSObject root = createRoot(Objects.requireNonNull(elementId));
-        JSObject child = component(new View.ComponentView<>(component, props, null));
+        JSObject child = component(new View.ComponentView<>(component, props, null), HotReload.rootPath(elementId, component.name()), true);
+        Root owner = new Root(root, elementId);
+        HotReload.root(elementId, owner);
         renderRoot(root, strict ? strict(child) : child);
-        return new Root(root);
+        return owner;
     }
     /** Owned React root. Closing is idempotent and disposes effects and subscriptions. */
     public static final class Root implements AutoCloseable {
         private JSObject root;
-        private Root(JSObject root) { this.root = root; }
-        @Override public void close() { if (root != null) { unmount(root); root = null; } }
+        private final String id;
+        private Root(JSObject root, String id) { this.root = root; this.id = id; }
+        @Override public void close() { if (root != null) { unmount(root); root = null; HotReload.forgetRoot(id); } }
     }
     /** Convert a view to an opaque native React element for framework-maintained interop bindings. */
     public static JSObject element(View view) {
+        String path = HotReload.viewPath();
+        return element(view, path, path);
+    }
+    private static JSObject element(View view, String position, String container) {
         return switch (view) {
-            case View.Element element -> nativeElement(element.tag(), attributes(element.attributes()), children(element.children()));
+            case View.Element element -> nativeElement(element.tag(), attributes(element.attributes()), children(element.children(), position + "/element"));
             case View.Text text -> nativeText(text.value());
-            case View.Fragment fragment -> fragment(children(fragment.children()));
-            case View.ComponentView<?> component -> component(component);
-            case View.Provider<?> provider -> provider(provider);
+            case View.Fragment fragment -> fragment(children(fragment.children(), position + "/fragment"));
+            case View.ComponentView<?> component -> component(component, HotReload.childPath(component.component().name(), component.key(), position, container), false);
+            case View.Provider<?> provider -> provider(provider, position);
             case View.Extension extension -> {
                 if (extension instanceof NativeView nativeView) yield nativeView.element();
                 throw new IllegalArgumentException("Unsupported React view extension: " + extension.getClass().getName());
             }
         };
     }
-    private static Object[] children(List<View> views) {
+    private static Object[] children(List<View> views, String container) {
         Object[] children = new Object[views.size()];
-        for (int i = 0; i < children.length; i++) children[i] = element(views.get(i));
+        for (int i = 0; i < children.length; i++) children[i] = element(views.get(i), container + "/" + i, container);
         return children;
     }
     private static JSObject attributes(Attributes attributes) {
@@ -96,12 +103,19 @@ public final class React {
         }
         return result;
     }
-    private static <P> JSObject component(View.ComponentView<P> view) {
+    private static <P> JSObject component(View.ComponentView<P> view, String path, boolean root) {
         Component<P> descriptor = view.component();
-        Render render = props -> element(descriptor.render(Interop.value(readProps(props))));
-        return nativeComponent(function(COMPONENTS, descriptor, render, descriptor.name()), view.props(), view.key());
+        Render render = props -> {
+            JSObject frame = HotReload.begin(readPath(props), descriptor.stateSignature(), readRoot(props));
+            try {
+                JSObject result = element(descriptor.render(Interop.value(readProps(props))));
+                HotReload.commit(frame);
+                return result;
+            } finally { HotReload.end(frame); }
+        };
+        return nativeComponent(function(COMPONENTS, descriptor, render, descriptor.name()), view.props(), view.key(), path, root);
     }
-    private static <T> JSObject provider(View.Provider<T> provider) { return provider(context(provider.context()), provider.value(), Interop.scalar(provider.value()), children(provider.children())); }
+    private static <T> JSObject provider(View.Provider<T> provider, String path) { return provider(context(provider.context()), provider.value(), Interop.scalar(provider.value()), children(provider.children(), path + "/provider")); }
     static JSObject context(Context<?> context) { return cachedContext(CONTEXTS, context, context.defaultValue()); }
 
     private static final class BrowserElement implements DomElement {
@@ -139,13 +153,15 @@ public final class React {
     @JSBody(params = {"object", "name", "handler"}, script = "object[name] = handler;") private static native void setHandler(JSObject object, String name, Handler handler);
     @JSBody(params = {"cache", "descriptor", "render", "name"}, script = "var fn = cache.get(descriptor); if (!fn) { fn = render; fn.displayName = name; cache.set(descriptor, fn); } return fn;") private static native JSObject function(JSObject cache, Object descriptor, Render render, String name);
     @JSBody(params = {"cache", "descriptor", "value"}, script = "var context = cache.get(descriptor); if (!context) { context = React.createContext(value); context.jxProvider = function(props) { var stable = React.useMemo(function() { return props.value; }, [props.identity]); return React.createElement(context.Provider, {value: stable}, props.children); }; cache.set(descriptor, context); } return context;", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject cachedContext(JSObject cache, Object descriptor, Object value);
-    @JSBody(params = {"component", "props", "key"}, script = "return React.createElement(component, key === null ? {value: props} : {value: props, key: key});", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject nativeComponent(JSObject component, Object props, String key);
+    @JSBody(params = {"component", "props", "key", "path", "root"}, script = "var values = {value: props, jxPath: path, jxRoot: root}; if (key !== null) values.key = key; return React.createElement(component, values);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject nativeComponent(JSObject component, Object props, String key, String path, boolean root);
     @JSBody(params = "props", script = "return props.value;") private static native Object readProps(JSObject props);
+    @JSBody(params = "props", script = "return props.jxPath;") private static native String readPath(JSObject props);
+    @JSBody(params = "props", script = "return !!props.jxRoot;") private static native boolean readRoot(JSObject props);
     @JSBody(params = {"tag", "props", "children"}, script = "return React.createElement.apply(null, [tag, props].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject nativeElement(String tag, JSObject props, Object[] children);
     @JSBody(params = "text", script = "return React.createElement(React.Fragment, null, text);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject nativeText(String text);
     @JSBody(params = "children", script = "return React.createElement.apply(null, [React.Fragment, null].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject fragment(Object[] children);
     @JSBody(params = {"context", "value", "identity", "children"}, script = "return React.createElement(context.jxProvider, {value: value, identity: identity, children: children});", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject provider(JSObject context, Object value, Object identity, Object[] children);
-    @JSBody(params = "elementId", script = "var element = document.getElementById(elementId); if (!element) throw new Error('Missing React root: ' + elementId); return ReactDOM.createRoot(element);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom/client")) private static native JSObject createRoot(String elementId);
+    @JSBody(params = "elementId", script = "var element = document.getElementById(elementId); if (!element) throw new Error('Missing React root: ' + elementId); var hot = globalThis.__JX_HOT__; var options = hot && hot.enabled ? {onUncaughtError: function(error) { if (typeof hot.fail === 'function') hot.fail(error); if (typeof reportError === 'function') reportError(error); else console.error(error); }} : undefined; return ReactDOM.createRoot(element, options);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom/client")) private static native JSObject createRoot(String elementId);
     @JSBody(params = "child", script = "return React.createElement(React.StrictMode, null, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject strict(JSObject child);
     @JSBody(params = {"root", "child"}, script = "root.render(child);") private static native void renderRoot(JSObject root, JSObject child);
     @JSBody(params = "root", script = "root.unmount();") private static native void unmount(JSObject root);

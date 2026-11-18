@@ -16,9 +16,15 @@ final class Lowerer {
     private final SourceFile source;
     private final MappedBuilder out;
     private final Set<Integer> inserted = new HashSet<>();
+    private final Map<String, String> signatures;
 
     Lowerer(JavaModel model, List<ComponentMetadata> components, List<Diagnostic> diagnostics) {
+        this(model, components, diagnostics, Map.of());
+    }
+
+    Lowerer(JavaModel model, List<ComponentMetadata> components, List<Diagnostic> diagnostics, Map<String, String> signatures) {
         this.model = model; this.components = components; this.diagnostics = diagnostics;
+        this.signatures = signatures;
         this.source = model.parsed().source(); this.out = new MappedBuilder(source);
     }
 
@@ -51,7 +57,8 @@ final class Lowerer {
             String function = component.hasProps() ? component.simpleName() + "::render" : "ignored -> " + component.simpleName() + ".render()";
             out.synthetic("\n    /** Stable React component identity generated from this declaration. */\n"
                     + "    public static final jx.Component<" + type + "> JX = new jx.Component<>("
-                    + quote(component.qualifiedName()) + ", " + function + ");\n", component.declaration().start());
+                    + quote(component.qualifiedName()) + ", " + quote(signatures.getOrDefault(component.qualifiedName(), ""))
+                    + ", " + function + ");\n", component.declaration().start());
             start = offset;
         }
         out.copy(start, span.end());

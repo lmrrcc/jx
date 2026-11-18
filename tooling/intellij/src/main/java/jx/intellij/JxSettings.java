@@ -16,6 +16,9 @@ public final class JxSettings implements PersistentStateComponent<JxSettings.Val
     public static final class Values {
         public String javaPath = Path.of(System.getProperty("java.home"), "bin", System.getProperty("os.name").startsWith("Windows") ? "java.exe" : "java").toString();
         public List<String> classpath = new ArrayList<>();
+        public List<String> developmentArguments = new ArrayList<>(List.of(DevLaunchPlan.DEFAULT_GOAL));
+        public String developmentRepository = "";
+        public boolean useProjectMavenCache = true;
     }
     private Values values = new Values();
     public static JxSettings getInstance() { return ApplicationManager.getApplication().getService(JxSettings.class); }

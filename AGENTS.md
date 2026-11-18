@@ -18,6 +18,9 @@ in Java and `.jx` markup. The governing specification is
 - Maven integration, a shared language server, an installable VS Code extension,
   and a verified IntelliJ plugin are required deliverables. Diagnostics must map
   to the original `.jx` source.
+- Both editors highlight mixed Java/HTML and launch the selected Maven module's
+  development server. Hot updates preserve compatible state through typed
+  checkpoints; never reuse opaque Java objects across rebuilt TeaVM generations.
 - Keep the core independent of Spring, persistence, and a particular server.
   Spring Boot support belongs in an optional integration.
 - Ordinary application logic is Java-only. Framework-maintained JavaScript/TypeScript
@@ -114,6 +117,7 @@ npm run build:runtime
 npm run test:runtime
 npm run test:counter
 npm run test:todo
+npm run test:hot
 ```
 
 The first command checks skill metadata, routing, documentation links, and

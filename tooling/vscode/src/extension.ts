@@ -4,12 +4,14 @@ import { access } from 'node:fs/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
+import { DevelopmentTasks } from './development';
 
 const execute = promisify(execFile);
 let client: LanguageClient | undefined;
 let output: vscode.LogOutputChannel;
 let watcher: vscode.FileSystemWatcher;
 let pending: Promise<void> = Promise.resolve();
+let development: DevelopmentTasks | undefined;
 
 async function start(context: vscode.ExtensionContext): Promise<void> {
   if (!vscode.workspace.isTrusted) return;
@@ -58,21 +60,6 @@ async function folder(): Promise<vscode.WorkspaceFolder | undefined> {
   return folders.length === 1 ? folders[0] : vscode.window.showWorkspaceFolderPick();
 }
 
-async function runMaven(development: boolean): Promise<void> {
-  if (!vscode.workspace.isTrusted) throw new Error('Trust this workspace before running its Maven Wrapper.');
-  const selected = await folder();
-  if (!selected) return;
-  const wrapper = path.join(selected.uri.fsPath, process.platform === 'win32' ? 'mvnw.cmd' : 'mvnw');
-  await access(wrapper);
-  const args = development ? vscode.workspace.getConfiguration('jx', selected.uri).get<string[]>('devArguments', []) : ['package'];
-  if (args.length === 0) throw new Error('Set jx.devArguments to the development goal for this project.');
-  const task = new vscode.Task({ type: 'jx', mode: development ? 'dev' : 'build' }, selected,
-    development ? 'JX Development Server' : 'JX Build', 'JX',
-    new vscode.ProcessExecution(wrapper, args, { cwd: selected.uri.fsPath }), []);
-  task.presentationOptions = { reveal: vscode.TaskRevealKind.Always, panel: vscode.TaskPanelKind.Dedicated };
-  await vscode.tasks.executeTask(task);
-}
-
 async function createComponent(): Promise<void> {
   if (!vscode.workspace.isTrusted) throw new Error('Trust this workspace before creating a component.');
   const name = await vscode.window.showInputBox({ prompt: 'Java component class name', value: 'NewComponent',
@@ -92,16 +79,18 @@ async function createComponent(): Promise<void> {
 
 export async function activate(context: vscode.ExtensionContext): Promise<{ isRunning(): boolean }> {
   output = vscode.window.createOutputChannel('JX Language Server', { log: true });
+  development = new DevelopmentTasks(output);
   watcher = vscode.workspace.createFileSystemWatcher('**/*.{jx,java}');
-  context.subscriptions.push(output, watcher);
+  context.subscriptions.push(output, watcher, development);
   const command = (id: string, action: () => Promise<unknown> | void) =>
     vscode.commands.registerCommand(id, async () => { try { await action(); } catch (failure) { report(failure); } });
   context.subscriptions.push(
     command('jx.restartServer', () => restart(context)),
     command('jx.showOutput', () => output.show()),
     command('jx.createComponent', createComponent),
-    command('jx.build', () => runMaven(false)),
-    command('jx.dev', () => runMaven(true)),
+    command('jx.build', () => development?.build()),
+    command('jx.dev', () => development?.start()),
+    command('jx.stopDev', () => development?.stop()),
     vscode.workspace.onDidGrantWorkspaceTrust(() => { void restart(context).catch(report); }),
     vscode.workspace.onDidChangeConfiguration(event => {
       if (event.affectsConfiguration('jx.javaPath') || event.affectsConfiguration('jx.classpath')) void restart(context).catch(report);
@@ -112,6 +101,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<{ isRu
 }
 
 export async function deactivate(): Promise<void> {
+  await development?.shutdown();
   await pending.catch(() => undefined);
   if (client) { await client.dispose(); client = undefined; }
 }

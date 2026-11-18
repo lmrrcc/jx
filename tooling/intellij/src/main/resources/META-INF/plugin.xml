@@ -11,8 +11,15 @@
         <lang.syntaxHighlighterFactory language="JX" implementationClass="jx.intellij.JxSyntaxHighlighterFactory"/>
         <platform.lsp.serverSupportProvider implementation="jx.intellij.JxLspSupportProvider"/>
         <applicationConfigurable id="jx.settings" displayName="JX" parentId="language" instance="jx.intellij.JxConfigurable"/>
+        <notificationGroup id="JX Development" displayType="BALLOON" isLogByDefault="true"/>
     </extensions>
     <actions>
+        <action id="JX.StartDevelopmentServer" class="jx.intellij.StartDevelopmentAction" text="Start JX Development Server" description="Run the active .jx file's Maven module with automatic browser updates">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+        <action id="JX.StopDevelopmentServer" class="jx.intellij.StopDevelopmentAction" text="Stop JX Development Server" description="Stop the JX development server and its active build">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
         <action id="JX.RestartLanguageServer" class="jx.intellij.RestartServerAction" text="Restart JX Language Server" description="Restart the shared JX language server for the current trusted project">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>

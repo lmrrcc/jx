@@ -36,7 +36,8 @@ Java 25 executable as `java`. Remote workspaces run Java on the remote extension
 host; install the JDK there. Remote execution is designed into the extension but
 has not been verified on a remote host.
 
-The extension supplies `.jx` highlighting and connects diagnostics, completion,
+The extension highlights Java alongside HTML-style markup: tags, attributes,
+quoted values, and `{Java expressions}` have distinct scopes. It connects diagnostics, completion,
 hover, definition navigation, and document symbols to the server. Additional
 semantic dependencies can be listed in `jx.classpath`, relative to each workspace
 folder or as absolute paths.
@@ -46,10 +47,18 @@ folder or as absolute paths.
 - **JX: Create Component** prompts for a Java class name and destination.
 - **JX: Build Application** runs the selected workspace's Maven Wrapper with
   `package`.
-- **JX: Start Development Server** runs that wrapper with `jx.devArguments`, whose
-  default is `dev.jx:jx-maven-plugin:0.1.0-SNAPSHOT:dev`. Set additional arguments
-  such as `-f` when the application is a nested Maven module. Configure the Maven
-  plugin's development web directory for that application's generated assets.
+- **JX: Start Development Server** saves files, finds the nearest `pom.xml` for
+  the active `.jx` file, and runs an ancestor Maven Wrapper with `-f` pointing to
+  that module. `jx.devArguments` defaults to
+  `dev.jx:jx-maven-plugin:0.1.0-SNAPSHOT:dev`; add options such as `-Djx.port=4174`.
+  The command suppresses duplicate starts for the same module and shows its task
+  terminal. **JX: Stop Development Server** stops the selected development task.
+- `jx.mavenRepository` optionally selects a repository. If unset, an existing
+  wrapper-root `.cache/maven-repository` is used, otherwise Maven's default.
+
+The same [Maven development loop](maven.md) preserves compatible browser state
+when `.jx` changes. Start/Stop controls own the process; editor restart and build
+commands are not required for each save.
 
 Opening an untrusted file permits highlighting, but starts neither Java nor a
 project build. Build and dev tasks require explicit command invocation in a
@@ -68,16 +77,20 @@ silently download a different editor version. The recorded target is VS Code
 hover, navigation to `Counter.jx`, component symbols, invalid-prop diagnostics on
 the original `.jx` line, and restart. A second isolated profile with workspace
 trust enabled verifies that activation and restart leave Java stopped in an
-untrusted workspace. Remote-host behavior and the build/dev task UI still need
-separate end-to-end tests. Rename, formatting, and debugging are not advertised
+untrusted workspace. The packaged editor suite also starts the real Maven dev
+goal against an isolated copied Counter module, checks module/wrapper discovery,
+saved input, repository selection, duplicate suppression, stop and restart.
+Remote-host behavior still needs separate testing. Rename, formatting, and debugging are not advertised
 capabilities.
 
 The extension pins `minimatch` 11.0.1 to avoid an advisory in its client's original
-dependency range. The packaging dependency tree still reports an upstream
-`picomatch` advisory through `@vscode/vsce`; the newest published `picomatch`
-checked for this setup was 4.0.7, within the affected range. Those packaging
-dependencies are excluded from the VSIX by bundling only the extension entry
-point and its runtime dependencies.
+dependency range. The final audit reports four high-severity packaging-tree
+findings propagated from the upstream `picomatch` advisory
+`GHSA-fc5q-39xc-vjpf` through the existing `@vscode/vsce` 4.1.1 tool. The newest
+published `picomatch` checked was 4.0.7, still within the affected range. The
+packager was retained and the resulting VSIX tested; packaging and tokenizer-test
+dependencies are excluded from the VSIX, which bundles the extension entry point
+and its runtime dependencies.
 
 ## IntelliJ IDEA
 
@@ -119,19 +132,30 @@ its Language Services widget exposes server status. Enable
 `#com.intellij.platform.lsp` in **Help → Diagnostic Tools → Debug Log Settings**
 when detailed protocol logs are needed.
 
-The adapter provides highlighting and the server's diagnostics, completion,
+The adapter provides mixed Java/HTML highlighting (tags, attributes, quoted
+values, entities and Java expression islands) and the server's diagnostics, completion,
 hover, navigation, and document symbols. It starts only for trusted projects.
 Java extraction uses a content-addressed JAR under the IDE system directory;
 concurrent projects share the immutable file. The process working directory is
 stable, while project roots are supplied through LSP initialization.
 
-Plugin Verifier reports compatibility with `IU-261.25134.95`, including four
-deprecated and eight experimental API usages in JetBrains' project-trust API.
+**Tools → Start JX Development Server** saves documents and chooses the active
+file's Maven module and ancestor wrapper. The Run console provides clickable
+URLs and Stop/Rerun controls. Starting again focuses the existing process;
+**Tools → Stop JX Development Server** and project disposal stop owned processes.
+The JX settings page also accepts development arguments (one per line), a Maven
+repository override, and optional use of an existing project cache. See the
+[plugin guide](../tooling/intellij/README.md).
+
+Plugin Verifier reports compatibility with `IU-261.25134.95`, including ten
+deprecated and fourteen experimental API usages in platform APIs.
 These warnings are retained; compatibility with future IDEs is not inferred.
-The declared build range is intentionally narrow. All three SDK tests pass: file
-registration/highlighting, file selection, and a live LSP-manager integration
-test that initializes the bundled process and requests completion. The tests use
-real temporary files and isolate JX with its required platform dependencies.
+The declared build range is intentionally narrow. SDK tests cover mixed-language
+highlighting and lexer restarts, module discovery/settings, a live LSP-manager
+integration, and Run console process lifecycle including duplicate starts,
+graceful stop, project disposal, and trust blocking. The lifecycle tests launch a
+real Java fixture through the wrapper boundary; Maven rebuild behavior is tested
+separately in the browser suite. Tests isolate JX with required platform dependencies.
 
 The adapter does not provide native Java refactoring, rename, formatting, debugger
 stepping, or generated-Java source hiding. A broader IDE/product matrix, remote

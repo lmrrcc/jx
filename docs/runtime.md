@@ -137,6 +137,86 @@ support for the full Java 25 standard library. Server Spring, filesystem, JDBC,
 blocking network calls, and thread-based application workflows are outside this
 browser subset. TeaVM reachability diagnostics remain part of the build.
 
+## State-preserving development replacement
+
+The development loader keeps the running application available during a rebuild.
+After loading a successful candidate, it captures the latest **committed** state,
+disposes the previous React roots and owned work, and starts the new compiled Java
+runtime with portable checkpoints. This replaces React roots without reloading
+the document. It does not pass Java instances between independently compiled TeaVM
+bundles: their class identities and representations can differ.
+
+The compiler supplies `Component(name, stateSignature, render)` metadata. Logical
+component paths include their parent/container position and explicit list keys.
+Unchanged component fingerprints preserve compatible state slots. A changed or
+missing fingerprint resets that component's state. The two-argument descriptor
+constructor remains valid but intentionally has no hot-restoration guarantee.
+Compiler fingerprints are conservative for hook order, state types, and custom
+hooks; unknown behavior must reset rather than guess.
+
+Scalar `useState` and `useReducer` values infer codecs from their initial String,
+Character, Boolean, or numeric wrapper type. These codecs retain exact Java values,
+including Unicode strings, null after initialization, integer limits, signed zero,
+and NaN. An initially null value has no inferable type: supply an explicit codec,
+for example `Hooks.useState(null, StateCodecs.strings())`. Callable values, arbitrary
+objects, resources, and identity-sensitive values are not automatically serialized.
+
+Custom records/collections require a pure `StateCodec<T>` with a stable schema id,
+string encoder, and validating decoder:
+
+```java
+State<Model> model = Hooks.useState(initialModel, MODEL_CODEC);
+// MODEL_CODEC.decode reconstructs Model and its immutable collections in the new runtime.
+```
+
+Change the codec's schema when its representation becomes incompatible. A different
+schema or rejected payload resets the corresponding slot. Encoding failure resets
+the containing component; unsupported values reset with a development notice.
+No checkpoint payload is logged. This mechanism does not preserve arbitrary object
+identity or claim transparent migration of every Java class.
+
+For a separately owned MVU store, register it before mounting:
+
+```java
+Store<Model, Message> store = new Store<>(program);
+HotReload.trackStore("application-model", "workflow-v1", store, MODEL_CODEC);
+React.mountStrict("root", APP, new App.Props(store));
+```
+
+`Store` implements `StateTransfer`: restoration is allowed only before its first
+activation, suppresses initial commands, and starts current subscriptions normally.
+Old commands/subscriptions are cancelled during disposal. Pending operations are
+not checkpointed or replayed. The model codec must normalize transient loading or
+saving states when their work cannot resume, and expose a deliberate recovery path.
+Strict Mode restarts do not replay initialization commands in a restored store.
+
+Effects, refs, memo caches, context instances, DOM handles, and foreign JavaScript
+component state restart. The development client restores input focus/selection
+after the new root commits; state ownership remains in hooks or the tracked store.
+Moving/removing components, changing keys, or changing incompatible hook metadata
+can reset state. This is a development migration profile, not React Fast Refresh's
+arbitrary JavaScript object-identity model.
+
+The runtime contract is enabled only when the loader sets
+`globalThis.__JX_HOT__ = {enabled: true}` before bootstrap. It exposes `capture()`,
+`dispose()`, `restore(checkpoint)`, and `ready()`. Checkpoints contain JSON data and
+encoded strings only; `ready()` waits for root commit and two animation frames and
+rejects on an uncaught root-render error. Handled error boundaries retain their
+normal application behavior. Development bundles share one React/React DOM vendor
+runtime across generations, avoiding repeated delegated DOM listener registration.
+The loader must capture before disposal, retain the checkpoint if candidate startup
+fails, and leave the old tree running on build/load failure. Runtime bounds cover
+4,096 component instances, 256 hooks per component, 128 tracked stores, one million
+UTF-16 code units per encoded state value, and eight MiB per whole checkpoint.
+
+The browser suite's `HotApplication` fixture loads separate TeaVM module generations
+and checks scalar/keyed state, a controlled String form, reducers, a record containing
+an immutable list, and an Elm store. It verifies new-runtime class identity and
+working post-replacement handlers, lifecycle cleanup, suppressed initialization,
+and safe resets after fingerprint/schema changes. The dev workflow additionally
+needs source-edit/build tests; a successful checkpoint transfer alone does not
+prove watcher/editor integration.
+
 Portals, transitions, deferred values, Suspense, lazy-module loading, SSR,
 hydration, component ref forwarding, and `.jx` debugger stepping are not advertised
 as implemented by this runtime. Source maps are generated for the TeaVM output;
