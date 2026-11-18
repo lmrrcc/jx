@@ -24,6 +24,8 @@ Both assets use the palette from the
 
 The serif monogram and headline, quiet surfaces, and light code panel follow the
 Todo app's visual direction. The counter uses the current `@JxComponent` annotation.
+Its markup uses `onClick={increment(count)}` with the extracted `EventHandler`
+helper shown below `render()`, matching the README's event-handler pattern.
 
 Created with the built-in image generation tool. The [mark prompt](mark-prompt.txt)
 records the icon design. The [banner prompt](banner-prompt.txt) records the social

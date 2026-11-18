@@ -1,31 +1,23 @@
-Use case: ads-marketing / style-transfer.
-Asset type: finished, high-resolution landscape cover for the JX GitHub README and a LinkedIn post. Aim for 2400 x 1260 pixels, aspect ratio 1.905:1.
-Input image 1 is the previous JX cover, supplied as a content/composition reference. Redesign it completely to match the actual JX Todo application's calm editorial visual identity. Keep the JX framework topic, the split headline/code concept, and the real Java counter; replace the previous dark/blue/orange styling.
-Art direction: a beautifully typeset flat editorial layout, warm ivory paper background #f5f4ef, forest-green ink #24352d and buttons #2e5543, sage panels #e8ece3, hairline dividers #d9dfd5, muted sage copy #6d7a6f, restrained terracotta accent #bd713d. Clean solid colors, very subtle soft shadow only beneath the code card. Generous space, precise alignment, refined Georgia-like regular-weight serif display typography, simple sans-serif body and genuine monospace code. No illustration, 3D, photography, blue, neon, gradients, fake operating-system window controls, decorative blobs, or noisy texture.
-Composition: large landscape 1.905:1. Comfortable 100px-equivalent outer margins. Slim header: the JX wordmark on the upper left, J in forest and X in terracotta, followed by "Java eXtended UI"; small upper-right "OPEN SOURCE / MIT". Thin sage rule under the header. Main content: about 43% width editorial headline on the left, 52% width a readable white/cream code card on the right, with a generous gutter. Bottom horizontal rule and small repository/tooling footer.
-Left exact text:
-eyebrow: "JAVA SYNTAX. REACT RUNTIME."
-headline first line: "React apps."
-headline second line: "Written in Java."
-Use very large refined serif, first line forest green, second line terracotta, no exclamation marks.
-body two lines: "Typed components. Real React hooks."
-"Your Java code, running in the browser."
-Three modest sage pills: ".jx markup", "Java 25", "Elm-style state".
-Right card: fine sage border, softly rounded corners, a very pale sage header with a small terracotta dot and title "Counter.jx", small right header label "JAVA + MARKUP". Show the following exact syntactically valid code, using legible monospaced text, correct braces and angle brackets, restrained forest/terracotta/olive syntax colors on a light background. There must be no spelling errors, ellipses, line numbers, omitted braces or code clipping. The actual current annotation is @JxComponent, NOT @Component.
+Use case: precise-object-edit / text update.
+Asset type: JX LinkedIn landscape post banner, not the GitHub README hero.
+Input image 1 is the EDIT TARGET: the existing finished JX banner with an ivory background, forest-green/terracotta serif headline and a light code card.
+Primary request: update ONLY the code inside the Counter.jx editor card to show the extracted Java click-handler helper, matching the current project documentation.
+Preserve every other element: the composition, landscape aspect ratio (1731:909), image size where supported, palette, fonts, JX wordmark, "Java eXtended UI", header rule, "OPEN SOURCE / MIT", headline "React apps. Written in Java.", supporting copy, three feature pills, card header, "BROWSER PREVIEW", green "Count: 3" button, footer URL "github.com/lmrrcc/jx", footer tooling labels and all margins.
+The old inline event lambda inside the button tag must be replaced with onClick={increment(count)}. Include the complete private static EventHandler helper below render(), inside the Counter class. Adjust ONLY code font size/line spacing modestly if needed so the following complete code fits legibly in the existing code area; no cropping, ellipses or missing lines. Keep the restrained forest/terracotta/olive syntax highlighting and genuine monospace typography. Use exactly this code:
 @JxComponent
 public final class Counter {
     public static View render() {
         State<Integer> count = Hooks.useState(0);
-
         return (
-            <button onClick={e ->
-                    count.update(n -> n + 1)}>
+            <button onClick={increment(count)}>
                 Count: {count.value()}
             </button>
         );
     }
+
+    private static EventHandler increment(
+            State<Integer> count) {
+        return event -> count.update(value -> value + 1);
+    }
 }
-Below code, a thin divider and a pale sage preview strip, left small label "BROWSER PREVIEW", right a forest-green rounded button with white exact text "Count: 3".
-Bottom footer left exact text: "github.com/lmrrcc/jx"
-Bottom footer right exact text: "Maven · VS Code · IntelliJ"
-This is a polished final production banner, not a screenshot or wireframe. Match the Todo app's warm ivory, forest green, sage and terracotta visual language throughout. All text must be sharp and comfortably legible.
+Critical exact text: "EventHandler", "increment(count)", "State<Integer>", "count.update(value -> value + 1)". Preserve every brace, angle bracket, semicolon and parenthesis. No extra text or redesign. High-resolution, sharp editorial graphic suitable for LinkedIn.
