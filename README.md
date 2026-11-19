@@ -124,6 +124,12 @@ Open [127.0.0.1:4180](http://127.0.0.1:4180). After loading, both counters
 continue working with networking disabled: their event handlers execute in the
 browser.
 
+With IntelliJ plugin 0.3.2, open `App.jx` and click the green Run gutter icon next
+to `class App`, or choose **Tools → Start JX Development Server**. Open the URL
+printed in the Run console (port **4173** by default). `Main.java` is a TeaVM
+browser entry point; launching it with the ordinary Java Run action on the JVM
+cannot execute the JavaScript interop methods.
+
 ### Todo application
 
 The [Todo example](examples/todo-app) combines controlled forms, validation,
@@ -186,7 +192,8 @@ attributes, quoted values, and embedded expressions have distinct highlighting.
 Java editing delegates to **IntelliJ's Java plugin** and **VS Code's Red Hat Java
 extension**, including Java expressions inside markup. The shared JX language
 server adds component/property semantics and compiler diagnostics. Updated editor
-packages are version **0.2.0**; see the tested operations and limits below.
+packages are version **0.3.2 for IntelliJ** and **0.2.0 for VS Code**; see the
+tested operations and limits below.
 
 | Tool | Build, edit, and run |
 | --- | --- |

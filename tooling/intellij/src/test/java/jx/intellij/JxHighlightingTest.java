@@ -37,9 +37,9 @@ public final class JxHighlightingTest extends TestCase {
         assertTrue(tokens.stream().anyMatch(token -> token.type() == JxLexer.ENTITY && token.text().equals("&amp;")));
         assertTrue(tokens.stream().anyMatch(token -> token.type() == JxLexer.STRING && token.text().equals("\"<not markup>\"")));
         var highlighter = new JxSyntaxHighlighterFactory().getSyntaxHighlighter(null, null);
-        assertEquals(DefaultLanguageHighlighterColors.MARKUP_TAG, highlighter.getTokenHighlights(JxLexer.TAG)[0]);
-        assertEquals(DefaultLanguageHighlighterColors.MARKUP_ATTRIBUTE, highlighter.getTokenHighlights(JxLexer.ATTRIBUTE)[0]);
-        assertEquals(DefaultLanguageHighlighterColors.STRING, highlighter.getTokenHighlights(JxLexer.ATTRIBUTE_VALUE)[0]);
+        assertEquals(JxColors.TAG, highlighter.getTokenHighlights(JxLexer.TAG)[0]);
+        assertEquals(JxColors.ATTRIBUTE, highlighter.getTokenHighlights(JxLexer.ATTRIBUTE)[0]);
+        assertEquals(JxColors.VALUE, highlighter.getTokenHighlights(JxLexer.ATTRIBUTE_VALUE)[0]);
         assertEquals(DefaultLanguageHighlighterColors.KEYWORD, highlighter.getTokenHighlights(JxLexer.KEYWORD)[0]);
     }
     public void testIncrementalRestartAtEveryTokenPreservesNestedContexts() {

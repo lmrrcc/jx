@@ -29,6 +29,7 @@ public final class JxGeneratedLifecycleTest extends LightJavaCodeInsightFixtureT
     private VirtualFile authored, generated, manifest, mapping, unowned;
     private PsiFile unownedPsi;
     private String sourceMap;
+    private VirtualFile generatedRoot;
 
     @Override protected LightProjectDescriptor getProjectDescriptor() { return JAVA_25; }
 
@@ -40,12 +41,22 @@ public final class JxGeneratedLifecycleTest extends LightJavaCodeInsightFixtureT
         sourceMap = compiled.generatedSources().getFirst().sourceMap().serialize();
         generated = myFixture.addFileToProject("target/generated-sources/jx/sample/Counter.java",
                 compiled.generatedSources().getFirst().javaSource()).getVirtualFile();
-        PsiTestUtil.addSourceRoot(getModule(), generated.getParent().getParent(), JavaSourceRootType.SOURCE,
+        generatedRoot = generated.getParent().getParent();
+        PsiTestUtil.addSourceRoot(getModule(), generatedRoot, JavaSourceRootType.SOURCE,
                 new JavaSourceRootProperties("", true));
         unownedPsi = myFixture.addFileToProject("target/generated-sources/jx/sample/Unowned.java",
                 "package sample; public class Unowned {}");
         unowned = unownedPsi.getVirtualFile();
         assertJava(true);
+    }
+
+    @Override protected void tearDown() throws Exception {
+        try {
+            if (generatedRoot != null) PsiTestUtil.removeSourceRoot(getModule(), generatedRoot);
+        } finally {
+            generatedRoot = null;
+            super.tearDown();
+        }
     }
 
     public void testLateAndRemovedOwnershipMetadataReclassifiesExistingJavaPsi() throws Exception {

@@ -127,7 +127,8 @@ public final class JxRenameClassProcessor extends RenamePsiElementProcessor {
         if (host instanceof JxJavaInjectionHost jx) {
             var projection = JxJavaProjection.getInstance(element.getProject()).forHost(jx).orElseThrow();
             return projection.sourceMap().editableSourceSpan(new SourceSpan(range.getStartOffset(), range.getEndOffset()))
-                    .map(span -> new Edit(jx.getContainingFile(), new TextRange(span.start(), span.end()))).orElse(null);
+                    .map(span -> new Edit(jx.getContainingFile(), new TextRange(span.start(), span.end())
+                            .shiftRight(jx.getTextRange().getStartOffset()))).orElse(null);
         }
         if (injected.isInjectedFragment(file)) return null;
         return new Edit(file, range);

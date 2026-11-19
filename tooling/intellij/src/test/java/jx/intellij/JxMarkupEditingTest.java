@@ -90,6 +90,23 @@ public final class JxMarkupEditingTest extends LightJavaCodeInsightFixtureTestCa
         assertEquals(beforeApp, app.getText()); assertEquals(beforeClass, file.getText());
         assertEquals("Counter.jx", file.getName());
     }
+    public void testClassRenamePreservesLeadingWhitespaceAndMappedConstructorOffsets() {
+        var app = app();
+        var file = com.intellij.psi.PsiManager.getInstance(getProject())
+                .findFile(myFixture.findFileInTempDir("sample/Counter.jx"));
+        var document = com.intellij.psi.PsiDocumentManager.getInstance(getProject()).getDocument(file);
+        com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(getProject(), () -> {
+            document.insertString(0, "\n   ");
+            com.intellij.psi.PsiDocumentManager.getInstance(getProject()).commitDocument(document);
+        });
+        String before = file.getText();
+        assertTrue(JxJavaProjection.host(file).getTextRange().getStartOffset() > 0);
+        var type = JxJavaProjection.javaFile(file).getClasses()[0];
+        com.intellij.refactoring.rename.PsiElementRenameHandler.rename(type, getProject(), type, null, "Meter");
+        assertEquals(before.replace("Counter", "Meter"), file.getText());
+        assertEquals("Meter.jx", file.getName());
+        assertTrue(app.getText(), app.getText().contains("<Meter label={\"Hello\"}></Meter>"));
+    }
     public void testClassRenameCannotTurnAComponentTagIntoAnHtmlElement() {
         var app = app();
         var file = com.intellij.psi.PsiManager.getInstance(getProject())

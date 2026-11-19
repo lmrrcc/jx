@@ -19,12 +19,15 @@ public final class JxSyntaxHighlighterFactory extends SyntaxHighlighterFactory {
                 if (type == JxLexer.KEYWORD) return pack(DefaultLanguageHighlighterColors.KEYWORD);
                 if (type == JxLexer.STRING) return pack(DefaultLanguageHighlighterColors.STRING);
                 if (type == JxLexer.COMMENT) return pack(DefaultLanguageHighlighterColors.BLOCK_COMMENT);
-                if (type == JxLexer.TAG) return pack(DefaultLanguageHighlighterColors.MARKUP_TAG);
-                if (type == JxLexer.ATTRIBUTE) return pack(DefaultLanguageHighlighterColors.MARKUP_ATTRIBUTE);
-                if (type == JxLexer.ATTRIBUTE_VALUE) return pack(DefaultLanguageHighlighterColors.STRING);
-                if (type == JxLexer.MARKUP_DELIMITER) return pack(DefaultLanguageHighlighterColors.MARKUP_TAG);
-                if (type == JxLexer.EXPRESSION_DELIMITER) return pack(DefaultLanguageHighlighterColors.BRACES);
-                if (type == JxLexer.ENTITY) return pack(DefaultLanguageHighlighterColors.VALID_STRING_ESCAPE);
+                if (type == JxLexer.TAG) return pack(JxColors.TAG);
+                if (type == JxLexer.ATTRIBUTE) return pack(JxColors.ATTRIBUTE);
+                if (type == JxLexer.ATTRIBUTE_VALUE) return pack(JxColors.VALUE);
+                if (type == JxLexer.MARKUP_DELIMITER) return pack(JxColors.DELIMITER);
+                if (type == JxLexer.EXPRESSION_DELIMITER || type == JxLexer.EXPRESSION_START || type == JxLexer.EXPRESSION_END
+                        || type == JxLexer.LBRACE || type == JxLexer.RBRACE) return pack(DefaultLanguageHighlighterColors.BRACES);
+                if (type == JxLexer.LPAREN || type == JxLexer.RPAREN) return pack(DefaultLanguageHighlighterColors.PARENTHESES);
+                if (type == JxLexer.LBRACKET || type == JxLexer.RBRACKET) return pack(DefaultLanguageHighlighterColors.BRACKETS);
+                if (type == JxLexer.ENTITY) return pack(JxColors.ENTITY);
                 if (type == JxLexer.OPERATOR) return pack(DefaultLanguageHighlighterColors.OPERATION_SIGN);
                 if (type == JxLexer.NUMBER) return pack(DefaultLanguageHighlighterColors.NUMBER);
                 return TextAttributesKey.EMPTY_ARRAY;

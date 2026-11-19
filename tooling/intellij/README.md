@@ -14,12 +14,40 @@ a complete Java PSI projection through the platform's language-injection API,
 preserving lexical variables and callback types inside markup expressions.
 Native Java completion, navigation, references and safe rename edits map back to
 the `.jx` source. Shared language-server services provide JX component/prop
-semantics and compiler diagnostics. Install the updated **0.2.0** package.
+semantics and compiler diagnostics. Install the updated **0.3.2** package.
+
+Java regions use the normal editor background. Markup inherits the active theme's
+HTML tag, attribute and value colors; optional overrides are under **Settings →
+Editor → Color Scheme → JX**. Other injected languages and the global color scheme
+are unaffected.
+
+Version 0.3.1 also fixes incremental Java/markup coloring after tag edits and
+reuses unchanged compiler projections instead of rebuilding them for repeated
+editor queries. See the [measured scope and remaining limits](../../docs/intellij-performance.md).
+
+The host editor also provides **Structure / File Structure**, Java and markup
+folding, context-aware comment actions, attribute quote pairs, closing tags, and
+indentation when pressing Enter between paired tags. Tag insertion respects
+IntelliJ's HTML/XML closing-tag preference. Structure entries navigate to the
+authored `.jx` declaration and omit generated component helpers.
+
+**Reformat Code** uses the bundled Java formatter for safely mapped Java whitespace
+and a JX layout model for markup. Strings, comments and meaningful markup text are
+preserved. This is not a claim that all Java refactorings or XML editing features
+are supported: JX still uses a typed Java projection rather than the native
+Java/XML expression PSI that IntelliJ's TSX implementation owns. The
+[mixed-language architecture decision](../../docs/decisions/0004-intellij-mixed-language-editing.md)
+records the research and remaining structural work. Use the
+[tooling capability matrix](../../docs/tooling.md) for the verification boundary.
 
 Open a `.jx` file in a trusted Maven project and choose **Tools → Start JX
-Development Server**. JX selects the nearest `pom.xml` above that file and finds
+Development Server**, or click the green Run gutter icon beside its matching class
+declaration (for example `class App` in `App.jx`). The gutter action runs the
+containing Maven application, not that component in isolation or a JVM `main`.
+JX selects the nearest `pom.xml` above that file and finds
 the Maven Wrapper in that module or a parent directory. Output appears in the
 **Run** window as **JX Dev · module-name**, with clickable server URLs and
+the default address `http://127.0.0.1:4173` unless a port is configured. It includes
 Stop/Rerun controls. Starting again focuses the existing process; stop it before
 switching applications. **Tools → Stop JX Development Server**, the console Stop
 button, and closing the project terminate the owned server and active build.

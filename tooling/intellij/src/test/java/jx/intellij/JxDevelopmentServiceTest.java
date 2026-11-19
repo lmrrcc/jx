@@ -102,6 +102,28 @@ public final class JxDevelopmentServiceTest extends BasePlatformTestCase {
         assertFalse(service.isRunning());
     }
 
+    public void testGutterClickLaunchesContainingModuleInRunConsole() {
+        var file = myFixture.addFileToProject("examples/example app/src/main/jx/App.jx", "class App {}");
+        var contentRoot = file.getVirtualFile().getParent().getParent().getParent().getParent();
+        com.intellij.testFramework.PsiTestUtil.addContentRoot(getModule(), contentRoot);
+        try {
+        var identifier = file.findElementAt(file.getText().indexOf("App"));
+        var marker = new JxRunLineMarkerProvider().getLineMarkerInfo(identifier);
+        assertNotNull("The authored class must expose a Run gutter action", marker);
+        com.intellij.testFramework.ServiceContainerUtil.replaceService(getProject(), JxDevelopmentService.class,
+                service, getTestRootDisposable());
+        var renderer = marker.createGutterRenderer();
+        assertNotNull(renderer.getClickAction());
+        renderer.getClickAction().actionPerformed(com.intellij.openapi.actionSystem.AnActionEvent.createFromAnAction(
+                renderer.getClickAction(), null, "test", com.intellij.openapi.actionSystem.DataContext.EMPTY_CONTEXT));
+        awaitReady();
+        assertEquals(module, service.currentPlan().module());
+        assertEquals("JX Dev · example app", service.consoleDescriptor().getDisplayName());
+        } finally {
+            com.intellij.testFramework.PsiTestUtil.removeContentEntry(getModule(), contentRoot);
+        }
+    }
+
     public void testUntrustedProjectCannotStartWrapper() {
         TrustedProjects.setTrusted(getProject(), false);
         assertFalse(TrustedProjects.isTrusted(getProject()));

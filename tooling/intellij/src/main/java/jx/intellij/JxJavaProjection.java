@@ -10,6 +10,7 @@ import com.intellij.openapi.roots.ProjectRootModificationTracker;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiJavaFile;
 import com.intellij.psi.PsiManager;
@@ -22,6 +23,7 @@ import com.intellij.psi.util.PsiModificationTracker;
 import com.intellij.psi.util.PsiTreeUtil;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +38,17 @@ public final class JxJavaProjection {
     private static final Logger LOG = Logger.getInstance(JxJavaProjection.class);
     private static final int MAX_FILES = 10_000, MAX_SOURCE_CHARS = 4 * 1024 * 1024;
     private static final long MAX_TOTAL_CHARS = 64L * 1024 * 1024;
+    private static final long MAX_RETAINED_CHARS = 64L * 1024 * 1024;
+    private static final long MAX_TRANSIENT_CHARS = 16L * 1024 * 1024;
     private static final Key<CachedValue<Snapshot>> SNAPSHOT = Key.create("jx.java.projection.snapshot");
     private final Project project;
+    // Keys contain immutable snapshots, never PSI. Compiler work runs outside these short
+    // cache locks; competing read actions may compute twice but cannot publish stale content.
+    private final Map<Path, Batch> moduleCache = new LinkedHashMap<>(16, 0.75f, true);
+    private final Map<VariantKey, Variant> variantCache = new LinkedHashMap<>(8, 0.75f, true);
+    private record Batch(List<SourceFile> sources, List<GeneratedSource> generated, long weight) {}
+    private record VariantKey(Path path, List<SourceFile> sources) {}
+    private record Variant(Optional<GeneratedSource> generated, long weight) {}
     public JxJavaProjection(Project project) { this.project = project; }
     public static JxJavaProjection getInstance(Project project) { return project.getService(JxJavaProjection.class); }
 
@@ -47,7 +58,11 @@ public final class JxJavaProjection {
     }
     Snapshot snapshot() {
         return CachedValuesManager.getManager(project).getCachedValue(project, SNAPSHOT,
-                () -> CachedValueProvider.Result.create(readSnapshot(), PsiModificationTracker.MODIFICATION_COUNT,
+                () -> CachedValueProvider.Result.create(readSnapshot(),
+                        PsiModificationTracker.getInstance(project).forLanguage(JxLanguage.INSTANCE),
+                        // Closed-file VFS writes need not produce a language PSI event.
+                        // Content-keyed batches keep unrelated VFS events from compiling JX.
+                        VirtualFileManager.getInstance(),
                         ProjectRootModificationTracker.getInstance(project), DumbService.getInstance(project).getModificationTracker()), false);
     }
     Optional<GeneratedSource> forHost(JxJavaInjectionHost host) {
@@ -63,7 +78,24 @@ public final class JxJavaProjection {
         var sources = new ArrayList<>(root == null ? List.<SourceFile>of() : state.batches().getOrDefault(root, List.of()));
         sources.removeIf(source -> source.path().equals(path));
         sources.add(new SourceFile(path, text));
-        return EditorProjection.project(sources).stream().filter(source -> source.source().path().equals(path)).findFirst();
+        var key = new VariantKey(path, ordered(sources));
+        synchronized (variantCache) {
+            Variant cached = variantCache.get(key);
+            if (cached != null) return cached.generated();
+        }
+        var generated = EditorProjection.project(key.sources()).stream().filter(source -> source.source().path().equals(path)).findFirst();
+        long weight = sourceWeight(key.sources()) + generated.map(JxJavaProjection::generatedWeight).orElse(0L);
+        if (weight <= MAX_TRANSIENT_CHARS) synchronized (variantCache) {
+            Variant existingVariant = variantCache.get(key);
+            if (existingVariant != null) return existingVariant.generated();
+            variantCache.put(key, new Variant(generated, weight));
+            long retained = variantCache.values().stream().mapToLong(Variant::weight).sum();
+            var entries = variantCache.entrySet().iterator();
+            while (entries.hasNext() && (variantCache.size() > 8 || retained > MAX_TRANSIENT_CHARS)) {
+                retained -= entries.next().getValue().weight(); entries.remove();
+            }
+        }
+        return generated;
     }
     static Path path(PsiFile file) {
         VirtualFile virtual = file.getOriginalFile().getVirtualFile();
@@ -110,18 +142,59 @@ public final class JxJavaProjection {
                 PsiFile file = PsiManager.getInstance(project).findFile(virtual);
                 if (file == null || file.getTextLength() > MAX_SOURCE_CHARS) continue;
                 Path path = path(file); Path root = moduleRoot(virtual);
-                String text = file.getText(); total += text.length();
+                // PSI owns leading/trailing whitespace outside this host. Native injection
+                // uses the host snapshot, so indexing must use that same coordinate space.
+                JxJavaInjectionHost host = host(file);
+                if (host == null) continue;
+                String text = host.getText();
+                if (total + text.length() > MAX_TOTAL_CHARS) {
+                    LOG.warn("JX native Java project analysis exceeds its source budget; remaining files use local analysis"); break;
+                }
+                total += text.length();
                 files.put(path, virtual); roots.put(path, root);
                 batches.computeIfAbsent(root, ignored -> new ArrayList<>()).add(new SourceFile(path, text));
             }
         }
         var generated = new LinkedHashMap<Path, GeneratedSource>();
-        for (List<SourceFile> batch : batches.values()) {
+        batches.replaceAll((root, batch) -> ordered(batch));
+        for (var entry : batches.entrySet()) {
             ProgressManager.checkCanceled();
-            for (GeneratedSource source : EditorProjection.project(batch)) generated.put(source.source().path(), source);
+            for (GeneratedSource source : projectBatch(entry.getKey(), entry.getValue())) generated.put(source.source().path(), source);
         }
-        batches.replaceAll((root, batch) -> List.copyOf(batch));
+        synchronized (moduleCache) { moduleCache.keySet().retainAll(batches.keySet()); }
         return new Snapshot(generated, files, batches, roots);
+    }
+    private List<GeneratedSource> projectBatch(Path root, List<SourceFile> sources) {
+        synchronized (moduleCache) {
+            Batch cached = moduleCache.get(root);
+            if (cached != null && cached.sources().equals(sources)) return cached.generated();
+        }
+        List<GeneratedSource> generated = EditorProjection.project(sources);
+        long weight = sourceWeight(sources) + generated.stream().mapToLong(JxJavaProjection::generatedWeight).sum();
+        synchronized (moduleCache) {
+            Batch cached = moduleCache.get(root);
+            if (cached != null && cached.sources().equals(sources)) return cached.generated();
+            moduleCache.remove(root);
+            if (weight <= MAX_RETAINED_CHARS) {
+                moduleCache.put(root, new Batch(sources, generated, weight));
+                long retained = moduleCache.values().stream().mapToLong(Batch::weight).sum();
+                var entries = moduleCache.entrySet().iterator();
+                while (entries.hasNext() && (moduleCache.size() > 64 || retained > MAX_RETAINED_CHARS)) {
+                    retained -= entries.next().getValue().weight(); entries.remove();
+                }
+            }
+        }
+        return generated;
+    }
+    private static List<SourceFile> ordered(List<SourceFile> sources) {
+        return sources.stream().sorted(Comparator.comparing(source -> source.path().toString())).toList();
+    }
+    private static long sourceWeight(List<SourceFile> sources) {
+        return sources.stream().mapToLong(source -> source.content().length()).sum();
+    }
+    private static long generatedWeight(GeneratedSource source) {
+        // Include a conservative allowance for mapping records in addition to text.
+        return source.javaSource().length() + 32L * source.sourceMap().segments().size();
     }
     private Path moduleRoot(VirtualFile file) {
         for (VirtualFile directory = file.getParent(); directory != null; directory = directory.getParent()) {

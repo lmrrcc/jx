@@ -166,6 +166,10 @@ final class MarkupParser {
         List<Node> children = new ArrayList<>();
         while (cursor < text.length()) {
             if (editor && javaTail()) break;
+            if (starts("<!--")) {
+                skipMarkupComment();
+                continue;
+            }
             if (starts("</")) {
                 int closeStart = cursor;
                 cursor += 2;
@@ -248,6 +252,19 @@ final class MarkupParser {
             return;
         }
         cursor = end + 2;
+    }
+
+    /** Markup comments are neither rendered children nor Java interpolation contexts. */
+    private void skipMarkupComment() {
+        int start = cursor;
+        int end = text.indexOf("-->", cursor + 4);
+        if (end < 0) {
+            if (!editor) fail("JX015", "Unterminated markup comment; expected '-->'", start);
+            report("JX015", "Unterminated markup comment; expected '-->'", start);
+            cursor = text.length();
+            return;
+        }
+        cursor = end + 3;
     }
 
     private void skipQuoted() {

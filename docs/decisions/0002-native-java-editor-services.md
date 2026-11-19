@@ -46,6 +46,13 @@ inside methods and markup expressions. The platform maps edits through its
 injected document. A Java element finder and reference/search integration expose
 JX declarations to the surrounding Java project.
 
+The injection host also registers an `ElementManipulator`: `updateText` alone is
+insufficient for native Java intention/ModCommand transactions. Host replacements
+must not schedule whole-file reformatting during a local rename or quick fix.
+Native host formatting, structure, folding, comments and typing are tracked in
+[the mixed-language decision](0004-intellij-mixed-language-editing.md); they are
+separate contracts rather than automatic consequences of Java injection.
+
 Maven-generated counterparts otherwise become duplicate Java declarations.
 For the standard Maven output directories, a language substitutor treats only
 manifest-owned counterparts as plain text in the IDE. Ownership requires an

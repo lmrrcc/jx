@@ -10,6 +10,20 @@
         <fileType name="JX" language="JX" implementationClass="jx.intellij.JxFileType" fieldName="INSTANCE" extensions="jx"/>
         <lang.parserDefinition language="JX" implementationClass="jx.intellij.JxParserDefinition"/>
         <lang.syntaxHighlighterFactory language="JX" implementationClass="jx.intellij.JxSyntaxHighlighterFactory"/>
+        <colorSettingsPage implementation="jx.intellij.JxColorSettingsPage"/>
+        <codeInsight.lineMarkerProvider language="JX" implementationClass="jx.intellij.JxRunLineMarkerProvider"/>
+        <lang.braceMatcher language="JX" implementationClass="jx.intellij.JxBraceMatcher"/>
+        <lang.quoteHandler language="JX" implementationClass="jx.intellij.JxQuoteHandler"/>
+        <lang.commenter language="JX" implementationClass="jx.intellij.JxCommenter"/>
+        <lang.elementManipulator forClass="jx.intellij.JxJavaInjectionHost" implementationClass="jx.intellij.JxJavaHostManipulator"/>
+        <lang.importOptimizer language="JX" implementationClass="jx.intellij.JxImportOptimizer"/>
+        <fileIndentOptionsProvider implementation="jx.intellij.JxFormattingIndentOptionsProvider"/>
+        <lang.formatter language="JX" implementationClass="jx.intellij.JxFormattingModelBuilder"/>
+        <preFormatProcessor implementation="jx.intellij.JxFormattingPreProcessor"/>
+        <typedHandler implementation="jx.intellij.JxTagTypingHandler"/>
+        <enterHandlerDelegate implementation="jx.intellij.JxEnterHandler"/>
+        <lang.psiStructureViewFactory language="JX" implementationClass="jx.intellij.JxStructureViewFactory"/>
+        <lang.foldingBuilder language="JX" implementationClass="jx.intellij.JxFoldingBuilder"/>
         <multiHostInjector implementation="jx.intellij.JxJavaInjector"/>
         <java.elementFinder implementation="jx.intellij.JxJavaElementFinder" order="first"/>
         <java.shortNamesCache implementation="jx.intellij.JxShortNamesCache"/>

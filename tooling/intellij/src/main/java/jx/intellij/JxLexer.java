@@ -13,6 +13,10 @@ public final class JxLexer extends LexerBase {
     static final IElementType TEXT = token("TEXT"), KEYWORD = token("KEYWORD"), STRING = token("STRING"), COMMENT = token("COMMENT"), TAG = token("TAG"), NUMBER = token("NUMBER"),
             ATTRIBUTE = token("ATTRIBUTE"), ATTRIBUTE_VALUE = token("ATTRIBUTE_VALUE"), MARKUP_DELIMITER = token("MARKUP_DELIMITER"),
             EXPRESSION_DELIMITER = token("EXPRESSION_DELIMITER"), ENTITY = token("ENTITY"), OPERATOR = token("OPERATOR");
+    static final IElementType LBRACE = token("LBRACE"), RBRACE = token("RBRACE"),
+            LPAREN = token("LPAREN"), RPAREN = token("RPAREN"),
+            LBRACKET = token("LBRACKET"), RBRACKET = token("RBRACKET"),
+            EXPRESSION_START = token("EXPRESSION_START"), EXPRESSION_END = token("EXPRESSION_END");
     private static final Set<String> KEYWORDS = Set.of("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "enum", "extends", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long", "native", "new", "package", "private", "protected", "public", "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "try", "void", "volatile", "while", "true", "false", "null", "record", "sealed", "permits", "var", "yield", "when");
     private sealed interface Context permits JavaContext, MarkupContext {}
     private static final class JavaContext implements Context {
@@ -29,6 +33,11 @@ public final class JxLexer extends LexerBase {
     private CharSequence buffer = "";
     private int start, end, limit;
     private IElementType type;
+    private int state;
+    private boolean markupToken;
+    private boolean tagInteriorToken;
+    boolean isMarkupToken() { return markupToken; }
+    boolean isTagInteriorToken() { return tagInteriorToken; }
     private static IElementType token(String name) { return new IElementType(name, JxLanguage.INSTANCE); }
     @Override public void start(@NotNull CharSequence value, int startOffset, int endOffset, int initialState) {
         buffer = value; start = end = 0; limit = endOffset;
@@ -38,7 +47,12 @@ public final class JxLexer extends LexerBase {
         do { advance(); } while (type != null && end <= startOffset);
         start = Math.max(start, startOffset);
     }
-    @Override public int getState() { return 0; }
+    // IntelliJ may reuse all following cached tokens when it reaches the initial state.
+    // Only neutral outer Java is a safe synchronization point. Returning zero inside
+    // markup/interpolations makes edits to nesting leave stale colors farther below.
+    // Nonzero states are deliberately non-restartable; start() reconstructs their context
+    // by replaying the prefix, without a growing table of encoded nested states.
+    @Override public int getState() { return state; }
     @Override public IElementType getTokenType() { return type; }
     @Override public int getTokenStart() { return start; }
     @Override public int getTokenEnd() { return end; }
@@ -51,9 +65,14 @@ public final class JxLexer extends LexerBase {
     }
     @Override public void advance() {
         start = end;
+        state = contexts.size() == 1 && contexts.peek() instanceof JavaContext java
+                && !java.expression && java.allowsMarkup ? 0 : 1;
         if (start >= limit) { type = null; return; }
+        markupToken = contexts.peek() instanceof MarkupContext;
+        tagInteriorToken = contexts.peek() instanceof MarkupContext markup && markup.inTag;
         if (contexts.peek() instanceof MarkupContext markup) markup(markup);
         else java((JavaContext) contexts.peek());
+        if (type == MARKUP_DELIMITER || type == EXPRESSION_START || type == EXPRESSION_END) markupToken = true;
     }
     private void java(JavaContext java) {
         char first = buffer.charAt(end++);
@@ -76,17 +95,21 @@ public final class JxLexer extends LexerBase {
         } else if (Character.isDigit(first)) {
             while (end < limit && (Character.isLetterOrDigit(buffer.charAt(end)) || buffer.charAt(end) == '.' || buffer.charAt(end) == '_')) end++;
             type = NUMBER; java.allowsMarkup = false;
-        } else if (first == '{') { java.braces++; java.allowsMarkup = true; type = OPERATOR; }
-        else if (first == '}' && java.expression && --java.braces == 0) { contexts.pop(); type = EXPRESSION_DELIMITER; }
+        } else if (first == '{') { java.braces++; java.allowsMarkup = true; type = LBRACE; }
+        else if (first == '}' && java.expression && --java.braces == 0) { contexts.pop(); type = EXPRESSION_END; }
         else {
             if (first == '-' && end < limit && buffer.charAt(end) == '>') end++;
             java.allowsMarkup = "(=?:,[;".indexOf(first) >= 0 || at(start, "->");
-            type = OPERATOR;
+            type = switch (first) {
+                case '(' -> LPAREN; case ')' -> RPAREN;
+                case '[' -> LBRACKET; case ']' -> RBRACKET;
+                case '}' -> RBRACE; default -> OPERATOR;
+            };
         }
     }
     private void markup(MarkupContext markup) {
         char first = buffer.charAt(end++);
-        if (first == '{') { contexts.push(new JavaContext(true)); type = EXPRESSION_DELIMITER; }
+        if (first == '{') { contexts.push(new JavaContext(true)); type = EXPRESSION_START; }
         else if (at(start, "<!--")) { end = start + 4; until("-->"); type = COMMENT; }
         else if (first == '<' && !markup.inTag) openTag(markup);
         else if (markup.inTag) {

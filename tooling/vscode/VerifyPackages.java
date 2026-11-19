@@ -13,12 +13,15 @@ import java.util.zip.ZipFile;
 public final class VerifyPackages {
     private static final int MAX_JAR_BYTES = 64 * 1024 * 1024;
     public static void main(String[] args) throws Exception {
+        if (args.length > 1 || args.length == 1 && !args[0].equals("--intellij-only"))
+            throw new IllegalArgumentException("Usage: VerifyPackages.java [--intellij-only]");
+        boolean intellijOnly = args.length == 1;
         Path server = Path.of("jx-language-server/target/jx-language-server-0.1.0-SNAPSHOT.jar");
         Path compiler = Path.of("jx-compiler/target/jx-compiler-0.1.0-SNAPSHOT.jar");
         Path bridge = Path.of("tooling/vscode/server/jx-java-bridge.jar");
         byte[] expected = Files.readAllBytes(server);
         Path vscode = Path.of("tooling/vscode/jx-language-0.2.0.vsix");
-        try (var zip = new ZipFile(vscode.toFile())) {
+        if (!intellijOnly) try (var zip = new ZipFile(vscode.toFile())) {
             var entry = zip.getEntry("extension/server/jx-language-server.jar");
             if (entry == null) throw new IOException("VSIX is missing the shared language server");
             try (var input = zip.getInputStream(entry)) { equal(expected, bounded(input), "VSIX"); }
@@ -28,7 +31,7 @@ public final class VerifyPackages {
                 equal(Files.readAllBytes(bridge), bounded(input), "VSIX Java bridge");
             }
         }
-        Path intellij = Path.of("tooling/intellij/build/distributions/jx-intellij-0.2.0.zip");
+        Path intellij = Path.of("tooling/intellij/build/distributions/jx-intellij-0.3.2.zip");
         int found = 0, compilers = 0;
         try (var zip = new ZipFile(intellij.toFile())) {
             for (var entry : zip.stream().filter(item -> item.getName().endsWith(".jar")).toList()) {
@@ -48,8 +51,10 @@ public final class VerifyPackages {
         }
         if (found != 1) throw new IOException("Expected exactly one bundled IntelliJ server; found " + found);
         if (compilers != 1) throw new IOException("Expected exactly one bundled IntelliJ compiler; found " + compilers);
-        System.out.println("PASS: editor packages bundle the current language server, compiler and Java bridge byte-for-byte.");
-        for (Path file : new Path[] {server, compiler, bridge, vscode, intellij}) {
+        System.out.println(intellijOnly
+                ? "PASS: IntelliJ package bundles the current language server and compiler byte-for-byte."
+                : "PASS: editor packages bundle the current language server, compiler and Java bridge byte-for-byte.");
+        for (Path file : intellijOnly ? new Path[] {server, compiler, intellij} : new Path[] {server, compiler, bridge, vscode, intellij}) {
             System.out.println(HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file))) + "  " + file);
         }
     }

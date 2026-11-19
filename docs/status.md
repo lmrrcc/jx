@@ -16,7 +16,7 @@ browser, or editor distribution.
 | Elm | Immutable transitions, pure updates, serialized committed store snapshots, keyed commands/subscriptions, cancellation, stale-response protection, and Strict Mode lifecycle tests. |
 | Browser services | Same-origin asynchronous bounded JSON HTTP, typed outcomes, cancellation/timeouts, history, route parameters, query strings, and back/forward navigation. |
 | Shared LSP | Compiler diagnostics, component/property completion, declared Java type hover, definition navigation, symbols, incomplete markup, UTF-16 positions, cancellation, and version handling. |
-| Editor packages | Version 0.2.0 integrates IntelliJ Java PSI and Red Hat Java/JDT LS for native Java editing, alongside mixed Java/HTML highlighting and module-aware development start/stop; tested operations and remaining limits are in the [tooling guide](tooling.md). |
+| Editor packages | IntelliJ 0.3.2 adds a Run gutter action for `.jx` classes, alongside projection reuse and native theme presentation; VS Code remains 0.2.0. Both integrate native Java engines and module-aware development start/stop; tested operations and limits are in the [tooling guide](tooling.md). |
 | Complete example | A Java/.jx todo application with controlled forms, keyboard submission/focus, custom hook, context, MVU workflows, async states, routing, filters, and Spring Boot persistence. |
 
 `jx-core` has no Spring, database, or browser implementation dependency.

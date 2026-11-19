@@ -1,6 +1,7 @@
 package jx.intellij;
 
 import com.intellij.lang.injection.InjectedLanguageManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiFile;
@@ -31,6 +32,7 @@ public final class JxGeneratedSourcesTest extends LightJavaCodeInsightFixtureTes
             """;
     private PsiFile authored, generated, javaConsumer, jxConsumer;
     private String generatedText;
+    private VirtualFile generatedRoot;
 
     @Override protected LightProjectDescriptor getProjectDescriptor() { return JAVA_25; }
 
@@ -48,7 +50,7 @@ public final class JxGeneratedSourcesTest extends LightJavaCodeInsightFixtureTes
         myFixture.addFileToProject("target/jx/main/sample/Counter.jxmap", authored.getVirtualFile().getUrl() + "\n"
                 + compilation.generatedSources().getFirst().sourceMap().serialize());
         generated = myFixture.addFileToProject("target/generated-sources/jx/sample/Counter.java", generatedText);
-        var generatedRoot = generated.getVirtualFile().getParent().getParent();
+        generatedRoot = generated.getVirtualFile().getParent().getParent();
         PsiTestUtil.addSourceRoot(getModule(), generatedRoot, JavaSourceRootType.SOURCE, new JavaSourceRootProperties("", true));
         javaConsumer = myFixture.addFileToProject("sample/JavaConsumer.java", """
                 package sample;
@@ -64,6 +66,15 @@ public final class JxGeneratedSourcesTest extends LightJavaCodeInsightFixtureTes
                 }
                 """);
         myFixture.configureFromExistingVirtualFile(authored.getVirtualFile());
+    }
+
+    @Override protected void tearDown() throws Exception {
+        try {
+            if (generatedRoot != null) PsiTestUtil.removeSourceRoot(getModule(), generatedRoot);
+        } finally {
+            generatedRoot = null;
+            super.tearDown();
+        }
     }
 
     public void testNativeClassFinderAndShortNamesPreferAuthoredDeclaration() {

@@ -26,6 +26,9 @@ and print their SHA-256 hashes from the repository root:
 java tooling/vscode/VerifyPackages.java
 ```
 
+When rebuilding only IntelliJ, use `java tooling/vscode/VerifyPackages.java --intellij-only`
+to verify its bundled compiler and language server without checking an older VSIX.
+
 ## Java editing matrix
 
 | Operation in `.jx` | IntelliJ IDEA 2026.1.3 | VS Code 1.138 / Red Hat Java 1.58 |
@@ -36,7 +39,10 @@ java tooling/vscode/VerifyPackages.java
 | Java → JX navigation | Native navigation | **JX: Go to Definition**, also scoped to F12 in Java files of JX modules |
 | Local and method rename | Native mapped edits across Java/JX | Mapped edits; ordinary Java targets must be open |
 | Component class/file rename | Authored declaration, constructors, Java references, tags and `.jx` filename | Rejected atomically until complete mappings are available |
-| Whole-file formatting, arbitrary structural refactoring, browser debugging | Not advertised | Not advertised |
+| Import quick fixes and Optimize Imports from markup | Native Java edit manipulator and host optimizer; incomplete markup protected | See bounded Java edit support below |
+| Structure, folding, comments and tag typing | Host services with authored navigation and Java indentation settings | Not advertised as equivalent native services |
+| Reformat Code / selection | Native Java whitespace plus markup-safe layout; meaningful text preserved | Not advertised |
+| Arbitrary structural refactoring, browser debugging | Not advertised | Not advertised |
 
 Native Java editing uses the project's imported Java dependencies. Opening a
 `.jx` file as plain text or assigning it the `java` language ID bypasses the JX
@@ -174,8 +180,13 @@ installation, the locally executed variant is:
 
 Gradle 9.7.1 is pinned with its distribution SHA-256. The IntelliJ Platform Gradle
 plugin is 2.18.1 and Plugin Verifier is 1.411. Install
-`tooling/intellij/build/distributions/jx-intellij-0.2.0.zip` through **Settings →
+`tooling/intellij/build/distributions/jx-intellij-0.3.2.zip` through **Settings →
 Plugins → Install Plugin from Disk**.
+
+Version 0.3.1 removes the injected-fragment background from normal JX editing,
+uses theme HTML colors (customizable under **Editor → Color Scheme → JX**), and
+reuses unchanged compiler projections. The [performance and presentation report](intellij-performance.md)
+records the reproduced defects, before/after measurements and their limits.
 
 Set the Java executable under **Settings → Languages & Frameworks → JX**. The
 default uses the IDE's bundled Java 25 runtime. The same page accepts additional
@@ -207,13 +218,18 @@ stable, while project roots are supplied through LSP initialization.
 file's Maven module and ancestor wrapper. The Run console provides clickable
 URLs and Stop/Rerun controls. Starting again focuses the existing process;
 **Tools → Stop JX Development Server** and project disposal stop owned processes.
+Version 0.3.2 also provides a green Run gutter icon beside the class matching a
+`.jx` filename, such as `App` in `App.jx`. It launches this same containing-module
+workflow, preserving trust checks and process ownership. It does not run a
+component in isolation or invoke a JVM entry point. The default port is 4173;
+the console URL reflects any configured override.
 The JX settings page also accepts development arguments (one per line), a Maven
 repository override, and optional use of an existing project cache. See the
 [plugin guide](../tooling/intellij/README.md).
 
 Plugin Verifier passes for `IU-261.25134.95` with **zero internal API usages**.
-The 12 deprecated and 14 experimental API warnings are retained; compatibility
-with future IDEs is not inferred. All **42 IntelliJ SDK tests** pass for 0.2.0.
+The 15 deprecated and 18 experimental API warnings are retained; compatibility
+with future IDEs is not inferred. All **89 IntelliJ SDK tests** pass for 0.3.1.
 The declared build range is intentionally narrow. SDK tests cover mixed-language
 highlighting and lexer restarts, module discovery/settings, a live LSP-manager
 integration, and Run console process lifecycle including duplicate starts,
@@ -227,9 +243,46 @@ is incomplete, source navigation, cross-file reference searches and rename,
 markup references, completion imports, native Java inspections, class/file rename
 and undo. Synthetic generated code is read-only;
 source edits must map to authored Java or explicit markup references.
-Whole-file formatting, arbitrary Java refactorings and browser debugger stepping
-are not advertised. A broader IDE/product matrix, remote development, and a
+Version 0.3.0 adds a registered injection-host manipulator required by native
+Java intention and ModCommand edits, fixing Add Import and inspection quick fixes.
+Its host import optimizer makes Optimize Imports available from markup, retains
+component references and import comments, and declines unsafe incomplete-source
+changes. Structure view and folding target authored `.jx`, including unsaved edits.
+Context-aware comments, quote pairs, automatic closing tags and paired-tag Enter
+use normal editor actions. Comments inside tag attributes are deliberately not
+inserted because XML comment delimiters are invalid there.
+
+Reformat Code and selection formatting use the native Java formatter on a detached
+projection, accepting only whitespace edits wholly within exact copied Java ranges.
+The host layout model preserves meaningful markup text, strings and comments,
+and follows Java indent/tab settings. If native formatting rewrites non-whitespace
+tokens, such as Javadoc or text-block contents, Java whitespace mapping is declined.
+This bounded formatter is not arbitrary Java/XML restructuring.
+
+The [TSX/Java architecture study](decisions/0004-intellij-mixed-language-editing.md)
+explains why the current projection does not provide universal Java feature parity.
+Arbitrary Java refactorings and browser debugger stepping remain unverified.
+A broader IDE/product matrix, remote development, and a
 manual install-and-edit walkthrough remain separate checks.
+
+The 0.3.1 IntelliJ package was built and verified locally on 2026-11-19. Its additional checks
+cover light/Darcula editor painting, theme overrides, incremental token updates,
+projection reuse/invalidation, JX-only packages and rename offsets after leading
+whitespace. The earlier scoped Maven build passed 49 core/compiler/language-server
+tests, including the five markup-comment regressions; those artifacts are unchanged
+by the 0.3.1 editor fixes. Package verification confirms the ZIP contains the current
+compiler and shared server byte-for-byte. ZIP SHA-256:
+`0a42ed36138117b5188a967f5e07fb780fb541b1255d0892cf5d58718fff8e8b`.
+
+The 0.3.2 package adds the Run gutter action. Plugin Verifier reports compatibility
+with `IU-261.25134.95`, zero internal API usages, and the same 15 deprecated/18
+experimental API warnings. All **92 IntelliJ SDK tests** pass,
+including invoking the actual gutter click action, selecting the containing Maven
+module and displaying its process in the Run console. The process-boundary fixture
+uses a Java test server behind a temporary wrapper; it does not rebuild the counter
+application during the IDE test. Package verification confirms the unchanged
+compiler/server bytes. ZIP SHA-256:
+`68f9ff39ec24c0c11cd9e27676e9ecbe5bf2f41bcec1ba005fe4933ed82e2288`.
 
 ## Verification scope
 
@@ -247,5 +300,6 @@ yet been executed remotely; local macOS results do not establish Linux CI succes
 
 The 0.2.0 packages were verified locally on 2026-11-18. The complete installed
 VS Code suite and separate native JDT suite passed; the latter also proves Maven
-main/test visibility. Package identity checks confirm that both installers contain
-the current shared server and their current compiler/Java bridge dependencies.
+main/test visibility. At that revision, package identity checks confirmed that
+both installers contained the matching shared server and compiler/Java bridge
+dependencies. The IntelliJ-only 0.3.1 verification above does not rebuild the VSIX.

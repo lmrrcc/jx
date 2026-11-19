@@ -6,6 +6,12 @@ declarations, and generates readable Java. It does not evaluate application code
 The [counter application](../examples/counter-app/src/main/jx/jx/example/counter/)
 is a compiling consumer of this contract.
 
+Inside element or fragment children, `<!-- ... -->` is a markup comment: its
+contents are neither rendered nor interpreted as Java. Comments do not change
+the text on either side. Unterminated comments report `JX015` at the opening
+delimiter. Java comments and comment-like strings inside Java or quoted attribute
+values keep their ordinary meaning; markup comments are not attribute syntax.
+
 ## Components and properties
 
 A component is a non-generic top-level class annotated with `@jx.Component`

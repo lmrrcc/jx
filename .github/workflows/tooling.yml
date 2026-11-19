@@ -36,7 +36,7 @@ jobs:
           if-no-files-found: error
           path: |
             tooling/vscode/jx-language-0.2.0.vsix
-            tooling/intellij/build/distributions/jx-intellij-0.2.0.zip
+            tooling/intellij/build/distributions/jx-intellij-0.3.2.zip
       - uses: actions/upload-artifact@v4
         if: always()
         with:

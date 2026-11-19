@@ -27,8 +27,9 @@ final class JxClassName extends LightElement implements PsiNamedElement {
         var projection = JxJavaProjection.getInstance(type.getProject()).forHost(host).orElseThrow();
         var original = projection.sourceMap().editableSourceSpan(new SourceSpan(range.getStartOffset(), range.getEndOffset()))
                 .orElseThrow(() -> new IncorrectOperationException("Generated class names cannot be renamed"));
-        PsiElement identifier = host.getContainingFile().findElementAt(original.start());
-        if (identifier == null || !identifier.getTextRange().equals(new TextRange(original.start(), original.end())))
+        TextRange authored = new TextRange(original.start(), original.end()).shiftRight(host.getTextRange().getStartOffset());
+        PsiElement identifier = host.getContainingFile().findElementAt(authored.getStartOffset());
+        if (identifier == null || !identifier.getTextRange().equals(authored))
             throw new IncorrectOperationException("The authored class identifier cannot be mapped exactly");
         return new JxClassName(type, identifier);
     }
