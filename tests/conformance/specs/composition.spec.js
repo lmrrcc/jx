@@ -95,9 +95,10 @@ test('is-valid-element: elements and fragments are valid elements; text, numbers
 
 test('children-utilities: Children counts, lists, maps and singles out the children it is given', async ({page, open}) => {
   await open('children-utilities');
-  // A nested list is flattened: one element and a list of two make three children.
-  await expect(page.getByRole('status')).toHaveText('3/3');
-  expect(await page.locator('li').allTextContents()).toEqual(['a', 'b', 'c']);
+  // A nested list is flattened; the empty child is counted but not listed.
+  await expect(page.getByRole('status')).toHaveText('4/3');
+  // map visits the empty child too.
+  expect(await page.locator('li').allTextContents()).toEqual(['a', '', 'b', 'c']);
   await expect(page.getByTestId('only').locator('em')).toHaveText('one');
 });
 

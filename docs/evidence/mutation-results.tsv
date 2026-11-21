@@ -30,7 +30,7 @@ touches-empty	killed	pointer-events	Touch lists are always empty
 focus-noop	killed	create-ref,dom-ref-focus,forward-ref,imperative-handle,ref-as-prop	DOM ref focus does nothing
 style-dropped	killed	attributes	Typed style values are not applied
 boolean-child-rejected	killed	child-values	Boolean children are no longer ignored
-nested-iterable-dropped	killed	child-values,children-utilities,generic-list,keyed-list	Iterable children render nothing
+nested-iterable-dropped	killed	child-slots,child-values,children-utilities,generic-list,keyed-list	Iterable children render nothing
 array-child-dropped	killed	child-values	Array children render nothing
 for-alias-broken	killed	attributes,use-id	The for attribute is lowered to a wrong name
 memo-never-skips	killed	memo-skip	Memoized components render on every parent render
@@ -48,4 +48,6 @@ portal-in-place	killed	portal	Portal content renders in place
 flush-sync-deferred	killed	flush-sync	flushSync does not commit before returning
 clone-keeps-children	killed	clone-element	A clone ignores its new children
 clone-ignores-attributes	killed	clone-element	A clone ignores its new attributes
-children-not-listed	killed	children-utilities	Nested children count as one
+children-not-listed	killed	children-utilities	Children does not look through collection children
+empty-child-dropped	killed	child-slots,children-utilities	Null children give up their position
+collection-flattened	killed	child-slots	Collection children are flattened into their siblings

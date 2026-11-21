@@ -6,8 +6,7 @@ by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
 Progress, 21 November 2026: M1-01 to M1-05 and R-01 to R-05 are done, committed as
 `75d79c2` with Verify green. `main` is protected: a change reaches it only through
-a pull request whose Verify check has passed. R-06 to R-11 are done. The next task is R-32, a defect found on the way: JX loses the
-state of a sibling written after a null child or a nested list.
+a pull request whose Verify check has passed. R-06 to R-11 and R-32 are done. The next task is R-12.
 
 ## Rules
 
@@ -91,8 +90,8 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-09 | M2 | Optional and default props, typed prop forwarding in place of spread, generic components | 3 | done |
 | R-10 | M2 | `createPortal`, `flushSync` | 2 | done |
 | R-11 | M2 | Typed equivalents of `Children`, `cloneElement` and `isValidElement` | 3 | done |
-| R-32 | M2 | Child positions: a null or boolean child and a nested list each keep one position among their siblings, so a later sibling keeps its state. Found by the `child-slots` case on 21 November 2026; `Children.count` then counts empty positions as React does | 1 | next |
-| R-12 | M3 | `useTransition`, `startTransition`, `useDeferredValue` | 3 | planned |
+| R-32 | M2 | Child positions: a null or boolean child and a nested list each keep one position among their siblings, so a later sibling keeps its state. Found by the `child-slots` case on 21 November 2026; `Children.count` then counts empty positions as React does | 1 | done |
+| R-12 | M3 | `useTransition`, `startTransition`, `useDeferredValue` | 3 | next |
 | R-13 | M3 | `Suspense` and `use` for promises and context | 2 | planned |
 | R-14 | M3 | `lazy`, on the lazy-runtime boundary proven in M1 | 1 | planned |
 | R-15 | M3 | `Activity`; `ViewTransition` and `addTransitionType` | 3 | planned |

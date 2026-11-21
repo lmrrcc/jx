@@ -12,6 +12,7 @@ public final class ChildrenUtilities {
             <main>
                 <ChildrenInspect>
                     <span>a</span>
+                    {null}
                     {List.of("b", "c").stream().map(name -> <span key={name}>{name}</span>).toList()}
                 </ChildrenInspect>
                 <ChildrenSingle><em>one</em></ChildrenSingle>

@@ -32,7 +32,7 @@ react:memo	api	supported	memo-skip	@Memo, ComponentType.memo		Declared on the co
 react:forwardRef	api	equivalent	forward-ref	ref as a Props field		Deprecated in React 19; a JX component receives ref as an ordinary prop
 react:createElement	api	equivalent	attributes,children-prop	Markup, Views.element, Views.component		
 react:cloneElement	legacy	equivalent	clone-element	Views.cloneElement		DOM element views only; a component view is rebuilt from a new Props record
-react:Children	legacy	equivalent	children-utilities	jx.Children		count, toList, map, forEach and only over a View children prop; null children are not counted until R-32
+react:Children	legacy	equivalent	children-utilities	jx.Children		count, toList, map, forEach and only over a View children prop
 react:isValidElement	legacy	equivalent	is-valid-element	Views.isValidElement		Also expressible as instanceof View
 react:createRef	legacy	equivalent	create-ref	new DomRef(), new Ref<>(initial)		Ref objects are plain Java objects and may be created outside a component
 react:Component	legacy	equivalent	error-boundary	React.boundary	R-28	Only the error-boundary use is offered; class components are not authored in JX
@@ -80,7 +80,7 @@ jsx:children	markup	supported	children-prop	children property of type View
 jsx:conditional-rendering	markup	supported	conditional	Java ternary and null		
 jsx:list-rendering	markup	supported	keyed-list,child-values	Iterable and array children		
 jsx:child-values	markup	supported	child-values	Views child normalization		
-jsx:child-slot-identity	markup	unsupported	child-slots		R-32	A null child or a nested list is flattened away when the view is built, so a later sibling changes position and loses its state
+jsx:child-slot-identity	markup	supported	child-slots	View.Empty, View.Items		A null or boolean child and a collection child each keep one position
 jsx:text-and-entities	markup	supported	text-escaping			
 jsx:props-update	markup	supported	props-update	Typed record props		
 jsx:custom-hooks	markup	supported	custom-hook	Ordinary static methods named useX		
