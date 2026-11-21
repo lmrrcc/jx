@@ -4,6 +4,7 @@ import jx.*;
 import jx.spi.HookRuntime;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import org.teavm.jso.*;
 
@@ -48,6 +49,50 @@ final class ReactHooks implements HookRuntime {
         Consumer<A> dispatch = memoRaw(() -> action -> dispatchNative(setter, action), Dependencies.none());
         return new ReducerState<>(snapshot, dispatch);
     }
+    @Override public <S, A> ReducerState<S, A> reducerLazy(BiFunction<S, A, S> reducer, Supplier<S> initial, StateCodec<S> codec) {
+        JSObject slot = HotReload.slot("reducer");
+        Ref<StateCodec<S>> selected = HotReload.enabled() ? Interop.value(refNative(new Ref<>(codec))) : null;
+        JSObject pair = reducerNative((old, action) -> {
+            S next = reducer.apply(Interop.value(old), Interop.value(action));
+            return Interop.same(old, next) ? old : next;
+        }, () -> {
+            S value = initial.get();
+            if (selected == null) return value;
+            if (selected.current() == null) selected.set(StateCodecs.forInitialValue(value));
+            return HotReload.restore(slot, selected.current(), value);
+        });
+        S snapshot = Interop.value(value(pair));
+        HotReload.record(slot, selected == null ? null : selected.current(), () -> snapshot);
+        JSObject setter = setter(pair);
+        Consumer<A> dispatch = memoRaw(() -> action -> dispatchNative(setter, action), Dependencies.none());
+        return new ReducerState<>(snapshot, dispatch);
+    }
+    @Override public void insertionEffect(Effect effect, Dependencies dependencies) {
+        HotReload.slot("insertion-effect");
+        Setup setup = () -> {
+            Runnable cleanup = effect.setup();
+            return cleanup == null ? null : cleanup::run;
+        };
+        insertionNative(setup, Interop.dependencies(dependencies));
+    }
+    @JSFunctor interface Call extends JSObject { void call(Object argument); }
+    @JSFunctor interface Format extends JSObject { String format(Object value); }
+    @Override public <A> Consumer<A> effectEvent(Consumer<A> callback) {
+        HotReload.slot("effect-event");
+        JSObject event = effectEventNative(argument -> callback.accept(Interop.value(argument)));
+        return argument -> callEvent(event, argument);
+    }
+    @Override public <T> void debugValue(T value, Function<T, String> format) {
+        HotReload.slot("debug-value");
+        debugNative(Interop.scalar(value), format == null ? null : shown -> format.apply(Interop.value(shown)));
+    }
+    @JSBody(params = {"setup", "deps"}, script = "React.useInsertionEffect(function() { var cleanup = setup(); return cleanup === null ? undefined : cleanup; }, deps === null ? undefined : deps);", imports = @JSBodyImport(alias = "React", fromModule = "react"))
+    private static native void insertionNative(Setup setup, Object[] deps);
+    @JSBody(params = "callback", script = "return React.useEffectEvent(function(argument) { callback(argument); });", imports = @JSBodyImport(alias = "React", fromModule = "react"))
+    private static native JSObject effectEventNative(Call callback);
+    @JSBody(params = {"event", "argument"}, script = "event(argument);") private static native void callEvent(JSObject event, Object argument);
+    @JSBody(params = {"value", "format"}, script = "if (format) React.useDebugValue(value, function(shown) { return format(shown); }); else React.useDebugValue(value);", imports = @JSBodyImport(alias = "React", fromModule = "react"))
+    private static native void debugNative(Object value, Format format);
     @Override public void effect(Effect effect, Dependencies dependencies, boolean layout) {
         HotReload.slot(layout ? "layout-effect" : "effect");
         Setup setup = () -> {

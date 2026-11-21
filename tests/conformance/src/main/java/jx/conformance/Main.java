@@ -53,6 +53,12 @@ import jx.conformance.cases.ForwardRef;
 import jx.conformance.cases.RefAsProp;
 import jx.conformance.cases.RefCallbackCase;
 import jx.conformance.cases.CreateRef;
+import jx.conformance.cases.StrictNested;
+import jx.conformance.cases.InsertionEffect;
+import jx.conformance.cases.EffectEvent;
+import jx.conformance.cases.DebugValue;
+import jx.conformance.cases.ProfilerCase;
+import jx.conformance.cases.ReducerLazyInit;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -115,6 +121,12 @@ public final class Main {
             case "ref-as-prop" -> React.mountStrict("app", RefAsProp.JX, null);
             case "ref-callback" -> React.mountStrict("app", RefCallbackCase.JX, null);
             case "create-ref" -> React.mountStrict("app", CreateRef.JX, null);
+            case "strict-nested" -> React.mount("app", StrictNested.JX, null);
+            case "insertion-effect" -> React.mountStrict("app", InsertionEffect.JX, null);
+            case "effect-event" -> React.mountStrict("app", EffectEvent.JX, null);
+            case "debug-value" -> React.mountStrict("app", DebugValue.JX, null);
+            case "profiler" -> React.mountStrict("app", ProfilerCase.JX, null);
+            case "reducer-lazy-init" -> React.mountStrict("app", ReducerLazyInit.JX, null);
             default -> Bench.unknown(id);
         }
     }

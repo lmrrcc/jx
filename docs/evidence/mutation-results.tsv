@@ -39,3 +39,7 @@ memo-field-ignored	killed	memo-skip	Generated memo comparison ignores the Props 
 ref-cleanup-dropped	killed	ref-callback	Callback ref cleanups are never registered
 ref-function-unstable	killed	ref-callback	Refs are re-attached on every render
 handle-not-published	killed	imperative-handle	Imperative handles never reach the ref
+insertion-as-layout	killed	insertion-effect	Insertion effects run as layout effects
+profiler-phase-fixed	killed	profiler	Profiler reports every commit as a mount
+strict-mode-dropped	killed	strict-nested	Nested StrictMode has no effect
+effect-event-first-callback	killed	effect-event	Effect events keep calling the first render's callback

@@ -1,0 +1,27 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case insertion-effect: insertion effects run before layout and passive effects. */
+@Component
+public final class InsertionEffect {
+    public static View render() {
+        Hooks.useEffect(() -> {
+            Bench.log("effect");
+            return null;
+        }, Dependencies.none());
+        Hooks.useLayoutEffect(() -> {
+            Bench.log("layout");
+            return null;
+        }, Dependencies.none());
+        Hooks.useInsertionEffect(() -> {
+            Bench.log("insertion");
+            return null;
+        }, Dependencies.none());
+        return <main><p role="status">mounted</p></main>;
+    }
+}

@@ -52,6 +52,8 @@ import { ForwardRef } from './cases/forward-ref.jsx';
 import { RefAsProp } from './cases/ref-as-prop.jsx';
 import { RefCallback } from './cases/ref-callback.jsx';
 import { CreateRef } from './cases/create-ref.jsx';
+import { ReducerLazyInit } from './cases/reducer-lazy-init.jsx';
+import { StrictNested } from './cases/strict-nested.jsx';
 import { MemoSkip } from './cases/memo-skip.jsx';
 import { TransitionPending } from './cases/transition-pending.jsx';
 import { StartTransition } from './cases/start-transition.jsx';
@@ -133,6 +135,8 @@ const cases = {
   'ref-as-prop': RefAsProp,
   'ref-callback': RefCallback,
   'create-ref': CreateRef,
+  'reducer-lazy-init': ReducerLazyInit,
+  'strict-nested': StrictNested,
   'memo-skip': MemoSkip,
   'transition-pending': TransitionPending,
   'start-transition': StartTransition,
@@ -173,6 +177,9 @@ if (id === 'hydrate-root') {
   container.innerHTML = renderToString(<StrictMode><Case /></StrictMode>);
   container.querySelector('button').benchServerNode = true;
   hydrateRoot(container, <StrictMode><Case /></StrictMode>);
+} else if (id === 'strict-nested') {
+  // The only case without a root StrictMode: it places StrictMode itself.
+  createRoot(document.getElementById('app')).render(<Case />);
 } else if (Case) {
   createRoot(document.getElementById('app')).render(<StrictMode><Case /></StrictMode>);
 } else {

@@ -31,6 +31,22 @@ public final class React {
             return element(fallback.apply(javaError == null ? new IllegalStateException(errorMessage(error)) : javaError));
         }));
     }
+    /** One commit measured by {@link #profiler}: React's {@code onRender} arguments. {@code phase}
+     * is {@code mount}, {@code update} or {@code nested-update}; times are milliseconds. */
+    public record Profile(String id, String phase, double actualDuration, double baseDuration, double startTime, double commitTime) {}
+    @JSFunctor interface OnRender extends JSObject { void render(String id, String phase, double actual, double base, double start, double commit); }
+    /** React's {@code Profiler}: reports each commit of the children. The callback runs after
+     * commit, outside rendering. Timings are zero in a production React build. */
+    public static View profiler(String id, Consumer<Profile> onRender, Object... children) {
+        Objects.requireNonNull(id); Objects.requireNonNull(onRender);
+        return new NativeView(profiler(id, (name, phase, actual, base, start, commit) ->
+                onRender.accept(new Profile(name, phase, actual, base, start, commit)), element(Views.fragment(children))));
+    }
+    /** React's {@code StrictMode} around part of a tree: development checks, including repeated
+     * effect setup and cleanup, apply to the children only. */
+    public static View strictMode(Object... children) {
+        return new NativeView(strict(element(Views.fragment(children))));
+    }
     /** Explicit event failure routing, because React error boundaries do not catch event handlers. */
     public static EventHandler guarded(EventHandler handler, Consumer<RuntimeException> failure) {
         Objects.requireNonNull(handler); Objects.requireNonNull(failure);
@@ -236,6 +252,7 @@ public final class React {
     @JSBody(params = "render", script = "return render;") private static native JSObject nativeFunction(Render render);
     @JSBody(script = "function Boundary(props) { React.Component.call(this, props); this.state = {error: null}; } Boundary.prototype = Object.create(React.Component.prototype); Boundary.prototype.constructor = Boundary; Boundary.getDerivedStateFromError = function(error) { return {error: error}; }; Boundary.prototype.render = function() { return this.state.error === null ? this.props.children : this.props.fallback(this.state.error); }; return Boundary;", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject boundaryType();
     @JSBody(params = {"type", "child", "fallback"}, script = "return React.createElement(type, {fallback: fallback}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject boundary(JSObject type, JSObject child, FailureView fallback);
+    @JSBody(params = {"id", "onRender", "child"}, script = "return React.createElement(React.Profiler, {id: id, onRender: function(id, phase, actual, base, start, commit) { onRender(id, phase, actual, base, start, commit); }}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject profiler(String id, OnRender onRender, JSObject child);
     @JSBody(params = "error", script = "return String(error && error.message || error);") private static native String errorMessage(JSObject error);
     @JSBody(params = {"type", "props"}, script = "return React.createElement(type, props);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject external(JSObject type, JSObject props);
     @JSBody(script = "return {};") private static native JSObject object();

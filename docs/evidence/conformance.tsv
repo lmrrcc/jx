@@ -1,10 +1,10 @@
 feature	area	jx	cases	jx-api	task	note
 react:useState	hook	supported	state-counter,state-lazy-init,callable-state,batched-updates	Hooks.useState, Hooks.useStateLazy		
-react:useReducer	hook	supported	reducer-batch	Hooks.useReducer		Lazy initializer argument is not offered
+react:useReducer	hook	supported	reducer-batch,reducer-lazy-init	Hooks.useReducer, Hooks.useReducerLazy		
 react:useEffect	hook	supported	effect-cleanup,effect-dependencies	Hooks.useEffect		
 react:useLayoutEffect	hook	supported	layout-effect-order,layout-effect-dependencies,dom-ref-focus	Hooks.useLayoutEffect		
-react:useInsertionEffect	hook	unsupported	insertion-effect		R-08	
-react:useEffectEvent	hook	unsupported	effect-event		R-08	
+react:useInsertionEffect	hook	supported	insertion-effect	Hooks.useInsertionEffect		
+react:useEffectEvent	hook	supported	effect-event	Hooks.useEffectEvent		Typed for Runnable and Consumer callbacks
 react:useRef	hook	supported	ref-persist,dom-ref-focus	Hooks.useRef, Hooks.useDomRef		
 react:useImperativeHandle	hook	supported	imperative-handle	Hooks.useImperativeHandle		The handle is published through a Ref passed as a prop
 react:useContext	hook	supported	context-nested	Hooks.useContext		
@@ -19,12 +19,12 @@ react:useDeferredValue	hook	unsupported	deferred-value		R-12
 react:useOptimistic	hook	unsupported	optimistic		R-16	
 react:useActionState	hook	unsupported	action-state		R-16	
 react:use	hook	unsupported	use-promise		R-13	Promise and context consumption
-react:useDebugValue	hook	unsupported	debug-value		R-08	
+react:useDebugValue	hook	supported	debug-value	Hooks.useDebugValue		The DevTools label itself is not asserted
 react:Fragment	component	supported	fragment	<>...</>, Views.fragment		
-react:StrictMode	component	supported	effect-cleanup,state-lazy-init,memo-recompute	React.mountStrict		Root only; no nested StrictMode element
+react:StrictMode	component	supported	effect-cleanup,state-lazy-init,memo-recompute,strict-nested	React.mountStrict, React.strictMode		Nested use is a view factory, not a markup tag
 react:Suspense	component	unsupported	use-promise,lazy-component		R-13	
 react:Activity	component	unsupported	activity		R-15	
-react:Profiler	component	unsupported	profiler		R-08	
+react:Profiler	component	supported	profiler	React.profiler		A view factory, not a markup tag
 react:ViewTransition	component	unsupported	view-transition		R-15	
 react:addTransitionType	api	unsupported	view-transition		R-15	
 react:lazy	api	unsupported	lazy-component		R-14	

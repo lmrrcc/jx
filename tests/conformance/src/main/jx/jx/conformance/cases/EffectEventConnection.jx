@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Reconnects when the room changes; the effect event reads the latest theme without reconnecting. */
+@Component
+public final class EffectEventConnection {
+    public record Props(String room, String theme) {}
+
+    public static View render(Props props) {
+        Runnable onConnected = Hooks.useEffectEvent(() -> Bench.log("connected " + props.room() + " " + props.theme()));
+        Hooks.useEffect(() -> {
+            onConnected.run();
+            return () -> Bench.log("disconnected " + props.room());
+        }, Dependencies.of(props.room()));
+        return <p role="status">{props.room()} {props.theme()}</p>;
+    }
+}

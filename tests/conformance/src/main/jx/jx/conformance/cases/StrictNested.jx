@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.react.React;
+
+/** Case strict-nested: mounted without a root StrictMode, so only the nested parts are checked. */
+@Component
+public final class StrictNested {
+    public static View render() {
+        State<Boolean> shown = Hooks.useState(false);
+        return (
+            <main>
+                <StrictProbe name="plain" />
+                {React.strictMode(<StrictProbe name="checked" />)}
+                {shown.value() ? React.strictMode(<StrictProbe name="late" />) : null}
+                <button onClick={event -> shown.set(true)}>Show late</button>
+            </main>
+        );
+    }
+}
