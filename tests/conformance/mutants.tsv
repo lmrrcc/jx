@@ -1,6 +1,6 @@
 id	file	find	replace	change
 effect-swap-layout	jx-react/src/main/java/jx/react/ReactHooks.java	if (layout) React.useLayoutEffect(effect,	if (!layout) React.useLayoutEffect(effect,	Layout and passive effects are swapped
-effect-drop-cleanup	jx-react/src/main/java/jx/react/ReactHooks.java	return cleanup == null ? null : cleanup::run;	return null;	Effect cleanups are never registered
+effect-drop-cleanup	jx-react/src/main/java/jx/react/ReactHooks.java	return cleanup === null ? undefined : cleanup; }; if (layout)	return undefined; }; if (layout)	Effect cleanups are never registered
 effect-always-becomes-once	jx-react/src/main/java/jx/react/ReactHooks.java	else React.useEffect(effect, deps === null ? undefined : deps);	else React.useEffect(effect, deps === null ? [] : deps);	An effect without dependencies runs only once
 effect-ignore-deps	jx-react/src/main/java/jx/react/ReactHooks.java	React.useLayoutEffect(effect, deps === null ? undefined : deps);	React.useLayoutEffect(effect, undefined);	Layout effects ignore their dependencies
 memo-ignore-deps	jx-react/src/main/java/jx/react/ReactHooks.java	return React.useMemo(factory, deps === null ? undefined : deps);	return React.useMemo(factory, undefined);	Memoized values are recomputed every render

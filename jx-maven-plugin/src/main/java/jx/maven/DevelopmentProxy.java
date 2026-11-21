@@ -31,6 +31,8 @@ import java.util.concurrent.TimeoutException;
  */
 final class DevelopmentProxy implements AutoCloseable {
     static final int MAX_REQUEST_BYTES = 1024 * 1024;
+    /** Most bytes read and thrown away from a rejected request body before answering. */
+    static final int MAX_DISCARDED_BYTES = 4 * MAX_REQUEST_BYTES;
     static final int MAX_RESPONSE_BYTES = 4 * 1024 * 1024;
     private static final Set<String> METHODS = Set.of("GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
     private static final Set<String> REQUEST_HEADERS = Set.of("Accept", "Content-Type", "If-Match", "If-None-Match");
@@ -74,7 +76,12 @@ final class DevelopmentProxy implements AutoCloseable {
                 try {
                     long declared = Long.parseLong(length);
                     if (declared < 0) { error(exchange, 400, "Invalid request length"); return; }
-                    if (declared > MAX_REQUEST_BYTES) { error(exchange, 413, "API request exceeds 1 MiB"); return; }
+                    if (declared > MAX_REQUEST_BYTES) {
+                        // Without this the connection is reset while the client still writes,
+                        // and it never sees the 413.
+                        discard(exchange.getRequestBody(), Math.min(declared, MAX_DISCARDED_BYTES));
+                        error(exchange, 413, "API request exceeds 1 MiB"); return;
+                    }
                 } catch (NumberFormatException ex) { error(exchange, 400, "Invalid request length"); return; }
             }
             byte[] body = exchange.getRequestBody().readNBytes(MAX_REQUEST_BYTES + 1);
@@ -146,6 +153,15 @@ final class DevelopmentProxy implements AutoCloseable {
         return sites == null || (sites.size() == 1 && (sites.getFirst().equals("same-origin") || sites.getFirst().equals("none")));
     }
 
+    private static void discard(java.io.InputStream body, long limit) throws IOException {
+        byte[] buffer = new byte[8192];
+        long remaining = limit;
+        while (remaining > 0) {
+            int read = body.read(buffer, 0, (int) Math.min(buffer.length, remaining));
+            if (read < 0) return;
+            remaining -= read;
+        }
+    }
     private static void error(HttpExchange exchange, int status, String message) throws IOException {
         exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
         respond(exchange, status, ("JX development proxy: " + message).getBytes(StandardCharsets.UTF_8));
