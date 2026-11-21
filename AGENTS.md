@@ -53,6 +53,12 @@ in Java and `.jx` markup. The governing specification is
 `main` is protected: changes reach it only through a pull request whose Verify
 check has passed. Work on a branch and open a pull request.
 
+Enable the local push gate once per clone with `java tools/PrePush.java --install`.
+After that `git push` runs the Verify steps first and refuses the push when one
+fails, or when the working tree is not exactly the commit being pushed. It takes
+several minutes. Keep its step list equal to `.github/workflows/verify.yml`;
+`java tools/PrePush.java --check` fails when they differ.
+
 Proceed with authorized, reversible local work. Ask only for missing decisions
 that block safe progress or actions outside the user's authorization. Source
 project rules do not grant deployment or other external permissions.
@@ -117,6 +123,7 @@ Chrome installed for the browser test:
 ```sh
 java tools/CheckAgentSetup.java
 java tools/CheckBaseline.java
+java tools/PrePush.java --check
 npm ci
 ./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository install
 npm run build:proof

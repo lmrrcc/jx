@@ -272,6 +272,10 @@ against the build files and validates the [capability ledger](docs/evidence/capa
 and the portfolio registers;
 after changing a pinned version, rerun it with `--write-versions`.
 
+`main` accepts only pull requests whose Verify check passed. To catch failures
+before a push, run `java tools/PrePush.java --install` once per clone: `git push`
+then runs the same steps locally and refuses the push when one fails.
+
 The Maven build runs compiler, plugin, language-server, model, and backend tests.
 After building, run the browser suites relevant to your change:
 

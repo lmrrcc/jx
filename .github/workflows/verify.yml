@@ -20,6 +20,7 @@ jobs:
           cache: npm
       - run: java tools/CheckAgentSetup.java
       - run: java tools/CheckBaseline.java
+      - run: java tools/PrePush.java --check
       - run: npm ci
       - run: ./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository install
       - run: npx playwright install --with-deps chrome
