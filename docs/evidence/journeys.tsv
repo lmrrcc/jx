@@ -1,0 +1,41 @@
+id	surface	route	kind	access	existing-test	baseline	note
+lmrr.blog-index	lmrr.blog	/blog/	read	public		lighthouse:lmrr-blog	Listing; no script needed
+lmrr.docs-index	lmrr.blog	/docs/	read	public		lighthouse:lmrr-docs	Listing plus three section indexes
+lmrr.article	lmrr.blog	/docs/:section/:slug	read	public		lighthouse:lmrr-article	58 public articles; Prism and Mermaid load from CDNs; hidden-content rules must carry over
+lmrr.home	lmrr.blog	/	write	public		lighthouse:lmrr-home	Resume request form posts to an external form service
+stacktrace.home	stacktrace.site	/:lang/	read	public	e2e/smoke.spec.ts	lighthouse:stacktrace-home	Hydrates for theme, language and menu
+stacktrace.legal	stacktrace.site	/:lang/privacy/	read	public	e2e/smoke.spec.ts	lighthouse:stacktrace-privacy	Content only; canonical and hreflang present
+stacktrace.contact	stacktrace.site	/:lang/contact/	write	public	e2e/smoke.spec.ts		Contact form with Turnstile and edge function
+stacktrace.apply	stacktrace.site	/:lang/careers/senior-software-engineer/	write	public	e2e/smoke.spec.ts		Application form with PDF upload
+luca4j.home	luca4j.site	/	read	public		lighthouse:luca4j-home	Lesson catalog from one source file; hydrates over static HTML
+luca4j.privacy	luca4j.site	/privacy/	read	public		lighthouse:luca4j-privacy	Content only
+luca4j.module	luca4j.site	/video/java-da-zero/	read	public		lighthouse:luca4j-module	Lesson module page with structured data
+luca4j.contact	luca4j.site	/contatti/	write	public			Form prepares an email in the visitor's mail program by default; API mode is off
+lumaspect.home	lumaspect.site	/:lang/	write	public		lighthouse:lumaspect-home	3D scene and notify form
+lumaspect.about	lumaspect.site	/:lang/about/	read	public		lighthouse:lumaspect-about	Content only apart from the footer newsletter form
+gandalf.wallet-home	gandalf.wallet-site	/	write	public		lighthouse:gandalf-wallet	Sections are static; one signup form
+gandalf.system-home	gandalf.system-site	/	write	public		lighthouse:gandalf-system	Design-system reference; one signup form
+gandalf.protocol-home	gandalf.protocol-site	/	read	public	tests/website.spec.ts	lighthouse:gandalf-protocol	No forms; strict headers
+gandalf.ext-activity	gandalf.extension	activity	read	extension			Renders from wallet state only
+gandalf.ext-networks	gandalf.extension	settings-networks	read	extension			List from state; navigation only
+gandalf.ext-connected-apps	gandalf.extension	connected-apps	read	extension			One storage read
+gandalf.ext-onboarding	gandalf.extension	onboarding	write	extension	tests/onboarding.spec.ts		Create or restore a vault; required journey
+gandalf.ext-send	gandalf.extension	send	write	extension			Build, sign and submit; needs live or local chain infrastructure to test
+gandalf.ext-approve	gandalf.extension	capability-approve	write	extension			Approve a site request with password
+jug.holding-home	jug.holding	/	write	public		lighthouse:jug-home	Waitlist form currently hidden by a Worker
+sensei.web-home	sensei.website	/web/	write	public		lighthouse:sensei-web	Marketing with beta, careers and contact forms
+sensei.terms	sensei.website	/terms	read	public		lighthouse:sensei-terms	Static text rendered by the client
+sensei.leaderboards	sensei.app	/web/leaderboards	read	public			GET only; personalized when signed in
+sensei.login	sensei.app	/app/login	write	public			Email and password
+sensei.profile	sensei.app	/app/profile	read	session			Mostly reads; has logout and start-session buttons
+sensei.sessions	sensei.app	/app/sessions	read	subscription			List view; same component creates sessions
+sensei.session	sensei.app	/app/session/:sessionId	write	session			Interview chat, streaming and voice; required journey
+sensei.payment	sensei.app	/app/payment	write	session			Stripe checkout; the only lazy route
+medusa.login	medusa.app	/app/login	write	public	frontend/functional/oidc.mjs		Password, OIDC and TOTP; totp.mjs and recovery.mjs cover the variants
+medusa.overview	medusa.app	/app	read	session			Workspace risk dashboard
+medusa.changes-list	medusa.app	/app/changes	read	session			One GET rendered as a list
+medusa.search	medusa.app	/app/search	read	session			One GET; fewest shared components
+medusa.template-detail	medusa.app	/app/organizations/:id/templates/:templateId	read	session			Two GETs
+medusa.account-detail	medusa.app	/app/organizations/:id/accounts/:accountId	read	session			Tabbed detail; tabs host send and sign dialogs
+medusa.change-approve	medusa.app	/app/changes/:changeId	write	session	frontend/functional/creation.mjs		Approve, sign and execute; required journey
+medusa.order-new	medusa.app	/app/organizations/:id/orders/new	write	session			Preview and submit exchange orders

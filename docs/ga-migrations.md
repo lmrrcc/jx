@@ -1,6 +1,7 @@
 # Portfolio migration inventory and acceptance plan
 
-Initial read-only inventory, 19 November 2026. Parent: [GA roadmap](ga-roadmap.md).
+Initial read-only inventory, 19 November 2026; corrected by [GA-02](ga-02-portfolio.md)
+on 21 November 2026. Parent: [GA roadmap](ga-roadmap.md).
 The paths below are relative to the named sibling repositories in the local
 workspace. They are evidence pointers, not files bundled with JX. No application
 was built, deployed or certified by this inventory; no secrets/runtime data were
@@ -19,20 +20,57 @@ needed. Confirm actual deployed variants and product owners before migration.
 | Stack Sensei media/payment: `frontend/src/services/narrationService.ts`, `frontend/src/services/voiceActivityDetectionService.ts`, `frontend/src/pages/PaymentPage.tsx` | Streaming response readers, audio gesture policies, getUserMedia/AudioContext/MediaRecorder and Stripe Elements | Media permission/cleanup and streaming slice after text; payments only with provider sandbox and failure/recovery qualification |
 | `lmrr.cc`: root `README.md`, `package.json`, `react/package.json` | Documented Eleventy blog/static workflow; separate React variant exists but its production role is unconfirmed | Static content section preserving Markdown, URLs, code/media, canonical metadata and no-JS readability |
 | `lucasoft`: `README.md`, `package.json`, `src/entry-server.tsx`, `server/forms.ts` | Folder contains Stacktrace consultancy site: React 19 prerender/hydration, bilingual routes, shared validation, edge forms/uploads | Complete small SSG/hydrated site after forms/SEO qualification; preserve edge API boundaries |
+| luca4j: `website/README.md`, `website/src/pages-meta.ts` | React 19 prerender and hydration on Cloudflare Pages, ten public pages, local fonts, Java build tooling; forms prepare an email and call no API by default | Selected website pilot; added by the GA-02 decisions |
 | Lumaspect: `web/README.md`, `web/package.json`, `inspect/README.md` | Prerendered bilingual site, Three.js/WebGL with static fallback, edge forms; separate React operator console with Kotlin/Spring, Rust acquisition and C++ vision | Website content then qualified 3D; console is a separate workflow pilot, not a backend rewrite |
 | Gandalf public sites: `gandalf-system/README.md`, `gandalf-website/README.md`, `gandalf-protocol/package.json` | Static HTML/CSS/JS, canonical design-system assets, forms | Low-risk preview section using JX SSG; preserve no-runtime content delivery |
-| `juglugano.ch` | Empty directory in this checkout | Inventory pending; no inferred stack |
+| JUG Lugano: `jug/juglugano.ch/README.md`, `jug/jug/web/src/App.tsx` | The top-level `juglugano.ch` directory is empty; the repositories are under `jug/`. Live static holding page with a waitlist form; separate gated React 19 application (about 45 routes) with a Java platform | Deferred: the holding page is one page tied to the platform API |
+| Tetra: `tetra-web/README.md`, `tetra-explorer-web/`, `tetra-explorer/web/` | Three React 19/Vite frontends: protocol website, explorer application and a small indexer UI; shared design-system package; no browser tests | Deferred; added by the GA-02 inventory |
 
-`stack-sensei` and `stack-sensei-repo` are different checkouts. The first is the
-working inventory baseline; canonical repository and deployment ownership must
-be confirmed before changes. Other websites, Tetra surfaces and any unlisted
-frontend are **not yet inventoried**. The inventory must be completed before
-promising that all frontends can retire.
+`stack-sensei` is the canonical checkout: `stack-sensei-repo` is an older clone,
+12 commits behind, pushed to a different remote. `usdxpay` holds a design document
+and no frontend code. The [surface register](evidence/portfolio.tsv) and
+[journey register](evidence/journeys.tsv) from [GA-02](ga-02-portfolio.md) are the
+current inventory; this table keeps the original evidence pointers. A frontend that
+is not in the register is not covered by any retirement promise.
 
 Rough source-tree counts observed by this audit were 375 TS/TSX files in Medusa's
 main frontend, 163 in Stack Sensei and 114 nongenerated files in Gandalf's extension.
 These are scale indicators only; route/workflow acceptance, not line-for-line
 translation, determines migration effort.
+
+## Findings from the GA-02 inventory
+
+Recorded on 21 November 2026 for the product owner. None was changed by JX work.
+
+1. **Deployment facts differ from repository documents.** `stacktrace.cc` and
+   `lumaspect.com` respond with the prerendered sites, although the Stacktrace
+   handover documents say it was never deployed and Lumaspect still configures a
+   test Turnstile key. The three Gandalf sites respond on their custom domains.
+   `tetra-protocol.fly.dev` did not resolve.
+2. **Medusa's React application has no applied hosting.** The live
+   `medusa-custody.com` is a separate static page whose login always fails. An
+   authenticated Medusa pilot therefore needs a deployment decision first.
+3. **Stack Sensei's public pages are client-rendered.** The initial HTML of `/web/`
+   and `/terms` is an empty shell, so they are not website-profile baselines.
+4. **`lmrr.cc-test` shares a hosting project with the blog.** Its publish script
+   targets the same Cloudflare Pages project and branch as `lmrr.cc`; running it
+   would replace the blog.
+5. **Stale deploy inputs.** The Gandalf protocol deploy script reuses an existing
+   July output directory without rebuilding. Medusa's build refuses a non-empty
+   `dist`, which exists.
+6. **Uncommitted work in baselines.** Medusa has 300 uncommitted changes (49 in the
+   frontend, including routing), `lmrr.cc` has 438, `lumaspect/web` has 31, and
+   `lucasoft` has no commits at all. Revisions in the register do not fully describe
+   those trees.
+7. **Route defects seen while reading.** Medusa's `/careers/:positionId` redirect
+   does not substitute the parameter, and the application has no catch-all route.
+8. **Security observations to review separately.** The Lumaspect operator console
+   has no authentication and listens on the local network in development. Stack
+   Sensei grants access from a cached subscription flag when verification fails and
+   sends unmasked session replay to its error monitor.
+9. **Evidence gaps.** No product has performance budgets. Only Medusa (four
+   scripts run from a backend test), the Gandalf extension and protocol site, and
+   Stacktrace have browser journey tests; Stack Sensei has none.
 
 ## Three profiles, shared platform
 

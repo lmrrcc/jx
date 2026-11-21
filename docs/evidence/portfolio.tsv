@@ -1,0 +1,22 @@
+id	product	profile	stack	checkout	revision	url	deployment	owner	pilot	note
+lmrr.blog	lmrr.cc	website	Eleventy 2, static HTML	lmrr.cc	78c3a9e	https://lmrr.cc/	live	Luca Marrocco	selected	Built output is committed; 438 uncommitted changes in the checkout
+lmrr.react	lmrr.cc	website	React 18 SPA variant	lmrr.cc/react	78c3a9e		none	Luca Marrocco	excluded	Rewrite that was never switched on
+stacktrace.site	Stacktrace	website	React 19 prerender and hydration, edge forms	lucasoft		https://stacktrace.cc/	live	Luca Marrocco	selected	Repository has no commits; its documents say it was never deployed, but the site responds
+luca4j.site	luca4j	website	React 19 prerender and hydration, Java build tooling	luca4j/website	2de93bb	https://www.luca4j.com/	live	Luca Marrocco	selected	Ten public pages plus 404; added at the owner's request; unit tests only
+lumaspect.site	Lumaspect	website	React 19 prerender, three.js, edge forms	lumaspect/web	68be417	https://lumaspect.com/	live	Luca Marrocco	candidate	Every page carries a newsletter form
+lumaspect.console	Lumaspect	application	React 19, Kotlin and Spring Boot	lumaspect/inspect	752cd78		none	Luca Marrocco	deferred	Runs on localhost only; no authentication
+gandalf.wallet-site	Gandalf	website	Static HTML and CSS	gandalf/gandalf-website	ff82b9e	https://gandalfwallet.com/	live	Luca Marrocco	candidate	One page; no tests
+gandalf.system-site	Gandalf	website	Static HTML and CSS	gandalf/gandalf-system	ff82b9e	https://gandalfsystem.com/	live	Luca Marrocco	candidate	One page; no tests
+gandalf.protocol-site	Gandalf	website	Static HTML, generated specification page	gandalf/gandalf-protocol	ff82b9e	https://gandalfprotocol.com/	live	Luca Marrocco	candidate	Has Playwright tests
+gandalf.extension	Gandalf	extension	React 19 MV3 popup and worker, Rust/WASM	gandalf/gandalf-wallet/extension	ff82b9e		unknown	Luca Marrocco	candidate	41 popup routes; store listing not checked
+jug.holding	JUG Lugano	website	Static holding page with waitlist form	jug/juglugano.ch	0ef8f95	https://juglugano.ch/	live	Luca Marrocco	deferred	Single page tied to the platform API
+jug.app	JUG Lugano	application	React 19, Java with Spring and Quarkus	jug/jug	8cc859d		configured	Luca Marrocco	deferred	About 45 gated routes; checkout is on a work branch
+sensei.website	Stack Sensei	website	React 18 client-rendered pages in the application bundle	stack-sensei/frontend	afb8904	https://stack-sensei.com/web/	live	Luca Marrocco	deferred	Initial HTML is an empty shell
+sensei.app	Stack Sensei	application	React 18, Vite, Kotlin and Spring Boot 3	stack-sensei/frontend	afb8904	https://stack-sensei.com/app/	live	Luca Marrocco	selected	stack-sensei is canonical; stack-sensei-repo is an older clone. Pilot is a separate implementation; the existing site is not modified
+sensei.admin	Stack Sensei	application	Same bundle, separate admin token	stack-sensei/frontend	afb8904	https://stack-sensei.com/admin	live	Luca Marrocco	deferred	State-changing console
+medusa.app	Medusa	application	React 18, Vite, Kotlin and Spring API	medusa/frontend	08c35436		none	Luca Marrocco	candidate	117 routes; hosting template not applied; 49 uncommitted frontend changes
+medusa.website	Medusa	website	Prerendered /web pages in the application bundle	medusa/frontend	08c35436		none	Luca Marrocco	deferred	Content comes from the backend catalog
+medusa.custody-www	Medusa	website	Static HTML on a Cloudflare Worker	medusa/www	08c35436	https://medusa-custody.com/	live	Luca Marrocco	deferred	Separate from the React application; login is a stub
+medusa.signer	Medusa	extension	React 19 MV3, pnpm	medusa/browser	08c35436		unknown	Luca Marrocco	deferred	Signing flows come last
+tetra.site	Tetra	website	React 19, Vite	tetra/tetra-web	2e9ab2a	https://tetra-protocol.fly.dev/	configured	Luca Marrocco	deferred	Host did not resolve on 2026-11-21
+tetra.explorer	Tetra	application	React 19, Vite, Rust indexer	tetra/tetra-explorer-web	2e9ab2a		none	Luca Marrocco	deferred	No deployment configuration found
