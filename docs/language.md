@@ -158,7 +158,12 @@ Use names such as `tabIndex`, `readOnly`, `viewBox`, and `strokeWidth`.
 booleans. `style` accepts the typed `Style` API. `ref` on intrinsic elements
 accepts `Hooks.useDomRef()`; it is React metadata, not a string DOM attribute.
 DOM event names such as `onClick` target `EventHandler`, so lambda parameters
-are typed. Event strings are rejected. Other attribute values must be scalar or
+are typed. Event strings are rejected. A handler receives one `jx.Event`, whose
+accessors cover every event family: type and targets, modifier keys, keyboard,
+mouse and pointer, wheel, touch lists, composition text, clipboard and drag data,
+animation and transition names. An accessor that does not apply to the event
+returns an empty value and never throws; read values inside the handler. Capture
+handlers use React's names, such as `onClickCapture`. Other attribute values must be scalar or
 an explicitly supported typed value. These runtime checks do not constitute a
 complete static HTML attribute schema.
 

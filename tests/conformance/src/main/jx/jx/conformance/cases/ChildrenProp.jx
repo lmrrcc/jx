@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case children-prop: nested markup is passed as children and updates with the parent. */
+@Component
+public final class ChildrenProp {
+    public static View render() {
+        State<Integer> count = Hooks.useState(0);
+        return (
+            <main>
+                <Panel title="Box">
+                    <p data-testid="first">first</p>
+                    <p role="status">{count.value()}</p>
+                </Panel>
+                <button onClick={event -> count.update(previous -> previous + 1)}>Increment</button>
+            </main>
+        );
+    }
+}

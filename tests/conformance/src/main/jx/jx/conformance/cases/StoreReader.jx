@@ -1,0 +1,15 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.View;
+import jx.conformance.CounterStore;
+
+/** Reads the shared store for the external-store case. */
+@Component
+public final class StoreReader {
+    public static View render() {
+        Integer value = Hooks.useSyncExternalStore(CounterStore.SHARED);
+        return <p role="status">{value}</p>;
+    }
+}

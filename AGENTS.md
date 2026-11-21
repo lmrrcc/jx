@@ -120,6 +120,7 @@ npm run build:proof
 npm run test:proof
 npm run build:runtime
 npm run test:runtime
+npm run test:bench
 npm run test:counter
 npm run test:todo
 npm run test:hot
@@ -127,8 +128,8 @@ npm run test:hot
 
 The first command checks skill metadata, routing, documentation links, and
 compatibility links. The second checks the [version manifest](docs/evidence/versions.tsv)
-against the build files and the [capability ledger](docs/evidence/capabilities.tsv)
-structure; after changing a pinned version, regenerate the manifest with
+against the build files, the [capability ledger](docs/evidence/capabilities.tsv)
+and the portfolio registers' structure; after changing a pinned version, regenerate the manifest with
 `java tools/CheckBaseline.java --write-versions`. Maven runs compiler, plugin, language-server, Elm/model, and
 backend checks; npm runs real browser checks and the complete examples. Editor
 package verification commands and supported targets live in

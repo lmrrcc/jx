@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** One of the two components the dynamic-component case chooses between. */
+@Component
+public final class LoudCounter {
+    public static View render() {
+        State<Integer> count = Hooks.useState(0);
+        return (
+            <section aria-label="Loud">
+                <p role="status">{count.value()}</p>
+                <button onClick={event -> count.update(previous -> previous + 1)}>Increment</button>
+            </section>
+        );
+    }
+}

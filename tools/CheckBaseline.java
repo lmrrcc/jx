@@ -16,11 +16,34 @@ import java.util.regex.Pattern;
 /**
  * Checks the GA baseline evidence without external dependencies: the version
  * manifest must equal the pins declared in the build files, hand-copied version
- * literals must agree with their pin, and capability ledger rows must be well formed.
+ * literals must agree with their pin, and the capability ledger and portfolio
+ * registers must be well formed.
  */
 public final class CheckBaseline {
     private static final String VERSIONS = "docs/evidence/versions.tsv";
     private static final String LEDGER = "docs/evidence/capabilities.tsv";
+    private static final String SURFACES = "docs/evidence/portfolio.tsv";
+    private static final String JOURNEYS = "docs/evidence/journeys.tsv";
+    private static final List<String> SURFACE_COLUMNS = List.of("id", "product", "profile", "stack", "checkout",
+            "revision", "url", "deployment", "owner", "pilot", "note");
+    private static final List<String> JOURNEY_COLUMNS = List.of("id", "surface", "route", "kind", "access",
+            "existing-test", "baseline", "note");
+    private static final Set<String> PROFILES = Set.of("application", "website", "extension");
+    private static final Set<String> DEPLOYMENTS = Set.of("live", "configured", "none", "unknown");
+    private static final Set<String> PILOTS = Set.of("candidate", "selected", "deferred", "excluded");
+    private static final Set<String> KINDS = Set.of("read", "write");
+    private static final Set<String> ACCESS = Set.of("public", "session", "subscription", "admin", "extension");
+    private static final String CONFORMANCE = "docs/evidence/conformance.tsv";
+    private static final String REACT_EXPORTS = "tests/conformance/react-exports.txt";
+    private static final String BENCH_SPECS = "tests/conformance/specs";
+    private static final List<String> CONFORMANCE_COLUMNS = List.of("feature", "area", "jx", "cases", "jx-api", "task", "note");
+    /** supported and equivalent need a passing case; untested is a claim without one; excluded needs a reason. */
+    private static final Set<String> FEATURE_STATES = Set.of("supported", "equivalent", "untested", "unsupported", "excluded");
+    private static final Pattern FEATURE = Pattern.compile("[a-z][a-z/-]*:[A-Za-z_][A-Za-z0-9_-]*");
+    private static final String TASKS = "docs/ga-tasks.md";
+    private static final Pattern PARITY_TASK = Pattern.compile("R-[0-9]{2}");
+    private static final Pattern BENCH_CASE = Pattern.compile("(?m)^(test|referenceOnly|serverOnly)\\('([a-z0-9-]+): ");
+    private static final Pattern COMMIT = Pattern.compile("[0-9a-f]{7,40}");
     private static final String VERSIONS_HEADER = "id\tvalue\tsource\tnote";
     private static final List<String> LEDGER_COLUMNS = List.of("id", "area", "capability", "status", "owner",
             "revision", "fixture", "command", "ci", "limits", "date");
@@ -146,6 +169,11 @@ public final class CheckBaseline {
     private final Map<String, String> sources = new LinkedHashMap<>();
     private int copyCount;
     private int rowCount;
+    private int surfaceCount;
+    private int journeyCount;
+    private final Map<String, Integer> featureStates = new java.util.TreeMap<>();
+    private int benchCases;
+    private int waitingCases;
 
     private CheckBaseline(Path root) throws IOException {
         this.root = root.toRealPath();
@@ -168,12 +196,17 @@ public final class CheckBaseline {
             checker.checkManifest(manifest);
             checker.checkCopies();
             checker.checkLedger();
+            checker.checkPortfolio();
+            checker.checkConformance();
             if (!checker.failures.isEmpty()) {
                 checker.failures.forEach(message -> System.err.println("FAIL: " + message));
                 System.exit(1);
             }
-            System.out.printf("PASS: %d version pins, %d repeated literals, %d capability rows.%n",
-                    PINS.size(), checker.copyCount, checker.rowCount);
+            System.out.printf("PASS: %d version pins, %d repeated literals, %d capability rows, "
+                    + "%d portfolio surfaces, %d journeys.%n",
+                    PINS.size(), checker.copyCount, checker.rowCount, checker.surfaceCount, checker.journeyCount);
+            System.out.printf("React features: %s; %d bench cases, %d of them reference-only.%n",
+                    checker.featureStates, checker.benchCases, checker.waitingCases);
             System.out.println("Checks recorded evidence structure only; no application build or tests were run.");
         } catch (IOException exception) {
             System.err.println("FAIL: cannot inspect baseline: " + exception.getMessage());
@@ -332,6 +365,155 @@ public final class CheckBaseline {
             }
         }
         require(rowCount > 0, LEDGER + " has no capability rows");
+    }
+
+    /** Checks the portfolio surface register and the journeys that refer to it. */
+    private void checkPortfolio() throws IOException {
+        List<String[]> surfaces = table(SURFACES, SURFACE_COLUMNS);
+        List<String[]> journeys = table(JOURNEYS, JOURNEY_COLUMNS);
+        if (surfaces == null || journeys == null) {
+            return;
+        }
+        Set<String> surfaceIds = new HashSet<>();
+        for (String[] cells : surfaces) {
+            String where = SURFACES + " (" + cells[0] + ")";
+            require(ID.matcher(cells[0]).matches(), where + " has an invalid id");
+            require(surfaceIds.add(cells[0]), where + " repeats an id");
+            require(!cells[1].isEmpty() && !cells[3].isEmpty() && !cells[4].isEmpty(),
+                    where + " needs product, stack and checkout");
+            require(PROFILES.contains(cells[2]), where + " has unknown profile '" + cells[2] + "'");
+            require(cells[5].isEmpty() || COMMIT.matcher(cells[5]).matches(), where + " has an invalid revision");
+            require(cells[6].isEmpty() || cells[6].startsWith("https://"), where + " url must be empty or https");
+            require(DEPLOYMENTS.contains(cells[7]), where + " has unknown deployment '" + cells[7] + "'");
+            require(!cells[7].equals("live") || !cells[6].isEmpty(), where + " is live without a url");
+            require(PILOTS.contains(cells[9]), where + " has unknown pilot state '" + cells[9] + "'");
+        }
+        Set<String> journeyIds = new HashSet<>();
+        Set<String> withJourney = new HashSet<>();
+        for (String[] cells : journeys) {
+            String where = JOURNEYS + " (" + cells[0] + ")";
+            require(ID.matcher(cells[0]).matches(), where + " has an invalid id");
+            require(journeyIds.add(cells[0]), where + " repeats an id");
+            require(surfaceIds.contains(cells[1]), where + " names unknown surface '" + cells[1] + "'");
+            require(!cells[2].isEmpty(), where + " needs a route");
+            require(KINDS.contains(cells[3]), where + " has unknown kind '" + cells[3] + "'");
+            require(ACCESS.contains(cells[4]), where + " has unknown access '" + cells[4] + "'");
+            withJourney.add(cells[1]);
+        }
+        for (String[] cells : surfaces) {
+            if (cells[9].equals("selected")) {
+                String where = SURFACES + " (" + cells[0] + ")";
+                require(!cells[8].isEmpty(), where + " is a selected pilot without an owner");
+                require(withJourney.contains(cells[0]), where + " is a selected pilot without a journey");
+            }
+        }
+        surfaceCount = surfaces.size();
+        journeyCount = journeys.size();
+    }
+
+    /**
+     * Checks the React feature list: every recorded React export has a row, and a
+     * feature claimed as supported or equivalent names bench cases that exist.
+     */
+    private void checkConformance() throws IOException {
+        List<String[]> features = table(CONFORMANCE, CONFORMANCE_COLUMNS);
+        String exports = source(REACT_EXPORTS);
+        String tasks = source(TASKS);
+        Path specs = root.resolve(BENCH_SPECS);
+        if (features == null || exports == null) {
+            return;
+        }
+        Set<String> cases = new HashSet<>();
+        Set<String> waiting = new HashSet<>();
+        if (Files.isDirectory(specs)) {
+            try (var files = Files.list(specs)) {
+                for (Path file : files.filter(path -> path.toString().endsWith(".spec.js")).toList()) {
+                    Matcher matcher = BENCH_CASE.matcher(Files.readString(file, StandardCharsets.UTF_8));
+                    while (matcher.find()) {
+                        require(cases.add(matcher.group(2)), "bench case id is used by two tests: " + matcher.group(2));
+                        if (!matcher.group(1).equals("test")) {
+                            waiting.add(matcher.group(2));
+                        }
+                    }
+                }
+            }
+        } else {
+            failures.add("missing bench specs directory: " + BENCH_SPECS);
+        }
+        benchCases = cases.size();
+        waitingCases = waiting.size();
+        Set<String> ids = new HashSet<>();
+        Set<String> covered = new HashSet<>();
+        for (String[] cells : features) {
+            String where = CONFORMANCE + " (" + cells[0] + ")";
+            String state = cells[2];
+            require(FEATURE.matcher(cells[0]).matches(), where + " has an invalid feature id");
+            require(ids.add(cells[0]), where + " repeats a feature");
+            require(!cells[1].isEmpty(), where + " needs an area");
+            require(FEATURE_STATES.contains(state), where + " has unknown state '" + state + "'");
+            boolean claimed = state.equals("supported") || state.equals("equivalent");
+            require(!claimed || !cells[3].isEmpty(), where + " is " + state + " without a bench case");
+            boolean unsupported = state.equals("unsupported");
+            require(claimed || unsupported || cells[3].isEmpty(), where + " lists cases but is " + state);
+            require(!unsupported || !cells[3].isEmpty(), where + " is unsupported without a waiting reference case");
+            require(!state.equals("excluded") && !state.equals("untested") || !cells[6].isEmpty(),
+                    where + " is " + state + " without a reason");
+            String task = cells[5];
+            boolean open = state.equals("unsupported") || state.equals("untested");
+            require(!open || PARITY_TASK.matcher(task).matches(), where + " is " + state + " without a parity task");
+            require(!state.equals("excluded") || task.equals("none") || PARITY_TASK.matcher(task).matches(),
+                    where + " is excluded and needs a parity task or 'none'");
+            if (PARITY_TASK.matcher(task).matches()) {
+                require(tasks != null && tasks.contains("| " + task + " |"), where + " names task " + task
+                        + ", which is not in " + TASKS);
+            } else {
+                require(task.isEmpty() || task.equals("none"), where + " has an invalid task '" + task + "'");
+            }
+            for (String id : cells[3].isEmpty() ? new String[0] : cells[3].split(",")) {
+                require(cases.contains(id), where + " names unknown bench case '" + id + "'");
+                require(!claimed || !waiting.contains(id), where + " is " + state + " but case '" + id
+                        + "' is still reference-only");
+                require(!unsupported || waiting.contains(id), where + " is unsupported but case '" + id
+                        + "' already runs on JX");
+                covered.add(id);
+            }
+            featureStates.merge(state, 1, Integer::sum);
+        }
+        exports.lines().filter(line -> !line.isBlank())
+                .filter(line -> !ids.contains(line))
+                .forEach(line -> failures.add(CONFORMANCE + " lacks React export " + line));
+        cases.stream().filter(id -> !covered.contains(id) && !id.equals("react-exports")).sorted()
+                .forEach(id -> failures.add("bench case '" + id + "' is not listed against any feature in " + CONFORMANCE));
+    }
+
+    /** Reads a tab-separated register, or returns null after recording why it is unusable. */
+    private List<String[]> table(String file, List<String> columns) throws IOException {
+        Path path = root.resolve(file);
+        if (!Files.isRegularFile(path)) {
+            failures.add("missing " + file);
+            return null;
+        }
+        String text = Files.readString(path, StandardCharsets.UTF_8);
+        require(text.endsWith("\n") && !text.contains("\r"), file + " must use LF line endings and end with a newline");
+        List<String> lines = text.lines().toList();
+        if (lines.isEmpty() || !lines.get(0).equals(String.join("\t", columns))) {
+            failures.add(file + " header must be: " + String.join(" ", columns));
+            return null;
+        }
+        List<String[]> rows = new ArrayList<>();
+        for (int index = 1; index < lines.size(); index++) {
+            String[] cells = lines.get(index).split("\t", -1);
+            if (cells.length != columns.size()) {
+                failures.add(file + ":" + (index + 1) + " has " + cells.length + " columns, expected " + columns.size());
+                continue;
+            }
+            for (String cell : cells) {
+                require(cell.equals(cell.strip()), file + ":" + (index + 1) + " has a cell with surrounding whitespace");
+            }
+            rows.add(cells);
+        }
+        require(!rows.isEmpty(), file + " has no rows");
+        return rows;
     }
 
     private static boolean isDate(String value) {

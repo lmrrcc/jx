@@ -1,0 +1,21 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Style;
+import jx.View;
+
+/** Case attributes: aliases, data and aria names, booleans, numbers and typed style. */
+@Component
+public final class AttributesCase {
+    public static View render() {
+        return (
+            <main>
+                <label for="field" class="label wide" data-kind="primary" aria-label="Field label">Field</label>
+                <input id="field" readOnly value="fixed" tabIndex={3} />
+                <button disabled>Disabled</button>
+                <button disabled={false}>Enabled</button>
+                <p data-testid="styled" style={Style.create().property("color", "rgb(255, 0, 0)").property("opacity", 0.5)}>styled</p>
+            </main>
+        );
+    }
+}

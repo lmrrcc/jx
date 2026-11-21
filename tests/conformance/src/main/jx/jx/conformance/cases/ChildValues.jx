@@ -1,0 +1,21 @@
+package jx.conformance.cases;
+
+import java.util.List;
+import jx.Component;
+import jx.View;
+
+/** Case child-values: null and booleans render nothing; numbers, characters and nested collections render as text. */
+@Component
+public final class ChildValues {
+    public static View render() {
+        String missing = null;
+        boolean flag = true;
+        return (
+            <main>
+                <p data-testid="empty">{missing}{flag}{!flag}</p>
+                <p data-testid="scalars">{42}{'x'}{1.5}</p>
+                <p data-testid="nested">{List.of("a", List.of("b", "c"))}{new String[] {"d", "e"}}</p>
+            </main>
+        );
+    }
+}

@@ -1,0 +1,18 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Throws during render on request, for the error-boundary case. */
+@Component
+public final class Exploder {
+    public static View render() {
+        State<Boolean> broken = Hooks.useState(false);
+        if (broken.value()) {
+            throw new IllegalStateException("render exploded");
+        }
+        return <button onClick={event -> broken.set(true)}>Explode</button>;
+    }
+}

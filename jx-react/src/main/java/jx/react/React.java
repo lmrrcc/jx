@@ -87,7 +87,12 @@ public final class React {
     }
     private static Object[] children(List<View> views, String container) {
         Object[] children = new Object[views.size()];
-        for (int i = 0; i < children.length; i++) children[i] = element(views.get(i), container + "/" + i, container);
+        for (int i = 0; i < children.length; i++) {
+            // Text stays a plain string child: title, style, option and textarea accept nothing else.
+            children[i] = views.get(i) instanceof View.Text text
+                    ? org.teavm.jso.core.JSString.valueOf(text.value())
+                    : element(views.get(i), container + "/" + i, container);
+        }
         return children;
     }
     private static JSObject attributes(Attributes attributes) {
@@ -127,20 +132,87 @@ public final class React {
         @JSBody(params = "element", script = "return element.value == null ? '' : String(element.value);") private static native String value(JSObject element);
     }
 
+    private static final class BrowserTarget implements EventTarget {
+        private final JSObject element;
+        BrowserTarget(JSObject element) { this.element = element; }
+        @Override public String tagName() { return text(element, "tagName"); }
+        @Override public String id() { return text(element, "id"); }
+        @Override public String value() { return text(element, "value"); }
+        @Override public boolean checked() { return flag(element, "checked"); }
+        @Override public String attribute(String name) { return attribute(element, name); }
+        @Override public double currentTime() { return number(element, "currentTime"); }
+        @Override public boolean paused() { return flag(element, "paused"); }
+        @JSBody(params = {"element", "name"}, script = "var value = element.getAttribute ? element.getAttribute(name) : null; return value == null ? '' : String(value);") private static native String attribute(JSObject element, String name);
+    }
+
     private static final class BrowserEvent implements Event {
         private final JSObject event;
         BrowserEvent(JSObject event) { this.event = event; }
+        @Override public String type() { return text(event, "type"); }
+        @Override public EventTarget target() { return target("target"); }
+        @Override public EventTarget currentTarget() { return target("currentTarget"); }
+        @Override public EventTarget relatedTarget() { return target("relatedTarget"); }
+        @Override public double timeStamp() { return number(event, "timeStamp"); }
         @Override public String targetValue() { return targetValue(event); }
         @Override public boolean targetChecked() { return targetChecked(event); }
-        @Override public String key() { return key(event); }
+        @Override public boolean shiftKey() { return flag(event, "shiftKey"); }
+        @Override public boolean altKey() { return flag(event, "altKey"); }
+        @Override public boolean ctrlKey() { return flag(event, "ctrlKey"); }
+        @Override public boolean metaKey() { return flag(event, "metaKey"); }
+        @Override public String key() { return text(event, "key"); }
+        @Override public String code() { return text(event, "code"); }
+        @Override public boolean repeat() { return flag(event, "repeat"); }
+        @Override public int button() { return (int) number(event, "button"); }
+        @Override public int buttons() { return (int) number(event, "buttons"); }
+        @Override public double clientX() { return number(event, "clientX"); }
+        @Override public double clientY() { return number(event, "clientY"); }
+        @Override public double pageX() { return number(event, "pageX"); }
+        @Override public double pageY() { return number(event, "pageY"); }
+        @Override public int detail() { return (int) number(event, "detail"); }
+        @Override public int pointerId() { return (int) number(event, "pointerId"); }
+        @Override public String pointerType() { return text(event, "pointerType"); }
+        @Override public boolean isPrimary() { return flag(event, "isPrimary"); }
+        @Override public double pressure() { return number(event, "pressure"); }
+        @Override public double deltaX() { return number(event, "deltaX"); }
+        @Override public double deltaY() { return number(event, "deltaY"); }
+        @Override public int deltaMode() { return (int) number(event, "deltaMode"); }
+        @Override public java.util.List<Touch> touches() { return touches("touches"); }
+        @Override public java.util.List<Touch> changedTouches() { return touches("changedTouches"); }
+        @Override public String data() { return text(event, "data"); }
+        @Override public String transferData(String format) { return transferData(event, java.util.Objects.requireNonNull(format)); }
+        @Override public void setTransferData(String format, String value) { setTransferData(event, java.util.Objects.requireNonNull(format), java.util.Objects.requireNonNull(value)); }
+        @Override public String animationName() { return text(event, "animationName"); }
+        @Override public String propertyName() { return text(event, "propertyName"); }
+        @Override public double elapsedTime() { return number(event, "elapsedTime"); }
         @Override public void preventDefault() { preventDefault(event); }
         @Override public void stopPropagation() { stopPropagation(event); }
+        @Override public boolean defaultPrevented() { return flag(event, "defaultPrevented"); }
+        private EventTarget target(String name) {
+            JSObject element = member(event, name);
+            return element == null ? null : new BrowserTarget(element);
+        }
+        private java.util.List<Touch> touches(String name) {
+            int count = touchCount(event, name);
+            java.util.List<Touch> result = new java.util.ArrayList<>(count);
+            for (int index = 0; index < count; index++) {
+                result.add(new Touch((int) touchNumber(event, name, index, "identifier"),
+                        touchNumber(event, name, index, "clientX"), touchNumber(event, name, index, "clientY")));
+            }
+            return java.util.List.copyOf(result);
+        }
         @JSBody(params = "event", script = "return event.target && event.target.value != null ? String(event.target.value) : '';") private static native String targetValue(JSObject event);
         @JSBody(params = "event", script = "return !!(event.target && event.target.checked);") private static native boolean targetChecked(JSObject event);
-        @JSBody(params = "event", script = "return event.key || '';") private static native String key(JSObject event);
+        @JSBody(params = {"event", "name"}, script = "var value = event[name]; return value && typeof value === 'object' ? value : null;") private static native JSObject member(JSObject event, String name);
+        @JSBody(params = {"event", "name"}, script = "var list = event[name]; return list && typeof list.length === 'number' ? list.length : 0;") private static native int touchCount(JSObject event, String name);
+        @JSBody(params = {"event", "name", "index", "field"}, script = "var value = event[name][index][field]; return typeof value === 'number' ? value : 0;") private static native double touchNumber(JSObject event, String name, int index, String field);
+        @JSBody(params = {"event", "format"}, script = "var transfer = event.clipboardData || event.dataTransfer; return transfer ? String(transfer.getData(format) || '') : '';") private static native String transferData(JSObject event, String format);
+        @JSBody(params = {"event", "format", "value"}, script = "var transfer = event.clipboardData || event.dataTransfer; if (transfer) transfer.setData(format, value);") private static native void setTransferData(JSObject event, String format, String value);
         @JSBody(params = "event", script = "event.preventDefault();") private static native void preventDefault(JSObject event);
         @JSBody(params = "event", script = "event.stopPropagation();") private static native void stopPropagation(JSObject event);
     }
+    @JSBody(params = {"object", "name"}, script = "var value = object[name]; return value == null ? '' : String(value);") private static native String text(JSObject object, String name);
+    @JSBody(params = {"object", "name"}, script = "var value = object[name]; return typeof value === 'number' && isFinite(value) ? value : 0;") private static native double number(JSObject object, String name);
+    @JSBody(params = {"object", "name"}, script = "return !!object[name];") private static native boolean flag(JSObject object, String name);
     @JSBody(script = "return new WeakMap();") private static native JSObject weakMap();
     @JSBody(params = "render", script = "return render;") private static native JSObject nativeFunction(Render render);
     @JSBody(script = "function Boundary(props) { React.Component.call(this, props); this.state = {error: null}; } Boundary.prototype = Object.create(React.Component.prototype); Boundary.prototype.constructor = Boundary; Boundary.getDerivedStateFromError = function(error) { return {error: error}; }; Boundary.prototype.render = function() { return this.state.error === null ? this.props.children : this.props.fallback(this.state.error); }; return Boundary;", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject boundaryType();
@@ -160,7 +232,7 @@ public final class React {
     @JSBody(params = {"tag", "props", "children"}, script = "return React.createElement.apply(null, [tag, props].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject nativeElement(String tag, JSObject props, Object[] children);
     @JSBody(params = "text", script = "return React.createElement(React.Fragment, null, text);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject nativeText(String text);
     @JSBody(params = "children", script = "return React.createElement.apply(null, [React.Fragment, null].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject fragment(Object[] children);
-    @JSBody(params = {"context", "value", "identity", "children"}, script = "return React.createElement(context.jxProvider, {value: value, identity: identity, children: children});", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject provider(JSObject context, Object value, Object identity, Object[] children);
+    @JSBody(params = {"context", "value", "identity", "children"}, script = "return React.createElement.apply(null, [context.jxProvider, {value: value, identity: identity}].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject provider(JSObject context, Object value, Object identity, Object[] children);
     @JSBody(params = "elementId", script = "var element = document.getElementById(elementId); if (!element) throw new Error('Missing React root: ' + elementId); var hot = globalThis.__JX_HOT__; var options = hot && hot.enabled ? {onUncaughtError: function(error) { if (typeof hot.fail === 'function') hot.fail(error); if (typeof reportError === 'function') reportError(error); else console.error(error); }} : undefined; return ReactDOM.createRoot(element, options);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom/client")) private static native JSObject createRoot(String elementId);
     @JSBody(params = "child", script = "return React.createElement(React.StrictMode, null, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject strict(JSObject child);
     @JSBody(params = {"root", "child"}, script = "root.render(child);") private static native void renderRoot(JSObject root, JSObject child);

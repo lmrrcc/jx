@@ -1,0 +1,21 @@
+package jx.conformance.cases;
+
+import java.util.function.Supplier;
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case callable-state: a function stored as state is kept, not invoked as an updater. */
+@Component
+public final class CallableState {
+    public static View render() {
+        State<Supplier<String>> label = Hooks.useState(() -> "first");
+        return (
+            <main>
+                <p role="status">{label.value().get()}</p>
+                <button onClick={event -> label.set(() -> "second")}>Replace function</button>
+            </main>
+        );
+    }
+}

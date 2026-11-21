@@ -1,0 +1,19 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+
+/** A titled container that renders the children it is given. */
+@Component
+public final class Panel {
+    public record Props(String title, View children) {}
+
+    public static View render(Props props) {
+        return (
+            <section aria-label={props.title()}>
+                <h2>{props.title()}</h2>
+                {props.children()}
+            </section>
+        );
+    }
+}

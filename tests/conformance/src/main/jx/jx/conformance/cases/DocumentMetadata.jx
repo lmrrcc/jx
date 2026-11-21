@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case document-metadata: title and meta rendered in a component are placed in the document head. */
+@Component
+public final class DocumentMetadata {
+    public static View render() {
+        State<Integer> page = Hooks.useState(1);
+        return (
+            <main>
+                <title>{"Bench page " + page.value()}</title>
+                <meta name="description" content={"Description " + page.value()} />
+                <button onClick={event -> page.update(previous -> previous + 1)}>Next page</button>
+                <p role="status">{page.value()}</p>
+            </main>
+        );
+    }
+}

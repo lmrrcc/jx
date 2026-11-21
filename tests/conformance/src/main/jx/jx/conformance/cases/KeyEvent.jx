@@ -1,0 +1,26 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case key-event: a key handler reads the key name and acts on Enter only. */
+@Component
+public final class KeyEvent {
+    public static View render() {
+        State<String> draft = Hooks.useState("");
+        State<String> submitted = Hooks.useState("");
+        return (
+            <main>
+                <input aria-label="Draft" value={draft.value()} onChange={event -> draft.set(event.targetValue())} onKeyDown={event -> {
+                    if (event.key().equals("Enter")) {
+                        submitted.set(draft.value());
+                        draft.set("");
+                    }
+                }} />
+                <p role="status">{submitted.value()}</p>
+            </main>
+        );
+    }
+}

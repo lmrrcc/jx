@@ -1,0 +1,17 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+
+/** Case use-id: generated ids are unique per instance and link a label to its input. */
+@Component
+public final class UseId {
+    public static View render() {
+        return (
+            <main>
+                <IdField label="First" />
+                <IdField label="Second" />
+            </main>
+        );
+    }
+}

@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case conditional: branches mount and unmount; null renders nothing. */
+@Component
+public final class Conditional {
+    public static View render() {
+        State<Integer> mode = Hooks.useState(0);
+        return (
+            <main>
+                <button onClick={event -> mode.update(previous -> (previous + 1) % 3)}>Next</button>
+                {mode.value() == 0 ? <p data-testid="branch">first</p> : mode.value() == 1 ? <p data-testid="branch">second</p> : null}
+            </main>
+        );
+    }
+}

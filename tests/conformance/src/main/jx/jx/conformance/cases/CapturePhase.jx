@@ -1,0 +1,19 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case capture-phase: capture handlers run before the target, bubble handlers after. */
+@Component
+public final class CapturePhase {
+    public static View render() {
+        return (
+            <main>
+                <div onClickCapture={event -> Bench.log("capture outer")} onClick={event -> Bench.log("bubble outer")}>
+                    <button onClickCapture={event -> Bench.log("capture target")} onClick={event -> Bench.log("bubble target")}>Press</button>
+                </div>
+            </main>
+        );
+    }
+}

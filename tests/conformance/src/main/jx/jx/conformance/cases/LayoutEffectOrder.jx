@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case layout-effect-order: layout effects run before passive effects. */
+@Component
+public final class LayoutEffectOrder {
+    public static View render() {
+        Hooks.useEffect(() -> {
+            Bench.log("effect");
+            return () -> Bench.log("cleanup effect");
+        }, Dependencies.none());
+        Hooks.useLayoutEffect(() -> {
+            Bench.log("layout");
+            return () -> Bench.log("cleanup layout");
+        }, Dependencies.none());
+        return <main><p role="status">mounted</p></main>;
+    }
+}

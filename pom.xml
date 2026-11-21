@@ -19,6 +19,7 @@
     <module>jx-language-server</module>
     <module>proof/react-bridge</module>
     <module>tests/runtime-browser</module>
+    <module>tests/conformance</module>
     <module>examples/todo-api</module>
     <module>examples/counter-app</module>
     <module>examples/todo-app</module>

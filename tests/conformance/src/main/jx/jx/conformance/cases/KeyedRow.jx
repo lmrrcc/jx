@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** One stateful row of the keyed-list case. */
+@Component
+public final class KeyedRow {
+    public record Props(String name) {}
+
+    public static View render(Props props) {
+        State<Integer> count = Hooks.useState(0);
+        return (
+            <li data-row={props.name()}>
+                <span role="status">{count.value()}</span>
+                <button onClick={event -> count.update(previous -> previous + 1)}>Increment {props.name()}</button>
+            </li>
+        );
+    }
+}

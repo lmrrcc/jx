@@ -1,0 +1,25 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case pointer-events: focus, pointer, wheel, touch and mouse-enter events carry their typed fields. */
+@Component
+public final class PointerEvents {
+    public static View render() {
+        return (
+            <main>
+                <input id="first" aria-label="First"
+                       onFocus={event -> Bench.log("focus " + event.target().tagName() + " " + (event.relatedTarget() == null ? "none" : event.relatedTarget().id()))}
+                       onBlur={event -> Bench.log("blur " + (event.relatedTarget() == null ? "none" : event.relatedTarget().id()))} />
+                <input id="second" aria-label="Second" />
+                <div data-testid="pad"
+                     onMouseEnter={event -> Bench.log("mouseenter " + event.currentTarget().tagName())}
+                     onPointerDown={event -> Bench.log("pointerdown " + event.pointerType() + " " + event.isPrimary() + " " + event.button())}
+                     onWheel={event -> Bench.log("wheel " + (int) Math.signum(event.deltaY()) + " " + event.deltaMode())}
+                     onTouchStart={event -> Bench.log("touchstart " + event.touches().size() + " " + event.changedTouches().get(0).identifier())}>pad</div>
+            </main>
+        );
+    }
+}

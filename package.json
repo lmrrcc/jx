@@ -11,7 +11,9 @@
     "test:runtime": "playwright test -c tests/runtime-browser/playwright.config.js",
     "test:counter": "playwright test -c examples/counter-app/playwright.config.js",
     "test:todo": "playwright test -c examples/todo-app/playwright.config.js",
-    "test:hot": "playwright test -c tests/hot-reload/playwright.config.js"
+    "test:hot": "playwright test -c tests/hot-reload/playwright.config.js",
+    "build:bench": "esbuild tests/conformance/reference/entry.jsx --bundle --format=esm --jsx=automatic --sourcemap --outfile=tests/conformance/target/reference-site/application.js && esbuild tests/conformance/reference/server.jsx --bundle --platform=node --format=cjs --jsx=automatic --outfile=tests/conformance/target/reference-site/server.cjs",
+    "test:bench": "npm run build:bench && playwright test -c tests/conformance/playwright.config.js"
   },
   "dependencies": { "react": "19.3.1", "react-dom": "19.3.1" },
   "devDependencies": { "@playwright/test": "1.65.1", "esbuild": "0.28.2" }

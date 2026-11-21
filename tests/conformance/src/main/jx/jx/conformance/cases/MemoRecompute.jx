@@ -1,0 +1,30 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case memo-recompute: a memoized value is recomputed only when its dependency changes. */
+@Component
+public final class MemoRecompute {
+    public static View render() {
+        State<Integer> number = Hooks.useState(1);
+        State<Integer> noise = Hooks.useState(0);
+        int current = number.value();
+        Integer doubled = Hooks.useMemo(() -> {
+            Bench.log("compute " + current);
+            return current * 2;
+        }, Dependencies.of(current));
+        return (
+            <main>
+                <p role="status">{doubled}</p>
+                <p data-testid="noise">{noise.value()}</p>
+                <button onClick={event -> noise.update(previous -> previous + 1)}>Unrelated render</button>
+                <button onClick={event -> number.update(previous -> previous + 1)}>Change dependency</button>
+            </main>
+        );
+    }
+}

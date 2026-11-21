@@ -1,0 +1,19 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+
+/** Case text-escaping: strings render as text, never as markup; entities decode. */
+@Component
+public final class TextEscaping {
+    public static View render() {
+        String markup = "<b>bold</b><img src=x onerror=alert(1)>";
+        return (
+            <main>
+                <p data-testid="string">{markup}</p>
+                <p data-testid="entities">&amp; &lt; &gt; &quot; &apos; &#65; &#x42;</p>
+                <p data-testid="attribute" title="a &amp; b">attribute</p>
+            </main>
+        );
+    }
+}

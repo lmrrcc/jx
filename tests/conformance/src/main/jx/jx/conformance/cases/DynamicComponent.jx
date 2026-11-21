@@ -1,0 +1,26 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.ComponentType;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.Views;
+
+/** Case dynamic-component: the component type is chosen at run time; a new type remounts. */
+@Component
+public final class DynamicComponent {
+    public static View render() {
+        State<Boolean> loud = Hooks.useState(false);
+        State<Integer> renders = Hooks.useState(0);
+        ComponentType<Void> chosen = loud.value() ? LoudCounter.JX : QuietCounter.JX;
+        return (
+            <main>
+                <button onClick={event -> loud.update(previous -> !previous)}>Switch type</button>
+                <button onClick={event -> renders.update(previous -> previous + 1)}>Rerender</button>
+                <p data-testid="renders">{renders.value()}</p>
+                {Views.component(chosen, null)}
+            </main>
+        );
+    }
+}

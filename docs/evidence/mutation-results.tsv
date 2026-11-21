@@ -1,0 +1,35 @@
+id	result	detected-by	change
+effect-swap-layout	killed	layout-effect-order	Layout and passive effects are swapped
+effect-drop-cleanup	killed	effect-cleanup,effect-dependencies,layout-effect-order	Effect cleanups are never registered
+effect-always-becomes-once	killed	batched-updates,effect-dependencies	An effect without dependencies runs only once
+effect-ignore-deps	killed	layout-effect-dependencies	Layout effects ignore their dependencies
+memo-ignore-deps	killed	callback-identity,memo-recompute	Memoized values are recomputed every render
+memo-never-recompute	killed	callback-identity,memo-recompute	Memoized values are never recomputed
+state-drop-updater	killed	batched-updates,callable-state,callback-identity,checkbox,children-prop,choice-inputs,conditional,context-nested,controlled-input,custom-elements,custom-hook,document-metadata,dom-ref-focus,dynamic-component,effect-cleanup,effect-dependencies,error-boundary,error-reporting,external-store,fragment,function-props,key-event,keyed-list,memo-recompute,prevent-default,props-update,ref-persist,remount-by-key,state-counter,state-lazy-init,stop-propagation,uncontrolled-inputs	State updaters are ignored
+state-eager-initializer	killed	state-lazy-init	The lazy state initializer runs on every render
+reducer-ignore-action	killed	reducer-batch	Reducer actions are ignored
+ref-not-persistent	killed	callback-identity,ref-persist	A ref is recreated on every render
+context-always-default	killed	context-nested	useContext ignores providers
+store-no-unsubscribe	killed	external-store	External stores are never unsubscribed
+store-stale-snapshot	killed	external-store	External store changes do not rerender
+id-constant	killed	use-id	useId returns the same id everywhere
+strict-mode-off	killed	batched-updates,custom-hook,effect-cleanup,effect-dependencies,layout-effect-order,memo-recompute,state-lazy-init	Strict Mode is not applied
+key-dropped	killed	keyed-list,remount-by-key	Component keys are not passed to React
+text-child-as-fragment	killed	document-metadata,resource-elements	Text children are wrapped in fragments again
+provider-children-as-array	killed	context-nested	Provider children are passed as one array again
+provider-ignores-value	killed	context-nested	Providers supply the default value
+prevent-default-noop	killed	prevent-default	preventDefault does nothing
+stop-propagation-noop	killed	stop-propagation	stopPropagation does nothing
+current-target-is-target	killed	event-payload	currentTarget reports the event target
+checked-inverted	killed	checkbox	The checked flag is inverted
+key-name-empty	killed	event-payload,key-event	Keyboard events report no key
+modifier-ignored	killed	event-payload	The shift modifier is never reported
+related-target-missing	killed	pointer-events	relatedTarget is never reported
+transfer-data-empty	killed	transfer-events	Clipboard and drag data read as empty
+touches-empty	killed	pointer-events	Touch lists are always empty
+focus-noop	killed	dom-ref-focus	DOM ref focus does nothing
+style-dropped	killed	attributes	Typed style values are not applied
+boolean-child-rejected	killed	child-values	Boolean children are no longer ignored
+nested-iterable-dropped	killed	child-values,keyed-list	Iterable children render nothing
+array-child-dropped	killed	child-values	Array children render nothing
+for-alias-broken	killed	attributes,use-id	The for attribute is lowered to a wrong name

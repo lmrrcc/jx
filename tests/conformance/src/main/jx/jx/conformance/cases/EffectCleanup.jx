@@ -1,0 +1,25 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case effect-cleanup: effect setup and cleanup on mount, dependency change and unmount. */
+@Component
+public final class EffectCleanup {
+    public static View render() {
+        State<String> dependency = Hooks.useState("a");
+        State<Boolean> shown = Hooks.useState(true);
+        State<Integer> renders = Hooks.useState(0);
+        return (
+            <main>
+                <button onClick={event -> dependency.set("b")}>Change dependency</button>
+                <button onClick={event -> renders.update(previous -> previous + 1)}>Rerender only</button>
+                <button onClick={event -> shown.update(previous -> !previous)}>Toggle probe</button>
+                <p data-testid="renders">{renders.value()}</p>
+                {shown.value() ? <EffectProbe dependency={dependency.value()} /> : null}
+            </main>
+        );
+    }
+}

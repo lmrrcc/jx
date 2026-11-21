@@ -14,6 +14,7 @@ public final class App {
             <main>
                 <p class="eyebrow">JAVA IN THE BROWSER</p>
                 <h1>Two counters. One Java application.</h1>
+                <h2>Hello World!!</h2>
                 <p>Each counter owns its state. React renders the Java-authored components.</p>
                 <div class="toolbar">
                     <button onClick={event -> parent.update(previous -> previous + 1)}>Rerender parent</button>

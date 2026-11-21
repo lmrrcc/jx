@@ -1,0 +1,30 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case effect-dependencies: an effect without dependencies runs every commit, one with none runs once. */
+@Component
+public final class EffectDependencies {
+    public static View render() {
+        State<Integer> renders = Hooks.useState(0);
+        Hooks.useEffect(() -> {
+            Bench.log("always");
+            return () -> Bench.log("cleanup always");
+        }, Dependencies.always());
+        Hooks.useEffect(() -> {
+            Bench.log("once");
+            return () -> Bench.log("cleanup once");
+        }, Dependencies.none());
+        return (
+            <main>
+                <p role="status">{renders.value()}</p>
+                <button onClick={event -> renders.update(previous -> previous + 1)}>Rerender</button>
+            </main>
+        );
+    }
+}

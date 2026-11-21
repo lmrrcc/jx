@@ -1,0 +1,34 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case choice-inputs: controlled radio group, select and textarea. */
+@Component
+public final class ChoiceInputs {
+    public static View render() {
+        State<String> size = Hooks.useState("small");
+        State<String> color = Hooks.useState("red");
+        State<String> notes = Hooks.useState("first");
+        return (
+            <main>
+                <label><input type="radio" name="size" value="small" checked={size.value().equals("small")} onChange={event -> size.set(event.targetValue())} />Small</label>
+                <label><input type="radio" name="size" value="large" checked={size.value().equals("large")} onChange={event -> size.set(event.targetValue())} />Large</label>
+                <select aria-label="Color" value={color.value()} onChange={event -> color.set(event.targetValue())}>
+                    <option value="red">Red</option>
+                    <option value="green">Green</option>
+                    <option value="blue">Blue</option>
+                </select>
+                <textarea aria-label="Notes" value={notes.value()} onChange={event -> notes.set(event.targetValue())} />
+                <p role="status">{size.value()}|{color.value()}|{notes.value()}</p>
+                <button onClick={event -> {
+                    size.set("small");
+                    color.set("blue");
+                    notes.set("reset");
+                }}>Reset</button>
+            </main>
+        );
+    }
+}

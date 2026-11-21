@@ -1,0 +1,31 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case prevent-default: preventing the default action stops link navigation and form submission. */
+@Component
+public final class PreventDefault {
+    public static View render() {
+        State<Integer> clicks = Hooks.useState(0);
+        State<Boolean> submitted = Hooks.useState(false);
+        return (
+            <main>
+                <a href="#moved" onClick={event -> {
+                    event.preventDefault();
+                    clicks.update(previous -> previous + 1);
+                }}>Stay</a>
+                <a href="#moved">Go</a>
+                <form onSubmit={event -> {
+                    event.preventDefault();
+                    submitted.set(true);
+                }}>
+                    <button type="submit">Submit</button>
+                </form>
+                <p role="status">{clicks.value()} {submitted.value() ? "submitted" : "idle"}</p>
+            </main>
+        );
+    }
+}

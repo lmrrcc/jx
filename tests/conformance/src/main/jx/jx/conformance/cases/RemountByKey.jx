@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case remount-by-key: changing a key discards the old instance and its state. */
+@Component
+public final class RemountByKey {
+    public static View render() {
+        State<Integer> version = Hooks.useState(1);
+        return (
+            <main>
+                <button onClick={event -> version.update(previous -> previous + 1)}>New key</button>
+                <ul><KeyedRow key={"version-" + version.value()} name="item" /></ul>
+            </main>
+        );
+    }
+}

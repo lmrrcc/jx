@@ -1,0 +1,24 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.Contexts;
+
+/** Case context-nested: default value, provider value, nested override and provider update. */
+@Component
+public final class ContextNested {
+    public static View render() {
+        State<String> theme = Hooks.useState("dark");
+        return (
+            <main>
+                <ThemeLabel name="outside" />
+                {Contexts.THEME.provide(theme.value(),
+                    <ThemeLabel name="inside" />,
+                    Contexts.THEME.provide("fixed", <ThemeLabel name="nested" />))}
+                <button onClick={event -> theme.set("contrast")}>Change provider</button>
+            </main>
+        );
+    }
+}

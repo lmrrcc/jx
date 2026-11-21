@@ -1,0 +1,29 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case state-counter: a state snapshot per render and queued functional updates. */
+@Component
+public final class StateCounter {
+    public static View render() {
+        State<Integer> count = Hooks.useState(0);
+        return (
+            <main>
+                <p role="status">{count.value()}</p>
+                <button onClick={event -> count.update(previous -> previous + 1)}>Increment</button>
+                <button onClick={event -> {
+                    count.update(previous -> previous + 1);
+                    count.update(previous -> previous + 1);
+                    count.update(previous -> previous + 1);
+                }}>Add three</button>
+                <button onClick={event -> {
+                    count.set(count.value() + 1);
+                    count.set(count.value() + 1);
+                }}>Set from snapshot twice</button>
+            </main>
+        );
+    }
+}

@@ -1,0 +1,25 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case function-props: a callback prop reaches the parent; a render prop produces the child's content. */
+@Component
+public final class FunctionProps {
+    public static View render() {
+        State<Integer> count = Hooks.useState(0);
+        State<Boolean> strong = Hooks.useState(false);
+        return (
+            <main>
+                <Stepper value={count.value()}
+                         onStep={() -> count.update(previous -> previous + 1)}
+                         renderValue={value -> strong.value()
+                             ? <strong data-testid="rendered">value {value}</strong>
+                             : <em data-testid="rendered">value {value}</em>} />
+                <button onClick={event -> strong.set(true)}>Use strong</button>
+            </main>
+        );
+    }
+}

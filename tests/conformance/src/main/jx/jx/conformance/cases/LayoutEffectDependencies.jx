@@ -1,0 +1,29 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case layout-effect-dependencies: a layout effect reruns only when its dependency changes. */
+@Component
+public final class LayoutEffectDependencies {
+    public static View render() {
+        State<Integer> value = Hooks.useState(1);
+        State<Integer> noise = Hooks.useState(0);
+        int current = value.value();
+        Hooks.useLayoutEffect(() -> {
+            Bench.log("layout " + current);
+            return () -> Bench.log("cleanup " + current);
+        }, Dependencies.of(current));
+        return (
+            <main>
+                <p role="status">{noise.value()}</p>
+                <button onClick={event -> noise.update(previous -> previous + 1)}>Unrelated render</button>
+                <button onClick={event -> value.update(previous -> previous + 1)}>Change dependency</button>
+            </main>
+        );
+    }
+}

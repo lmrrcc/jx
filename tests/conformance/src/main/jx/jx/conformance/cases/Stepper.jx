@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import java.util.function.Function;
+import jx.Component;
+import jx.View;
+
+/** Calls back to its parent and renders its value through a function prop. */
+@Component
+public final class Stepper {
+    public record Props(int value, Runnable onStep, Function<Integer, View> renderValue) {}
+
+    public static View render(Props props) {
+        return (
+            <section aria-label="Stepper">
+                {props.renderValue().apply(props.value())}
+                <button onClick={event -> props.onStep().run()}>Step</button>
+            </section>
+        );
+    }
+}

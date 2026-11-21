@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.ReducerState;
+import jx.View;
+
+/** Case reducer-batch: two dispatches in one event are both reduced, in order. */
+@Component
+public final class ReducerBatch {
+    public static View render() {
+        ReducerState<String, String> text = Hooks.useReducer((state, action) -> state + action, "");
+        return (
+            <main>
+                <p role="status">{text.value()}</p>
+                <button onClick={event -> {
+                    text.dispatch().accept("a");
+                    text.dispatch().accept("b");
+                }}>Dispatch a then b</button>
+            </main>
+        );
+    }
+}

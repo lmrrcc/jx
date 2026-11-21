@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Logs its effect lifecycle for the effect-cleanup case. */
+@Component
+public final class EffectProbe {
+    public record Props(String dependency) {}
+
+    public static View render(Props props) {
+        String dependency = props.dependency();
+        Hooks.useEffect(() -> {
+            Bench.log("setup " + dependency);
+            return () -> Bench.log("cleanup " + dependency);
+        }, Dependencies.of(dependency));
+        return <p role="status">{dependency}</p>;
+    }
+}

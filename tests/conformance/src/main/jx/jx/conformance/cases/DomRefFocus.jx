@@ -1,0 +1,28 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.DomRef;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case dom-ref-focus: a DOM ref is attached before layout effects and reads the element. */
+@Component
+public final class DomRefFocus {
+    public static View render() {
+        DomRef input = Hooks.useDomRef();
+        State<String> read = Hooks.useState("");
+        Hooks.useLayoutEffect(() -> {
+            input.current().focus();
+            return null;
+        }, Dependencies.none());
+        return (
+            <main>
+                <input ref={input} aria-label="Field" />
+                <button onClick={event -> read.set(input.current().value())}>Read field</button>
+                <p role="status">{read.value()}</p>
+            </main>
+        );
+    }
+}

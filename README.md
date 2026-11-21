@@ -268,7 +268,8 @@ typed, include a compiling consumer example for new capabilities, and add checks
 that exercise observable behavior.
 
 `java tools/CheckBaseline.java` checks the [version manifest](docs/evidence/versions.tsv)
-against the build files and validates the [capability ledger](docs/evidence/capabilities.tsv);
+against the build files and validates the [capability ledger](docs/evidence/capabilities.tsv)
+and the portfolio registers;
 after changing a pinned version, rerun it with `--write-versions`.
 
 The Maven build runs compiler, plugin, language-server, model, and backend tests.
@@ -279,10 +280,14 @@ npm run build:proof
 npm run test:proof
 npm run build:runtime
 npm run test:runtime
+npm run test:bench
 npm run test:counter
 npm run test:todo
 npm run test:hot
 ```
+
+`test:bench` runs the [React conformance bench](tests/conformance/README.md): each
+case exists in plain React and in JX, and one spec must pass against both.
 
 These checks cover real React behavior, offline interaction, interoperability,
 HTTP and routing, the complete examples, and actual Maven-driven hot updates.
@@ -298,7 +303,8 @@ The [GA roadmap](docs/ga-roadmap.md) is a proposed one-year plan for complete
 applications, shared Java/API contracts, Spring Boot integration, browser-library
 coverage, React capabilities and migration of real products. It separates current
 evidence from planned capabilities and includes release gates, a dependency-ordered
-backlog and a daily review process.
+backlog and a daily review process. Work proceeds through the
+[implementation sequence](docs/ga-tasks.md), one change-sized task at a time.
 
 ## License
 

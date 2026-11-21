@@ -1,0 +1,19 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+
+/** Case resource-elements: a style with href and precedence is hoisted to the head once, however often it is rendered. */
+@Component
+public final class ResourceElements {
+    public static View render() {
+        String css = ".bench-styled { color: rgb(0, 128, 0); }";
+        return (
+            <main>
+                <style href="bench-style" precedence="default">{css}</style>
+                <style href="bench-style" precedence="default">{css}</style>
+                <p class="bench-styled" data-testid="styled">styled</p>
+            </main>
+        );
+    }
+}

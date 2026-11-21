@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.Ref;
+import jx.State;
+import jx.View;
+
+/** Case ref-persist: a ref keeps its value across renders and does not schedule one. */
+@Component
+public final class RefPersist {
+    public static View render() {
+        Ref<Integer> clicks = Hooks.useRef(0);
+        State<Integer> renders = Hooks.useState(0);
+        return (
+            <main>
+                <p role="status">{clicks.current()}</p>
+                <button onClick={event -> clicks.set(clicks.current() + 1)}>Bump ref</button>
+                <button onClick={event -> renders.update(previous -> previous + 1)}>Render</button>
+            </main>
+        );
+    }
+}

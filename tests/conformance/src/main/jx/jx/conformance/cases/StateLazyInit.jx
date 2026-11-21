@@ -1,0 +1,24 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case state-lazy-init: a lazy initializer supplies the first value. */
+@Component
+public final class StateLazyInit {
+    public static View render() {
+        State<Integer> value = Hooks.useStateLazy(() -> {
+            Bench.log("init");
+            return 7;
+        });
+        return (
+            <main>
+                <p role="status">{value.value()}</p>
+                <button onClick={event -> value.update(previous -> previous + 1)}>Increment</button>
+            </main>
+        );
+    }
+}

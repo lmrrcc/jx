@@ -1,0 +1,24 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case media-events: animation, transition, media and load events reach their handlers. */
+@Component
+public final class MediaEvents {
+    public static View render() {
+        return (
+            <main>
+                <div data-testid="box"
+                     onAnimationEnd={event -> Bench.log("animationend " + event.animationName() + " " + event.elapsedTime())}
+                     onTransitionEnd={event -> Bench.log("transitionend " + event.propertyName())}>box</div>
+                <audio data-testid="audio"
+                       onPlay={event -> Bench.log("play " + event.target().tagName() + " " + event.target().paused())}
+                       onPause={event -> Bench.log("pause " + event.currentTarget().tagName())}
+                       onTimeUpdate={event -> Bench.log("timeupdate " + (int) event.target().currentTime())} />
+                <img alt="Picture" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onLoad={event -> Bench.log("load " + event.target().tagName())} />
+            </main>
+        );
+    }
+}

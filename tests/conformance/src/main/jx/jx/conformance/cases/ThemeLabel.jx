@@ -1,0 +1,17 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.View;
+import jx.conformance.Contexts;
+
+/** Shows the theme context value for the context-nested case. */
+@Component
+public final class ThemeLabel {
+    public record Props(String name) {}
+
+    public static View render(Props props) {
+        String theme = Hooks.useContext(Contexts.THEME);
+        return <p data-theme-of={props.name()}>{theme}</p>;
+    }
+}

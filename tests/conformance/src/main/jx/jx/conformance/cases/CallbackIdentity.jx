@@ -1,0 +1,31 @@
+package jx.conformance.cases;
+
+import java.util.function.Supplier;
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.Ref;
+import jx.State;
+import jx.View;
+
+/** Case callback-identity: a callback keeps its identity until a dependency changes. */
+@Component
+public final class CallbackIdentity {
+    public static View render() {
+        State<Integer> noise = Hooks.useState(0);
+        State<Integer> dependency = Hooks.useState(0);
+        Supplier<String> stable = Hooks.useCallback(() -> "stable", Dependencies.none());
+        Supplier<String> dependent = Hooks.useCallback(() -> "dependent", Dependencies.of(dependency.value()));
+        Ref<Supplier<String>> firstStable = Hooks.useRef(stable);
+        Ref<Supplier<String>> firstDependent = Hooks.useRef(dependent);
+        return (
+            <main>
+                <p data-testid="stable">{firstStable.current() == stable ? "same" : "changed"}</p>
+                <p data-testid="dependent">{firstDependent.current() == dependent ? "same" : "changed"}</p>
+                <p role="status">{noise.value()}</p>
+                <button onClick={event -> noise.update(previous -> previous + 1)}>Unrelated render</button>
+                <button onClick={event -> dependency.update(previous -> previous + 1)}>Change dependency</button>
+            </main>
+        );
+    }
+}

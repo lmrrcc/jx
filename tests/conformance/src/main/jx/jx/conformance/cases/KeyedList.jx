@@ -1,0 +1,49 @@
+package jx.conformance.cases;
+
+import java.util.ArrayList;
+import java.util.List;
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case keyed-list: component state follows its key across reorder and is lost on removal. */
+@Component
+public final class KeyedList {
+    public static View render() {
+        State<List<String>> names = Hooks.useState(List.of("a", "b", "c"));
+        return (
+            <main>
+                <button onClick={event -> names.update(KeyedList::reversed)}>Reverse</button>
+                <button onClick={event -> names.update(previous -> without(previous, "a"))}>Remove a</button>
+                <button onClick={event -> names.update(previous -> with(previous, "a"))}>Restore a</button>
+                <ul>
+                    {names.value().stream().map(name -> <KeyedRow key={name} name={name} />).toList()}
+                </ul>
+            </main>
+        );
+    }
+
+    private static List<String> reversed(List<String> names) {
+        List<String> result = new ArrayList<>();
+        for (int index = names.size() - 1; index >= 0; index--) {
+            result.add(names.get(index));
+        }
+        return List.copyOf(result);
+    }
+
+    private static List<String> without(List<String> names, String name) {
+        List<String> result = new ArrayList<>(names);
+        result.remove(name);
+        return List.copyOf(result);
+    }
+
+    private static List<String> with(List<String> names, String name) {
+        if (names.contains(name)) {
+            return names;
+        }
+        List<String> result = new ArrayList<>(names);
+        result.add(name);
+        return List.copyOf(result);
+    }
+}

@@ -1,0 +1,37 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case transfer-events: composition text, clipboard data and drag data are readable and writable. */
+@Component
+public final class TransferEvents {
+    public static View render() {
+        return (
+            <main>
+                <input aria-label="Compose"
+                       onCompositionStart={event -> Bench.log("compositionstart [" + event.data() + "]")}
+                       onCompositionUpdate={event -> Bench.log("compositionupdate [" + event.data() + "]")}
+                       onCompositionEnd={event -> Bench.log("compositionend [" + event.data() + "]")}
+                       onPaste={event -> {
+                           event.preventDefault();
+                           Bench.log("paste " + event.transferData("text/plain"));
+                       }}
+                       onCopy={event -> {
+                           event.preventDefault();
+                           event.setTransferData("text/plain", "copied by handler");
+                           Bench.log("copy");
+                       }} />
+                <div data-testid="source" draggable onDragStart={event -> {
+                    event.setTransferData("text/plain", "dragged item");
+                    Bench.log("dragstart");
+                }}>source</div>
+                <div data-testid="target" onDragOver={event -> event.preventDefault()} onDrop={event -> {
+                    event.preventDefault();
+                    Bench.log("drop " + event.transferData("text/plain"));
+                }}>target</div>
+            </main>
+        );
+    }
+}

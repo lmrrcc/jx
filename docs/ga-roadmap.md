@@ -9,7 +9,35 @@ Progress, 21 November 2026: [GA-01](ga-01-baseline.md) is done, with CI green at
 `3688d25`. It found `78c9836` red in CI (counter example), restored a
 green baseline and added the [baseline record](evidence/baseline.md),
 [version manifest](evidence/versions.tsv) and [capability ledger](evidence/capabilities.tsv).
-No other work package has started.
+
+Progress, 21 November 2026: [GA-02](ga-02-portfolio.md) is implemented and awaits
+Luca's end-to-end check. It registered 21 browser surfaces and 40 journeys, measured
+the deployed public sites and three production bundles in the
+[portfolio baseline](evidence/portfolio-baseline.md), and recorded Luca's decisions:
+website pilots `lmrr.cc`, `stacktrace.cc` and `luca4j.com`; application pilot Stack
+Sensei as a separate implementation with one-to-one behavior and no change to the
+existing site. No later work package has started.
+
+Revision, 21 November 2026: implementation now follows the
+[implementation sequence](ga-tasks.md), an ordered list of change-sized tasks
+grouped by these milestones. Each task adds code with a check that Luca runs before
+the next one starts. Milestone dates and gates below are unchanged.
+
+Decision, 21 November 2026: JX is proven first against a purpose-built React test
+bench (reference React and JX versions of each case, one shared spec, every stable
+React export mapped), described in the implementation sequence. Existing products
+are later pilots, not the starting point.
+
+Scope change, 21 November 2026: the target is support for **all** React features in
+JX, measured by the [feature list](evidence/conformance.tsv) (118 rows: 36 covered,
+14 untested, 49 unsupported, 19 excluded on that date). The React parity track in the
+implementation sequence assigns every open row to a task. This supersedes two
+statements below: section 1's limit to "stable asynchronous/form capabilities" as a
+chosen subset, and the placement of React Server Components outside 1.0, which
+becomes the last and largest parity item after a feasibility proof. Java typing
+still applies: where a React shape is untyped, JX provides a typed equivalent with
+the same observable outcome. The added scope is not yet reflected in the capacity
+figures of section 8; dates stay conditional and are reviewed at each gate.
 
 Planning horizon: **19 November 2026–19 November 2027**. GA is an evidence gate,
 not an automatic consequence of reaching the last date. This document proposes
@@ -416,7 +444,7 @@ Proposed defaults allow work to begin without pretending decisions are final:
 | Decision | Proposed default | Deadline / consequence |
 | --- | --- | --- |
 | Initial release users | Java teams building Spring apps, with backend-neutral interop preserved | D7; affects template and documentation priorities |
-| First pilot | Content page + read-only authenticated route; choose actual owner/workflow from inventory | D7; no production cutover yet |
+| First pilot | **Decided 21 November 2026:** websites `lmrr.cc`, `stacktrace.cc`, `luca4j.com`; application Stack Sensei, built beside the existing frontend without modifying it. First routes are chosen when the pilots start | No production cutover yet |
 | Exact parity scope | Stable pinned React DOM application APIs; explicit separate RSC track | D15; strict Flight parity changes critical path |
 | SSR operations | CSR/SSG single Boot JAR; candidate isolated JS renderer for request-time SSR | D30–M2; require proof and operator acceptance |
 | Contract authority | Java-first for new Java apps; OpenAPI/import adapters for existing/non-Java APIs | D15; no two handwritten authorities |

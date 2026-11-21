@@ -1,0 +1,21 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.View;
+
+/** One labelled field of the use-id case. */
+@Component
+public final class IdField {
+    public record Props(String label) {}
+
+    public static View render(Props props) {
+        String id = Hooks.useId();
+        return (
+            <p>
+                <label for={id}>{props.label()}</label>
+                <input id={id} />
+            </p>
+        );
+    }
+}

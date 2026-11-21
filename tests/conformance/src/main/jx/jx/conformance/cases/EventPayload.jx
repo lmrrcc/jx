@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case event-payload: handlers read type, buttons, modifiers, targets and coordinates. */
+@Component
+public final class EventPayload {
+    public static View render() {
+        return (
+            <main>
+                <div data-testid="area" onClick={event -> Bench.log(event.type() + " " + event.button() + " " + event.shiftKey() + " " + event.altKey()
+                        + " " + event.currentTarget().tagName() + " " + event.target().tagName() + " " + (event.clientX() > 0) + " " + event.detail())}>
+                    <span data-testid="inner">inner</span>
+                </div>
+                <input aria-label="Keys" onKeyDown={event -> Bench.log(event.type() + " " + event.key() + " " + event.code()
+                        + " " + event.ctrlKey() + " " + event.metaKey() + " " + event.repeat())} />
+            </main>
+        );
+    }
+}

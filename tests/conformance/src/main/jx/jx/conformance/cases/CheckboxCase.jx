@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case checkbox: a controlled checkbox reports its checked flag. */
+@Component
+public final class CheckboxCase {
+    public static View render() {
+        State<Boolean> accepted = Hooks.useState(false);
+        return (
+            <main>
+                <input type="checkbox" aria-label="Accept" checked={accepted.value()} onChange={event -> accepted.set(event.targetChecked())} />
+                <p role="status">{accepted.value() ? "accepted" : "pending"}</p>
+            </main>
+        );
+    }
+}

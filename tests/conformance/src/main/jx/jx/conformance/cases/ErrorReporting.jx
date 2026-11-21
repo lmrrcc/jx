@@ -1,0 +1,26 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case error-reporting: an error in a handler is reported and leaves the UI; an uncaught render error unmounts the root. */
+@Component
+public final class ErrorReporting {
+    public static View render() {
+        State<Boolean> broken = Hooks.useState(false);
+        if (broken.value()) {
+            throw new IllegalStateException("render exploded");
+        }
+        return (
+            <main>
+                <p role="status">alive</p>
+                <button onClick={event -> {
+                    throw new IllegalStateException("handler exploded");
+                }}>Throw in handler</button>
+                <button onClick={event -> broken.set(true)}>Throw in render</button>
+            </main>
+        );
+    }
+}

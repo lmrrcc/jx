@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+import jx.conformance.CounterHook;
+
+/** Case custom-hook: two calls of one custom hook keep independent state and effects. */
+@Component
+public final class CustomHook {
+    public static View render() {
+        CounterHook.Counter ones = CounterHook.useCounter("ones", 1);
+        CounterHook.Counter tens = CounterHook.useCounter("tens", 10);
+        return (
+            <main>
+                <p data-testid="ones">{ones.value()}</p>
+                <p data-testid="tens">{tens.value()}</p>
+                <button onClick={event -> ones.advance().run()}>Advance ones</button>
+                <button onClick={event -> tens.advance().run()}>Advance tens</button>
+            </main>
+        );
+    }
+}

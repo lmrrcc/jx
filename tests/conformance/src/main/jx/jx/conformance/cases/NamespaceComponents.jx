@@ -1,0 +1,18 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+
+/** Case namespace-components: a component is referenced by a dotted, qualified name. */
+@Component
+public final class NamespaceComponents {
+    public static View render() {
+        return (
+            <main>
+                <jx.conformance.cases.Panel title="Qualified">
+                    <p data-testid="inside">inside</p>
+                </jx.conformance.cases.Panel>
+            </main>
+        );
+    }
+}

@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case props-update: a child keeps its state when the parent rerenders or changes its props. */
+@Component
+public final class PropsUpdate {
+    public static View render() {
+        State<Integer> ticks = Hooks.useState(0);
+        State<String> label = Hooks.useState("before");
+        return (
+            <main>
+                <p data-testid="ticks">{ticks.value()}</p>
+                <button onClick={event -> ticks.update(previous -> previous + 1)}>Rerender parent</button>
+                <button onClick={event -> label.set("after")}>Change label</button>
+                <LabelledCounter label={label.value()} />
+            </main>
+        );
+    }
+}

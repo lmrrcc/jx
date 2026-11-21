@@ -1,0 +1,21 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case controlled-input: the input shows state, and state may transform what was typed. */
+@Component
+public final class ControlledInput {
+    public static View render() {
+        State<String> text = Hooks.useState("");
+        return (
+            <main>
+                <input aria-label="Name" value={text.value()} onChange={event -> text.set(event.targetValue().toUpperCase())} />
+                <p role="status">{text.value()}</p>
+                <button onClick={event -> text.set("")}>Clear</button>
+            </main>
+        );
+    }
+}

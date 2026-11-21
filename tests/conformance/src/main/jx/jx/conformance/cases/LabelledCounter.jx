@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** A child with its own state and a label from props. */
+@Component
+public final class LabelledCounter {
+    public record Props(String label) {}
+
+    public static View render(Props props) {
+        State<Integer> count = Hooks.useState(0);
+        return (
+            <section aria-label={props.label()}>
+                <h2>{props.label()}</h2>
+                <p role="status">{count.value()}</p>
+                <button onClick={event -> count.update(previous -> previous + 1)}>Increment child</button>
+            </section>
+        );
+    }
+}

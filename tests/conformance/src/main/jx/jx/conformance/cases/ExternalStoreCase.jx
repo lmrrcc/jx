@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.CounterStore;
+
+/** Case external-store: a component follows a store that React does not own. */
+@Component
+public final class ExternalStoreCase {
+    public static View render() {
+        State<Boolean> shown = Hooks.useState(true);
+        return (
+            <main>
+                {shown.value() ? <StoreReader /> : null}
+                <button onClick={event -> CounterStore.SHARED.increment()}>Change store</button>
+                <button onClick={event -> shown.update(previous -> !previous)}>Toggle reader</button>
+            </main>
+        );
+    }
+}

@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case fragment: fragments group children without adding an element. */
+@Component
+public final class FragmentCase {
+    public static View render() {
+        State<Boolean> more = Hooks.useState(false);
+        return (
+            <main>
+                <button onClick={event -> more.set(true)}>More</button>
+                <ul>
+                    <><li>one</li><li>two</li></>
+                    {more.value() ? <><li>three</li><li>four</li></> : null}
+                </ul>
+            </main>
+        );
+    }
+}

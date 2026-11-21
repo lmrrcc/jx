@@ -1,0 +1,18 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+import jx.react.React;
+
+/** Case error-boundary: a render error is replaced by the boundary fallback; siblings survive. */
+@Component
+public final class ErrorBoundaryCase {
+    public static View render() {
+        return (
+            <main>
+                <p data-testid="sibling">sibling</p>
+                {React.boundary(<Exploder />, error -> <p role="alert">failed: {error.getMessage()}</p>)}
+            </main>
+        );
+    }
+}
