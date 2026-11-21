@@ -12,11 +12,14 @@ import org.teavm.jso.*;
 public final class React {
     private static final JSObject COMPONENTS = weakMap();
     private static final JSObject CONTEXTS = weakMap();
+    private static final JSObject REFS = weakMap();
     private static final JSObject ERROR_BOUNDARY = boundaryType();
     private React() {}
     @JSFunctor interface Render extends JSObject { JSObject render(JSObject props); }
     @JSFunctor interface Handler extends JSObject { void handle(JSObject event); }
     @JSFunctor interface FailureView extends JSObject { JSObject render(JSObject error); }
+    @JSFunctor interface Detach extends JSObject { void run(); }
+    @JSFunctor interface Attach extends JSObject { Detach attach(JSObject node); }
     @JSFunctor interface Compare extends JSObject { boolean same(Object previous, Object next); }
     private record NativeView(JSObject element) implements View.Extension {}
     /** Error boundary for descendant rendering/lifecycle errors, including Java exceptions.
@@ -100,7 +103,14 @@ public final class React {
         JSObject result = object();
         for (Attributes.Entry entry : attributes.entries()) {
             if (entry.value() instanceof EventHandler event) setHandler(result, entry.name(), js -> event.handle(new BrowserEvent(js)));
-            else if (entry.value() instanceof DomRef ref) setHandler(result, "ref", js -> ref.attach(js == null ? null : new BrowserElement(js)));
+            else if (entry.value() instanceof DomRef ref) setNative(result, "ref", refFunction(REFS, ref, js -> {
+                ref.attach(js == null ? null : new BrowserElement(js));
+                return null;
+            }));
+            else if (entry.value() instanceof RefCallback callback) setNative(result, "ref", refFunction(REFS, callback, js -> {
+                Runnable cleanup = callback.attach(js == null ? null : new BrowserElement(js));
+                return cleanup == null ? null : cleanup::run;
+            }));
             else if (entry.value() instanceof Style style) {
                 JSObject values = object();
                 style.properties().forEach((name, value) -> set(values, name, Interop.scalar(value)));
@@ -131,6 +141,10 @@ public final class React {
         BrowserElement(JSObject element) { this.element = element; }
         @Override public void focus() { focus(element); }
         @Override public String value() { return value(element); }
+        @Override public void setValue(String value) { setValue(element, Objects.requireNonNull(value)); }
+        @Override public String tagName() { return text(element, "tagName"); }
+        @Override public String textContent() { return text(element, "textContent"); }
+        @JSBody(params = {"element", "value"}, script = "element.value = value;") private static native void setValue(JSObject element, String value);
         @JSBody(params = "element", script = "element.focus();") private static native void focus(JSObject element);
         @JSBody(params = "element", script = "return element.value == null ? '' : String(element.value);") private static native String value(JSObject element);
     }
@@ -217,6 +231,8 @@ public final class React {
     @JSBody(params = {"object", "name"}, script = "var value = object[name]; return typeof value === 'number' && isFinite(value) ? value : 0;") private static native double number(JSObject object, String name);
     @JSBody(params = {"object", "name"}, script = "return !!object[name];") private static native boolean flag(JSObject object, String name);
     @JSBody(script = "return new WeakMap();") private static native JSObject weakMap();
+    // One function per ref object or callback, so React re-attaches only when the ref itself changes.
+    @JSBody(params = {"cache", "ref", "attach"}, script = "var fn = cache.get(ref); if (!fn) { fn = function(node) { var cleanup = attach(node); return cleanup === null ? undefined : cleanup; }; cache.set(ref, fn); } return fn;") private static native JSObject refFunction(JSObject cache, Object ref, Attach attach);
     @JSBody(params = "render", script = "return render;") private static native JSObject nativeFunction(Render render);
     @JSBody(script = "function Boundary(props) { React.Component.call(this, props); this.state = {error: null}; } Boundary.prototype = Object.create(React.Component.prototype); Boundary.prototype.constructor = Boundary; Boundary.getDerivedStateFromError = function(error) { return {error: error}; }; Boundary.prototype.render = function() { return this.state.error === null ? this.props.children : this.props.fallback(this.state.error); }; return Boundary;", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject boundaryType();
     @JSBody(params = {"type", "child", "fallback"}, script = "return React.createElement(type, {fallback: fallback}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject boundary(JSObject type, JSObject child, FailureView fallback);

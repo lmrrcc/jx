@@ -51,6 +51,7 @@ import { ImperativeHandle } from './cases/imperative-handle.jsx';
 import { ForwardRef } from './cases/forward-ref.jsx';
 import { RefAsProp } from './cases/ref-as-prop.jsx';
 import { RefCallback } from './cases/ref-callback.jsx';
+import { CreateRef } from './cases/create-ref.jsx';
 import { MemoSkip } from './cases/memo-skip.jsx';
 import { TransitionPending } from './cases/transition-pending.jsx';
 import { StartTransition } from './cases/start-transition.jsx';
@@ -131,6 +132,7 @@ const cases = {
   'forward-ref': ForwardRef,
   'ref-as-prop': RefAsProp,
   'ref-callback': RefCallback,
+  'create-ref': CreateRef,
   'memo-skip': MemoSkip,
   'transition-pending': TransitionPending,
   'start-transition': StartTransition,

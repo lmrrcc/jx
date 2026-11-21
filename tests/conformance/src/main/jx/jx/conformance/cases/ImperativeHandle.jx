@@ -1,0 +1,27 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.Ref;
+import jx.State;
+import jx.View;
+import jx.conformance.FieldHandle;
+
+/** Case imperative-handle: a component exposes chosen methods instead of its DOM node. */
+@Component
+public final class ImperativeHandle {
+    public static View render() {
+        Ref<FieldHandle> field = Hooks.useRef(null);
+        State<String> read = Hooks.useState("");
+        return (
+            <main>
+                <ImperativeField ref={field} />
+                <button onClick={event -> {
+                    field.current().fill().accept("filled");
+                    read.set(field.current().read().get());
+                }}>Fill through handle</button>
+                <p role="status">{read.value()}</p>
+            </main>
+        );
+    }
+}

@@ -116,7 +116,8 @@ final class Lowerer {
         for (Attribute attribute : attributes.values()) {
             String name = canonicalAttribute(attribute.name());
             boolean handler = name.length() > 2 && name.startsWith("on") && Character.isUpperCase(name.charAt(2));
-            out.synthetic((handler ? ".on(" : ".attr(") + quote(name) + ", ", attribute.nameSpan().start());
+            // ref has typed overloads so that a lambda becomes a RefCallback.
+            out.synthetic(name.equals("ref") ? ".ref(" : (handler ? ".on(" : ".attr(") + quote(name) + ", ", attribute.nameSpan().start());
             value(attribute);
             out.synthetic(")", attribute.span().end() - 1);
         }

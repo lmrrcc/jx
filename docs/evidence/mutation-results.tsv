@@ -36,3 +36,6 @@ for-alias-broken	killed	attributes,use-id	The for attribute is lowered to a wron
 memo-never-skips	killed	memo-skip	Memoized components render on every parent render
 memo-always-skips	killed	memo-skip	Memoized components never see new props
 memo-field-ignored	killed	memo-skip	Generated memo comparison ignores the Props fields
+ref-cleanup-dropped	killed	ref-callback	Callback ref cleanups are never registered
+ref-function-unstable	killed	ref-callback	Refs are re-attached on every render
+handle-not-published	killed	imperative-handle	Imperative handles never reach the ref

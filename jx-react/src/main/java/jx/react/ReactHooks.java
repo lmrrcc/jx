@@ -57,6 +57,17 @@ final class ReactHooks implements HookRuntime {
         effectNative(setup, Interop.dependencies(dependencies), layout);
     }
     @Override public <T> Ref<T> ref(T initial) { HotReload.slot("ref"); return Interop.value(refNative(new Ref<>(initial))); }
+    @JSFunctor interface Assign extends JSObject { void set(Object value); }
+    private static final JSObject HANDLES = weakMap();
+    @Override public <H> void imperativeHandle(Ref<H> ref, Supplier<H> create, Dependencies dependencies) {
+        HotReload.slot("imperative-handle");
+        // React compares the ref by identity, so each Ref keeps one target function.
+        JSObject target = ref == null ? null : handleTarget(HANDLES, ref, handle -> ref.set(Interop.value(handle)));
+        imperativeNative(target, create::get, Interop.dependencies(dependencies));
+    }
+    @JSBody(script = "return new WeakMap();") private static native JSObject weakMap();
+    @JSBody(params = {"cache", "ref", "assign"}, script = "var target = cache.get(ref); if (!target) { target = function(handle) { assign(handle); }; cache.set(ref, target); } return target;") private static native JSObject handleTarget(JSObject cache, Object ref, Assign assign);
+    @JSBody(params = {"target", "factory", "deps"}, script = "React.useImperativeHandle(target, factory, deps === null ? undefined : deps);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native void imperativeNative(JSObject target, Factory factory, Object[] deps);
     @Override public <T> T memo(Supplier<T> calculation, Dependencies dependencies) {
         HotReload.slot("memo");
         return memoRaw(calculation, dependencies);

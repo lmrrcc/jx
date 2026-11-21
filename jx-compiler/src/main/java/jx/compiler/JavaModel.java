@@ -84,9 +84,10 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
                             && !variable.getModifiers().getFlags().contains(Modifier.STATIC)) {
                         properties.add(new ComponentMetadata.Prop(variable.getName().toString(), variable.getType().toString(),
                                 span(positions, unit, variable, shadow.length())));
-                        if (variable.getName().contentEquals("key") || variable.getName().contentEquals("ref")) {
-                            diagnostics.add(Diagnostic.error(parsed.source(), "JX100", "Props field '" + variable.getName()
-                                    + "' is reserved for framework identity/ref metadata", span(positions, unit, variable, shadow.length())));
+                        // As in React 19, ref is an ordinary prop of a component; only key is not.
+                        if (variable.getName().contentEquals("key")) {
+                            diagnostics.add(Diagnostic.error(parsed.source(), "JX100", "Props field 'key'"
+                                    + " is reserved for framework identity metadata", span(positions, unit, variable, shadow.length())));
                         }
                     }
                 }

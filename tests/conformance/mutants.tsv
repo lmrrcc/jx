@@ -36,3 +36,6 @@ for-alias-broken	jx-compiler/src/main/java/jx/compiler/Lowerer.java	case "for" -
 memo-never-skips	jx-react/src/main/java/jx/react/React.java	&& compare(previous.value, next.value); });	&& false; });	Memoized components render on every parent render
 memo-always-skips	jx-react/src/main/java/jx/react/React.java	&& compare(previous.value, next.value); });	&& true; });	Memoized components never see new props
 memo-field-ignored	jx-compiler/src/main/java/jx/compiler/Lowerer.java	yield ".memo((previous, next) -> " + (fields.isEmpty() ? "true" : fields) + ")";	yield ".memo((previous, next) -> true)";	Generated memo comparison ignores the Props fields
+ref-cleanup-dropped	jx-react/src/main/java/jx/react/React.java	Runnable cleanup = callback.attach(js == null ? null : new BrowserElement(js));	callback.attach(js == null ? null : new BrowserElement(js)); Runnable cleanup = null;	Callback ref cleanups are never registered
+ref-function-unstable	jx-react/src/main/java/jx/react/React.java	var fn = cache.get(ref); if (!fn) { fn = function(node)	var fn = null; if (!fn) { fn = function(node)	Refs are re-attached on every render
+handle-not-published	jx-react/src/main/java/jx/react/ReactHooks.java	handle -> ref.set(Interop.value(handle))	handle -> ref.set(null)	Imperative handles never reach the ref

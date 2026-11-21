@@ -1,0 +1,24 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.DomRef;
+import jx.Hooks;
+import jx.Ref;
+import jx.View;
+import jx.conformance.FieldHandle;
+
+/** A field that exposes fill and read through its ref instead of the input element. */
+@Component
+public final class ImperativeField {
+    public record Props(Ref<FieldHandle> ref) {}
+
+    public static View render(Props props) {
+        DomRef input = Hooks.useDomRef();
+        Hooks.useImperativeHandle(props.ref(), () -> new FieldHandle(value -> {
+            input.current().setValue(value);
+            input.current().focus();
+        }, () -> input.current().value()), Dependencies.none());
+        return <input ref={input} aria-label="Inner" />;
+    }
+}

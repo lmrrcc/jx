@@ -6,7 +6,7 @@ react:useLayoutEffect	hook	supported	layout-effect-order,layout-effect-dependenc
 react:useInsertionEffect	hook	unsupported	insertion-effect		R-08	
 react:useEffectEvent	hook	unsupported	effect-event		R-08	
 react:useRef	hook	supported	ref-persist,dom-ref-focus	Hooks.useRef, Hooks.useDomRef		
-react:useImperativeHandle	hook	unsupported	imperative-handle		R-07	
+react:useImperativeHandle	hook	supported	imperative-handle	Hooks.useImperativeHandle		The handle is published through a Ref passed as a prop
 react:useContext	hook	supported	context-nested	Hooks.useContext		
 react:createContext	api	supported	context-nested	Hooks.createContext, Context.provide		
 react:useMemo	hook	supported	memo-recompute	Hooks.useMemo		
@@ -29,12 +29,12 @@ react:ViewTransition	component	unsupported	view-transition		R-15
 react:addTransitionType	api	unsupported	view-transition		R-15	
 react:lazy	api	unsupported	lazy-component		R-14	
 react:memo	api	supported	memo-skip	@Memo, ComponentType.memo		Declared on the component with @Memo; a custom comparison is a static arePropsEqual method
-react:forwardRef	api	unsupported	forward-ref		R-07	Deprecated in React 19 in favor of ref as a prop, which JX also lacks for components
+react:forwardRef	api	equivalent	forward-ref	ref as a Props field		Deprecated in React 19; a JX component receives ref as an ordinary prop
 react:createElement	api	equivalent	attributes,children-prop	Markup, Views.element, Views.component		
 react:cloneElement	legacy	unsupported	clone-element		R-11	
 react:Children	legacy	unsupported	children-utilities		R-11	
 react:isValidElement	legacy	excluded			R-11	View is a static Java type; there is no untyped value to inspect
-react:createRef	legacy	excluded			R-07	Class component API; useRef covers function components
+react:createRef	legacy	equivalent	create-ref	new DomRef(), new Ref<>(initial)		Ref objects are plain Java objects and may be created outside a component
 react:Component	legacy	equivalent	error-boundary	React.boundary	R-28	Only the error-boundary use is offered; class components are not authored in JX
 react:PureComponent	legacy	excluded			R-28	Class component API; its function equivalent is memo, listed separately
 react:act	test	excluded			R-29	Test utility, not application behavior
@@ -88,8 +88,8 @@ jsx:dynamic-component	markup	supported	dynamic-component	Views.component with a 
 jsx:spread-props	markup	unsupported	spread-props		R-09	No spread attributes
 jsx:default-and-optional-props	markup	unsupported	default-props		R-09	Every record field is required
 jsx:generic-components	markup	unsupported	generic-list		R-09	
-jsx:ref-as-prop	markup	unsupported	ref-as-prop		R-07	ref on a component
-jsx:ref-callback	markup	unsupported	ref-callback		R-07	Callback refs and their cleanup
+jsx:ref-as-prop	markup	supported	ref-as-prop	ref as a Props field		
+jsx:ref-callback	markup	supported	ref-callback	RefCallback, Attributes.ref		The returned cleanup runs on removal
 jsx:namespace-components	markup	equivalent	namespace-components	Fully qualified component class name		Java has no component namespace objects; the dotted form is a qualified class name
 dom:ref-on-element	dom	supported	dom-ref-focus	ref with Hooks.useDomRef		DomElement exposes focus and value only
 dom:attributes	dom	supported	attributes	Markup attributes		A sample of attributes; the full attribute table is not covered yet

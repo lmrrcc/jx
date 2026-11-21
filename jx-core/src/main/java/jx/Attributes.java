@@ -15,7 +15,7 @@ public final class Attributes {
     public Attributes attr(String name, Object value) {
         validate(name);
         if (name.equals("ref")) {
-            if (!(value instanceof DomRef)) throw new IllegalArgumentException("ref requires DomRef");
+            if (!(value instanceof DomRef || value instanceof RefCallback)) throw new IllegalArgumentException("ref requires DomRef or RefCallback");
             return with(name, value);
         }
         if (name.startsWith("on") || name.equals("dangerouslySetInnerHTML") || name.equals("__proto__"))
@@ -29,6 +29,10 @@ public final class Attributes {
             throw new IllegalArgumentException("Executable URL is not an attribute value");
         return with(name.equals("class") ? "className" : name.equals("for") ? "htmlFor" : name, value);
     }
+    /** Attaches the element to a ref object. A null ref attaches nothing. */
+    public Attributes ref(DomRef ref) { return ref == null ? this : with("ref", ref); }
+    /** Attaches the element through a callback ref. A null callback attaches nothing. */
+    public Attributes ref(RefCallback callback) { return callback == null ? this : with("ref", callback); }
     public Attributes on(String event, EventHandler handler) {
         validate(event);
         if (!event.matches("on[A-Z][A-Za-z]+")) throw new IllegalArgumentException("Use a React event name such as onClick");

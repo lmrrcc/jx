@@ -48,6 +48,11 @@ import jx.conformance.cases.MediaEvents;
 import jx.conformance.cases.EventPayload;
 import jx.conformance.cases.LayoutEffectDependencies;
 import jx.conformance.cases.MemoSkip;
+import jx.conformance.cases.ImperativeHandle;
+import jx.conformance.cases.ForwardRef;
+import jx.conformance.cases.RefAsProp;
+import jx.conformance.cases.RefCallbackCase;
+import jx.conformance.cases.CreateRef;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -105,6 +110,11 @@ public final class Main {
             case "event-payload" -> React.mountStrict("app", EventPayload.JX, null);
             case "layout-effect-dependencies" -> React.mountStrict("app", LayoutEffectDependencies.JX, null);
             case "memo-skip" -> React.mountStrict("app", MemoSkip.JX, null);
+            case "imperative-handle" -> React.mountStrict("app", ImperativeHandle.JX, null);
+            case "forward-ref" -> React.mountStrict("app", ForwardRef.JX, null);
+            case "ref-as-prop" -> React.mountStrict("app", RefAsProp.JX, null);
+            case "ref-callback" -> React.mountStrict("app", RefCallbackCase.JX, null);
+            case "create-ref" -> React.mountStrict("app", CreateRef.JX, null);
             default -> Bench.unknown(id);
         }
     }

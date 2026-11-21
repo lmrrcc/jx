@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.DomRef;
+import jx.View;
+
+/** Case create-ref: a ref object created outside a component attaches to an element. */
+@Component
+public final class CreateRef {
+    private static final DomRef FIELD = new DomRef();
+
+    public static View render() {
+        return (
+            <main>
+                <input ref={FIELD} aria-label="Created" />
+                <button onClick={event -> FIELD.current().focus()}>Focus field</button>
+            </main>
+        );
+    }
+}

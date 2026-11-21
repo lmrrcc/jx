@@ -16,6 +16,8 @@ class ViewContractTest {
         assertThrows(IllegalArgumentException.class, () -> attributes.attr("count", new BigDecimal("1")));
         assertThrows(IllegalArgumentException.class, () -> attributes.attr("title", Style.create()));
         assertThrows(IllegalArgumentException.class, () -> attributes.attr("ref", "element"));
+        assertEquals(1, attributes.ref((jx.RefCallback) element -> null).entries().size());
+        assertSame(attributes, attributes.ref((DomRef) null));
         assertThrows(IllegalArgumentException.class, () -> Style.create().property("width", Double.NaN));
     }
     @Test void immutableDescriptionsKeepOwnershipAndNeverExecuteChildren() {
