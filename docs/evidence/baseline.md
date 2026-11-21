@@ -9,7 +9,8 @@ capability status is in the [capability ledger](capabilities.tsv).
 - Base commit: `78c9836` on `main`.
 - Plus uncommitted GA-01 changes: the restored counter example, the GA planning
   documents, this evidence directory, `tools/CheckBaseline.java`, and the workflow
-  and documentation updates. Ledger rows run on this tree carry revision `78c9836+`.
+  and documentation updates. They were committed as `3688d25`, which the ledger rows
+  run on this tree now name.
 - Date: 2026-11-21.
 
 ## Finding: the named baseline was red
@@ -93,7 +94,7 @@ naming the row or file. A bad option exits 2 with the usage line.
 | Workflow | Status |
 | --- | --- |
 | Verify, `78c9836` | Failed, as described above |
-| Verify, GA-01 changes | **Pending**: not yet committed or pushed |
+| Verify, `3688d25` (GA-01 changes) | Passed on Ubuntu, Temurin 25, Node.js 22: [run 44891179058](https://github.com/lmrrcc/jx/actions/runs/44891179058) |
 | Package and verify editors | Never executed; manual trigger only |
 
 ## Not run for this record
@@ -123,7 +124,8 @@ CI:
 7. One operating system (Ubuntu) and one browser (Chrome). macOS evidence is local only.
 8. Editor suites never run in CI. The editor workflow is manual and has no run.
 9. Before this change Verify had no timeout and kept no browser artifacts on failure.
-   Both are added, and are unverified until the workflow runs.
+   Both are added; the workflow passed with them, so the failure-only upload was
+   skipped and remains unexercised.
 10. No dependency caching for Maven in Verify.
 
 Evidence:

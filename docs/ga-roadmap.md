@@ -5,8 +5,8 @@ Evidence baseline: repository commit `78c9836`; IntelliJ 0.3.2, VS Code 0.2.0,
 Java 25, TeaVM 0.16.0, React/React DOM 19.3.1. These are observed pins, not a
 promise to freeze upstream dependencies for a year.
 
-Progress, 21 November 2026: [GA-01](ga-01-baseline.md) is implemented locally and
-awaits CI confirmation. It found `78c9836` red in CI (counter example), restored a
+Progress, 21 November 2026: [GA-01](ga-01-baseline.md) is done, with CI green at
+`3688d25`. It found `78c9836` red in CI (counter example), restored a
 green baseline and added the [baseline record](evidence/baseline.md),
 [version manifest](evidence/versions.tsv) and [capability ledger](evidence/capabilities.tsv).
 No other work package has started.

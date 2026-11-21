@@ -9,8 +9,9 @@ exact version manifest, gaps and commands recorded.*
 
 ## Status
 
-**Implemented; CI verification pending.** Tasks 1–11 are complete on the working
-tree. Task 12 needs a commit and push, which are the maintainer's actions.
+**Done, 2026-11-21.** Committed as `3688d25`; the Verify workflow passed
+([run 44891179058](https://github.com/lmrrcc/jx/actions/runs/44891179058)). The manual editor workflow was
+not run and stays a recorded gap.
 
 ## Design
 
@@ -54,10 +55,9 @@ Decisions:
 - [x] 9. Write `evidence/baseline.md` from the actual run output.
 - [x] 10. Run both checkers on the final tree.
 - [x] 11. Update the roadmap and the backlog row.
-- [ ] 12. After commit and push: confirm the Verify workflow is green, record its
-  URL in `baseline.md`, replace the `78c9836+` revisions in `capabilities.tsv` with
-  the new commit, and mark GA-01 done in the backlog. Optionally run the manual
-  editor workflow once.
+- [x] 12. After commit and push: Verify is green for `3688d25`; its URL is in
+  `baseline.md`; ledger revisions name the commit; the backlog row is marked done.
+  The optional manual editor workflow was not run.
 
 ## End-to-end test
 
@@ -93,9 +93,9 @@ Starting evidence and assumptions: roadmap names 78c9836 as its evidence baselin
 Changes / experiment: see Tasks 1–11
 Checks actually executed: see evidence/baseline.md
 Observed outcome and failure cases: see evidence/baseline.md
-Status: implemented-unqualified
+Status: implemented-unqualified (ledger rows); GA-01 acceptance met
 Decision or scope change: none; gaps recorded, not fixed
 Budget/performance/security impact: none measured
-Remaining uncertainty / next smallest action: Task 12
-Pilot feedback / user decision needed: commit and push
+Remaining uncertainty / next smallest action: choose the next backlog item
+Pilot feedback / user decision needed: none for GA-01
 ```
