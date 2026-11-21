@@ -68,6 +68,9 @@ import jx.conformance.cases.ChildrenUtilities;
 import jx.conformance.cases.CloneElement;
 import jx.conformance.cases.IsValidElement;
 import jx.conformance.cases.ChildSlots;
+import jx.conformance.cases.TransitionPending;
+import jx.conformance.cases.StartTransition;
+import jx.conformance.cases.DeferredValue;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -145,6 +148,9 @@ public final class Main {
             case "clone-element" -> React.mountStrict("app", CloneElement.JX, null);
             case "is-valid-element" -> React.mountStrict("app", IsValidElement.JX, null);
             case "child-slots" -> React.mountStrict("app", ChildSlots.JX, null);
+            case "transition-pending" -> React.mountStrict("app", TransitionPending.JX, null);
+            case "start-transition" -> React.mountStrict("app", StartTransition.JX, null);
+            case "deferred-value" -> React.mountStrict("app", DeferredValue.JX, null);
             default -> Bench.unknown(id);
         }
     }

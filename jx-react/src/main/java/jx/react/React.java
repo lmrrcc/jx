@@ -64,6 +64,13 @@ public final class React {
         Objects.requireNonNull(action);
         flushSyncNative(action::run);
     }
+    /** React's standalone {@code startTransition}: runs {@code action} now and marks the state
+     * updates it makes as a transition. It reports no pending state; use
+     * {@link Hooks#useTransition()} for that. */
+    public static void startTransition(Runnable action) {
+        Objects.requireNonNull(action);
+        startTransitionNative(action::run);
+    }
     /** Explicit event failure routing, because React error boundaries do not catch event handlers. */
     public static EventHandler guarded(EventHandler handler, Consumer<RuntimeException> failure) {
         Objects.requireNonNull(handler); Objects.requireNonNull(failure);
@@ -274,6 +281,7 @@ public final class React {
     @JSBody(params = {"type", "child", "fallback"}, script = "return React.createElement(type, {fallback: fallback}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject boundary(JSObject type, JSObject child, FailureView fallback);
     @JSBody(params = {"id", "onRender", "child"}, script = "return React.createElement(React.Profiler, {id: id, onRender: function(id, phase, actual, base, start, commit) { onRender(id, phase, actual, base, start, commit); }}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject profiler(String id, OnRender onRender, JSObject child);
     @JSBody(params = {"child", "target"}, script = "return ReactDOM.createPortal(child, target);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom")) private static native JSObject portal(JSObject child, JSObject target);
+    @JSBody(params = "action", script = "React.startTransition(function() { action(); });", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native void startTransitionNative(Detach action);
     @JSBody(script = "return document.body;") private static native JSObject body();
     @JSBody(params = "action", script = "ReactDOM.flushSync(function() { action(); });", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom")) private static native void flushSyncNative(Detach action);
     @JSBody(params = "error", script = "return String(error && error.message || error);") private static native String errorMessage(JSObject error);

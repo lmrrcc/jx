@@ -21,7 +21,7 @@ custom-elements	pass	pass
 custom-hook	pass	pass
 debug-value	pass	pass
 default-props	pass	pass
-deferred-value	pass	unsupported
+deferred-value	pass	pass
 document-metadata	pass	pass
 dom-ref-focus	pass	pass
 dynamic-component	pass	pass
@@ -76,7 +76,7 @@ server-render-to-string	pass	unsupported
 server-resume	pass	unsupported
 server-resume-pipeable	pass	unsupported
 spread-props	pass	pass
-start-transition	pass	unsupported
+start-transition	pass	pass
 state-counter	pass	pass
 state-lazy-init	pass	pass
 static-prerender	pass	unsupported
@@ -88,7 +88,7 @@ strict-nested	pass	pass
 svg	pass	pass
 text-escaping	pass	pass
 transfer-events	pass	pass
-transition-pending	pass	unsupported
+transition-pending	pass	pass
 uncontrolled-inputs	pass	pass
 unknown-case	pass	pass
 use-id	pass	pass

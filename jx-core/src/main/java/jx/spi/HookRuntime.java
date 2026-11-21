@@ -16,6 +16,9 @@ public interface HookRuntime {
     <A> Consumer<A> effectEvent(Consumer<A> callback);
     /** {@code format} is null when the value is shown as it is. */
     <T> void debugValue(T value, Function<T, String> format);
+    TransitionState transition();
+    /** {@code initial} is used only when {@code hasInitial} is true; it may then be null. */
+    <T> T deferredValue(T value, T initial, boolean hasInitial);
     <T> Ref<T> ref(T initial);
     <H> void imperativeHandle(Ref<H> ref, Supplier<H> create, Dependencies dependencies);
     <T> T memo(Supplier<T> calculation, Dependencies dependencies);

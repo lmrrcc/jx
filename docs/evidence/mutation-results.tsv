@@ -51,3 +51,6 @@ clone-ignores-attributes	killed	clone-element	A clone ignores its new attributes
 children-not-listed	killed	children-utilities	Children does not look through collection children
 empty-child-dropped	killed	child-slots,children-utilities	Null children give up their position
 collection-flattened	killed	child-slots	Collection children are flattened into their siblings
+transition-resolves-early	killed	transition-pending	Async transitions stop pending before the action completes
+deferred-initial-ignored	killed	deferred-value	The initial deferred value is ignored
+deferred-not-deferred	killed	deferred-value	Deferred values are returned at once

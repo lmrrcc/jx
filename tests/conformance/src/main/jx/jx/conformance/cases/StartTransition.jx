@@ -1,0 +1,25 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.react.React;
+
+/** Case start-transition: a standalone transition update is applied with the urgent one. */
+@Component
+public final class StartTransition {
+    public static View render() {
+        State<String> tab = Hooks.useState("first");
+        State<Integer> urgent = Hooks.useState(0);
+        return (
+            <main>
+                <button onClick={event -> {
+                    urgent.update(previous -> previous + 1);
+                    React.startTransition(() -> tab.set("second"));
+                }}>Switch tab</button>
+                <p role="status">{tab.value()} {urgent.value()}</p>
+            </main>
+        );
+    }
+}

@@ -294,6 +294,12 @@ memo, context, external stores and ids:
   depending on what it reads.
 - `useDebugValue(value)` and `useDebugValue(value, format)` label a custom hook in
   React DevTools.
+- `useTransition()` returns a `TransitionState`: `pending()`, `start(action)` and
+  `startAsync(done -> ...)`. An asynchronous action receives a completion callback
+  in place of returning a promise; the transition stays pending until it is called.
+  `React.startTransition(action)` in `jx.react` is the standalone form.
+- `useDeferredValue(value)` and `useDeferredValue(value, initial)` return the
+  previous value while a render with the new one is prepared.
 - `useImperativeHandle` is described under Refs.
 
 `React.portal(target, children...)` is React's `createPortal`: the children render

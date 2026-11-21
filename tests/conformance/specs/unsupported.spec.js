@@ -3,31 +3,6 @@ import {referenceOnly, expect, log} from './bench.js';
 // React features that JX does not offer yet. Each test passes on the reference
 // and reports `unsupported` on JX until the matching parity task lands.
 
-referenceOnly('transition-pending: useTransition reports pending while an async action runs', async ({page, open}) => {
-  await open('transition-pending');
-  await expect(page.getByRole('status')).toHaveText('idle');
-  await page.getByRole('button', {name: 'Start'}).click();
-  await expect(page.getByRole('status')).toHaveText('pending');
-  await page.getByRole('button', {name: 'Finish'}).click();
-  await expect(page.getByRole('status')).toHaveText('done');
-});
-
-referenceOnly('start-transition: a standalone transition update is applied with the urgent one', async ({page, open}) => {
-  await open('start-transition');
-  await page.getByRole('button', {name: 'Switch tab'}).click();
-  await expect(page.getByRole('status')).toHaveText('second 1');
-});
-
-referenceOnly('deferred-value: the initial value renders first, then the real value', async ({page, open}) => {
-  await open('deferred-value');
-  await expect(page.getByRole('status')).toHaveText('ready');
-  const first = await log(page);
-  expect(first[0]).toEqual('initial');
-  expect(first.at(-1)).toEqual('ready');
-  await page.getByRole('button', {name: 'Change'}).click();
-  await expect(page.getByRole('status')).toHaveText('changed');
-});
-
 referenceOnly('optimistic: the optimistic value shows during the action, then the confirmed one', async ({page, open}) => {
   await open('optimistic');
   await expect(page.getByRole('status')).toHaveText('saved');
