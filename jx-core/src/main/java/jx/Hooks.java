@@ -38,6 +38,14 @@ public final class Hooks {
     public static void useDebugValue(Object value) { runtime().debugValue(value, null); }
     /** As {@link #useDebugValue(Object)}; the formatter runs only when DevTools inspects the hook. */
     public static <T> void useDebugValue(T value, Function<T, String> format) { runtime().debugValue(value, Objects.requireNonNull(format)); }
+    /** React's {@code useTransition}. */
+    public static TransitionState useTransition() { return runtime().transition(); }
+    /** React's {@code useDeferredValue}: returns the previous value while a render with the new
+     * one is prepared in the background. Values compare like props of a memoized component:
+     * strings, characters, booleans and boxed numbers by value, other objects by identity. */
+    public static <T> T useDeferredValue(T value) { return runtime().deferredValue(value, null, false); }
+    /** As {@link #useDeferredValue(Object)}, with the value to show during the first render. */
+    public static <T> T useDeferredValue(T value, T initial) { return runtime().deferredValue(value, initial, true); }
     public static void useEffect(Effect effect, Dependencies dependencies) { runtime().effect(Objects.requireNonNull(effect), Objects.requireNonNull(dependencies), false); }
     public static void useLayoutEffect(Effect effect, Dependencies dependencies) { runtime().effect(Objects.requireNonNull(effect), Objects.requireNonNull(dependencies), true); }
     public static <T> Ref<T> useRef(T initial) { return runtime().ref(initial); }

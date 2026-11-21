@@ -1,0 +1,29 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.TransitionState;
+import jx.View;
+import jx.react.React;
+
+/** Case transition-pending: useTransition reports pending while an async action runs. */
+@Component
+public final class TransitionPending {
+    private static Runnable finish = () -> {};
+
+    public static View render() {
+        TransitionState transition = Hooks.useTransition();
+        State<String> result = Hooks.useState("idle");
+        return (
+            <main>
+                <button onClick={event -> transition.startAsync(done -> finish = () -> {
+                    React.startTransition(() -> result.set("done"));
+                    done.run();
+                })}>Start</button>
+                <button onClick={event -> finish.run()}>Finish</button>
+                <p role="status">{transition.pending() ? "pending" : result.value()}</p>
+            </main>
+        );
+    }
+}

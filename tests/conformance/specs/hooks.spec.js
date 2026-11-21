@@ -267,3 +267,28 @@ test('profiler: onRender reports the mount and each update', async ({page, open}
   await expect(page.getByRole('status')).toHaveText('1');
   await expect.poll(async () => (await log(page)).at(-1)).toEqual('bench update');
 });
+
+test('transition-pending: useTransition reports pending while an async action runs', async ({page, open}) => {
+  await open('transition-pending');
+  await expect(page.getByRole('status')).toHaveText('idle');
+  await page.getByRole('button', {name: 'Start'}).click();
+  await expect(page.getByRole('status')).toHaveText('pending');
+  await page.getByRole('button', {name: 'Finish'}).click();
+  await expect(page.getByRole('status')).toHaveText('done');
+});
+
+test('start-transition: a standalone transition update is applied with the urgent one', async ({page, open}) => {
+  await open('start-transition');
+  await page.getByRole('button', {name: 'Switch tab'}).click();
+  await expect(page.getByRole('status')).toHaveText('second 1');
+});
+
+test('deferred-value: the initial value renders first, then the real value', async ({page, open}) => {
+  await open('deferred-value');
+  await expect(page.getByRole('status')).toHaveText('ready');
+  const first = await log(page);
+  expect(first[0]).toEqual('initial');
+  expect(first.at(-1)).toEqual('ready');
+  await page.getByRole('button', {name: 'Change'}).click();
+  await expect(page.getByRole('status')).toHaveText('changed');
+});

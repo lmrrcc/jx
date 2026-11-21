@@ -13,9 +13,9 @@ react:useMemo	hook	supported	memo-recompute	Hooks.useMemo
 react:useCallback	hook	supported	callback-identity	Hooks.useCallback		
 react:useId	hook	supported	use-id	Hooks.useId		
 react:useSyncExternalStore	hook	supported	external-store	Hooks.useSyncExternalStore		Server snapshot argument is not offered
-react:useTransition	hook	unsupported	transition-pending		R-12	
-react:startTransition	api	unsupported	start-transition,transition-pending		R-12	
-react:useDeferredValue	hook	unsupported	deferred-value		R-12	
+react:useTransition	hook	supported	transition-pending	Hooks.useTransition, TransitionState		An async action takes a completion callback instead of returning a promise
+react:startTransition	api	supported	start-transition,transition-pending	React.startTransition		
+react:useDeferredValue	hook	supported	deferred-value	Hooks.useDeferredValue		Equal scalars compare by value
 react:useOptimistic	hook	unsupported	optimistic		R-16	
 react:useActionState	hook	unsupported	action-state		R-16	
 react:use	hook	unsupported	use-promise		R-13	Promise and context consumption

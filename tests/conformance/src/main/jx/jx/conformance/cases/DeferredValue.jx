@@ -1,0 +1,28 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case deferred-value: the initial value renders first, then the real value. */
+@Component
+public final class DeferredValue {
+    public static View render() {
+        State<String> text = Hooks.useState("ready");
+        // Built anew on each render, so only value comparison keeps it from being deferred forever.
+        String deferred = Hooks.useDeferredValue(new StringBuilder(text.value()).toString(), "initial");
+        Hooks.useEffect(() -> {
+            Bench.log(deferred);
+            return null;
+        }, Dependencies.of(deferred));
+        return (
+            <main>
+                <p role="status">{deferred}</p>
+                <button onClick={event -> text.set("changed")}>Change</button>
+            </main>
+        );
+    }
+}
