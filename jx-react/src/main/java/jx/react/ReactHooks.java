@@ -39,23 +39,24 @@ final class ReactHooks implements HookRuntime {
     @Override public <S, A> ReducerState<S, A> reducer(BiFunction<S, A, S> reducer, S initial, StateCodec<S> codec) {
         JSObject slot = HotReload.slot("reducer");
         StateCodec<S> selected = codec == null ? StateCodecs.forInitialValue(initial) : codec;
-        JSObject pair = reducerNative((old, action) -> {
-            S next = reducer.apply(Interop.value(old), Interop.value(action));
-            return Interop.same(old, next) ? old : next;
-        }, () -> HotReload.restore(slot, selected, initial));
+        JSObject pair = reducerNative(reduce(reducer), () -> HotReload.restore(slot, selected, initial));
         S snapshot = Interop.value(value(pair));
         HotReload.record(slot, selected, () -> snapshot);
         JSObject setter = setter(pair);
         Consumer<A> dispatch = memoRaw(() -> action -> dispatchNative(setter, action), Dependencies.none());
         return new ReducerState<>(snapshot, dispatch);
     }
+    /** Keeps the previous state object when the reducer returns an equal value, so React bails out. */
+    private static <S, A> Reduce reduce(BiFunction<S, A, S> reducer) {
+        return (old, action) -> {
+            S next = reducer.apply(Interop.value(old), Interop.value(action));
+            return Interop.same(old, next) ? old : next;
+        };
+    }
     @Override public <S, A> ReducerState<S, A> reducerLazy(BiFunction<S, A, S> reducer, Supplier<S> initial, StateCodec<S> codec) {
         JSObject slot = HotReload.slot("reducer");
         Ref<StateCodec<S>> selected = HotReload.enabled() ? Interop.value(refNative(new Ref<>(codec))) : null;
-        JSObject pair = reducerNative((old, action) -> {
-            S next = reducer.apply(Interop.value(old), Interop.value(action));
-            return Interop.same(old, next) ? old : next;
-        }, () -> {
+        JSObject pair = reducerNative(reduce(reducer), () -> {
             S value = initial.get();
             if (selected == null) return value;
             if (selected.current() == null) selected.set(StateCodecs.forInitialValue(value));
