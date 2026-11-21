@@ -5,6 +5,9 @@ This is an initial, executable implementation of the
 compatibility profile. It is not a promise of every Java library, React feature,
 browser, or editor distribution.
 
+The [GA roadmap](ga-roadmap.md) proposes the next year of work, measurable release
+gates and portfolio migrations. Its planned capabilities are not delivered status.
+
 ## Delivered boundaries
 
 | Boundary | Implementation and evidence |
@@ -55,6 +58,12 @@ preservation without replayed HTTP. Packaged VS Code and IntelliJ evidence is
 recorded separately in the tooling guide. These counts describe the checked
 revision, rather than replacing the commands and assertions in the repository.
 
+On 2026-11-21, the [GA baseline record](evidence/baseline.md) found commit `78c9836`
+red in CI because of development edits left in the counter example. With the
+example restored, a clean-directory run passed 74 Java tests and 17 Chrome tests.
+The [version manifest](evidence/versions.tsv) and [capability ledger](evidence/capabilities.tsv)
+are checked by `java tools/CheckBaseline.java`.
+
 ## Development build measurement
 
 Before the hot-reload change, one warm, unchanged-input todo rebuild on macOS ARM64, Apple M5, Corretto
@@ -85,9 +94,10 @@ need their own measurements.
    classpaths; native Java services use the editors' Java engines. Whole-file
    formatting, arbitrary refactorings and additional IDE versions need their own
    verification. See the [editor matrix](tooling.md) for supported operations.
-4. The runtime matrix explicitly tracks unimplemented portals, lazy/code-split
-   components, Suspense, transitions/deferred values, ref forwarding, SSR, and
-   hydration. Loading flags do not constitute Suspense support.
+4. The [capability ledger](evidence/capabilities.tsv) and the [runtime guide](runtime.md)
+   track unimplemented portals, lazy/code-split components, Suspense,
+   transitions/deferred values, ref forwarding, SSR, and hydration. Loading flags
+   do not constitute Suspense support.
 5. The demo is one local workspace, bound to loopback with no login or sessions.
    Its transactional capacity limit is 500 tasks, so successful creates remain
    visible after reload. A hosted multi-user product needs its own

@@ -267,6 +267,10 @@ Start with [AGENTS.md](AGENTS.md) for repository conventions and
 typed, include a compiling consumer example for new capabilities, and add checks
 that exercise observable behavior.
 
+`java tools/CheckBaseline.java` checks the [version manifest](docs/evidence/versions.tsv)
+against the build files and validates the [capability ledger](docs/evidence/capabilities.tsv);
+after changing a pinned version, rerun it with `--write-versions`.
+
 The Maven build runs compiler, plugin, language-server, model, and backend tests.
 After building, run the browser suites relevant to your change:
 
@@ -287,6 +291,14 @@ Editor verification has separate commands in the [tooling guide](docs/tooling.md
 The [contributor tooling guide](docs/contributor-tooling.md) explains the portable
 skill pack, Codex/Claude Code/Cursor integration, reuse in other projects, and
 validation of repository instructions.
+
+## Roadmap to general availability
+
+The [GA roadmap](docs/ga-roadmap.md) is a proposed one-year plan for complete
+applications, shared Java/API contracts, Spring Boot integration, browser-library
+coverage, React capabilities and migration of real products. It separates current
+evidence from planned capabilities and includes release gates, a dependency-ordered
+backlog and a daily review process.
 
 ## License
 

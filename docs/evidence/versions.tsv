@@ -1,0 +1,47 @@
+id	value	source	note
+jx.framework	0.1.0-SNAPSHOT	pom.xml	Maven artifacts
+jx.npm-workspace	0.1.0	package.json	private development package
+jx.intellij-plugin	0.3.2	tooling/intellij/build.gradle.kts	
+jx.vscode-extension	0.2.0	tooling/vscode/package.json	
+java.release	25	pom.xml	language level; JDK patch is not pinned
+maven.wrapper	3.3.4	.mvn/wrapper/maven-wrapper.properties	
+maven.distribution	3.9.11	.mvn/wrapper/maven-wrapper.properties	no distributionSha256Sum
+maven.api	3.9.11	jx-maven-plugin/pom.xml	
+maven.plugin-tools	3.16.0	jx-maven-plugin/pom.xml	
+maven.compiler-plugin	3.14.1	pom.xml	
+maven.surefire-plugin	3.5.4	pom.xml	
+maven.jar-plugin	3.4.2	pom.xml	
+maven.resources-plugin	3.3.1	pom.xml	
+maven.clean-plugin	3.4.1	pom.xml	
+maven.install-plugin	3.1.4	pom.xml	
+maven.shade-plugin	3.6.1	jx-language-server/pom.xml	
+teavm	0.16.0	pom.xml	
+react	19.3.1	package.json	exact; lockfile must agree
+react-dom	19.3.1	package.json	exact; lockfile must agree
+scheduler	0.28.0	package-lock.json	transitive; from lockfile
+esbuild	0.28.2	package.json	
+playwright	1.65.1	package.json	drives the installed Chrome channel; Chrome itself is not pinned
+npm.lockfile	3	package-lock.json	
+node.engine.framework	>=20	package.json	gap: documentation says 22 or later
+node.engine.vscode	>=22	tooling/vscode/package.json	
+node.ci.verify	22	.github/workflows/verify.yml	
+node.ci.tooling	26.3.0	.github/workflows/tooling.yml	gap: differs from the Verify workflow
+spring-boot	4.1.2	examples/todo-api/pom.xml	example only; its BOM resolves H2, Flyway and JUnit
+junit.jupiter	5.13.4	jx-core/pom.xml	gap: the Spring example takes JUnit from the Boot BOM instead
+lsp4j	1.0.0	jx-language-server/pom.xml	
+gson	2.15.0	jx-language-server/pom.xml	
+intellij.gradle-plugin	2.18.1	tooling/intellij/build.gradle.kts	
+intellij.platform	2026.1.3	tooling/intellij/build.gradle.kts	
+intellij.since-build	261.25134.95	tooling/intellij/build.gradle.kts	
+intellij.until-build	261.25134.*	tooling/intellij/build.gradle.kts	
+intellij.plugin-verifier	1.411	tooling/intellij/build.gradle.kts	
+intellij.junit	4.13.2	tooling/intellij/build.gradle.kts	
+gradle.wrapper	9.7.1	tooling/intellij/gradle/wrapper/gradle-wrapper.properties	distribution checksum pinned
+vscode.engine	^1.138.0	tooling/vscode/package.json	
+vscode.languageclient	11.0.0	tooling/vscode/package.json	
+vscode.typescript	5.9.3	tooling/vscode/package.json	
+vscode.vsce	4.1.1	tooling/vscode/package.json	
+vscode.test-electron	3.1.0	tooling/vscode/package.json	
+vscode.npm-lockfile	3	tooling/vscode/package-lock.json	
+redhat-java	1.58.0	tooling/vscode/PrepareJavaBridge.java	required exactly by the VS Code extension
+jdt-ls	1.63.0	tooling/vscode/PrepareJavaBridge.java	lower bound
