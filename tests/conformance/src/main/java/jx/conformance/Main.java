@@ -59,6 +59,9 @@ import jx.conformance.cases.EffectEvent;
 import jx.conformance.cases.DebugValue;
 import jx.conformance.cases.ProfilerCase;
 import jx.conformance.cases.ReducerLazyInit;
+import jx.conformance.cases.SpreadProps;
+import jx.conformance.cases.DefaultProps;
+import jx.conformance.cases.GenericList;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -127,6 +130,9 @@ public final class Main {
             case "debug-value" -> React.mountStrict("app", DebugValue.JX, null);
             case "profiler" -> React.mountStrict("app", ProfilerCase.JX, null);
             case "reducer-lazy-init" -> React.mountStrict("app", ReducerLazyInit.JX, null);
+            case "spread-props" -> React.mountStrict("app", SpreadProps.JX, null);
+            case "default-props" -> React.mountStrict("app", DefaultProps.JX, null);
+            case "generic-list" -> React.mountStrict("app", GenericList.JX, null);
             default -> Bench.unknown(id);
         }
     }

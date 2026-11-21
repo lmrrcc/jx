@@ -85,9 +85,9 @@ jsx:props-update	markup	supported	props-update	Typed record props
 jsx:custom-hooks	markup	supported	custom-hook	Ordinary static methods named useX		
 jsx:function-props	markup	supported	function-props	Runnable and Function record fields		
 jsx:dynamic-component	markup	supported	dynamic-component	Views.component with a ComponentType value		Markup tags name a component statically; a run-time choice goes through Views.component
-jsx:spread-props	markup	unsupported	spread-props		R-09	No spread attributes
-jsx:default-and-optional-props	markup	unsupported	default-props		R-09	Every record field is required
-jsx:generic-components	markup	unsupported	generic-list		R-09	
+jsx:spread-props	markup	equivalent	spread-props	{...attributes} on elements, {...props} on components		Elements merge an Attributes value in source order; a component takes its whole Props record and no other property
+jsx:default-and-optional-props	markup	supported	default-props	@OptionalProp		Defaults are set in the Props compact constructor
+jsx:generic-components	markup	supported	generic-list	generic Props record and render method		The component class itself stays non-generic
 jsx:ref-as-prop	markup	supported	ref-as-prop	ref as a Props field		
 jsx:ref-callback	markup	supported	ref-callback	RefCallback, Attributes.ref		The returned cleanup runs on removal
 jsx:namespace-components	markup	equivalent	namespace-components	Fully qualified component class name		Java has no component namespace objects; the dotted form is a qualified class name

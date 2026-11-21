@@ -63,3 +63,26 @@ test('memo-skip: a memoized component skips rendering when props are equal', asy
   await expect(page.getByTestId('compared')).toHaveText('b 1');
   expect(await log(page)).toEqual([...mount, 'render b', 'render b', 'render compared b', 'render compared b']);
 });
+
+test('spread-props: spread attributes and props follow source order', async ({page, open}) => {
+  await open('spread-props');
+  const button = page.getByRole('button');
+  await expect(button).toHaveAttribute('data-kind', 'spread');
+  await expect(button).toHaveAttribute('title', 'explicit wins');
+  await expect(page.getByText('Earlier loses')).toHaveAttribute('title', 'from spread');
+  await expect(page.getByTestId('label')).toHaveText('spread text');
+  await expect(page.getByTestId('label')).toHaveAttribute('data-tone', 'calm');
+});
+
+test('default-props: an omitted prop takes its default and an absent one adds no attribute', async ({page, open}) => {
+  await open('default-props');
+  const fallback = page.getByTestId('badge-default-label');
+  await expect(fallback).toHaveText('default label');
+  expect(await fallback.evaluate(node => node.hasAttribute('data-tone'))).toBe(false);
+  await expect(page.getByTestId('badge-given')).toHaveAttribute('data-tone', 'warm');
+});
+
+test('generic-list: one component renders lists of different item types', async ({page, open}) => {
+  await open('generic-list');
+  expect(await page.locator('li').allTextContents()).toEqual(['X', 'Y', '1:one', '2:two']);
+});

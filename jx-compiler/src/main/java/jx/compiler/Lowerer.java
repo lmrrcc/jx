@@ -67,8 +67,10 @@ final class Lowerer {
             int offset = component.descriptorOffset();
             if (offset < start || offset >= span.end() || !inserted.add(offset)) continue;
             out.copy(start, offset);
-            String type = component.hasProps() ? "Props" : "Void";
-            String function = component.hasProps() ? component.simpleName() + "::render" : "ignored -> " + component.simpleName() + ".render()";
+            String type = component.hasProps() ? component.propsType() : "Void";
+            String function = !component.hasProps() ? "ignored -> " + component.simpleName() + ".render()"
+                    : component.propsTypeParameters() == 0 ? component.simpleName() + "::render"
+                    : "props -> " + component.simpleName() + ".render(props)";
             out.synthetic("\n    /** Stable React component identity generated from this declaration. */\n"
                     + "    public static final jx.ComponentType<" + type + "> JX = new jx.ComponentType<" + (component.memo() == ComponentMetadata.Memo.NONE ? "" : type) + ">("
                     + quote(component.qualifiedName()) + ", " + quote(signatures.getOrDefault(component.qualifiedName(), ""))
@@ -105,6 +107,8 @@ final class Lowerer {
         Map<String, Attribute> attributes = new LinkedHashMap<>();
         for (Attribute attribute : element.attributes()) {
             String name = isComponent ? attribute.name() : canonicalAttribute(attribute.name());
+            // Spreads never collide: each one keeps its place in source order.
+            if (name.equals(MarkupParser.SPREAD)) name += attributes.size();
             if (attributes.putIfAbsent(name, attribute) != null)
                 error("JX101", "Duplicate property '" + attribute.name() + "'", attribute.nameSpan());
         }
@@ -115,6 +119,12 @@ final class Lowerer {
         out.synthetic("jx.Views.element(" + quote(element.name()) + ", jx.Attributes.create()", anchor);
         for (Attribute attribute : attributes.values()) {
             String name = canonicalAttribute(attribute.name());
+            if (name.equals(MarkupParser.SPREAD)) {
+                out.synthetic(".merge(", attribute.nameSpan().start());
+                value(attribute);
+                out.synthetic(")", attribute.span().end() - 1);
+                continue;
+            }
             boolean handler = name.length() > 2 && name.startsWith("on") && Character.isUpperCase(name.charAt(2));
             // ref has typed overloads so that a lambda becomes a RefCallback.
             out.synthetic(name.equals("ref") ? ".ref(" : (handler ? ".on(" : ".attr(") + quote(name) + ", ", attribute.nameSpan().start());
@@ -140,6 +150,21 @@ final class Lowerer {
             editorComponent(element, component);
             return;
         }
+        Attribute spread = element.attributes().stream().filter(attribute -> attribute.name().equals(MarkupParser.SPREAD)).findFirst().orElse(null);
+        if (spread != null) {
+            // Typed prop forwarding: the spread value is the whole Props record.
+            boolean alone = element.attributes().stream().allMatch(attribute -> attribute == spread || attribute.name().equals("key"))
+                    && meaningfulChildren(element.children()).isEmpty();
+            if (!component.hasProps()) error("JX105", component.simpleName() + " has no props to spread", spread.nameSpan());
+            else if (!alone) error("JX105", "A spread on a component must be its only property besides key; build the "
+                    + component.simpleName() + ".Props value in Java", spread.nameSpan());
+            out.synthetic("jx.Views.component(" + element.name() + ".JX, ", anchor);
+            value(spread);
+            Attribute spreadKey = attributes.get("key");
+            if (spreadKey != null) { out.synthetic(", ", spreadKey.nameSpan().start()); value(spreadKey); }
+            out.synthetic(")", anchor);
+            return;
+        }
         Set<String> declared = new HashSet<>();
         for (ComponentMetadata.Prop prop : component.props()) declared.add(prop.name());
         for (Attribute attribute : attributes.values())
@@ -153,7 +178,7 @@ final class Lowerer {
         out.synthetic("jx.Views.component(" + element.name() + ".JX, ", anchor);
         if (!component.hasProps()) out.synthetic("null", anchor);
         else {
-            out.synthetic("new " + element.name() + ".Props(", anchor);
+            out.synthetic("new " + element.name() + ".Props" + (component.propsTypeParameters() == 0 ? "" : "<>") + "(", anchor);
             boolean first = true;
             for (ComponentMetadata.Prop prop : component.props()) {
                 if (!first) out.synthetic(", ", anchor);
@@ -162,6 +187,9 @@ final class Lowerer {
                 if (attribute != null) value(attribute);
                 else if (prop.name().equals("children") && !children.isEmpty()) {
                     out.synthetic("jx.Views.fragment(", anchor); children(children); out.synthetic(")", anchor);
+                } else if (prop.optional()) {
+                    // An omitted optional prop is Java's default; a compact constructor may replace it.
+                    out.synthetic(editorDefault(prop.javaType()), anchor);
                 } else {
                     error("JX103", "Missing required property '" + prop.name() + "' on " + component.simpleName(), element.nameSpan());
                     out.synthetic("null", anchor);
@@ -192,6 +220,12 @@ final class Lowerer {
             if (!first) out.synthetic(", ", attribute.nameSpan().start());
             first = false;
             boolean declared = component.props().stream().anyMatch(prop -> prop.name().equals(attribute.name()));
+            if (attribute.name().equals(MarkupParser.SPREAD) && component.hasProps()) {
+                out.synthetic("jx.Views.component(" + element.name() + ".JX, ", attribute.nameSpan().start());
+                value(attribute);
+                out.synthetic(")", attribute.span().end());
+                continue;
+            }
             if (!declared && !attribute.name().equals("key")) {
                 // Keep invalid-property expressions available to Java editing; the shared JX
                 // diagnostics still report the unknown property against the authored tag.
@@ -222,7 +256,7 @@ final class Lowerer {
         out.synthetic("jx.Views.component(" + element.name() + ".JX, ", anchor);
         if (!component.hasProps()) out.synthetic("null", anchor);
         else {
-            out.synthetic("new " + element.name() + ".Props(", anchor);
+            out.synthetic("new " + element.name() + ".Props" + (component.propsTypeParameters() == 0 ? "" : "<>") + "(", anchor);
             boolean first = true;
             boolean copied = false;
             for (ComponentMetadata.Prop prop : component.props()) {

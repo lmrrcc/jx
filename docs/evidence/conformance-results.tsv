@@ -19,7 +19,7 @@ create-ref	pass	pass
 custom-elements	pass	pass
 custom-hook	pass	pass
 debug-value	pass	pass
-default-props	pass	unsupported
+default-props	pass	pass
 deferred-value	pass	unsupported
 document-metadata	pass	pass
 dom-ref-focus	pass	pass
@@ -38,7 +38,7 @@ form-status	pass	unsupported
 forward-ref	pass	pass
 fragment	pass	pass
 function-props	pass	pass
-generic-list	pass	unsupported
+generic-list	pass	pass
 hydrate-root	pass	unsupported
 imperative-handle	pass	pass
 insertion-effect	pass	pass
@@ -73,7 +73,7 @@ server-render-to-static-markup	pass	unsupported
 server-render-to-string	pass	unsupported
 server-resume	pass	unsupported
 server-resume-pipeable	pass	unsupported
-spread-props	pass	unsupported
+spread-props	pass	pass
 start-transition	pass	unsupported
 state-counter	pass	pass
 state-lazy-init	pass	pass

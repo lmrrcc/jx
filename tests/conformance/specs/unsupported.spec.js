@@ -150,29 +150,6 @@ referenceOnly('resource-hints: the six resource functions add their elements to 
   await expect.poll(() => page.evaluate(() => [globalThis.__benchPreinit, globalThis.__benchPreinitModule])).toEqual([1, 1]);
 });
 
-referenceOnly('spread-props: spread attributes and props follow source order', async ({page, open}) => {
-  await open('spread-props');
-  const button = page.getByRole('button');
-  await expect(button).toHaveAttribute('data-kind', 'spread');
-  await expect(button).toHaveAttribute('title', 'explicit wins');
-  await expect(page.getByText('Earlier loses')).toHaveAttribute('title', 'from spread');
-  await expect(page.getByTestId('label')).toHaveText('spread text');
-  await expect(page.getByTestId('label')).toHaveAttribute('data-tone', 'calm');
-});
-
-referenceOnly('default-props: an omitted prop takes its default and an absent one adds no attribute', async ({page, open}) => {
-  await open('default-props');
-  const fallback = page.getByTestId('badge-default-label');
-  await expect(fallback).toHaveText('default label');
-  expect(await fallback.evaluate(node => node.hasAttribute('data-tone'))).toBe(false);
-  await expect(page.getByTestId('badge-given')).toHaveAttribute('data-tone', 'warm');
-});
-
-referenceOnly('generic-list: one component renders lists of different item types', async ({page, open}) => {
-  await open('generic-list');
-  expect(await page.locator('li').allTextContents()).toEqual(['X', 'Y', '1:one', '2:two']);
-});
-
 referenceOnly('raw-html: explicitly supplied HTML is inserted as markup', async ({page, open}) => {
   await open('raw-html');
   const raw = page.getByTestId('raw');

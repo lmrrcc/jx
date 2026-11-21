@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import java.util.List;
+import jx.Component;
+import jx.View;
+
+/** Case generic-list: one component renders lists of different item types. */
+@Component
+public final class GenericList {
+    public record Entry(int id, String name) {}
+
+    public static View render() {
+        return (
+            <main>
+                <TypedList items={List.of("x", "y")} keyOf={item -> item} render={item -> item.toUpperCase()} />
+                <TypedList items={List.of(new Entry(1, "one"), new Entry(2, "two"))}
+                           keyOf={item -> String.valueOf(item.id())}
+                           render={item -> item.id() + ":" + item.name()} />
+            </main>
+        );
+    }
+}
