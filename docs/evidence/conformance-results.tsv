@@ -7,11 +7,12 @@ callable-state	pass	pass
 callback-identity	pass	pass
 capture-phase	pass	pass
 checkbox	pass	pass
+child-slots	pass	unsupported
 child-values	pass	pass
 children-prop	pass	pass
-children-utilities	pass	unsupported
+children-utilities	pass	pass
 choice-inputs	pass	pass
-clone-element	pass	unsupported
+clone-element	pass	pass
 conditional	pass	pass
 context-nested	pass	pass
 controlled-input	pass	pass
@@ -42,6 +43,7 @@ generic-list	pass	pass
 hydrate-root	pass	unsupported
 imperative-handle	pass	pass
 insertion-effect	pass	pass
+is-valid-element	pass	pass
 key-event	pass	pass
 keyed-list	pass	pass
 layout-effect-dependencies	pass	pass

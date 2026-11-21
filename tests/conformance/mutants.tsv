@@ -46,3 +46,6 @@ effect-event-first-callback	jx-react/src/main/java/jx/react/ReactHooks.java	retu
 spread-never-overrides	jx-core/src/main/java/jx/Attributes.java	copy.putAll(other.values);	other.values.forEach(copy::putIfAbsent);	A spread never overrides an earlier attribute
 portal-in-place	jx-react/src/main/java/jx/react/React.java	return ReactDOM.createPortal(child, target);	return child;	Portal content renders in place
 flush-sync-deferred	jx-react/src/main/java/jx/react/React.java	ReactDOM.flushSync(function() { action(); });	action();	flushSync does not commit before returning
+clone-keeps-children	jx-core/src/main/java/jx/Views.java	children.length == 0 ? original.children() : children(children));	original.children());	A clone ignores its new children
+clone-ignores-attributes	jx-core/src/main/java/jx/Views.java	original.attributes().merge(extra),	original.attributes(),	A clone ignores its new attributes
+children-not-listed	jx-core/src/main/java/jx/Children.java	return children instanceof View.Fragment fragment ? fragment.children() : List.of(children);	return List.of(children);	Nested children count as one

@@ -64,6 +64,9 @@ import jx.conformance.cases.DefaultProps;
 import jx.conformance.cases.GenericList;
 import jx.conformance.cases.Portal;
 import jx.conformance.cases.FlushSync;
+import jx.conformance.cases.ChildrenUtilities;
+import jx.conformance.cases.CloneElement;
+import jx.conformance.cases.IsValidElement;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -137,6 +140,9 @@ public final class Main {
             case "generic-list" -> React.mountStrict("app", GenericList.JX, null);
             case "portal" -> React.mountStrict("app", Portal.JX, null);
             case "flush-sync" -> React.mountStrict("app", FlushSync.JX, null);
+            case "children-utilities" -> React.mountStrict("app", ChildrenUtilities.JX, null);
+            case "clone-element" -> React.mountStrict("app", CloneElement.JX, null);
+            case "is-valid-element" -> React.mountStrict("app", IsValidElement.JX, null);
             default -> Bench.unknown(id);
         }
     }

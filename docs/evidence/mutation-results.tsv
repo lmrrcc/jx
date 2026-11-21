@@ -46,3 +46,6 @@ effect-event-first-callback	killed	effect-event	Effect events keep calling the f
 spread-never-overrides	killed	spread-props	A spread never overrides an earlier attribute
 portal-in-place	killed	portal	Portal content renders in place
 flush-sync-deferred	killed	flush-sync	flushSync does not commit before returning
+clone-keeps-children	killed	clone-element	A clone ignores its new children
+clone-ignores-attributes	killed	clone-element	A clone ignores its new attributes
+children-not-listed	killed	children-utilities	Nested children count as one

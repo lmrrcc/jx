@@ -86,3 +86,26 @@ test('generic-list: one component renders lists of different item types', async 
   await open('generic-list');
   expect(await page.locator('li').allTextContents()).toEqual(['X', 'Y', '1:one', '2:two']);
 });
+
+
+test('is-valid-element: elements and fragments are valid elements; text, numbers and null are not', async ({page, open}) => {
+  await open('is-valid-element');
+  await expect(page.getByRole('status')).toHaveText('true true false false false');
+});
+
+test('children-utilities: Children counts, lists, maps and singles out the children it is given', async ({page, open}) => {
+  await open('children-utilities');
+  // A nested list is flattened: one element and a list of two make three children.
+  await expect(page.getByRole('status')).toHaveText('3/3');
+  expect(await page.locator('li').allTextContents()).toEqual(['a', 'b', 'c']);
+  await expect(page.getByTestId('only').locator('em')).toHaveText('one');
+});
+
+test('clone-element: a cloned element merges new props and children', async ({page, open}) => {
+  await open('clone-element');
+  const button = page.getByRole('button');
+  await expect(button).toHaveText('Cloned');
+  await expect(button).toHaveClass('cloned');
+  await expect(button).toHaveAttribute('title', 'original');
+  await expect(button).toHaveAttribute('data-extra', 'yes');
+});

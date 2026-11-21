@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import jx.Children;
+import jx.Component;
+import jx.View;
+
+/** Counts its children and wraps each of them in a list item. */
+@Component
+public final class ChildrenInspect {
+    public record Props(View children) {}
+
+    public static View render(Props props) {
+        return (
+            <section aria-label="Inspect">
+                <p role="status">{Children.count(props.children())}/{Children.toList(props.children()).size()}</p>
+                <ul>{Children.map(props.children(), child -> <li>{child}</li>)}</ul>
+            </section>
+        );
+    }
+}

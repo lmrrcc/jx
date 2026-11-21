@@ -31,9 +31,9 @@ react:lazy	api	unsupported	lazy-component		R-14
 react:memo	api	supported	memo-skip	@Memo, ComponentType.memo		Declared on the component with @Memo; a custom comparison is a static arePropsEqual method
 react:forwardRef	api	equivalent	forward-ref	ref as a Props field		Deprecated in React 19; a JX component receives ref as an ordinary prop
 react:createElement	api	equivalent	attributes,children-prop	Markup, Views.element, Views.component		
-react:cloneElement	legacy	unsupported	clone-element		R-11	
-react:Children	legacy	unsupported	children-utilities		R-11	
-react:isValidElement	legacy	excluded			R-11	View is a static Java type; there is no untyped value to inspect
+react:cloneElement	legacy	equivalent	clone-element	Views.cloneElement		DOM element views only; a component view is rebuilt from a new Props record
+react:Children	legacy	equivalent	children-utilities	jx.Children		count, toList, map, forEach and only over a View children prop; null children are not counted until R-32
+react:isValidElement	legacy	equivalent	is-valid-element	Views.isValidElement		Also expressible as instanceof View
 react:createRef	legacy	equivalent	create-ref	new DomRef(), new Ref<>(initial)		Ref objects are plain Java objects and may be created outside a component
 react:Component	legacy	equivalent	error-boundary	React.boundary	R-28	Only the error-boundary use is offered; class components are not authored in JX
 react:PureComponent	legacy	excluded			R-28	Class component API; its function equivalent is memo, listed separately
@@ -80,6 +80,7 @@ jsx:children	markup	supported	children-prop	children property of type View
 jsx:conditional-rendering	markup	supported	conditional	Java ternary and null		
 jsx:list-rendering	markup	supported	keyed-list,child-values	Iterable and array children		
 jsx:child-values	markup	supported	child-values	Views child normalization		
+jsx:child-slot-identity	markup	unsupported	child-slots		R-32	A null child or a nested list is flattened away when the view is built, so a later sibling changes position and loses its state
 jsx:text-and-entities	markup	supported	text-escaping			
 jsx:props-update	markup	supported	props-update	Typed record props		
 jsx:custom-hooks	markup	supported	custom-hook	Ordinary static methods named useX		

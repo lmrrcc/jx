@@ -187,6 +187,13 @@ to publish chosen operations with
 separate `forwardRef`. A ref object may also be created outside a component with
 `new DomRef()` or `new Ref<>(initial)`, which is React's `createRef`.
 
+`jx.Children` is the typed counterpart of React's `Children` for a `View children`
+prop: `count`, `toList`, `map`, `forEach` and `only`. `Views.cloneElement(element,
+extra, children...)` copies a DOM element view with attributes merged over it and,
+when given, new children; a component view is rebuilt from a new Props record
+instead. `Views.isValidElement(value)` is React's `isValidElement`. Null children
+are dropped when a view is built, so they are not counted.
+
 Records are shallowly immutable. Application authors must defensively copy mutable
 collections and nested values when props ownership requires immutable snapshots.
 

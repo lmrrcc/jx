@@ -1,0 +1,19 @@
+package jx.conformance.cases;
+
+import jx.Attributes;
+import jx.Component;
+import jx.View;
+import jx.Views;
+
+/** Case clone-element: a cloned element merges new attributes and children. */
+@Component
+public final class CloneElement {
+    public static View render() {
+        View original = <button class="base" title="original">Press</button>;
+        return (
+            <main>
+                {Views.cloneElement(original, Attributes.create().attr("class", "cloned").attr("data-extra", "yes"), "Cloned")}
+            </main>
+        );
+    }
+}
