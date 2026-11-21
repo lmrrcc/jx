@@ -1,0 +1,21 @@
+package jx.conformance.cases;
+
+import jx.Attributes;
+import jx.Component;
+import jx.View;
+
+/** Case spread-props: spread attributes follow source order; a component takes its Props value whole. */
+@Component
+public final class SpreadProps {
+    public static View render() {
+        Attributes attributes = Attributes.create().attr("data-kind", "spread").attr("title", "from spread");
+        SpreadLabel.Props props = new SpreadLabel.Props("spread text", "calm");
+        return (
+            <main>
+                <button {...attributes} title="explicit wins">Later wins</button>
+                <a title="explicit loses" {...attributes}>Earlier loses</a>
+                <SpreadLabel {...props} />
+            </main>
+        );
+    }
+}

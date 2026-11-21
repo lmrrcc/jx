@@ -98,6 +98,77 @@ class JxCompilerTest {
         assertTrue(compilation.diagnostics().toString().contains("arePropsEqual"), compilation.diagnostics().toString());
     }
 
+    @Test void optionalPropsSpreadsAndGenericPropsLowerToTypedJava() throws Exception {
+        var compilation = compiler.compile(List.of(source("Badge.jx", """
+                package demo;
+                import jx.*;
+                @Component public final class Badge {
+                    public record Props(@OptionalProp String label, @OptionalProp int size, boolean strong) {
+                        public Props { if (label == null) label = "default"; }
+                    }
+                    public static View render(Props props) { return <p>{props.label()}</p>; }
+                }
+                """), source("Rows.jx", """
+                package demo;
+                import jx.*;
+                import java.util.List;
+                import java.util.function.Function;
+                @Component public final class Rows {
+                    public record Props<T>(List<T> items, Function<T, String> label) {}
+                    public static <T> View render(Props<T> props) {
+                        return <ul>{props.items().stream().map(item -> <li>{props.label().apply(item)}</li>).toList()}</ul>;
+                    }
+                }
+                """), source("Page.jx", """
+                package demo;
+                import jx.*;
+                import java.util.List;
+                @Component public final class Page {
+                    public static View render() {
+                        Attributes shared = Attributes.create().attr("title", "shared");
+                        Badge.Props forwarded = new Badge.Props("forwarded", 2, true);
+                        return <main>
+                            <Badge strong />
+                            <Badge {...forwarded} key="k" />
+                            <a id="first" {...shared} title="last">link</a>
+                            <Rows items={List.of("a", "b")} label={item -> item.toUpperCase()} />
+                        </main>;
+                    }
+                }
+                """)));
+        assertTrue(compilation.successful(), compilation.diagnostics().toString());
+        String all = String.join("\n", compilation.generatedSources().stream().map(GeneratedSource::javaSource).toList());
+        assertTrue(all.contains("new Badge.Props(null, 0, true)"), all);
+        assertTrue(all.contains("jx.Views.component(Badge.JX, forwarded, \"k\")"), all);
+        assertTrue(all.contains(".attr(\"id\", \"first\").merge(shared).attr(\"title\", \"last\")"), all);
+        assertTrue(all.contains("jx.ComponentType<Props<?>> JX"), all);
+        assertTrue(all.contains("props -> Rows.render(props)"), all);
+        assertTrue(all.contains("new Rows.Props<>(List.of(\"a\", \"b\"), item -> item.toUpperCase())"), all);
+        assertEquals(List.of(), check(compilation));
+    }
+
+    @Test void rejectsASpreadMixedWithOtherComponentProperties() throws Exception {
+        var compilation = compiler.compile(List.of(source("Tag.jx", """
+                package demo;
+                import jx.*;
+                @Component public final class Tag {
+                    public record Props(String label, String tone) {}
+                    public static View render(Props props) { return <p>{props.label()}</p>; }
+                }
+                """), source("Use.jx", """
+                package demo;
+                import jx.*;
+                @Component public final class Use {
+                    public static View render() {
+                        Tag.Props props = new Tag.Props("a", "b");
+                        return <Tag {...props} tone="c" />;
+                    }
+                }
+                """)));
+        assertFalse(compilation.successful());
+        assertTrue(compilation.diagnostics().stream().anyMatch(d -> d.code().equals("JX105")), compilation.diagnostics().toString());
+    }
+
     @Test void acceptsComponentAnnotationAndDeprecatedSourceAlias() throws Exception {
         for (String declaration : List.of(
                 "import jx.Component; @Component",
@@ -256,7 +327,7 @@ class JxCompilerTest {
         SourceFile reserved = source("Bad.jx", "import jx.*; @Component public class Bad { public record Props(String key) {} public static View render(Props props) { return <span/>; } }");
         assertTrue(compiler.compile(List.of(reserved)).diagnostics().stream().anyMatch(d -> d.message().contains("reserved")));
         SourceFile generic = source("Bad.jx", "import jx.*; @Component public class Bad { public record Props<T>(T value) {} public static View render(Props props) { return <span/>; } }");
-        assertTrue(compiler.compile(List.of(generic)).diagnostics().stream().anyMatch(d -> d.message().contains("concrete record")));
+        assertTrue(compiler.compile(List.of(generic)).diagnostics().stream().anyMatch(d -> d.message().contains("same type parameters")));
     }
 
     @Test void explicitImportsResolveBeforeAnotherTypeInTheSamePackage() throws Exception {
@@ -329,17 +400,18 @@ class JxCompilerTest {
     private List<Diagnostic> check(Compilation compilation) throws Exception {
         // Compile-signature fixtures isolate compiler behavior. The browser sample also compiles against the real core.
         List<Path> files = new ArrayList<>();
-        Map<String, String> signatures = Map.of(
+        Map<String, String> signatures = new java.util.HashMap<>(Map.of(
                 "View", "public interface View {}",
                 "Component", "public @interface Component {}",
                 "JxComponent", "@Deprecated public @interface JxComponent {}",
                 "ComponentType", "public record ComponentType<P>(String name, String stateSignature, java.util.function.Function<P,View> render) { public ComponentType<P> memo(java.util.function.BiPredicate<P,P> propsEqual) { return this; } public static boolean sameValue(Object first, Object second) { return first == second; } }",
                 "Memo", "public @interface Memo {}",
                 "Views", "public final class Views { public static View element(String tag, Attributes attrs, Object... children) { return null; } public static View fragment(Object... children) { return null; } public static <P> View component(ComponentType<P> type, P props) { return null; } public static <P> View component(ComponentType<P> type, P props, String key) { return null; } }",
-                "Attributes", "public final class Attributes { public static Attributes create() { return new Attributes(); } public Attributes attr(String name, Object value) { return this; } public Attributes on(String name, java.util.function.Consumer<Event> handler) { return this; } }",
+                "Attributes", "public final class Attributes { public static Attributes create() { return new Attributes(); } public Attributes attr(String name, Object value) { return this; } public Attributes merge(Attributes other) { return this; } public Attributes on(String name, java.util.function.Consumer<Event> handler) { return this; } }",
                 "Event", "public interface Event { void preventDefault(); }",
                 "Hooks", "public final class Hooks { public static <T> State<T> useState(T value) { return null; } }",
-                "State", "public interface State<T> { T value(); void update(java.util.function.UnaryOperator<T> update); }");
+                "State", "public interface State<T> { T value(); void update(java.util.function.UnaryOperator<T> update); }"));
+        signatures.put("OptionalProp", "@java.lang.annotation.Target(java.lang.annotation.ElementType.RECORD_COMPONENT) public @interface OptionalProp {}");
         for (var signature : signatures.entrySet()) {
             Path path = directory.resolve("signatures/jx/" + signature.getKey() + ".java");
             Files.createDirectories(path.getParent());

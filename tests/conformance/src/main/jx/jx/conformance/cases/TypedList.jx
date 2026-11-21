@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import java.util.List;
+import java.util.function.Function;
+import jx.Component;
+import jx.View;
+
+/** A list component that is generic in its item type. */
+@Component
+public final class TypedList {
+    public record Props<T>(List<T> items, Function<T, String> keyOf, Function<T, String> render) {}
+
+    public static <T> View render(Props<T> props) {
+        return (
+            <ul>
+                {props.items().stream().map(item -> <li key={props.keyOf().apply(item)}>{props.render().apply(item)}</li>).toList()}
+            </ul>
+        );
+    }
+}

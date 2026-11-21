@@ -1,0 +1,17 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+
+/** Case default-props: an omitted prop takes its default and an absent one adds no attribute. */
+@Component
+public final class DefaultProps {
+    public static View render() {
+        return (
+            <main>
+                <Badge />
+                <Badge label="given" tone="warm" />
+            </main>
+        );
+    }
+}

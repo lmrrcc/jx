@@ -1,0 +1,14 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+
+/** A label that receives its whole Props value from a spread. */
+@Component
+public final class SpreadLabel {
+    public record Props(String text, String tone) {}
+
+    public static View render(Props props) {
+        return <p data-testid="label" data-tone={props.tone()}>{props.text()}</p>;
+    }
+}

@@ -54,8 +54,9 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
                 }
                 MethodTree render = renders.getFirst();
                 boolean hasProps = !render.getParameters().isEmpty();
-                if (hasProps && !render.getParameters().getFirst().getType().toString().equals("Props")
-                        && !render.getParameters().getFirst().getType().toString().equals(type.getSimpleName() + ".Props")) {
+                // A generic Props record is named with its type arguments, such as Props<T>.
+                String parameterType = hasProps ? render.getParameters().getFirst().getType().toString().replaceFirst("<.*", "") : "";
+                if (hasProps && !parameterType.equals("Props") && !parameterType.equals(type.getSimpleName() + ".Props")) {
                     diagnostics.add(Diagnostic.error(parsed.source(), "JX100", "render's parameter must be the nested Props record", declarationSpan));
                     continue;
                 }
@@ -65,12 +66,12 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
                     diagnostics.add(Diagnostic.error(parsed.source(), "JX100", "A component with props requires a public nested record Props", declarationSpan));
                     continue;
                 }
-                if (hasProps && !props.getTypeParameters().isEmpty()) {
-                    diagnostics.add(Diagnostic.error(parsed.source(), "JX100", "Props must be a concrete record; generic record parameters are not supported", declarationSpan));
+                if (hasProps && props.getTypeParameters().size() != render.getTypeParameters().size()) {
+                    diagnostics.add(Diagnostic.error(parsed.source(), "JX100", "A generic Props record needs a render method with the same type parameters, such as <T> View render(Props<T> props)", declarationSpan));
                     continue;
                 }
                 if (!type.getTypeParameters().isEmpty()) {
-                    diagnostics.add(Diagnostic.error(parsed.source(), "JX100", "Generic component classes are not supported; use concrete Props", declarationSpan));
+                    diagnostics.add(Diagnostic.error(parsed.source(), "JX100", "Generic component classes are not supported; make the Props record and the render method generic", declarationSpan));
                     continue;
                 }
                 if (type.getMembers().stream().anyMatch(member -> member instanceof VariableTree variable && variable.getName().contentEquals("JX"))) {
@@ -82,8 +83,10 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
                     // javac exposes record components as private final VariableTrees before the body.
                     for (Tree member : props.getMembers()) if (member instanceof VariableTree variable
                             && !variable.getModifiers().getFlags().contains(Modifier.STATIC)) {
+                        boolean optional = variable.getModifiers().getAnnotations().stream().anyMatch(annotation ->
+                                isJxAnnotation("OptionalProp", annotation.getAnnotationType().toString(), packageName, imports, unit));
                         properties.add(new ComponentMetadata.Prop(variable.getName().toString(), variable.getType().toString(),
-                                span(positions, unit, variable, shadow.length())));
+                                span(positions, unit, variable, shadow.length()), optional));
                         // As in React 19, ref is an ordinary prop of a component; only key is not.
                         if (variable.getName().contentEquals("key")) {
                             diagnostics.add(Diagnostic.error(parsed.source(), "JX100", "Props field 'key'"
@@ -110,7 +113,7 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
                     descriptorOffset = -1;
                 components.add(new ComponentMetadata(packageName.isEmpty() ? simpleName : packageName + "." + simpleName,
                         simpleName, packageName, imports, hasProps, properties, parsed.source().path(),
-                        declarationSpan, descriptorOffset, memo));
+                        declarationSpan, descriptorOffset, memo, hasProps ? props.getTypeParameters().size() : 0));
             }
             for (javax.tools.Diagnostic<? extends JavaFileObject> diagnostic : collector.getDiagnostics())
                 if (diagnostic.getKind() == javax.tools.Diagnostic.Kind.ERROR) {

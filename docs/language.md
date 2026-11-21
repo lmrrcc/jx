@@ -96,11 +96,53 @@ is necessary.
 
 Every record field is required. Unknown, missing, and duplicate properties are
 compiler errors. javac checks property value types and functional interface
-signatures. Attributes can appear in any order. Boolean shorthand means `true`;
-there are no implicit property defaults or spread attributes. Nested record fields
-can use ordinary Java generics; generic component classes themselves are currently
-rejected. Props records themselves must also be concrete, without type parameters;
-raw generic Props must not erase property type checking.
+signatures. Attributes can appear in any order. Boolean shorthand means `true`.
+
+### Optional props and defaults
+
+A Props field marked `@jx.OptionalProp` may be omitted in markup. An omitted field
+receives Java's default for its type (null, zero or false); the record's compact
+constructor supplies any other default:
+
+```java
+public record Props(@OptionalProp String label, @OptionalProp String tone) {
+    public Props { if (label == null) label = "default label"; }
+}
+```
+
+`<Badge />` then renders with the default label. As with a default parameter in
+JavaScript, the default also replaces an explicit null. A null attribute value,
+such as `data-tone={props.tone()}` here, adds no attribute.
+
+### Spread
+
+`{...value}` between properties is the typed form of a JSX spread.
+
+- On an element the value is an `Attributes`. Spreads and written attributes apply
+  in source order and the later one wins: `<a title="x" {...shared}>` takes the
+  title from `shared`, `<a {...shared} title="x">` keeps `x`.
+- On a component the value is its whole Props record: `<Label {...props} />`. It
+  must be the only property besides `key`, because a record cannot be merged field
+  by field; build the value in Java instead.
+
+### Generic components
+
+A component can be generic in its Props. Declare the type parameters on the record
+and on `render`; the component class itself stays non-generic:
+
+```java
+@Component
+public final class TypedList {
+    public record Props<T>(List<T> items, Function<T, String> label) {}
+
+    public static <T> View render(Props<T> props) {
+        return <ul>{props.items().stream().map(item -> <li>{props.label().apply(item)}</li>).toList()}</ul>;
+    }
+}
+```
+
+`<TypedList items={names} label={name -> name.toUpperCase()} />` infers `T` from
+the property values, and javac checks the lambdas against it.
 
 Component lookup supports the current package, explicit imports, wildcard imports,
 and fully qualified names. All component declarations used in markup must be
