@@ -4,6 +4,10 @@ Revision 4, 21 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file tur
 the [work package register](ga-execution.md) into an ordered list of tasks, grouped
 by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
+Progress, 21 November 2026: M1-01 to M1-05 and R-01 to R-05 are done, committed as
+`75d79c2` with Verify green. `main` is protected: a change reaches it only through
+a pull request whose Verify check has passed. The next task is R-06.
+
 ## Rules
 
 1. **One task is one isolated change**: one commit (or pull request) that builds and
@@ -75,11 +79,11 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 
 | Task | Milestone | Change | Rows closed | Status |
 | --- | --- | --- | --- | --- |
-| R-01 | M1 | Cases for untested markup features: custom hooks, function and render props, run-time component choice, dotted component names. A case that fails becomes a defect fix in the same task | 4 untested | approved |
-| R-02 | M1 | Cases for untested DOM features: radio, select, textarea, uncontrolled inputs, capture-phase handlers, custom elements, document metadata, resource elements, root error callbacks | 7 untested | approved |
-| R-03 | M1 | Reference-only cases for every unsupported row; the JX column reports `unsupported`; results written to `evidence/conformance-results.tsv`; Verify fails on any regression | none; gives every later task a waiting test | review |
-| R-04 | M1 | Typed event model: mouse, keyboard with modifiers, focus, pointer, touch, wheel, composition, clipboard, drag, media and animation events, with `currentTarget` | 1 unsupported, 3 untested | review |
-| R-05 | M1 | Mutation runner over the runtime bridge, core hook API and markup lowering; survivors become new cases until none remains | none; proves the bench detects defects | review |
+| R-01 | M1 | Cases for untested markup features: custom hooks, function and render props, run-time component choice, dotted component names. A case that fails becomes a defect fix in the same task | 4 untested | done |
+| R-02 | M1 | Cases for untested DOM features: radio, select, textarea, uncontrolled inputs, capture-phase handlers, custom elements, document metadata, resource elements, root error callbacks | 7 untested | done |
+| R-03 | M1 | Reference-only cases for every unsupported row; the JX column reports `unsupported`; results written to `evidence/conformance-results.tsv`; Verify fails on any regression | none; gives every later task a waiting test | done |
+| R-04 | M1 | Typed event model: mouse, keyboard with modifiers, focus, pointer, touch, wheel, composition, clipboard, drag, media and animation events, with `currentTarget` | 1 unsupported, 3 untested | done |
+| R-05 | M1 | Mutation runner over the runtime bridge, core hook API and markup lowering; survivors become new cases until none remains | none; proves the bench detects defects | done |
 | R-06 | M2 | `memo`, with custom comparison | 1 | next |
 | R-07 | M2 | Refs: ref as a component prop, callback refs with cleanup, `useImperativeHandle`, the `forwardRef` and `createRef` equivalents | 5 | planned |
 | R-08 | M2 | `useInsertionEffect`, `useEffectEvent`, `useDebugValue`, `Profiler`; reducer lazy initializer; nested `StrictMode` | 4 | planned |
@@ -148,10 +152,10 @@ as a test, with a recorded decision.
 | Task | GA | Change | Try it | Status |
 | --- | --- | --- | --- | --- |
 | M1-01 | 01 | Green baseline, version manifest, capability ledger, `CheckBaseline` | `java tools/CheckBaseline.java` | done |
-| M1-02 | 02 | Portfolio and journey registers, old-UI baseline, pilot decisions | `java tools/CheckBaseline.java` | review |
-| M1-03 | 18 | Test bench skeleton: a reference React app and a JX app that mount one case per page load, one shared Chrome spec run against both; first cases: state, effect cleanup, keyed list | `npm run test:bench` | approved |
-| M1-04 | 18 | React API inventory generated from the pinned `react` and `react-dom` packages; `conformance.tsv` maps every export to a case or a reasoned exclusion; `CheckBaseline` fails on an unmapped export | `java tools/CheckBaseline.java` | approved |
-| M1-05 | 18 | Bench cases for everything JX implements today: all current hooks, context, refs, error boundaries, events, controlled inputs, Strict Mode, attributes, text and child values. 32 cases; fixed a key warning for context providers with several children | `npm run test:bench` | approved |
+| M1-02 | 02 | Portfolio and journey registers, old-UI baseline, pilot decisions | `java tools/CheckBaseline.java` | done |
+| M1-03 | 18 | Test bench skeleton: a reference React app and a JX app that mount one case per page load, one shared Chrome spec run against both; first cases: state, effect cleanup, keyed list | `npm run test:bench` | done |
+| M1-04 | 18 | React API inventory generated from the pinned `react` and `react-dom` packages; `conformance.tsv` maps every export to a case or a reasoned exclusion; `CheckBaseline` fails on an unmapped export | `java tools/CheckBaseline.java` | done |
+| M1-05 | 18 | Bench cases for everything JX implements today: all current hooks, context, refs, error boundaries, events, controlled inputs, Strict Mode, attributes, text and child values. 32 cases; fixed a key warning for context providers with several children | `npm run test:bench` | done |
 | M1-10 | 05 | Compiler writes a versioned component metadata descriptor into each module's output | `./mvnw -pl jx-compiler test` | planned |
 | M1-11 | 05 | Compiler resolves components from descriptors in classpath JARs, without their sources | `./mvnw -pl jx-compiler test` | planned |
 | M1-12 | 05 | `examples/component-library` (producer JAR) and `examples/library-consumer` (separate app) with a Chrome test | `npm run test:library` | planned |

@@ -9,8 +9,8 @@ agreed; old-UI behavior/performance captured.*
 
 ## Status
 
-**Implemented; awaiting Luca's end-to-end check.** Tasks 1–11 are complete on the
-working tree. Task 12 needs the check, then a commit and push.
+**Done, 2026-11-21.** Committed as `aebedc1`; Verify passed on the following commit
+([run 44912595660](https://github.com/lmrrcc/jx/actions/runs/44912595660)).
 
 ## Design
 
@@ -48,7 +48,7 @@ Rules for this work:
 - [x] 10. Write the scored pilot shortlist; record Luca's decisions on the pilot
   pair, canonical deployments and owners.
 - [x] 11. Run both checkers; update the roadmap and the backlog row.
-- [ ] 12. After Luca's end-to-end check: commit, push, confirm Verify is green.
+- [x] 12. After Luca's end-to-end check: commit, push, confirm Verify is green.
 
 ## Pilot shortlist
 
