@@ -1,0 +1,21 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.OptionalProp;
+import jx.View;
+
+/** A badge whose label has a default and whose tone may be absent. */
+@Component
+public final class Badge {
+    public record Props(@OptionalProp String label, @OptionalProp String tone) {
+        public Props {
+            if (label == null) {
+                label = "default label";
+            }
+        }
+    }
+
+    public static View render(Props props) {
+        return <p data-testid={"badge-" + props.label().replace(' ', '-')} data-tone={props.tone()}>{props.label()}</p>;
+    }
+}

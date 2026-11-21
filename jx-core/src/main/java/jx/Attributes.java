@@ -29,6 +29,14 @@ public final class Attributes {
             throw new IllegalArgumentException("Executable URL is not an attribute value");
         return with(name.equals("class") ? "className" : name.equals("for") ? "htmlFor" : name, value);
     }
+    /** These attributes followed by all of {@code other}, whose values win for names in both: the
+     * typed form of a JSX spread. A null argument adds nothing. */
+    public Attributes merge(Attributes other) {
+        if (other == null || other.values.isEmpty()) return this;
+        var copy = new LinkedHashMap<>(values);
+        copy.putAll(other.values);
+        return new Attributes(java.util.Collections.unmodifiableMap(copy));
+    }
     /** Attaches the element to a ref object. A null ref attaches nothing. */
     public Attributes ref(DomRef ref) { return ref == null ? this : with("ref", ref); }
     /** Attaches the element through a callback ref. A null callback attaches nothing. */

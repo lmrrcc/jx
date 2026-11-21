@@ -104,6 +104,9 @@ final class MarkupParser {
                 || Character.isJavaIdentifierStart(text.charAt(cursor + 1)));
     }
 
+    /** The name of a spread attribute; it cannot collide with a property name. */
+    static final String SPREAD = "...";
+
     private Element element() {
         if (++depth > MAX_DEPTH) fail("JX003", "Markup nesting exceeds " + MAX_DEPTH, cursor);
         int start = cursor++;
@@ -127,6 +130,21 @@ final class MarkupParser {
                 if (!separated) {
                     if (!editor) fail("JX004", "Expected whitespace, '>' or '/>' after " + name, cursor);
                     report("JX004", "Expected whitespace, '>' or '/>' after " + name, cursor);
+                }
+                if (starts("{")) {
+                    // A spread, {...value}: Attributes on an element, a Props value on a component.
+                    int spreadStart = cursor;
+                    int dots = cursor + 1;
+                    while (dots < text.length() && Character.isWhitespace(text.charAt(dots))) dots++;
+                    if (text.startsWith("...", dots)) {
+                        cursor = dots + 2;
+                        Interpolation value = interpolation();
+                        attributes.add(new Attribute(SPREAD, new SourceSpan(spreadStart, cursor), new SourceSpan(spreadStart, spreadStart + 1),
+                                null, new Interpolation(new SourceSpan(spreadStart, cursor), value.expression())));
+                        continue;
+                    }
+                    if (!editor) fail("JX015", "Only a spread such as {...value} can stand between properties", cursor);
+                    report("JX015", "Only a spread such as {...value} can stand between properties", cursor);
                 }
                 if (editor && !Character.isJavaIdentifierStart(text.charAt(cursor))) {
                     // A partial property/tag delimiter is markup, not editable Java. Leave a new

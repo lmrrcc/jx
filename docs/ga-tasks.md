@@ -6,7 +6,7 @@ by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
 Progress, 21 November 2026: M1-01 to M1-05 and R-01 to R-05 are done, committed as
 `75d79c2` with Verify green. `main` is protected: a change reaches it only through
-a pull request whose Verify check has passed. R-06 to R-08 are done. The next task is R-09.
+a pull request whose Verify check has passed. R-06 to R-09 are done. The next task is R-10.
 
 ## Rules
 
@@ -87,8 +87,8 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-06 | M2 | `memo`, with custom comparison | 1 | done |
 | R-07 | M2 | Refs: ref as a component prop, callback refs with cleanup, `useImperativeHandle`, the `forwardRef` and `createRef` equivalents | 5 | done |
 | R-08 | M2 | `useInsertionEffect`, `useEffectEvent`, `useDebugValue`, `Profiler`; reducer lazy initializer; nested `StrictMode` | 4 | done |
-| R-09 | M2 | Optional and default props, typed prop forwarding in place of spread, generic components | 3 | next |
-| R-10 | M2 | `createPortal`, `flushSync` | 2 | planned |
+| R-09 | M2 | Optional and default props, typed prop forwarding in place of spread, generic components | 3 | done |
+| R-10 | M2 | `createPortal`, `flushSync` | 2 | next |
 | R-11 | M2 | Typed equivalents of `Children`, `cloneElement` and `isValidElement` | 3 | planned |
 | R-12 | M3 | `useTransition`, `startTransition`, `useDeferredValue` | 3 | planned |
 | R-13 | M3 | `Suspense` and `use` for promises and context | 2 | planned |

@@ -43,3 +43,4 @@ insertion-as-layout	killed	insertion-effect	Insertion effects run as layout effe
 profiler-phase-fixed	killed	profiler	Profiler reports every commit as a mount
 strict-mode-dropped	killed	strict-nested	Nested StrictMode has no effect
 effect-event-first-callback	killed	effect-event	Effect events keep calling the first render's callback
+spread-never-overrides	killed	spread-props	A spread never overrides an earlier attribute
