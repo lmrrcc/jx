@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case effect-event: an effect event reads the latest values without re-running the effect. */
+@Component
+public final class EffectEvent {
+    public static View render() {
+        State<String> room = Hooks.useState("a");
+        State<String> theme = Hooks.useState("light");
+        return (
+            <main>
+                <EffectEventConnection room={room.value()} theme={theme.value()} />
+                <button onClick={event -> theme.set("dark")}>Change theme</button>
+                <button onClick={event -> room.set("b")}>Change room</button>
+            </main>
+        );
+    }
+}

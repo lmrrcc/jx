@@ -215,3 +215,55 @@ test('ref-callback: a callback ref gets the node and its cleanup runs on removal
   await page.getByRole('button', {name: 'Remove node'}).click();
   await expect.poll(() => log(page)).toEqual(['attach P', 'detach', 'attach P', 'detach']);
 });
+
+test('reducer-lazy-init: the initializer computes the first reducer state once per mount', async ({page, open}) => {
+  await open('reducer-lazy-init');
+  await expect(page.getByRole('status')).toHaveText('10');
+  // Strict Mode in development calls the initializer twice.
+  expect(await log(page)).toEqual(['init', 'init']);
+  await page.getByRole('button', {name: 'Increment'}).click();
+  await expect(page.getByRole('status')).toHaveText('11');
+  expect(await log(page)).toEqual(['init', 'init']);
+});
+
+test('strict-nested: a nested StrictMode checks its children only', async ({page, open}) => {
+  await open('strict-nested');
+  // Only the nested part renders twice. React does not repeat the effects of a nested
+  // StrictMode that mounts together with a parent outside Strict Mode.
+  const mount = ['render plain', 'render checked', 'render checked', 'plain setup', 'checked setup'];
+  await expect.poll(() => log(page)).toEqual(mount);
+  await page.getByRole('button', {name: 'Show late'}).click();
+  // A StrictMode subtree that mounts later also repeats its effects.
+  await expect.poll(() => log(page)).toEqual([...mount, 'render plain', 'render checked', 'render checked',
+    'render late', 'render late', 'late setup', 'late cleanup', 'late setup']);
+});
+
+test('insertion-effect: insertion effects run before layout and passive effects', async ({page, open}) => {
+  await open('insertion-effect');
+  await expect.poll(async () => (await log(page)).slice(0, 3)).toEqual(['insertion', 'layout', 'effect']);
+});
+
+test('effect-event: an effect event reads the latest values without re-running the effect', async ({page, open}) => {
+  await open('effect-event');
+  const mount = ['connected a light', 'disconnected a', 'connected a light'];
+  await expect.poll(() => log(page)).toEqual(mount);
+  await page.getByRole('button', {name: 'Change theme'}).click();
+  await expect(page.getByRole('status')).toHaveText('a dark');
+  expect(await log(page)).toEqual(mount);
+  await page.getByRole('button', {name: 'Change room'}).click();
+  await expect.poll(() => log(page)).toEqual([...mount, 'disconnected a', 'connected b dark']);
+});
+
+test('debug-value: a hook labelled with useDebugValue behaves like the plain hook', async ({page, open}) => {
+  await open('debug-value');
+  await page.getByRole('button', {name: 'Increment'}).click();
+  await expect(page.getByRole('status')).toHaveText('2');
+});
+
+test('profiler: onRender reports the mount and each update', async ({page, open}) => {
+  await open('profiler');
+  await expect.poll(async () => (await log(page))[0]).toEqual('bench mount');
+  await page.getByRole('button', {name: 'Update'}).click();
+  await expect(page.getByRole('status')).toHaveText('1');
+  await expect.poll(async () => (await log(page)).at(-1)).toEqual('bench update');
+});

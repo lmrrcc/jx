@@ -226,6 +226,25 @@ Hooks belong to mounted component instances. `State.value()` is the current
 render's immutable snapshot; setters schedule future rendering. Functional
 updaters queue in order. Effects and external operations belong outside render.
 
+`Hooks` offers React's hooks under their own names. Beyond state, effects, refs,
+memo, context, external stores and ids:
+
+- `useReducerLazy(reducer, initial)` computes the first state once per mount, like
+  the third argument of React's `useReducer`.
+- `useInsertionEffect` runs before layout effects and before the DOM changes.
+- `useEffectEvent` takes a `Runnable` or a `Consumer` and returns an action that
+  always runs the latest render's callback, so an effect can call it without
+  depending on what it reads.
+- `useDebugValue(value)` and `useDebugValue(value, format)` label a custom hook in
+  React DevTools.
+- `useImperativeHandle` is described under Refs.
+
+`React.profiler(id, onRender, children...)` and `React.strictMode(children...)` in
+`jx.react` are React's `Profiler` and nested `StrictMode`. They are view factories
+called in an interpolation, for example `{React.strictMode(<Panel />)}`. As in
+React, a nested `StrictMode` renders its children twice in development but repeats
+their effects only when it mounts after its parent.
+
 The compiler checks conventional `useX` calls in render/custom-hook methods for
 placement inside branches, loops, callbacks, try/switch constructs, and after a
 possible early return. These are conservative syntax checks. They do not analyze

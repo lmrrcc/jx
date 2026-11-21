@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.Bench;
+import jx.react.React;
+
+/** Case profiler: onRender reports the mount and each update. */
+@Component
+public final class ProfilerCase {
+    public static View render() {
+        State<Integer> count = Hooks.useState(0);
+        return (
+            <main>
+                {React.profiler("bench", profile -> Bench.log(profile.id() + " " + profile.phase()),
+                    <p role="status">{count.value()}</p>)}
+                <button onClick={event -> count.update(previous -> previous + 1)}>Update</button>
+            </main>
+        );
+    }
+}

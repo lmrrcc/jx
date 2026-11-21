@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Logs each render and its effect setup and cleanup under the given name. */
+@Component
+public final class StrictProbe {
+    public record Props(String name) {}
+
+    public static View render(Props props) {
+        Bench.log("render " + props.name());
+        Hooks.useEffect(() -> {
+            Bench.log(props.name() + " setup");
+            return () -> Bench.log(props.name() + " cleanup");
+        }, Dependencies.none());
+        return <p>{props.name()}</p>;
+    }
+}

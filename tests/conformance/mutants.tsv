@@ -39,3 +39,7 @@ memo-field-ignored	jx-compiler/src/main/java/jx/compiler/Lowerer.java	yield ".me
 ref-cleanup-dropped	jx-react/src/main/java/jx/react/React.java	Runnable cleanup = callback.attach(js == null ? null : new BrowserElement(js));	callback.attach(js == null ? null : new BrowserElement(js)); Runnable cleanup = null;	Callback ref cleanups are never registered
 ref-function-unstable	jx-react/src/main/java/jx/react/React.java	var fn = cache.get(ref); if (!fn) { fn = function(node)	var fn = null; if (!fn) { fn = function(node)	Refs are re-attached on every render
 handle-not-published	jx-react/src/main/java/jx/react/ReactHooks.java	handle -> ref.set(Interop.value(handle))	handle -> ref.set(null)	Imperative handles never reach the ref
+insertion-as-layout	jx-react/src/main/java/jx/react/ReactHooks.java	React.useInsertionEffect(function() {	React.useLayoutEffect(function() {	Insertion effects run as layout effects
+profiler-phase-fixed	jx-react/src/main/java/jx/react/React.java	new Profile(name, phase,	new Profile(name, "mount",	Profiler reports every commit as a mount
+strict-mode-dropped	jx-react/src/main/java/jx/react/React.java	return new NativeView(strict(element(Views.fragment(children))));	return new NativeView(element(Views.fragment(children)));	Nested StrictMode has no effect
+effect-event-first-callback	jx-react/src/main/java/jx/react/ReactHooks.java	return React.useEffectEvent(function(argument) { callback(argument); });	return React.useCallback(function(argument) { callback(argument); }, []);	Effect events keep calling the first render's callback

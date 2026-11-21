@@ -3,22 +3,6 @@ import {referenceOnly, expect, log} from './bench.js';
 // React features that JX does not offer yet. Each test passes on the reference
 // and reports `unsupported` on JX until the matching parity task lands.
 
-referenceOnly('insertion-effect: insertion effects run before layout and passive effects', async ({page, open}) => {
-  await open('insertion-effect');
-  await expect.poll(async () => (await log(page)).slice(0, 3)).toEqual(['insertion', 'layout', 'effect']);
-});
-
-referenceOnly('effect-event: an effect event reads the latest values without re-running the effect', async ({page, open}) => {
-  await open('effect-event');
-  const mount = ['connected a light', 'disconnected a', 'connected a light'];
-  await expect.poll(() => log(page)).toEqual(mount);
-  await page.getByRole('button', {name: 'Change theme'}).click();
-  await expect(page.getByRole('status')).toHaveText('a dark');
-  expect(await log(page)).toEqual(mount);
-  await page.getByRole('button', {name: 'Change room'}).click();
-  await expect.poll(() => log(page)).toEqual([...mount, 'disconnected a', 'connected b dark']);
-});
-
 referenceOnly('transition-pending: useTransition reports pending while an async action runs', async ({page, open}) => {
   await open('transition-pending');
   await expect(page.getByRole('status')).toHaveText('idle');
@@ -116,14 +100,6 @@ referenceOnly('activity: a hidden activity keeps state, hides its DOM and stops 
   await expect.poll(async () => (await log(page)).at(-1)).toEqual('effect on');
 });
 
-referenceOnly('profiler: onRender reports the mount and each update', async ({page, open}) => {
-  await open('profiler');
-  await expect.poll(async () => (await log(page))[0]).toEqual('bench mount');
-  await page.getByRole('button', {name: 'Update'}).click();
-  await expect(page.getByRole('status')).toHaveText('1');
-  await expect.poll(async () => (await log(page)).at(-1)).toEqual('bench update');
-});
-
 referenceOnly('view-transition: a typed transition updates content inside a ViewTransition', async ({page, open}) => {
   await open('view-transition');
   await expect(page.getByRole('status')).toHaveText('first');
@@ -213,8 +189,3 @@ referenceOnly('hydrate-root: hydration attaches to server markup without replaci
   expect(await button.evaluate(node => node.benchServerNode)).toBe(true);
 });
 
-referenceOnly('debug-value: a hook labelled with useDebugValue behaves like the plain hook', async ({page, open}) => {
-  await open('debug-value');
-  await page.getByRole('button', {name: 'Increment'}).click();
-  await expect(page.getByRole('status')).toHaveText('2');
-});

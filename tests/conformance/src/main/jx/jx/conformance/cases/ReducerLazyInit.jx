@@ -1,0 +1,26 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.ReducerState;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case reducer-lazy-init: the initializer computes the first reducer state once per mount. */
+@Component
+public final class ReducerLazyInit {
+    public static View render() {
+        ReducerState<Integer, Integer> count = Hooks.useReducerLazy((state, step) -> state + step, () -> initialize(5));
+        return (
+            <main>
+                <p role="status">{count.value()}</p>
+                <button onClick={event -> count.dispatch().accept(1)}>Increment</button>
+            </main>
+        );
+    }
+
+    private static int initialize(int seed) {
+        Bench.log("init");
+        return seed * 2;
+    }
+}

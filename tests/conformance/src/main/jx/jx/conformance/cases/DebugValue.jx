@@ -1,0 +1,26 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case debug-value: a hook labelled with useDebugValue behaves like the plain hook. */
+@Component
+public final class DebugValue {
+    public static View render() {
+        State<Integer> value = useLabelled(1);
+        return (
+            <main>
+                <p role="status">{value.value()}</p>
+                <button onClick={event -> value.update(previous -> previous + 1)}>Increment</button>
+            </main>
+        );
+    }
+
+    private static State<Integer> useLabelled(int initial) {
+        State<Integer> value = Hooks.useState(initial);
+        Hooks.useDebugValue(value.value(), current -> "value: " + current);
+        return value;
+    }
+}

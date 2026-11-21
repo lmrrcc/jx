@@ -2,6 +2,8 @@ package jx;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import jx.spi.HookRuntime;
 
@@ -16,6 +18,26 @@ public final class Hooks {
     public static <T> State<T> useStateLazy(Supplier<T> initial, StateCodec<T> codec) { return runtime().state(Objects.requireNonNull(initial), Objects.requireNonNull(codec)); }
     public static <S, A> ReducerState<S, A> useReducer(BiFunction<S, A, S> reducer, S initial) { return runtime().reducer(Objects.requireNonNull(reducer), initial, null); }
     public static <S, A> ReducerState<S, A> useReducer(BiFunction<S, A, S> reducer, S initial, StateCodec<S> codec) { return runtime().reducer(Objects.requireNonNull(reducer), initial, Objects.requireNonNull(codec)); }
+    /** A reducer whose first state is computed once, on mount, like React's third {@code useReducer} argument. */
+    public static <S, A> ReducerState<S, A> useReducerLazy(BiFunction<S, A, S> reducer, Supplier<S> initial) { return runtime().reducerLazy(Objects.requireNonNull(reducer), Objects.requireNonNull(initial), null); }
+    public static <S, A> ReducerState<S, A> useReducerLazy(BiFunction<S, A, S> reducer, Supplier<S> initial, StateCodec<S> codec) { return runtime().reducerLazy(Objects.requireNonNull(reducer), Objects.requireNonNull(initial), Objects.requireNonNull(codec)); }
+    /** Runs before layout effects and before React changes the DOM; meant for inserting styles.
+     * Refs are not attached yet and state must not be updated here. */
+    public static void useInsertionEffect(Effect effect, Dependencies dependencies) { runtime().insertionEffect(Objects.requireNonNull(effect), Objects.requireNonNull(dependencies)); }
+    /** An effect event: the returned action always runs the callback of the latest render, so an
+     * effect can call it without listing what the callback reads as dependencies. Call it only
+     * from effects, never during rendering, and do not pass it to other components. */
+    public static Runnable useEffectEvent(Runnable callback) {
+        Objects.requireNonNull(callback);
+        Consumer<Object> event = runtime().effectEvent(ignored -> callback.run());
+        return () -> event.accept(null);
+    }
+    /** An effect event that takes one argument; see {@link #useEffectEvent(Runnable)}. */
+    public static <A> Consumer<A> useEffectEvent(Consumer<A> callback) { return runtime().effectEvent(Objects.requireNonNull(callback)); }
+    /** Labels the calling custom hook in React DevTools. It has no effect on rendering. */
+    public static void useDebugValue(Object value) { runtime().debugValue(value, null); }
+    /** As {@link #useDebugValue(Object)}; the formatter runs only when DevTools inspects the hook. */
+    public static <T> void useDebugValue(T value, Function<T, String> format) { runtime().debugValue(value, Objects.requireNonNull(format)); }
     public static void useEffect(Effect effect, Dependencies dependencies) { runtime().effect(Objects.requireNonNull(effect), Objects.requireNonNull(dependencies), false); }
     public static void useLayoutEffect(Effect effect, Dependencies dependencies) { runtime().effect(Objects.requireNonNull(effect), Objects.requireNonNull(dependencies), true); }
     public static <T> Ref<T> useRef(T initial) { return runtime().ref(initial); }

@@ -18,7 +18,7 @@ controlled-input	pass	pass
 create-ref	pass	pass
 custom-elements	pass	pass
 custom-hook	pass	pass
-debug-value	pass	unsupported
+debug-value	pass	pass
 default-props	pass	unsupported
 deferred-value	pass	unsupported
 document-metadata	pass	pass
@@ -26,7 +26,7 @@ dom-ref-focus	pass	pass
 dynamic-component	pass	pass
 effect-cleanup	pass	pass
 effect-dependencies	pass	pass
-effect-event	pass	unsupported
+effect-event	pass	pass
 error-boundary	pass	pass
 error-reporting	pass	pass
 event-payload	pass	pass
@@ -41,7 +41,7 @@ function-props	pass	pass
 generic-list	pass	unsupported
 hydrate-root	pass	unsupported
 imperative-handle	pass	pass
-insertion-effect	pass	unsupported
+insertion-effect	pass	pass
 key-event	pass	pass
 keyed-list	pass	pass
 layout-effect-dependencies	pass	pass
@@ -55,11 +55,12 @@ optimistic	pass	unsupported
 pointer-events	pass	pass
 portal	pass	unsupported
 prevent-default	pass	pass
-profiler	pass	unsupported
+profiler	pass	pass
 props-update	pass	pass
 raw-html	pass	unsupported
 react-exports	pass	n/a
 reducer-batch	pass	pass
+reducer-lazy-init	pass	pass
 ref-as-prop	pass	pass
 ref-callback	pass	pass
 ref-persist	pass	pass
@@ -81,6 +82,7 @@ static-prerender-node	pass	unsupported
 static-resume-prerender	pass	unsupported
 static-resume-prerender-node	pass	unsupported
 stop-propagation	pass	pass
+strict-nested	pass	pass
 svg	pass	pass
 text-escaping	pass	pass
 transfer-events	pass	pass
