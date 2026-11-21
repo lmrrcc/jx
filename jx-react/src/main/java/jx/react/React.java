@@ -116,6 +116,9 @@ public final class React {
             case View.Fragment fragment -> fragment(children(fragment.children(), position + "/fragment"));
             case View.ComponentView<?> component -> component(component, HotReload.childPath(component.component().name(), component.key(), position, container), false);
             case View.Provider<?> provider -> provider(provider, position);
+            case View.Empty empty -> null;
+            // A real array, so React gives the collection one position and matches its items by key.
+            case View.Items items -> array(children(items.children(), position + "/items"));
             case View.Extension extension -> {
                 if (extension instanceof NativeView nativeView) yield nativeView.element();
                 throw new IllegalArgumentException("Unsupported React view extension: " + extension.getClass().getName());
@@ -126,7 +129,7 @@ public final class React {
         Object[] children = new Object[views.size()];
         for (int i = 0; i < children.length; i++) {
             // Text stays a plain string child: title, style, option and textarea accept nothing else.
-            children[i] = views.get(i) instanceof View.Text text
+            children[i] = views.get(i) instanceof View.Empty ? null : views.get(i) instanceof View.Text text
                     ? org.teavm.jso.core.JSString.valueOf(text.value())
                     : element(views.get(i), container + "/" + i, container);
         }
@@ -276,6 +279,7 @@ public final class React {
     @JSBody(params = "error", script = "return String(error && error.message || error);") private static native String errorMessage(JSObject error);
     @JSBody(params = {"type", "props"}, script = "return React.createElement(type, props);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject external(JSObject type, JSObject props);
     @JSBody(script = "return {};") private static native JSObject object();
+    @JSBody(params = "items", script = "return Array.prototype.slice.call(items);") private static native JSObject array(Object[] items);
     @JSBody(params = {"object", "name", "value"}, script = "object[name] = value;") private static native void set(JSObject object, String name, Object value);
     @JSBody(params = {"object", "name", "value"}, script = "object[name] = value;") private static native void setNative(JSObject object, String name, JSObject value);
     @JSBody(params = {"object", "name", "handler"}, script = "object[name] = handler;") private static native void setHandler(JSObject object, String name, Handler handler);

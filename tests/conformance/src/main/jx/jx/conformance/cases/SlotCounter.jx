@@ -1,0 +1,17 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** A labelled counter button. */
+@Component
+public final class SlotCounter {
+    public record Props(String label) {}
+
+    public static View render(Props props) {
+        State<Integer> count = Hooks.useState(0);
+        return <button onClick={event -> count.update(previous -> previous + 1)}>{props.label()} {count.value()}</button>;
+    }
+}

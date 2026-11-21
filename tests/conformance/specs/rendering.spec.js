@@ -125,3 +125,15 @@ test('unknown-case: an unknown id is reported, not rendered as an empty page', a
   await expect(page.locator('#app')).toHaveAttribute('data-bench', 'unknown');
   await expect(page.locator('#app')).toHaveText('unknown case: no-such-case');
 });
+
+test('child-slots: a sibling after a null child or a nested list keeps its state', async ({page, open}) => {
+  await open('child-slots');
+  await page.getByRole('button', {name: 'after-conditional 0'}).click();
+  await page.getByRole('button', {name: 'after-list 0'}).click();
+  await page.getByRole('button', {name: 'Show banner'}).click();
+  await expect(page.locator('p', {hasText: 'banner'})).toBeVisible();
+  await expect(page.getByRole('button', {name: 'after-conditional 1'})).toBeVisible();
+  await page.getByRole('button', {name: 'Add item'}).click();
+  await expect(page.getByText('b', {exact: true})).toBeVisible();
+  await expect(page.getByRole('button', {name: 'after-list 1'})).toBeVisible();
+});

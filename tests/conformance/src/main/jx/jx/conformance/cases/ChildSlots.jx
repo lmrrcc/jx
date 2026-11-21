@@ -1,0 +1,30 @@
+package jx.conformance.cases;
+
+import java.util.List;
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case child-slots: a sibling after a null child or a nested list keeps its state. */
+@Component
+public final class ChildSlots {
+    public static View render() {
+        State<Boolean> shown = Hooks.useState(false);
+        State<List<String>> items = Hooks.useState(List.of("a"));
+        return (
+            <main>
+                <div>
+                    {shown.value() ? <p>banner</p> : null}
+                    <SlotCounter label="after-conditional" />
+                </div>
+                <div>
+                    {items.value().stream().map(item -> <span key={item}>{item}</span>).toList()}
+                    <SlotCounter label="after-list" />
+                </div>
+                <button onClick={event -> shown.set(true)}>Show banner</button>
+                <button onClick={event -> items.set(List.of("a", "b"))}>Add item</button>
+            </main>
+        );
+    }
+}

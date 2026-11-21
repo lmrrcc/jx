@@ -191,8 +191,16 @@ separate `forwardRef`. A ref object may also be created outside a component with
 prop: `count`, `toList`, `map`, `forEach` and `only`. `Views.cloneElement(element,
 extra, children...)` copies a DOM element view with attributes merged over it and,
 when given, new children; a component view is rebuilt from a new Props record
-instead. `Views.isValidElement(value)` is React's `isValidElement`. Null children
-are dropped when a view is built, so they are not counted.
+instead. `Views.isValidElement(value)` is React's `isValidElement`.
+
+As in React, every child written in markup keeps one position among its siblings.
+A null or boolean child renders nothing but holds its place (`View.Empty`), and a
+collection child, such as the list from `stream().map(...).toList()`, is one
+position whose items are matched by `key` (`View.Items`). A component written after
+`{shown ? <Banner /> : null}` or after a list therefore keeps its state when the
+condition flips or the list grows. Give the items of a collection a `key`; React
+warns in development when they have none. `Children.count` counts empty positions
+and looks through collections; `Children.toList` leaves empty positions out.
 
 Records are shallowly immutable. Application authors must defensively copy mutable
 collections and nested values when props ownership requires immutable snapshots.

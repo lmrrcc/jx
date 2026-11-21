@@ -18,6 +18,7 @@ export function ChildrenUtilities() {
     <main>
       <Inspect>
         <span>a</span>
+        {null}
         {['b', 'c'].map(name => <span key={name}>{name}</span>)}
       </Inspect>
       <Single><em>one</em></Single>

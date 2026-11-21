@@ -135,16 +135,3 @@ referenceOnly('hydrate-root: hydration attaches to server markup without replaci
   expect(await button.evaluate(node => node.benchServerNode)).toBe(true);
 });
 
-// Found while writing the Children utilities: JX drops null children and flattens nested
-// lists when a view is built, so a later sibling changes position and loses its state.
-referenceOnly('child-slots: a sibling after a null child or a nested list keeps its state', async ({page, open}) => {
-  await open('child-slots');
-  await page.getByRole('button', {name: 'after-conditional 0'}).click();
-  await page.getByRole('button', {name: 'after-list 0'}).click();
-  await page.getByRole('button', {name: 'Show banner'}).click();
-  await expect(page.locator('p', {hasText: 'banner'})).toBeVisible();
-  await expect(page.getByRole('button', {name: 'after-conditional 1'})).toBeVisible();
-  await page.getByRole('button', {name: 'Add item'}).click();
-  await expect(page.getByText('b', {exact: true})).toBeVisible();
-  await expect(page.getByRole('button', {name: 'after-list 1'})).toBeVisible();
-});

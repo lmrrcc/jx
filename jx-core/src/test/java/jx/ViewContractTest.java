@@ -35,7 +35,12 @@ class ViewContractTest {
     }
     @Test void childSchemaPreservesTextAndRejectsArbitraryObjects() {
         View.Fragment view = (View.Fragment) Views.fragment(null, false, "<script>", List.of(1, 2));
-        assertEquals(List.of(new View.Text("<script>"), new View.Text("1"), new View.Text("2")), view.children());
+        // Null and boolean children keep their position; a collection is one position.
+        assertEquals(List.of(View.Empty.INSTANCE, View.Empty.INSTANCE, new View.Text("<script>"),
+                new View.Items(List.of(new View.Text("1"), new View.Text("2")))), view.children());
+        assertEquals(5, Children.count(view));
+        assertEquals(List.of(new View.Text("<script>"), new View.Text("1"), new View.Text("2")), Children.toList(view));
+        assertFalse(Views.isValidElement(View.Empty.INSTANCE));
         assertThrows(IllegalArgumentException.class, () -> Views.fragment(new Object()));
     }
 }

@@ -29,9 +29,9 @@ transfer-data-empty	jx-react/src/main/java/jx/react/React.java	String(transfer.g
 touches-empty	jx-react/src/main/java/jx/react/React.java	return list && typeof list.length === 'number' ? list.length : 0;	return 0;	Touch lists are always empty
 focus-noop	jx-react/src/main/java/jx/react/React.java	script = "element.focus();"	script = ""	DOM ref focus does nothing
 style-dropped	jx-react/src/main/java/jx/react/React.java	setNative(result, entry.name(), values);		Typed style values are not applied
-boolean-child-rejected	jx-core/src/main/java/jx/Views.java	if (child == null || child instanceof Boolean) return;	if (child == null) return;	Boolean children are no longer ignored
-nested-iterable-dropped	jx-core/src/main/java/jx/Views.java	else if (child instanceof Iterable<?> items) for (Object item : items) append(result, item);	else if (child instanceof Iterable<?> items) { }	Iterable children render nothing
-array-child-dropped	jx-core/src/main/java/jx/Views.java	else if (child instanceof Object[] items) for (Object item : items) append(result, item);	else if (child instanceof Object[] items) { }	Array children render nothing
+boolean-child-rejected	jx-core/src/main/java/jx/Views.java	if (child == null || child instanceof Boolean) result.add(View.Empty.INSTANCE);	if (child == null) result.add(View.Empty.INSTANCE);	Boolean children are no longer ignored
+nested-iterable-dropped	jx-core/src/main/java/jx/Views.java	else if (child instanceof Iterable<?> items) result.add(items(items));	else if (child instanceof Iterable<?> items) { }	Iterable children render nothing
+array-child-dropped	jx-core/src/main/java/jx/Views.java	else if (child instanceof Object[] items) result.add(items(java.util.Arrays.asList(items)));	else if (child instanceof Object[] items) { }	Array children render nothing
 for-alias-broken	jx-compiler/src/main/java/jx/compiler/Lowerer.java	case "for" -> "htmlFor";	case "for" -> "htmlFur";	The for attribute is lowered to a wrong name
 memo-never-skips	jx-react/src/main/java/jx/react/React.java	&& compare(previous.value, next.value); });	&& false; });	Memoized components render on every parent render
 memo-always-skips	jx-react/src/main/java/jx/react/React.java	&& compare(previous.value, next.value); });	&& true; });	Memoized components never see new props
@@ -48,4 +48,6 @@ portal-in-place	jx-react/src/main/java/jx/react/React.java	return ReactDOM.creat
 flush-sync-deferred	jx-react/src/main/java/jx/react/React.java	ReactDOM.flushSync(function() { action(); });	action();	flushSync does not commit before returning
 clone-keeps-children	jx-core/src/main/java/jx/Views.java	children.length == 0 ? original.children() : children(children));	original.children());	A clone ignores its new children
 clone-ignores-attributes	jx-core/src/main/java/jx/Views.java	original.attributes().merge(extra),	original.attributes(),	A clone ignores its new attributes
-children-not-listed	jx-core/src/main/java/jx/Children.java	return children instanceof View.Fragment fragment ? fragment.children() : List.of(children);	return List.of(children);	Nested children count as one
+children-not-listed	jx-core/src/main/java/jx/Children.java	if (child instanceof View.Items items) items.children().forEach(item -> flatten(item, result));	if (false) { }	Children does not look through collection children
+empty-child-dropped	jx-core/src/main/java/jx/Views.java	if (child == null || child instanceof Boolean) result.add(View.Empty.INSTANCE);	if (child == null || child instanceof Boolean) { }	Null children give up their position
+collection-flattened	jx-core/src/main/java/jx/Views.java	else if (child instanceof Iterable<?> items) result.add(items(items));	else if (child instanceof Iterable<?> items) for (Object item : items) append(result, item);	Collection children are flattened into their siblings

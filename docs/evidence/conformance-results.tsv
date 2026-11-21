@@ -7,7 +7,7 @@ callable-state	pass	pass
 callback-identity	pass	pass
 capture-phase	pass	pass
 checkbox	pass	pass
-child-slots	pass	unsupported
+child-slots	pass	pass
 child-values	pass	pass
 children-prop	pass	pass
 children-utilities	pass	pass

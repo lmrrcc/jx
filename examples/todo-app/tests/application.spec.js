@@ -17,7 +17,9 @@ test('Java/.jx todo application: validation, persistence, routes, keyboard, load
   const persisted = await (await request.get('/api/todos')).json();
   expect(persisted).toHaveLength(1);
   expect(persisted[0].title).toBe('Ship a Java browser app');
-  await row.getByRole('checkbox').check();
+  // The checkbox is controlled and only becomes checked once the server confirms, so click
+  // and wait; check() would demand an immediate change.
+  await row.getByRole('checkbox').click();
   await expect(row.getByRole('checkbox')).toBeChecked();
   await expect(row.getByRole('checkbox')).toBeEnabled();
   await page.getByRole('link', { name: 'Active', exact: true }).click();
