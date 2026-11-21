@@ -281,6 +281,11 @@ memo, context, external stores and ids:
   React DevTools.
 - `useImperativeHandle` is described under Refs.
 
+`React.portal(target, children...)` is React's `createPortal`: the children render
+into another DOM element, taken from a `DomRef` or `React.documentBody()`, while
+context and event bubbling still follow the React parent. `React.flushSync(action)`
+commits the updates made in `action` to the DOM before it returns.
+
 `React.profiler(id, onRender, children...)` and `React.strictMode(children...)` in
 `jx.react` are React's `Profiler` and nested `StrictMode`. They are view factories
 called in an interpolation, for example `{React.strictMode(<Panel />)}`. As in

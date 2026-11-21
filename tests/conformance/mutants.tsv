@@ -44,3 +44,5 @@ profiler-phase-fixed	jx-react/src/main/java/jx/react/React.java	new Profile(name
 strict-mode-dropped	jx-react/src/main/java/jx/react/React.java	return new NativeView(strict(element(Views.fragment(children))));	return new NativeView(element(Views.fragment(children)));	Nested StrictMode has no effect
 effect-event-first-callback	jx-react/src/main/java/jx/react/ReactHooks.java	return React.useEffectEvent(function(argument) { callback(argument); });	return React.useCallback(function(argument) { callback(argument); }, []);	Effect events keep calling the first render's callback
 spread-never-overrides	jx-core/src/main/java/jx/Attributes.java	copy.putAll(other.values);	other.values.forEach(copy::putIfAbsent);	A spread never overrides an earlier attribute
+portal-in-place	jx-react/src/main/java/jx/react/React.java	return ReactDOM.createPortal(child, target);	return child;	Portal content renders in place
+flush-sync-deferred	jx-react/src/main/java/jx/react/React.java	ReactDOM.flushSync(function() { action(); });	action();	flushSync does not commit before returning

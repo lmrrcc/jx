@@ -46,8 +46,8 @@ react:version	constant	excluded			R-29	Constant; pinned in the version manifest
 react/jsx-runtime:jsx	compiler	equivalent	attributes	Markup lowering		JX lowers markup to Views calls, not to the JSX runtime
 react/jsx-runtime:jsxs	compiler	equivalent	children-prop	Markup lowering		
 react/jsx-runtime:Fragment	compiler	equivalent	fragment	<>...</>		
-react-dom:createPortal	api	unsupported	portal		R-10	
-react-dom:flushSync	api	unsupported	flush-sync		R-10	
+react-dom:createPortal	api	supported	portal	React.portal, React.documentBody		A view factory; the target is a DomElement
+react-dom:flushSync	api	supported	flush-sync	React.flushSync		
 react-dom:useFormStatus	hook	unsupported	form-status		R-16	
 react-dom:requestFormReset	api	unsupported	form-reset		R-16	
 react-dom:preconnect	resource	unsupported	resource-hints		R-18	

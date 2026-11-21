@@ -1,0 +1,28 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.DomRef;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.react.React;
+
+/** Case flush-sync: the DOM is updated before flushSync returns. */
+@Component
+public final class FlushSync {
+    public static View render() {
+        State<Integer> count = Hooks.useState(0);
+        State<String> seen = Hooks.useState("");
+        DomRef status = Hooks.useDomRef();
+        return (
+            <main>
+                <p role="status" ref={status}>{count.value()}</p>
+                <p data-testid="seen">{seen.value()}</p>
+                <button onClick={event -> {
+                    React.flushSync(() -> count.update(previous -> previous + 1));
+                    seen.set("dom showed " + status.current().textContent());
+                }}>Flush</button>
+            </main>
+        );
+    }
+}

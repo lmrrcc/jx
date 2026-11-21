@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.react.React;
+
+/** Case portal: portal content renders elsewhere in the DOM but events reach the React parent. */
+@Component
+public final class Portal {
+    public static View render() {
+        State<Integer> clicks = Hooks.useState(0);
+        return (
+            <main>
+                <div data-testid="owner" onClick={event -> clicks.update(previous -> previous + 1)}>
+                    <p role="status">{clicks.value()}</p>
+                    {React.portal(React.documentBody(), <button data-testid="ported">Ported</button>)}
+                </div>
+            </main>
+        );
+    }
+}

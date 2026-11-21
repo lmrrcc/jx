@@ -47,6 +47,23 @@ public final class React {
     public static View strictMode(Object... children) {
         return new NativeView(strict(element(Views.fragment(children))));
     }
+    /** React's {@code createPortal}: renders the children into another DOM element while they stay
+     * part of this React tree, so context and event bubbling follow the React parent. The target
+     * comes from a {@link DomRef} or from {@link #documentBody()} and must stay in the document. */
+    public static View portal(DomElement target, Object... children) {
+        if (!(Objects.requireNonNull(target) instanceof BrowserElement browser))
+            throw new IllegalArgumentException("A portal target must be a DOM element of this renderer");
+        return new NativeView(portal(element(Views.fragment(children)), browser.element));
+    }
+    /** The document's body element, the usual target of a portal. */
+    public static DomElement documentBody() { return new BrowserElement(body()); }
+    /** React's {@code flushSync}: runs the updates in {@code action} and commits them to the DOM
+     * before returning. Use it rarely; it forces a synchronous render and must not be called
+     * during rendering or from an effect. */
+    public static void flushSync(Runnable action) {
+        Objects.requireNonNull(action);
+        flushSyncNative(action::run);
+    }
     /** Explicit event failure routing, because React error boundaries do not catch event handlers. */
     public static EventHandler guarded(EventHandler handler, Consumer<RuntimeException> failure) {
         Objects.requireNonNull(handler); Objects.requireNonNull(failure);
@@ -253,6 +270,9 @@ public final class React {
     @JSBody(script = "function Boundary(props) { React.Component.call(this, props); this.state = {error: null}; } Boundary.prototype = Object.create(React.Component.prototype); Boundary.prototype.constructor = Boundary; Boundary.getDerivedStateFromError = function(error) { return {error: error}; }; Boundary.prototype.render = function() { return this.state.error === null ? this.props.children : this.props.fallback(this.state.error); }; return Boundary;", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject boundaryType();
     @JSBody(params = {"type", "child", "fallback"}, script = "return React.createElement(type, {fallback: fallback}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject boundary(JSObject type, JSObject child, FailureView fallback);
     @JSBody(params = {"id", "onRender", "child"}, script = "return React.createElement(React.Profiler, {id: id, onRender: function(id, phase, actual, base, start, commit) { onRender(id, phase, actual, base, start, commit); }}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject profiler(String id, OnRender onRender, JSObject child);
+    @JSBody(params = {"child", "target"}, script = "return ReactDOM.createPortal(child, target);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom")) private static native JSObject portal(JSObject child, JSObject target);
+    @JSBody(script = "return document.body;") private static native JSObject body();
+    @JSBody(params = "action", script = "ReactDOM.flushSync(function() { action(); });", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom")) private static native void flushSyncNative(Detach action);
     @JSBody(params = "error", script = "return String(error && error.message || error);") private static native String errorMessage(JSObject error);
     @JSBody(params = {"type", "props"}, script = "return React.createElement(type, props);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject external(JSObject type, JSObject props);
     @JSBody(script = "return {};") private static native JSObject object();
