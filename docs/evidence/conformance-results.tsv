@@ -15,6 +15,7 @@ clone-element	pass	unsupported
 conditional	pass	pass
 context-nested	pass	pass
 controlled-input	pass	pass
+create-ref	pass	pass
 custom-elements	pass	pass
 custom-hook	pass	pass
 debug-value	pass	unsupported
@@ -34,12 +35,12 @@ flush-sync	pass	unsupported
 form-actions	pass	unsupported
 form-reset	pass	unsupported
 form-status	pass	unsupported
-forward-ref	pass	unsupported
+forward-ref	pass	pass
 fragment	pass	pass
 function-props	pass	pass
 generic-list	pass	unsupported
 hydrate-root	pass	unsupported
-imperative-handle	pass	unsupported
+imperative-handle	pass	pass
 insertion-effect	pass	unsupported
 key-event	pass	pass
 keyed-list	pass	pass
@@ -59,8 +60,8 @@ props-update	pass	pass
 raw-html	pass	unsupported
 react-exports	pass	n/a
 reducer-batch	pass	pass
-ref-as-prop	pass	unsupported
-ref-callback	pass	unsupported
+ref-as-prop	pass	pass
+ref-callback	pass	pass
 ref-persist	pass	pass
 remount-by-key	pass	pass
 resource-elements	pass	pass

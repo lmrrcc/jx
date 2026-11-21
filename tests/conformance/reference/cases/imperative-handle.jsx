@@ -6,6 +6,9 @@ function Field({ ref }) {
     fill(value) {
       input.current.value = value;
       input.current.focus();
+    },
+    read() {
+      return input.current.value;
     }
   }), []);
   return <input ref={input} aria-label="Inner" />;
@@ -13,15 +16,15 @@ function Field({ ref }) {
 
 export function ImperativeHandle() {
   const field = useRef(null);
-  const [keys, setKeys] = useState('');
+  const [read, setRead] = useState('');
   return (
     <main>
       <Field ref={field} />
       <button onClick={() => {
         field.current.fill('filled');
-        setKeys(Object.keys(field.current).join(','));
+        setRead(field.current.read());
       }}>Fill through handle</button>
-      <p role="status">{keys}</p>
+      <p role="status">{read}</p>
     </main>
   );
 }

@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.DomRef;
+import jx.Hooks;
+import jx.View;
+
+/** Case forward-ref: a ref passes through a component to its element; JX has no separate forwardRef. */
+@Component
+public final class ForwardRef {
+    public static View render() {
+        DomRef field = Hooks.useDomRef();
+        return (
+            <main>
+                <RefField ref={field} label="Forwarded" />
+                <button onClick={event -> field.current().focus()}>Focus field</button>
+            </main>
+        );
+    }
+}

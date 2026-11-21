@@ -118,7 +118,32 @@ explicitly.
 `String`, and is not a Props field. Keep keys stable among siblings in a dynamic
 list. React owns keyed reconciliation. Unkeyed collection entries and duplicate
 keys follow React's warnings and behavior; the compiler does not prove uniqueness
-of computed keys. Component ref forwarding has no markup contract yet.
+of computed keys.
+
+### Refs
+
+`ref` on an element takes a `DomRef` or a `RefCallback`:
+
+```java
+DomRef input = Hooks.useDomRef();
+RefCallback measure = Hooks.useCallback(node -> {
+    observe(node);
+    return () -> stopObserving(node);   // runs when the node is removed
+}, Dependencies.none());
+return <><input ref={input} /><p ref={measure}>text</p></>;
+```
+
+A callback that returns null is called again with a null element on removal, as
+in React. React compares refs by identity: a lambda written inline is a new
+callback on each render and is detached and attached again each time.
+`DomElement` offers `focus`, `value`, `setValue`, `tagName` and `textContent`.
+
+As in React 19, `ref` is an ordinary prop of a component. Declare it as a Props
+field, typed `DomRef` to hand an inner element to the parent, or `Ref<Handle>`
+to publish chosen operations with
+`Hooks.useImperativeHandle(props.ref(), () -> handle, dependencies)`. There is no
+separate `forwardRef`. A ref object may also be created outside a component with
+`new DomRef()` or `new Ref<>(initial)`, which is React's `createRef`.
 
 Records are shallowly immutable. Application authors must defensively copy mutable
 collections and nested values when props ownership requires immutable snapshots.

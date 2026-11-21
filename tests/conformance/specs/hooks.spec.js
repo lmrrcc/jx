@@ -176,3 +176,42 @@ test('layout-effect-dependencies: a layout effect reruns only when its dependenc
   await page.getByRole('button', {name: 'Change dependency'}).click();
   await expect.poll(() => log(page)).toEqual([...mount, 'cleanup 1', 'layout 2']);
 });
+
+test('create-ref: a ref object created outside a component attaches to an element', async ({page, open}) => {
+  await open('create-ref');
+  await page.getByRole('button', {name: 'Focus field'}).click();
+  await expect(page.getByLabel('Created')).toBeFocused();
+});
+
+test('imperative-handle: a component exposes chosen methods instead of its DOM node', async ({page, open}) => {
+  await open('imperative-handle');
+  await page.getByRole('button', {name: 'Fill through handle'}).click();
+  await expect(page.getByLabel('Inner')).toHaveValue('filled');
+  await expect(page.getByLabel('Inner')).toBeFocused();
+  // The value is read back through the handle, not from the node.
+  await expect(page.getByRole('status')).toHaveText('filled');
+});
+
+test('forward-ref: a ref passes through a component to its element', async ({page, open}) => {
+  await open('forward-ref');
+  await page.getByRole('button', {name: 'Focus field'}).click();
+  await expect(page.getByLabel('Forwarded')).toBeFocused();
+});
+
+test('ref-as-prop: a function component receives ref as an ordinary prop', async ({page, open}) => {
+  await open('ref-as-prop');
+  await page.getByRole('button', {name: 'Focus field'}).click();
+  await expect(page.getByLabel('Direct')).toBeFocused();
+});
+
+test('ref-callback: a callback ref gets the node and its cleanup runs on removal', async ({page, open}) => {
+  await open('ref-callback');
+  // Strict Mode in development attaches, detaches and attaches again.
+  await expect.poll(() => log(page)).toEqual(['attach P', 'detach', 'attach P']);
+  // A stable callback is not detached and attached again by a rerender.
+  await page.getByRole('button', {name: 'Rerender'}).click();
+  await expect(page.getByTestId('ticks')).toHaveText('1');
+  expect(await log(page)).toEqual(['attach P', 'detach', 'attach P']);
+  await page.getByRole('button', {name: 'Remove node'}).click();
+  await expect.poll(() => log(page)).toEqual(['attach P', 'detach', 'attach P', 'detach']);
+});

@@ -19,34 +19,6 @@ referenceOnly('effect-event: an effect event reads the latest values without re-
   await expect.poll(() => log(page)).toEqual([...mount, 'disconnected a', 'connected b dark']);
 });
 
-referenceOnly('imperative-handle: a component exposes chosen methods instead of its DOM node', async ({page, open}) => {
-  await open('imperative-handle');
-  await page.getByRole('button', {name: 'Fill through handle'}).click();
-  await expect(page.getByLabel('Inner')).toHaveValue('filled');
-  await expect(page.getByLabel('Inner')).toBeFocused();
-  await expect(page.getByRole('status')).toHaveText('fill');
-});
-
-referenceOnly('forward-ref: forwardRef passes a ref through a component to its element', async ({page, open}) => {
-  await open('forward-ref');
-  await page.getByRole('button', {name: 'Focus field'}).click();
-  await expect(page.getByLabel('Forwarded')).toBeFocused();
-});
-
-referenceOnly('ref-as-prop: a function component receives ref as an ordinary prop', async ({page, open}) => {
-  await open('ref-as-prop');
-  await page.getByRole('button', {name: 'Focus field'}).click();
-  await expect(page.getByLabel('Direct')).toBeFocused();
-});
-
-referenceOnly('ref-callback: a callback ref gets the node and its cleanup runs on removal', async ({page, open}) => {
-  await open('ref-callback');
-  // Strict Mode in development attaches, detaches and attaches again.
-  await expect.poll(() => log(page)).toEqual(['attach P', 'detach', 'attach P']);
-  await page.getByRole('button', {name: 'Remove node'}).click();
-  await expect.poll(() => log(page)).toEqual(['attach P', 'detach', 'attach P', 'detach']);
-});
-
 referenceOnly('transition-pending: useTransition reports pending while an async action runs', async ({page, open}) => {
   await open('transition-pending');
   await expect(page.getByRole('status')).toHaveText('idle');

@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.DomRef;
+import jx.Hooks;
+import jx.View;
+
+/** Case ref-as-prop: a function component receives ref as an ordinary prop. */
+@Component
+public final class RefAsProp {
+    public static View render() {
+        DomRef field = Hooks.useDomRef();
+        return (
+            <main>
+                <RefField ref={field} label="Direct" />
+                <button onClick={event -> field.current().focus()}>Focus field</button>
+            </main>
+        );
+    }
+}

@@ -1,0 +1,30 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.RefCallback;
+import jx.State;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Case ref-callback: a callback ref gets the node and its cleanup runs on removal. */
+@Component
+public final class RefCallbackCase {
+    public static View render() {
+        State<Boolean> shown = Hooks.useState(true);
+        State<Integer> ticks = Hooks.useState(0);
+        RefCallback attach = Hooks.useCallback(node -> {
+            Bench.log("attach " + node.tagName());
+            return () -> Bench.log("detach");
+        }, Dependencies.none());
+        return (
+            <main>
+                {shown.value() ? <p ref={attach} role="status">node</p> : null}
+                <p data-testid="ticks">{ticks.value()}</p>
+                <button onClick={event -> ticks.update(previous -> previous + 1)}>Rerender</button>
+                <button onClick={event -> shown.set(false)}>Remove node</button>
+            </main>
+        );
+    }
+}

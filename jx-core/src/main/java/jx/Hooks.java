@@ -19,6 +19,10 @@ public final class Hooks {
     public static void useEffect(Effect effect, Dependencies dependencies) { runtime().effect(Objects.requireNonNull(effect), Objects.requireNonNull(dependencies), false); }
     public static void useLayoutEffect(Effect effect, Dependencies dependencies) { runtime().effect(Objects.requireNonNull(effect), Objects.requireNonNull(dependencies), true); }
     public static <T> Ref<T> useRef(T initial) { return runtime().ref(initial); }
+    /** Publishes a handle through a ref that the parent passed as a prop, in place of a DOM node.
+     * The handle is created after commit and again when a dependency changes; the ref holds null
+     * after unmount. A null ref is ignored. */
+    public static <H> void useImperativeHandle(Ref<H> ref, Supplier<H> create, Dependencies dependencies) { runtime().imperativeHandle(ref, Objects.requireNonNull(create), Objects.requireNonNull(dependencies)); }
     public static DomRef useDomRef() { return useMemo(DomRef::new, Dependencies.none()); }
     public static <T> T useMemo(Supplier<T> calculation, Dependencies dependencies) { return runtime().memo(Objects.requireNonNull(calculation), Objects.requireNonNull(dependencies)); }
     public static <T> T useCallback(T callback, Dependencies dependencies) { return useMemo(() -> callback, dependencies); }
