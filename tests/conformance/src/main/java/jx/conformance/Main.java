@@ -47,6 +47,7 @@ import jx.conformance.cases.TransferEvents;
 import jx.conformance.cases.MediaEvents;
 import jx.conformance.cases.EventPayload;
 import jx.conformance.cases.LayoutEffectDependencies;
+import jx.conformance.cases.MemoSkip;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -103,6 +104,7 @@ public final class Main {
             case "media-events" -> React.mountStrict("app", MediaEvents.JX, null);
             case "event-payload" -> React.mountStrict("app", EventPayload.JX, null);
             case "layout-effect-dependencies" -> React.mountStrict("app", LayoutEffectDependencies.JX, null);
+            case "memo-skip" -> React.mountStrict("app", MemoSkip.JX, null);
             default -> Bench.unknown(id);
         }
     }

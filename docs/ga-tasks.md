@@ -6,7 +6,7 @@ by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
 Progress, 21 November 2026: M1-01 to M1-05 and R-01 to R-05 are done, committed as
 `75d79c2` with Verify green. `main` is protected: a change reaches it only through
-a pull request whose Verify check has passed. The next task is R-06.
+a pull request whose Verify check has passed. R-06 is done. The next task is R-07.
 
 ## Rules
 
@@ -84,8 +84,8 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-03 | M1 | Reference-only cases for every unsupported row; the JX column reports `unsupported`; results written to `evidence/conformance-results.tsv`; Verify fails on any regression | none; gives every later task a waiting test | done |
 | R-04 | M1 | Typed event model: mouse, keyboard with modifiers, focus, pointer, touch, wheel, composition, clipboard, drag, media and animation events, with `currentTarget` | 1 unsupported, 3 untested | done |
 | R-05 | M1 | Mutation runner over the runtime bridge, core hook API and markup lowering; survivors become new cases until none remains | none; proves the bench detects defects | done |
-| R-06 | M2 | `memo`, with custom comparison | 1 | next |
-| R-07 | M2 | Refs: ref as a component prop, callback refs with cleanup, `useImperativeHandle`, the `forwardRef` and `createRef` equivalents | 5 | planned |
+| R-06 | M2 | `memo`, with custom comparison | 1 | done |
+| R-07 | M2 | Refs: ref as a component prop, callback refs with cleanup, `useImperativeHandle`, the `forwardRef` and `createRef` equivalents | 5 | next |
 | R-08 | M2 | `useInsertionEffect`, `useEffectEvent`, `useDebugValue`, `Profiler`; reducer lazy initializer; nested `StrictMode` | 4 | planned |
 | R-09 | M2 | Optional and default props, typed prop forwarding in place of spread, generic components | 3 | planned |
 | R-10 | M2 | `createPortal`, `flushSync` | 2 | planned |

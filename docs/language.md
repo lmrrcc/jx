@@ -44,6 +44,34 @@ declared field order and references the generated `Counter.JX` descriptor.
 React invokes the render function. A parent does not call a child's render method
 during lowering. `JX` is a reserved static field name.
 
+### Memoized components
+
+`@jx.Memo` on a component is React's `memo`: when the parent renders again and the
+props are equal, React keeps the previous output and does not call `render`.
+
+```java
+@Component
+@Memo
+public final class Row {
+    public record Props(String label, int tick) {}
+
+    // Optional. Without it every Props field is compared.
+    public static boolean arePropsEqual(Props previous, Props next) {
+        return previous.label().equals(next.label());
+    }
+
+    public static View render(Props props) { return <p>{props.label()}</p>; }
+}
+```
+
+The generated comparison tests each field with `ComponentType.sameValue`, which is
+React's `Object.is` for Java values: strings, characters, booleans and boxed numbers
+compare by value, every other object by identity. A new list, record or lambda on
+each parent render therefore defeats the memo, as in React; keep such values stable
+with `Hooks.useMemo` or `Hooks.useCallback`. A comparison must be pure. State,
+context and hot updates still render a memoized component. A descriptor written by
+hand is memoized with `ComponentType.memo(comparison)`.
+
 ### Pre-release component naming migration
 
 Use `import jx.Component;` and `@Component` for new declarations. The original

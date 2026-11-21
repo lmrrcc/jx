@@ -17,6 +17,7 @@ public final class React {
     @JSFunctor interface Render extends JSObject { JSObject render(JSObject props); }
     @JSFunctor interface Handler extends JSObject { void handle(JSObject event); }
     @JSFunctor interface FailureView extends JSObject { JSObject render(JSObject error); }
+    @JSFunctor interface Compare extends JSObject { boolean same(Object previous, Object next); }
     private record NativeView(JSObject element) implements View.Extension {}
     /** Error boundary for descendant rendering/lifecycle errors, including Java exceptions.
      * Like React itself, this does not catch event callbacks or asynchronous work. */
@@ -118,7 +119,9 @@ public final class React {
                 return result;
             } finally { HotReload.end(frame); }
         };
-        return nativeComponent(function(COMPONENTS, descriptor, render, descriptor.name()), view.props(), view.key(), path, root);
+        var propsEqual = descriptor.propsEqual();
+        Compare compare = propsEqual == null ? null : (previous, next) -> propsEqual.test(Interop.value(previous), Interop.value(next));
+        return nativeComponent(function(COMPONENTS, descriptor, render, compare, descriptor.name()), view.props(), view.key(), path, root);
     }
     private static <T> JSObject provider(View.Provider<T> provider, String path) { return provider(context(provider.context()), provider.value(), Interop.scalar(provider.value()), children(provider.children(), path + "/provider")); }
     static JSObject context(Context<?> context) { return cachedContext(CONTEXTS, context, context.defaultValue()); }
@@ -223,7 +226,9 @@ public final class React {
     @JSBody(params = {"object", "name", "value"}, script = "object[name] = value;") private static native void set(JSObject object, String name, Object value);
     @JSBody(params = {"object", "name", "value"}, script = "object[name] = value;") private static native void setNative(JSObject object, String name, JSObject value);
     @JSBody(params = {"object", "name", "handler"}, script = "object[name] = handler;") private static native void setHandler(JSObject object, String name, Handler handler);
-    @JSBody(params = {"cache", "descriptor", "render", "name"}, script = "var fn = cache.get(descriptor); if (!fn) { fn = render; fn.displayName = name; cache.set(descriptor, fn); } return fn;") private static native JSObject function(JSObject cache, Object descriptor, Render render, String name);
+    // A memoized descriptor becomes React.memo. The comparison also requires the same hot-reload
+    // position, which is part of the native props but not of the component's own props.
+    @JSBody(params = {"cache", "descriptor", "render", "compare", "name"}, script = "var fn = cache.get(descriptor); if (!fn) { fn = render; fn.displayName = name; if (compare) fn = React.memo(fn, function(previous, next) { return previous.jxPath === next.jxPath && previous.jxRoot === next.jxRoot && compare(previous.value, next.value); }); cache.set(descriptor, fn); } return fn;", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject function(JSObject cache, Object descriptor, Render render, Compare compare, String name);
     @JSBody(params = {"cache", "descriptor", "value"}, script = "var context = cache.get(descriptor); if (!context) { context = React.createContext(value); context.jxProvider = function(props) { var stable = React.useMemo(function() { return props.value; }, [props.identity]); return React.createElement(context.Provider, {value: stable}, props.children); }; cache.set(descriptor, context); } return context;", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject cachedContext(JSObject cache, Object descriptor, Object value);
     @JSBody(params = {"component", "props", "key", "path", "root"}, script = "var values = {value: props, jxPath: path, jxRoot: root}; if (key !== null) values.key = key; return React.createElement(component, values);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject nativeComponent(JSObject component, Object props, String key, String path, boolean root);
     @JSBody(params = "props", script = "return props.value;") private static native Object readProps(JSObject props);

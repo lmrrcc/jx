@@ -70,12 +70,27 @@ final class Lowerer {
             String type = component.hasProps() ? "Props" : "Void";
             String function = component.hasProps() ? component.simpleName() + "::render" : "ignored -> " + component.simpleName() + ".render()";
             out.synthetic("\n    /** Stable React component identity generated from this declaration. */\n"
-                    + "    public static final jx.ComponentType<" + type + "> JX = new jx.ComponentType<>("
+                    + "    public static final jx.ComponentType<" + type + "> JX = new jx.ComponentType<" + (component.memo() == ComponentMetadata.Memo.NONE ? "" : type) + ">("
                     + quote(component.qualifiedName()) + ", " + quote(signatures.getOrDefault(component.qualifiedName(), ""))
-                    + ", " + function + ");\n", component.declaration().start());
+                    + ", " + function + ")" + memo(component) + ";\n", component.declaration().start());
             start = offset;
         }
         out.copy(start, span.end());
+    }
+
+    /** The memo comparison of a {@code @Memo} component: its own method, or one sameValue test per Props field. */
+    private static String memo(ComponentMetadata component) {
+        return switch (component.memo()) {
+            case NONE -> "";
+            case CUSTOM -> ".memo(" + component.simpleName() + "::arePropsEqual)";
+            case FIELDS -> {
+                StringBuilder fields = new StringBuilder();
+                for (ComponentMetadata.Prop prop : component.props())
+                    fields.append(fields.isEmpty() ? "" : " && ").append("jx.ComponentType.sameValue(previous.")
+                            .append(prop.name()).append("(), next.").append(prop.name()).append("())");
+                yield ".memo((previous, next) -> " + (fields.isEmpty() ? "true" : fields) + ")";
+            }
+        };
     }
 
     private void element(Element element) {

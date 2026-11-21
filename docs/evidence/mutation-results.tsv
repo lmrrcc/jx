@@ -33,3 +33,6 @@ boolean-child-rejected	killed	child-values	Boolean children are no longer ignore
 nested-iterable-dropped	killed	child-values,keyed-list	Iterable children render nothing
 array-child-dropped	killed	child-values	Array children render nothing
 for-alias-broken	killed	attributes,use-id	The for attribute is lowered to a wrong name
+memo-never-skips	killed	memo-skip	Memoized components render on every parent render
+memo-always-skips	killed	memo-skip	Memoized components never see new props
+memo-field-ignored	killed	memo-skip	Generated memo comparison ignores the Props fields
