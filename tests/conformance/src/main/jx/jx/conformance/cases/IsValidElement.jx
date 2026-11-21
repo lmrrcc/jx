@@ -1,0 +1,15 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+import jx.Views;
+
+/** Case is-valid-element: elements and fragments are valid elements; text, numbers and null are not. */
+@Component
+public final class IsValidElement {
+    public static View render() {
+        String checks = Views.isValidElement(<p />) + " " + Views.isValidElement(<></>) + " "
+                + Views.isValidElement("text") + " " + Views.isValidElement(7) + " " + Views.isValidElement(null);
+        return <main><p role="status">{checks}</p></main>;
+    }
+}

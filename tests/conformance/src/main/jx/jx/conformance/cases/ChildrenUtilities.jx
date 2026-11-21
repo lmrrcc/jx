@@ -1,0 +1,21 @@
+package jx.conformance.cases;
+
+import java.util.List;
+import jx.Component;
+import jx.View;
+
+/** Case children-utilities: Children counts, lists, maps and singles out the children it is given. */
+@Component
+public final class ChildrenUtilities {
+    public static View render() {
+        return (
+            <main>
+                <ChildrenInspect>
+                    <span>a</span>
+                    {List.of("b", "c").stream().map(name -> <span key={name}>{name}</span>).toList()}
+                </ChildrenInspect>
+                <ChildrenSingle><em>one</em></ChildrenSingle>
+            </main>
+        );
+    }
+}

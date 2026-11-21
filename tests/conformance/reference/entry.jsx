@@ -54,6 +54,8 @@ import { RefCallback } from './cases/ref-callback.jsx';
 import { CreateRef } from './cases/create-ref.jsx';
 import { ReducerLazyInit } from './cases/reducer-lazy-init.jsx';
 import { StrictNested } from './cases/strict-nested.jsx';
+import { IsValidElement } from './cases/is-valid-element.jsx';
+import { ChildSlots } from './cases/child-slots.jsx';
 import { MemoSkip } from './cases/memo-skip.jsx';
 import { TransitionPending } from './cases/transition-pending.jsx';
 import { StartTransition } from './cases/start-transition.jsx';
@@ -137,6 +139,8 @@ const cases = {
   'create-ref': CreateRef,
   'reducer-lazy-init': ReducerLazyInit,
   'strict-nested': StrictNested,
+  'is-valid-element': IsValidElement,
+  'child-slots': ChildSlots,
   'memo-skip': MemoSkip,
   'transition-pending': TransitionPending,
   'start-transition': StartTransition,

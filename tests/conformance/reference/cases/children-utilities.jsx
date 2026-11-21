@@ -9,14 +9,18 @@ function Inspect({ children }) {
   );
 }
 
+function Single({ children }) {
+  return <strong data-testid="only">{Children.only(children)}</strong>;
+}
+
 export function ChildrenUtilities() {
   return (
     <main>
       <Inspect>
         <span>a</span>
-        {null}
         {['b', 'c'].map(name => <span key={name}>{name}</span>)}
       </Inspect>
+      <Single><em>one</em></Single>
     </main>
   );
 }

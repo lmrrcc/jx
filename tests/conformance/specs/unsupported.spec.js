@@ -107,22 +107,6 @@ referenceOnly('view-transition: a typed transition updates content inside a View
   await expect(page.getByRole('status')).toHaveText('second');
 });
 
-referenceOnly('clone-element: a cloned element merges new props and children', async ({page, open}) => {
-  await open('clone-element');
-  const button = page.getByRole('button');
-  await expect(button).toHaveText('Cloned');
-  await expect(button).toHaveClass('cloned');
-  await expect(button).toHaveAttribute('title', 'original');
-  await expect(button).toHaveAttribute('data-extra', 'yes');
-});
-
-referenceOnly('children-utilities: Children counts, flattens and maps the children it is given', async ({page, open}) => {
-  await open('children-utilities');
-  await expect(page.getByRole('status')).toHaveText('4/3');
-  // map visits the empty child too; toArray drops it.
-  expect(await page.locator('li').allTextContents()).toEqual(['a', '', 'b', 'c']);
-});
-
 referenceOnly('resource-hints: the six resource functions add their elements to the head', async ({page, open}) => {
   await open('resource-hints');
   const head = selector => page.locator('head ' + selector);
@@ -151,3 +135,16 @@ referenceOnly('hydrate-root: hydration attaches to server markup without replaci
   expect(await button.evaluate(node => node.benchServerNode)).toBe(true);
 });
 
+// Found while writing the Children utilities: JX drops null children and flattens nested
+// lists when a view is built, so a later sibling changes position and loses its state.
+referenceOnly('child-slots: a sibling after a null child or a nested list keeps its state', async ({page, open}) => {
+  await open('child-slots');
+  await page.getByRole('button', {name: 'after-conditional 0'}).click();
+  await page.getByRole('button', {name: 'after-list 0'}).click();
+  await page.getByRole('button', {name: 'Show banner'}).click();
+  await expect(page.locator('p', {hasText: 'banner'})).toBeVisible();
+  await expect(page.getByRole('button', {name: 'after-conditional 1'})).toBeVisible();
+  await page.getByRole('button', {name: 'Add item'}).click();
+  await expect(page.getByText('b', {exact: true})).toBeVisible();
+  await expect(page.getByRole('button', {name: 'after-list 1'})).toBeVisible();
+});

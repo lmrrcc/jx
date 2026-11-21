@@ -1,0 +1,15 @@
+package jx.conformance.cases;
+
+import jx.Children;
+import jx.Component;
+import jx.View;
+
+/** Requires exactly one child. */
+@Component
+public final class ChildrenSingle {
+    public record Props(View children) {}
+
+    public static View render(Props props) {
+        return <strong data-testid="only">{Children.only(props.children())}</strong>;
+    }
+}
