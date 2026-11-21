@@ -78,3 +78,18 @@ test('error-reporting: handler errors are reported and keep the UI; an uncaught 
   await expect.poll(() => reports.filter(report => report.includes('render exploded')).length).toBeGreaterThan(0);
   await expect(page.locator('#app')).toBeEmpty();
 });
+
+test('portal: portal content renders elsewhere in the DOM but events reach the React parent', async ({page, open}) => {
+  await open('portal');
+  const ported = page.getByTestId('ported');
+  expect(await ported.evaluate(node => node.parentElement === document.body)).toBe(true);
+  expect(await page.getByTestId('owner').evaluate(node => node.querySelector('[data-testid="ported"]'))).toBeNull();
+  await ported.click();
+  await expect(page.getByRole('status')).toHaveText('1');
+});
+
+test('flush-sync: the DOM is updated before flushSync returns', async ({page, open}) => {
+  await open('flush-sync');
+  await page.getByRole('button', {name: 'Flush'}).click();
+  await expect(page.getByTestId('seen')).toHaveText('dom showed 1');
+});

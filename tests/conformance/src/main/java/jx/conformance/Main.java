@@ -62,6 +62,8 @@ import jx.conformance.cases.ReducerLazyInit;
 import jx.conformance.cases.SpreadProps;
 import jx.conformance.cases.DefaultProps;
 import jx.conformance.cases.GenericList;
+import jx.conformance.cases.Portal;
+import jx.conformance.cases.FlushSync;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -133,6 +135,8 @@ public final class Main {
             case "spread-props" -> React.mountStrict("app", SpreadProps.JX, null);
             case "default-props" -> React.mountStrict("app", DefaultProps.JX, null);
             case "generic-list" -> React.mountStrict("app", GenericList.JX, null);
+            case "portal" -> React.mountStrict("app", Portal.JX, null);
+            case "flush-sync" -> React.mountStrict("app", FlushSync.JX, null);
             default -> Bench.unknown(id);
         }
     }

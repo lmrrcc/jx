@@ -123,21 +123,6 @@ referenceOnly('children-utilities: Children counts, flattens and maps the childr
   expect(await page.locator('li').allTextContents()).toEqual(['a', '', 'b', 'c']);
 });
 
-referenceOnly('portal: portal content renders elsewhere in the DOM but events reach the React parent', async ({page, open}) => {
-  await open('portal');
-  const ported = page.getByTestId('ported');
-  expect(await ported.evaluate(node => node.parentElement === document.body)).toBe(true);
-  expect(await page.getByTestId('owner').evaluate(node => node.querySelector('[data-testid="ported"]'))).toBeNull();
-  await ported.click();
-  await expect(page.getByRole('status')).toHaveText('1');
-});
-
-referenceOnly('flush-sync: the DOM is updated before flushSync returns', async ({page, open}) => {
-  await open('flush-sync');
-  await page.getByRole('button', {name: 'Flush'}).click();
-  await expect(page.getByTestId('seen')).toHaveText('dom showed 1');
-});
-
 referenceOnly('resource-hints: the six resource functions add their elements to the head', async ({page, open}) => {
   await open('resource-hints');
   const head = selector => page.locator('head ' + selector);

@@ -31,7 +31,7 @@ error-boundary	pass	pass
 error-reporting	pass	pass
 event-payload	pass	pass
 external-store	pass	pass
-flush-sync	pass	unsupported
+flush-sync	pass	pass
 form-actions	pass	unsupported
 form-reset	pass	unsupported
 form-status	pass	unsupported
@@ -53,7 +53,7 @@ memo-skip	pass	pass
 namespace-components	pass	pass
 optimistic	pass	unsupported
 pointer-events	pass	pass
-portal	pass	unsupported
+portal	pass	pass
 prevent-default	pass	pass
 profiler	pass	pass
 props-update	pass	pass
