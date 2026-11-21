@@ -41,6 +41,8 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
                 boolean annotated = type.getModifiers().getAnnotations().stream().anyMatch(annotation ->
                         isComponentAnnotation(annotation.getAnnotationType().toString(), packageName, imports, unit));
                 if (!annotated) continue;
+                boolean memoized = type.getModifiers().getAnnotations().stream().anyMatch(annotation ->
+                        isJxAnnotation("Memo", annotation.getAnnotationType().toString(), packageName, imports, unit));
                 SourceSpan declarationSpan = span(positions, unit, type, shadow.length());
                 List<MethodTree> renders = type.getMembers().stream().filter(MethodTree.class::isInstance)
                         .map(MethodTree.class::cast).filter(m -> m.getName().contentEquals("render")).toList();
@@ -88,6 +90,17 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
                         }
                     }
                 }
+                List<MethodTree> comparisons = type.getMembers().stream().filter(MethodTree.class::isInstance)
+                        .map(MethodTree.class::cast).filter(m -> m.getName().contentEquals("arePropsEqual")).toList();
+                if (!comparisons.isEmpty() && (!memoized || !hasProps || comparisons.size() != 1
+                        || comparisons.getFirst().getParameters().size() != 2
+                        || !comparisons.getFirst().getModifiers().getFlags().containsAll(Set.of(Modifier.PUBLIC, Modifier.STATIC)))) {
+                    diagnostics.add(Diagnostic.error(parsed.source(), "JX100",
+                            "arePropsEqual must be one public static method (Props previous, Props next) on a @Memo component with props", declarationSpan));
+                    continue;
+                }
+                ComponentMetadata.Memo memo = !memoized ? ComponentMetadata.Memo.NONE
+                        : comparisons.isEmpty() ? ComponentMetadata.Memo.FIELDS : ComponentMetadata.Memo.CUSTOM;
                 String simpleName = type.getSimpleName().toString();
                 int descriptorOffset = declarationSpan.end() - 1;
                 // javac ends an unterminated class at EOF. That is not an insertion point: the
@@ -96,7 +109,7 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
                     descriptorOffset = -1;
                 components.add(new ComponentMetadata(packageName.isEmpty() ? simpleName : packageName + "." + simpleName,
                         simpleName, packageName, imports, hasProps, properties, parsed.source().path(),
-                        declarationSpan, descriptorOffset));
+                        declarationSpan, descriptorOffset, memo));
             }
             for (javax.tools.Diagnostic<? extends JavaFileObject> diagnostic : collector.getDiagnostics())
                 if (diagnostic.getKind() == javax.tools.Diagnostic.Kind.ERROR) {
@@ -113,6 +126,17 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
 
     /** Resolve supported annotation spellings from authored imports, without treating Spring or other
      * same-named component annotations as JX. Full javac attribution still validates ambiguous Java. */
+    /** The same import resolution for another annotation of the jx package, such as Memo. */
+    private static boolean isJxAnnotation(String simpleName, String annotation, String packageName, List<String> imports, CompilationUnitTree unit) {
+        if (annotation.equals("jx." + simpleName)) return true;
+        if (!annotation.equals(simpleName)) return false;
+        List<String> explicit = imports.stream().filter(name -> name.endsWith("." + simpleName)).toList();
+        if (!explicit.isEmpty()) return explicit.size() == 1 && explicit.getFirst().equals("jx." + simpleName);
+        boolean localType = unit.getTypeDecls().stream().anyMatch(declaration -> declaration instanceof ClassTree type
+                && type.getSimpleName().contentEquals(simpleName));
+        return !localType && (packageName.equals("jx") || imports.contains("jx.*"));
+    }
+
     private static boolean isComponentAnnotation(String annotation, String packageName, List<String> imports, CompilationUnitTree unit) {
         if (annotation.equals("jx.Component") || annotation.equals("jx.JxComponent")) return true;
         if (!annotation.equals("Component") && !annotation.equals("JxComponent")) return false;

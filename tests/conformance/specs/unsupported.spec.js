@@ -47,21 +47,6 @@ referenceOnly('ref-callback: a callback ref gets the node and its cleanup runs o
   await expect.poll(() => log(page)).toEqual(['attach P', 'detach', 'attach P', 'detach']);
 });
 
-referenceOnly('memo-skip: a memoized component skips rendering when props are equal', async ({page, open}) => {
-  await open('memo-skip');
-  const mount = ['render a', 'render a', 'render compared a', 'render compared a'];
-  expect(await log(page)).toEqual(mount);
-  await page.getByRole('button', {name: 'Rerender parent'}).click();
-  await expect(page.getByRole('status')).toHaveText('1');
-  // The custom comparison ignores the changed tick, so the stale tick stays.
-  expect(await log(page)).toEqual(mount);
-  await expect(page.getByTestId('compared')).toHaveText('a 0');
-  await page.getByRole('button', {name: 'Change label'}).click();
-  await expect(page.getByTestId('row')).toHaveText('b');
-  await expect(page.getByTestId('compared')).toHaveText('b 1');
-  expect(await log(page)).toEqual([...mount, 'render b', 'render b', 'render compared b', 'render compared b']);
-});
-
 referenceOnly('transition-pending: useTransition reports pending while an async action runs', async ({page, open}) => {
   await open('transition-pending');
   await expect(page.getByRole('status')).toHaveText('idle');

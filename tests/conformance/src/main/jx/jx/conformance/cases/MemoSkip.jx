@@ -1,0 +1,24 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case memo-skip: memoized children skip rendering when their props are equal. */
+@Component
+public final class MemoSkip {
+    public static View render() {
+        State<Integer> tick = Hooks.useState(0);
+        State<String> label = Hooks.useState("a");
+        return (
+            <main>
+                <MemoRow label={label.value()} />
+                <MemoCompared label={label.value()} tick={tick.value()} />
+                <p role="status">{tick.value()}</p>
+                <button onClick={event -> tick.update(previous -> previous + 1)}>Rerender parent</button>
+                <button onClick={event -> label.set("b")}>Change label</button>
+            </main>
+        );
+    }
+}

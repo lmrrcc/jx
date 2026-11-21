@@ -33,3 +33,6 @@ boolean-child-rejected	jx-core/src/main/java/jx/Views.java	if (child == null || 
 nested-iterable-dropped	jx-core/src/main/java/jx/Views.java	else if (child instanceof Iterable<?> items) for (Object item : items) append(result, item);	else if (child instanceof Iterable<?> items) { }	Iterable children render nothing
 array-child-dropped	jx-core/src/main/java/jx/Views.java	else if (child instanceof Object[] items) for (Object item : items) append(result, item);	else if (child instanceof Object[] items) { }	Array children render nothing
 for-alias-broken	jx-compiler/src/main/java/jx/compiler/Lowerer.java	case "for" -> "htmlFor";	case "for" -> "htmlFur";	The for attribute is lowered to a wrong name
+memo-never-skips	jx-react/src/main/java/jx/react/React.java	&& compare(previous.value, next.value); });	&& false; });	Memoized components render on every parent render
+memo-always-skips	jx-react/src/main/java/jx/react/React.java	&& compare(previous.value, next.value); });	&& true; });	Memoized components never see new props
+memo-field-ignored	jx-compiler/src/main/java/jx/compiler/Lowerer.java	yield ".memo((previous, next) -> " + (fields.isEmpty() ? "true" : fields) + ")";	yield ".memo((previous, next) -> true)";	Generated memo comparison ignores the Props fields

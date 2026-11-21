@@ -1,0 +1,18 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Memo;
+import jx.View;
+import jx.conformance.Bench;
+
+/** A memoized row: it renders again only when its label changes. */
+@Component
+@Memo
+public final class MemoRow {
+    public record Props(String label) {}
+
+    public static View render(Props props) {
+        Bench.log("render " + props.label());
+        return <p data-testid="row">{props.label()}</p>;
+    }
+}

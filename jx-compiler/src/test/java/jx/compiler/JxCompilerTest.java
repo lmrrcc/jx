@@ -53,6 +53,51 @@ class JxCompilerTest {
         assertEquals(List.of(), check(compilation));
     }
 
+    @Test void memoComponentsCompareEachPropsFieldOrUseTheirOwnComparison() throws Exception {
+        var compilation = compiler.compile(List.of(source("Row.jx", """
+                package demo;
+                import jx.*;
+                @Component @Memo public final class Row {
+                    public record Props(String label, int tick) {}
+                    public static View render(Props props) { return <p>{props.label()}</p>; }
+                }
+                """), source("Custom.jx", """
+                package demo;
+                @jx.Component @jx.Memo public final class Custom {
+                    public record Props(String label) {}
+                    public static boolean arePropsEqual(Props previous, Props next) { return true; }
+                    public static jx.View render(Props props) { return <p>{props.label()}</p>; }
+                }
+                """), source("Still.jx", """
+                package demo;
+                import jx.*;
+                @Component @Memo public final class Still {
+                    public static View render() { return <p>still</p>; }
+                }
+                """)));
+        assertTrue(compilation.successful(), compilation.diagnostics().toString());
+        String all = String.join("\n", compilation.generatedSources().stream().map(GeneratedSource::javaSource).toList());
+        assertTrue(all.contains(".memo((previous, next) -> jx.ComponentType.sameValue(previous.label(), next.label())"
+                + " && jx.ComponentType.sameValue(previous.tick(), next.tick()))"), all);
+        assertTrue(all.contains(".memo(Custom::arePropsEqual)"), all);
+        assertTrue(all.contains(".memo((previous, next) -> true)"), all);
+        assertEquals(List.of(), check(compilation));
+    }
+
+    @Test void rejectsAPropsComparisonWithoutMemo() throws Exception {
+        var compilation = compiler.compile(List.of(source("Plain.jx", """
+                package demo;
+                import jx.*;
+                @Component public final class Plain {
+                    public record Props(String label) {}
+                    public static boolean arePropsEqual(Props previous, Props next) { return true; }
+                    public static View render(Props props) { return <p>{props.label()}</p>; }
+                }
+                """)));
+        assertFalse(compilation.successful());
+        assertTrue(compilation.diagnostics().toString().contains("arePropsEqual"), compilation.diagnostics().toString());
+    }
+
     @Test void acceptsComponentAnnotationAndDeprecatedSourceAlias() throws Exception {
         for (String declaration : List.of(
                 "import jx.Component; @Component",
@@ -288,7 +333,8 @@ class JxCompilerTest {
                 "View", "public interface View {}",
                 "Component", "public @interface Component {}",
                 "JxComponent", "@Deprecated public @interface JxComponent {}",
-                "ComponentType", "public record ComponentType<P>(String name, String stateSignature, java.util.function.Function<P,View> render) {}",
+                "ComponentType", "public record ComponentType<P>(String name, String stateSignature, java.util.function.Function<P,View> render) { public ComponentType<P> memo(java.util.function.BiPredicate<P,P> propsEqual) { return this; } public static boolean sameValue(Object first, Object second) { return first == second; } }",
+                "Memo", "public @interface Memo {}",
                 "Views", "public final class Views { public static View element(String tag, Attributes attrs, Object... children) { return null; } public static View fragment(Object... children) { return null; } public static <P> View component(ComponentType<P> type, P props) { return null; } public static <P> View component(ComponentType<P> type, P props, String key) { return null; } }",
                 "Attributes", "public final class Attributes { public static Attributes create() { return new Attributes(); } public Attributes attr(String name, Object value) { return this; } public Attributes on(String name, java.util.function.Consumer<Event> handler) { return this; } }",
                 "Event", "public interface Event { void preventDefault(); }",

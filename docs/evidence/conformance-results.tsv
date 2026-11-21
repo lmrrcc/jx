@@ -48,7 +48,7 @@ layout-effect-order	pass	pass
 lazy-component	pass	unsupported
 media-events	pass	pass
 memo-recompute	pass	pass
-memo-skip	pass	unsupported
+memo-skip	pass	pass
 namespace-components	pass	pass
 optimistic	pass	unsupported
 pointer-events	pass	pass

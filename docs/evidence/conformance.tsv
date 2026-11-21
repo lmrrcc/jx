@@ -28,7 +28,7 @@ react:Profiler	component	unsupported	profiler		R-08
 react:ViewTransition	component	unsupported	view-transition		R-15	
 react:addTransitionType	api	unsupported	view-transition		R-15	
 react:lazy	api	unsupported	lazy-component		R-14	
-react:memo	api	unsupported	memo-skip		R-06	
+react:memo	api	supported	memo-skip	@Memo, ComponentType.memo		Declared on the component with @Memo; a custom comparison is a static arePropsEqual method
 react:forwardRef	api	unsupported	forward-ref		R-07	Deprecated in React 19 in favor of ref as a prop, which JX also lacks for components
 react:createElement	api	equivalent	attributes,children-prop	Markup, Views.element, Views.component		
 react:cloneElement	legacy	unsupported	clone-element		R-11	

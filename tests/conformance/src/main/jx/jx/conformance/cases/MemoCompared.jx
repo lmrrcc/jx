@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Memo;
+import jx.View;
+import jx.conformance.Bench;
+
+/** A memoized row with its own comparison, which ignores the tick. */
+@Component
+@Memo
+public final class MemoCompared {
+    public record Props(String label, int tick) {}
+
+    public static boolean arePropsEqual(Props previous, Props next) {
+        return previous.label().equals(next.label());
+    }
+
+    public static View render(Props props) {
+        Bench.log("render compared " + props.label());
+        return <p data-testid="compared">{props.label()} {props.tick()}</p>;
+    }
+}
