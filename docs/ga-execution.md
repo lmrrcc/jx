@@ -20,7 +20,7 @@ exists, not when its document or skeleton module lands.
 | ID | Work package / owner role | Depends on | Target / size | Acceptance outcome |
 | --- | --- | --- | --- | --- |
 | GA-01 | Baseline and capability/evidence ledger / Q | — | M1 / M | Reproducible clean build, verified CI status, exact version manifest, gaps and commands recorded. **Done 2026-11-21, CI green at `3688d25`** — [task file](ga-01-baseline.md) |
-| GA-02 | Portfolio routes, owners and pilot selection / M | — | M1 / M | Canonical deployments and required journeys agreed; old-UI behavior/performance captured. **Implemented 2026-11-21; awaiting Luca's end-to-end check** — [task file](ga-02-portfolio.md) |
+| GA-02 | Portfolio routes, owners and pilot selection / M | — | M1 / M | Canonical deployments and required journeys agreed; old-UI behavior/performance captured. **Done 2026-11-21** — [task file](ga-02-portfolio.md) |
 | GA-03 | Browser async ownership design / R | GA-01 | M1 / S | One HTTP/Elm/loader/Suspense cancellation/error model demonstrated in a spike |
 | GA-04 | Shared contract, codec and exact-value spike / C | GA-03 | M1 / M | One DTO/operation definition; real Spring/browser round trip, decimal/long/null boundaries |
 | GA-05 | Component-library JAR ABI spike / L | GA-01 | M1 / S | Independent producer and consumer, no source copying, metadata version failure tested |

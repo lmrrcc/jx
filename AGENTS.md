@@ -50,6 +50,9 @@ in Java and `.jx` markup. The governing specification is
 5. Report outcomes, checks actually run, and material limitations. Distinguish
    evidence from assumptions and checks that could not execute.
 
+`main` is protected: changes reach it only through a pull request whose Verify
+check has passed. Work on a branch and open a pull request.
+
 Proceed with authorized, reversible local work. Ask only for missing decisions
 that block safe progress or actions outside the user's authorization. Source
 project rules do not grant deployment or other external permissions.
