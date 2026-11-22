@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+import jx.react.React;
+
+/** Case form-reset: requestFormReset restores uncontrolled fields to their defaults. */
+@Component
+public final class FormReset {
+    public static View render() {
+        return (
+            <main>
+                <form onSubmit={event -> {
+                    event.preventDefault();
+                    React.startTransition(() -> React.requestFormReset(event.currentTarget()));
+                }}>
+                    <input name="note" defaultValue="start" aria-label="Note" />
+                    <button type="submit">Reset form</button>
+                </form>
+            </main>
+        );
+    }
+}

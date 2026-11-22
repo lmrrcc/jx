@@ -4,6 +4,7 @@ import jx.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.Consumer;
 import org.teavm.jso.*;
 
@@ -95,6 +96,18 @@ public final class React {
      * transition classes can tell for example forward from backward navigation. Call it inside a
      * transition action. */
     public static void addTransitionType(String type) { addTransitionTypeNative(Objects.requireNonNull(type)); }
+    /** React DOM's {@code requestFormReset}: resets the uncontrolled fields of a form to their
+     * defaults when the running transition ends. Call it inside a transition, with the form taken
+     * from an event, for example {@code event.currentTarget()} of a submit event. */
+    public static void requestFormReset(EventTarget form) {
+        if (!(form instanceof BrowserTarget target)) throw new IllegalArgumentException("requestFormReset needs a form element from a browser event");
+        requestFormResetNative(target.element);
+    }
+    /** As {@link #requestFormReset(EventTarget)}, for a form held by a {@link DomRef}. */
+    public static void requestFormReset(DomElement form) {
+        if (!(form instanceof BrowserElement element)) throw new IllegalArgumentException("requestFormReset needs a form element from a DomRef");
+        requestFormResetNative(element.element);
+    }
     /** React's {@code createPortal}: renders the children into another DOM element while they stay
      * part of this React tree, so context and event bubbling follow the React parent. The target
      * comes from a {@link DomRef} or from {@link #documentBody()} and must stay in the document. */
@@ -118,6 +131,14 @@ public final class React {
     public static void startTransition(Runnable action) {
         Objects.requireNonNull(action);
         startTransitionNative(action::run);
+    }
+    /** React's standalone {@code startTransition} with an asynchronous action, usually
+     * {@code () -> Async.run(() -> ...)}: {@code action} runs now and the transition lasts until
+     * the promise it returns is settled. Updates made after an {@code await} belong to a
+     * transition only when they are wrapped in one again. */
+    public static void startTransitionAsync(Supplier<? extends Promise<?>> action) {
+        Objects.requireNonNull(action);
+        startTransitionPromiseNative(() -> AsyncBridge.thenable(Objects.requireNonNull(action.get(), "The transition action returned null")));
     }
     /** Explicit event failure routing, because React error boundaries do not catch event handlers. */
     public static EventHandler guarded(EventHandler handler, Consumer<RuntimeException> failure) {
@@ -202,6 +223,7 @@ public final class React {
                 Runnable cleanup = callback.attach(js == null ? null : new BrowserElement(js));
                 return cleanup == null ? null : cleanup::run;
             }));
+            else if (entry.value() instanceof FormAction action) setNative(result, entry.name(), Forms.function(action));
             else if (entry.value() instanceof Style style) {
                 JSObject values = object();
                 style.properties().forEach((name, value) -> set(values, name, Interop.scalar(value)));
@@ -356,6 +378,9 @@ public final class React {
     @JSBody(params = {"mode", "child"}, script = "return React.createElement(React.Activity, {mode: mode}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject activityNative(String mode, JSObject child);
     @JSBody(params = {"props", "child"}, script = "return React.createElement(React.ViewTransition, props, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject viewTransitionNative(JSObject props, JSObject child);
     @JSBody(params = "type", script = "React.addTransitionType(type);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native void addTransitionTypeNative(String type);
+    @JSBody(params = "form", script = "ReactDOM.requestFormReset(form);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom")) private static native void requestFormResetNative(JSObject form);
+    @JSFunctor interface PromiseAction extends JSObject { JSObject run(); }
+    @JSBody(params = "action", script = "React.startTransition(function() { return action(); });", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native void startTransitionPromiseNative(PromiseAction action);
     @JSBody(params = "child", script = "return React.createElement(React.StrictMode, null, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject strict(JSObject child);
     @JSBody(params = {"root", "child"}, script = "root.render(child);") private static native void renderRoot(JSObject root, JSObject child);
     @JSBody(params = "root", script = "root.unmount();") private static native void unmount(JSObject root);

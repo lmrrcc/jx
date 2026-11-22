@@ -1,0 +1,26 @@
+package jx.conformance.cases;
+
+import static jx.Async.await;
+
+import jx.Async;
+import jx.Component;
+import jx.FormAction;
+import jx.Promise;
+import jx.View;
+
+/** Case form-status: a child of the form sees the pending submission. */
+@Component
+public final class FormStatusCase {
+    private static Promise.Resolver<Void> release;
+
+    public static View render() {
+        return (
+            <main>
+                <form action={FormAction.async(data -> Async.run(() -> { await(Promise.<Void>create(resolver -> release = resolver)); }))}>
+                    <FormSubmit />
+                </form>
+                <button onClick={event -> release.resolve(null)}>Release</button>
+            </main>
+        );
+    }
+}

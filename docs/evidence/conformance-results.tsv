@@ -1,5 +1,5 @@
 case	reference	jx
-action-state	pass	unsupported
+action-state	pass	pass
 activity	pass	pass
 async-function	pass	pass
 attributes	pass	pass
@@ -34,9 +34,9 @@ error-reporting	pass	pass
 event-payload	pass	pass
 external-store	pass	pass
 flush-sync	pass	pass
-form-actions	pass	unsupported
-form-reset	pass	unsupported
-form-status	pass	unsupported
+form-actions	pass	pass
+form-reset	pass	pass
+form-status	pass	pass
 forward-ref	pass	pass
 fragment	pass	pass
 function-props	pass	pass
@@ -54,7 +54,7 @@ media-events	pass	pass
 memo-recompute	pass	pass
 memo-skip	pass	pass
 namespace-components	pass	pass
-optimistic	pass	unsupported
+optimistic	pass	pass
 pointer-events	pass	pass
 portal	pass	pass
 prevent-default	pass	pass

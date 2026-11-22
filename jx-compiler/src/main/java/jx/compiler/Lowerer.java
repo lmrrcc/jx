@@ -126,8 +126,9 @@ final class Lowerer {
                 continue;
             }
             boolean handler = name.length() > 2 && name.startsWith("on") && Character.isUpperCase(name.charAt(2));
-            // ref has typed overloads so that a lambda becomes a RefCallback.
-            out.synthetic(name.equals("ref") ? ".ref(" : (handler ? ".on(" : ".attr(") + quote(name) + ", ", attribute.nameSpan().start());
+            // ref, action and formAction have typed overloads so that a lambda gets its type.
+            out.synthetic(name.equals("ref") ? ".ref(" : name.equals("action") ? ".action(" : name.equals("formAction") ? ".formAction("
+                    : (handler ? ".on(" : ".attr(") + quote(name) + ", ", attribute.nameSpan().start());
             value(attribute);
             out.synthetic(")", attribute.span().end() - 1);
         }

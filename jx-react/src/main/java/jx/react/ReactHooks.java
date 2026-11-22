@@ -122,6 +122,45 @@ final class ReactHooks implements HookRuntime {
     @JSBody(params = "pair", script = "return !!pair[0];") private static native boolean pending(JSObject pair);
     @JSBody(params = {"start", "action"}, script = "start(function() { action(); });") private static native void startNative(JSObject start, Cleanup action);
     @JSBody(params = {"start", "action"}, script = "start(function() { return new Promise(function(resolve) { action(resolve); }); });") private static native void startAsyncNative(JSObject start, AsyncAction action);
+    @JSFunctor interface StateAction extends JSObject { Object run(Object previous, JSObject data); }
+    @Override public <S> ActionState<S> actionState(BiFunction<S, FormData, ?> action, S initial, boolean async) {
+        HotReload.slot("action-state");
+        JSObject triple = actionStateNative((previous, data) -> {
+            Object next = action.apply(Interop.value(previous), new Forms.BrowserFormData(data));
+            return async ? AsyncBridge.thenable((Promise<?>) java.util.Objects.requireNonNull(next, "The action returned null")) : next;
+        }, initial);
+        JSObject dispatch = setter(triple);
+        FormAction formAction = memoRaw(() -> new Forms.NativeAction(dispatch), Dependencies.none());
+        return new ActionState<>(Interop.value(value(triple)), formAction, third(triple));
+    }
+    @Override public <T> State<T> optimistic(T value) {
+        HotReload.slot("optimistic");
+        JSObject pair = optimisticNative(value);
+        JSObject set = setter(pair);
+        State.Setter<T> setter = memoRaw(() -> update -> updateNative(set, old -> update.apply(Interop.value(old))), Dependencies.none());
+        return new State<>(Interop.value(value(pair)), setter);
+    }
+    @Override public <S, A> ReducerState<S, A> optimistic(S value, BiFunction<S, A, S> update) {
+        HotReload.slot("optimistic");
+        JSObject pair = optimisticReducerNative(value, (state, action) -> update.apply(Interop.value(state), Interop.value(action)));
+        JSObject add = setter(pair);
+        Consumer<A> dispatch = memoRaw(() -> action -> dispatchNative(add, action), Dependencies.none());
+        return new ReducerState<>(Interop.value(value(pair)), dispatch);
+    }
+    @Override public FormStatus formStatus() {
+        HotReload.slot("form-status");
+        JSObject status = formStatusNative();
+        JSObject data = statusData(status);
+        return new FormStatus(statusPending(status), data == null ? null : new Forms.BrowserFormData(data), statusMethod(status));
+    }
+    @JSBody(params = {"action", "initial"}, script = "return React.useActionState(function(previous, data) { return action(previous, data); }, initial);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject actionStateNative(StateAction action, Object initial);
+    @JSBody(params = "triple", script = "return !!triple[2];") private static native boolean third(JSObject triple);
+    @JSBody(params = "value", script = "return React.useOptimistic(value);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject optimisticNative(Object value);
+    @JSBody(params = {"value", "update"}, script = "return React.useOptimistic(value, function(state, action) { return update(state, action); });", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject optimisticReducerNative(Object value, Reduce update);
+    @JSBody(script = "return ReactDOM.useFormStatus();", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom")) private static native JSObject formStatusNative();
+    @JSBody(params = "status", script = "return !!status.pending;") private static native boolean statusPending(JSObject status);
+    @JSBody(params = "status", script = "return status.data ? status.data : null;") private static native JSObject statusData(JSObject status);
+    @JSBody(params = "status", script = "return status.pending && status.method ? String(status.method) : null;") private static native String statusMethod(JSObject status);
     @JSFunctor interface PromiseAction extends JSObject { JSObject run(); }
     @JSBody(params = {"start", "action"}, script = "start(function() { return action(); });") private static native void startPromiseNative(JSObject start, PromiseAction action);
     @Override public <T> T use(Promise<T> promise) { return Interop.value(useNative(AsyncBridge.thenable(promise))); }

@@ -41,6 +41,14 @@ public final class Attributes {
     public Attributes ref(DomRef ref) { return ref == null ? this : with("ref", ref); }
     /** Attaches the element through a callback ref. A null callback attaches nothing. */
     public Attributes ref(RefCallback callback) { return callback == null ? this : with("ref", callback); }
+    /** The URL a form submits to. */
+    public Attributes action(String url) { return attr("action", url); }
+    /** A function as form action; null adds nothing. */
+    public Attributes action(FormAction action) { return action == null ? this : with("action", action); }
+    /** The URL a submit button submits its form to. */
+    public Attributes formAction(String url) { return attr("formAction", url); }
+    /** A function as the action of a submit button; null adds nothing. */
+    public Attributes formAction(FormAction action) { return action == null ? this : with("formAction", action); }
     public Attributes on(String event, EventHandler handler) {
         validate(event);
         if (!event.matches("on[A-Z][A-Za-z]+")) throw new IllegalArgumentException("Use a React event name such as onClick");

@@ -1,0 +1,25 @@
+package jx.conformance.cases;
+
+import jx.ActionState;
+import jx.Async;
+import jx.Component;
+import jx.Hooks;
+import jx.View;
+
+/** Case action-state: a form action receives the previous state and the form data. */
+@Component
+public final class ActionStateCase {
+    public static View render() {
+        ActionState<Integer> total = Hooks.useActionStateAsync(
+                (previous, data) -> Async.run(() -> previous + Integer.parseInt(data.get("step"))), 0);
+        return (
+            <main>
+                <form action={total.action()}>
+                    <input name="step" defaultValue="2" aria-label="Step" />
+                    <button type="submit">Add</button>
+                </form>
+                <p role="status">{total.pending() ? "pending" : String.valueOf(total.state())}</p>
+            </main>
+        );
+    }
+}

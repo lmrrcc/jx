@@ -64,3 +64,9 @@ lazy-reloads-each-render	jx-core/src/main/java/jx/ComponentType.java	if (loading
 activity-always-visible	jx-react/src/main/java/jx/react/React.java	visible ? "visible" : "hidden"	"visible"	A hidden activity stays visible
 transition-type-dropped	jx-react/src/main/java/jx/react/React.java	script = "React.addTransitionType(type);"	script = ""	Transition types are not passed to React
 view-transition-plain	jx-react/src/main/java/jx/react/React.java	return React.createElement(React.ViewTransition, props, child);	return child;	ViewTransition renders its children without a boundary
+form-action-not-awaited	jx-react/src/main/java/jx/react/Forms.java	return AsyncBridge.thenable(async.start(fields));	{ async.start(fields); return null; }	An asynchronous form action is not pending
+form-data-wrong-field	jx-react/src/main/java/jx/react/Forms.java	var value = data.get(name); return typeof	var value = data.get(name + 'x'); return typeof	Form data reads the wrong field
+action-state-drops-previous	jx-react/src/main/java/jx/react/ReactHooks.java	Object next = action.apply(Interop.value(previous), new Forms.BrowserFormData(data));	Object next = action.apply(Interop.value(initial), new Forms.BrowserFormData(data));	An action always receives the initial state
+optimistic-set-ignored	jx-react/src/main/java/jx/react/ReactHooks.java	update -> updateNative(set, old -> update.apply(Interop.value(old)))	update -> {}	The optimistic setter does nothing
+form-reset-ignored	jx-react/src/main/java/jx/react/React.java	script = "ReactDOM.requestFormReset(form);"	script = ""	requestFormReset does nothing
+form-status-never-pending	jx-react/src/main/java/jx/react/ReactHooks.java	script = "return !!status.pending;"	script = "return false;"	Form status never reports a pending submission

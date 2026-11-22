@@ -1,0 +1,24 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case form-actions: function actions on a form and on a submit button receive form data. */
+@Component
+public final class FormActions {
+    public static View render() {
+        State<String> result = Hooks.useState("none");
+        return (
+            <main>
+                <form action={data -> result.set("form " + data.get("name"))}>
+                    <input name="name" defaultValue="Ada" aria-label="Name" />
+                    <button type="submit">Save</button>
+                    <button type="submit" formAction={data -> result.set("alternative " + data.get("name"))}>Save differently</button>
+                </form>
+                <p role="status">{result.value()}</p>
+            </main>
+        );
+    }
+}

@@ -1,0 +1,15 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.FormStatus;
+import jx.Hooks;
+import jx.View;
+
+/** The submit button of the form-status case; it reads the status of the enclosing form. */
+@Component
+public final class FormSubmit {
+    public static View render() {
+        FormStatus status = Hooks.useFormStatus();
+        return <button type="submit" disabled={status.pending()}>{status.pending() ? "Sending" : "Send"}</button>;
+    }
+}
