@@ -46,13 +46,6 @@ referenceOnly('form-reset: requestFormReset restores uncontrolled fields to thei
   await expect(page.getByLabel('Note')).toHaveValue('start');
 });
 
-referenceOnly('lazy-component: a lazy component shows the Suspense fallback until it loads', async ({page, open}) => {
-  await open('lazy-component');
-  await expect(page.getByRole('status')).toHaveText('loading');
-  await page.getByRole('button', {name: 'Load'}).click();
-  await expect(page.getByRole('status')).toHaveText('late content');
-});
-
 referenceOnly('activity: a hidden activity keeps state, hides its DOM and stops its effects', async ({page, open}) => {
   await open('activity');
   await page.getByRole('button', {name: 'Increment'}).click();

@@ -97,4 +97,11 @@ class PromiseTest {
         assertThrows(NullPointerException.class, () -> Async.await(null));
         assertTrue(Promise.create(resolver -> {}).pending());
     }
+
+    @Test void aLazyComponentDoesNotLoadWhenItIsDeclared() {
+        ComponentType<Void> lazy = ComponentType.lazy("Late", () -> { seen.add("loaded"); return Promise.create(resolver -> {}); });
+        assertEquals("Late", lazy.name());
+        assertEquals(List.of(), seen, "the loader waits for the first render");
+        assertThrows(NullPointerException.class, () -> ComponentType.lazy("Late", null));
+    }
 }

@@ -110,3 +110,10 @@ test('clone-element: a cloned element merges new props and children', async ({pa
   await expect(button).toHaveAttribute('title', 'original');
   await expect(button).toHaveAttribute('data-extra', 'yes');
 });
+
+test('lazy-component: a lazy component shows the Suspense fallback until it loads', async ({page, open}) => {
+  await open('lazy-component');
+  await expect(page.getByRole('status')).toHaveText('loading');
+  await page.getByRole('button', {name: 'Load'}).click();
+  await expect(page.getByRole('status')).toHaveText('late content');
+});

@@ -1,0 +1,12 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+
+/** The component that lazy-component loads. */
+@Component
+public final class LateContent {
+    public static View render() {
+        return <p role="status">late content</p>;
+    }
+}

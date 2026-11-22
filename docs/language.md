@@ -368,6 +368,11 @@ or a memo. A failed promise reaches the nearest `React.boundary`.
 {React.suspense(<p>Loading</p>, <Profile user={userPromise} />)}
 ```
 
+`ComponentType.lazy(name, () -> promiseOfComponent)` is React's `lazy`: the loader
+runs once, when the component first renders, and the nearest `React.suspense`
+shows its fallback until the promise is settled. It defers the loader's work; it
+does not yet move the component's code into a separate file.
+
 The compiler checks conventional `useX` calls in render/custom-hook methods for
 placement inside branches, loops, callbacks, try/switch constructs, and after a
 possible early return. These are conservative syntax checks. They do not analyze

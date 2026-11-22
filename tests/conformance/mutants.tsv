@@ -60,3 +60,4 @@ use-thenable-not-cached	jx-react/src/main/java/jx/react/AsyncBridge.java	cache.s
 transition-promise-dropped	jx-react/src/main/java/jx/react/ReactHooks.java	start(function() { return action(); });	start(function() { action(); });	A promise transition stops pending before the promise is settled
 suspense-fallback-dropped	jx-react/src/main/java/jx/react/React.java	React.createElement(React.Suspense, {fallback: fallback}, child)	React.createElement(React.Suspense, {fallback: null}, child)	Suspense shows no fallback
 use-context-default	jx-react/src/main/java/jx/react/ReactHooks.java	return Interop.value(useNative(React.context(context)));	return context.defaultValue();	use(context) ignores providers
+lazy-reloads-each-render	jx-core/src/main/java/jx/ComponentType.java	if (loading[0] == null) loading[0] =	loading[0] =	The lazy loader runs on every render
