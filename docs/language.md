@@ -374,6 +374,31 @@ or a memo. A failed promise reaches the nearest `React.boundary`.
 {React.suspense(<p>Loading</p>, <Profile user={userPromise} />)}
 ```
 
+### Form actions
+
+A form's `action` and a submit button's `formAction` take a function in place of a
+URL. It receives the submitted fields as `FormData` (`get`, `getAll`, `has`; file
+fields are not offered), runs inside a transition, and React resets the form's
+uncontrolled fields afterwards:
+
+```java
+<form action={data -> result.set("saved " + data.get("name"))}>
+```
+
+- `FormAction.async(data -> Async.run(() -> { ... }))` is an asynchronous action;
+  the form is pending until its promise is settled.
+- `Hooks.useFormStatus()` in a component inside the form returns a `FormStatus`
+  with `pending()`, `data()` and `method()`.
+- `Hooks.useActionState(action, initial)` and `useActionStateAsync` return an
+  `ActionState`: `state()`, the `action()` to give to the form, and `pending()`.
+  The action receives the previous state and the form data and returns the next
+  state, or its promise in the asynchronous form.
+- `Hooks.useOptimistic(value)` returns a `State` that shows `value`, or what was
+  set inside a running transition or action until it ends. With an update function
+  it returns a `ReducerState`.
+- `React.startTransitionAsync(() -> promise)` is the standalone asynchronous
+  transition, and `React.requestFormReset(form)` resets a form by hand.
+
 `ComponentType.lazy(name, () -> promiseOfComponent)` is React's `lazy`: the loader
 runs once, when the component first renders, and the nearest `React.suspense`
 shows its fallback until the promise is settled. It defers the loader's work; it

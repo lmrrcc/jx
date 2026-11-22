@@ -27,6 +27,11 @@ public interface HookRuntime {
     <T> T use(Promise<T> promise);
     /** React's {@code use} for a context; not bound to a hook position. */
     <T> T use(Context<T> context);
+    /** {@code action} returns the next state, or its {@link Promise} when {@code async} is true. */
+    <S> ActionState<S> actionState(BiFunction<S, FormData, ?> action, S initial, boolean async);
+    <T> State<T> optimistic(T value);
+    <S, A> ReducerState<S, A> optimistic(S value, BiFunction<S, A, S> update);
+    FormStatus formStatus();
     <T> T externalStore(ExternalStore<T> store);
     String id();
 }

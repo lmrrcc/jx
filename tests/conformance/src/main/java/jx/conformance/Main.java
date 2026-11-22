@@ -77,6 +77,11 @@ import jx.conformance.cases.TransitionPromise;
 import jx.conformance.cases.LazyComponent;
 import jx.conformance.cases.ActivityCase;
 import jx.conformance.cases.ViewTransitionCase;
+import jx.conformance.cases.Optimistic;
+import jx.conformance.cases.ActionStateCase;
+import jx.conformance.cases.FormStatusCase;
+import jx.conformance.cases.FormActions;
+import jx.conformance.cases.FormReset;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -163,6 +168,11 @@ public final class Main {
             case "lazy-component" -> React.mountStrict("app", LazyComponent.JX, null);
             case "activity" -> React.mountStrict("app", ActivityCase.JX, null);
             case "view-transition" -> React.mountStrict("app", ViewTransitionCase.JX, null);
+            case "optimistic" -> React.mountStrict("app", Optimistic.JX, null);
+            case "action-state" -> React.mountStrict("app", ActionStateCase.JX, null);
+            case "form-status" -> React.mountStrict("app", FormStatusCase.JX, null);
+            case "form-actions" -> React.mountStrict("app", FormActions.JX, null);
+            case "form-reset" -> React.mountStrict("app", FormReset.JX, null);
             default -> Bench.unknown(id);
         }
     }

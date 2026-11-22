@@ -93,3 +93,30 @@ test('flush-sync: the DOM is updated before flushSync returns', async ({page, op
   await page.getByRole('button', {name: 'Flush'}).click();
   await expect(page.getByTestId('seen')).toHaveText('dom showed 1');
 });
+
+test('form-status: a child of the form sees the pending submission', async ({page, open}) => {
+  await open('form-status');
+  await page.getByRole('button', {name: 'Send'}).click();
+  await expect(page.getByRole('button', {name: 'Sending'})).toBeDisabled();
+  // The submission stays pending until the action is released, not only for an instant.
+  await page.waitForTimeout(250);
+  await expect(page.getByRole('button', {name: 'Sending'})).toBeDisabled();
+  await page.getByRole('button', {name: 'Release'}).click();
+  await expect(page.getByRole('button', {name: 'Send', exact: true})).toBeEnabled();
+});
+
+test('form-actions: function actions on a form and on a submit button receive form data', async ({page, open}) => {
+  await open('form-actions');
+  await page.getByRole('button', {name: 'Save', exact: true}).click();
+  await expect(page.getByRole('status')).toHaveText('form Ada');
+  await page.getByLabel('Name').fill('Grace');
+  await page.getByRole('button', {name: 'Save differently'}).click();
+  await expect(page.getByRole('status')).toHaveText('alternative Grace');
+});
+
+test('form-reset: requestFormReset restores uncontrolled fields to their defaults', async ({page, open}) => {
+  await open('form-reset');
+  await page.getByLabel('Note').fill('edited');
+  await page.getByRole('button', {name: 'Reset form'}).click();
+  await expect(page.getByLabel('Note')).toHaveValue('start');
+});

@@ -319,3 +319,22 @@ test('use-promise: use suspends on a promise, reads context, and may be conditio
   await page.getByRole('button', {name: 'Resolve'}).click();
   await expect(page.getByRole('status')).toHaveText('loaded bright');
 });
+
+test('optimistic: the optimistic value shows during the action, then the confirmed one', async ({page, open}) => {
+  await open('optimistic');
+  await expect(page.getByRole('status')).toHaveText('saved');
+  await page.getByRole('button', {name: 'Send'}).click();
+  await expect(page.getByRole('status')).toHaveText('sending');
+  await page.getByRole('button', {name: 'Settle'}).click();
+  await expect(page.getByRole('status')).toHaveText('confirmed');
+});
+
+test('action-state: a form action receives the previous state and the form data', async ({page, open}) => {
+  await open('action-state');
+  await expect(page.getByRole('status')).toHaveText('0');
+  await page.getByRole('button', {name: 'Add'}).click();
+  await expect(page.getByRole('status')).toHaveText('2');
+  await page.getByLabel('Step').fill('5');
+  await page.getByRole('button', {name: 'Add'}).click();
+  await expect(page.getByRole('status')).toHaveText('7');
+});

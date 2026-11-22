@@ -3,49 +3,6 @@ import {referenceOnly, expect, log} from './bench.js';
 // React features that JX does not offer yet. Each test passes on the reference
 // and reports `unsupported` on JX until the matching parity task lands.
 
-referenceOnly('optimistic: the optimistic value shows during the action, then the confirmed one', async ({page, open}) => {
-  await open('optimistic');
-  await expect(page.getByRole('status')).toHaveText('saved');
-  await page.getByRole('button', {name: 'Send'}).click();
-  await expect(page.getByRole('status')).toHaveText('sending');
-  await page.getByRole('button', {name: 'Settle'}).click();
-  await expect(page.getByRole('status')).toHaveText('confirmed');
-});
-
-referenceOnly('action-state: a form action receives the previous state and the form data', async ({page, open}) => {
-  await open('action-state');
-  await expect(page.getByRole('status')).toHaveText('0');
-  await page.getByRole('button', {name: 'Add'}).click();
-  await expect(page.getByRole('status')).toHaveText('2');
-  await page.getByLabel('Step').fill('5');
-  await page.getByRole('button', {name: 'Add'}).click();
-  await expect(page.getByRole('status')).toHaveText('7');
-});
-
-referenceOnly('form-status: a child of the form sees the pending submission', async ({page, open}) => {
-  await open('form-status');
-  await page.getByRole('button', {name: 'Send'}).click();
-  await expect(page.getByRole('button', {name: 'Sending'})).toBeDisabled();
-  await page.getByRole('button', {name: 'Release'}).click();
-  await expect(page.getByRole('button', {name: 'Send', exact: true})).toBeEnabled();
-});
-
-referenceOnly('form-actions: function actions on a form and on a submit button receive form data', async ({page, open}) => {
-  await open('form-actions');
-  await page.getByRole('button', {name: 'Save', exact: true}).click();
-  await expect(page.getByRole('status')).toHaveText('form Ada');
-  await page.getByLabel('Name').fill('Grace');
-  await page.getByRole('button', {name: 'Save differently'}).click();
-  await expect(page.getByRole('status')).toHaveText('alternative Grace');
-});
-
-referenceOnly('form-reset: requestFormReset restores uncontrolled fields to their defaults', async ({page, open}) => {
-  await open('form-reset');
-  await page.getByLabel('Note').fill('edited');
-  await page.getByRole('button', {name: 'Reset form'}).click();
-  await expect(page.getByLabel('Note')).toHaveValue('start');
-});
-
 referenceOnly('resource-hints: the six resource functions add their elements to the head', async ({page, open}) => {
   await open('resource-hints');
   const head = selector => page.locator('head ' + selector);

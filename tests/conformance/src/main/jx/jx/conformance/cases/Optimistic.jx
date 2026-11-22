@@ -1,0 +1,33 @@
+package jx.conformance.cases;
+
+import static jx.Async.await;
+
+import jx.Async;
+import jx.Component;
+import jx.Hooks;
+import jx.Promise;
+import jx.State;
+import jx.View;
+import jx.react.React;
+
+/** Case optimistic: the optimistic value shows during the action, then the confirmed one. */
+@Component
+public final class Optimistic {
+    private static Promise.Resolver<Void> settle;
+
+    public static View render() {
+        State<String> saved = Hooks.useState("saved");
+        State<String> shown = Hooks.useOptimistic(saved.value());
+        return (
+            <main>
+                <button onClick={event -> React.startTransitionAsync(() -> Async.run(() -> {
+                    shown.set("sending");
+                    await(Promise.<Void>create(resolver -> settle = resolver));
+                    React.startTransition(() -> saved.set("confirmed"));
+                }))}>Send</button>
+                <button onClick={event -> settle.resolve(null)}>Settle</button>
+                <p role="status">{shown.value()}</p>
+            </main>
+        );
+    }
+}

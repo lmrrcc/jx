@@ -16,8 +16,8 @@ react:useSyncExternalStore	hook	supported	external-store	Hooks.useSyncExternalSt
 react:useTransition	hook	supported	transition-pending,transition-promise	Hooks.useTransition, TransitionState		An async action returns a jx.Promise, usually from Async.run, or takes a completion callback
 react:startTransition	api	supported	start-transition,transition-pending	React.startTransition		
 react:useDeferredValue	hook	supported	deferred-value	Hooks.useDeferredValue		Equal scalars compare by value
-react:useOptimistic	hook	unsupported	optimistic		R-16	
-react:useActionState	hook	unsupported	action-state		R-16	
+react:useOptimistic	hook	supported	optimistic	Hooks.useOptimistic		Returns a State, or a ReducerState with an update function
+react:useActionState	hook	supported	action-state	Hooks.useActionState, Hooks.useActionStateAsync, ActionState		The permalink argument is not offered
 react:use	hook	supported	use-promise	Hooks.use		Takes a jx.Promise or a Context
 react:useDebugValue	hook	supported	debug-value	Hooks.useDebugValue		The DevTools label itself is not asserted
 react:Fragment	component	supported	fragment	<>...</>, Views.fragment		
@@ -48,8 +48,8 @@ react/jsx-runtime:jsxs	compiler	equivalent	children-prop	Markup lowering
 react/jsx-runtime:Fragment	compiler	equivalent	fragment	<>...</>		
 react-dom:createPortal	api	supported	portal	React.portal, React.documentBody		A view factory; the target is a DomElement
 react-dom:flushSync	api	supported	flush-sync	React.flushSync		
-react-dom:useFormStatus	hook	unsupported	form-status		R-16	
-react-dom:requestFormReset	api	unsupported	form-reset		R-16	
+react-dom:useFormStatus	hook	supported	form-status	Hooks.useFormStatus, FormStatus		The action field is not offered
+react-dom:requestFormReset	api	supported	form-reset	React.requestFormReset		
 react-dom:preconnect	resource	unsupported	resource-hints		R-18	
 react-dom:prefetchDNS	resource	unsupported	resource-hints		R-18	
 react-dom:preinit	resource	unsupported	resource-hints		R-18	
@@ -110,7 +110,7 @@ dom:controlled-checkbox	dom	supported	checkbox
 dom:radio-select-textarea	dom	supported	choice-inputs	checked, value and onChange on radio, select and textarea		
 dom:uncontrolled-inputs	dom	supported	uncontrolled-inputs	defaultValue and defaultChecked attributes		
 dom:form-submit	dom	supported	prevent-default	onSubmit		
-dom:form-actions	dom	unsupported	form-actions,action-state		R-16	action and formAction functions
+dom:form-actions	dom	supported	form-actions,action-state	FormAction, FormAction.async, FormData		File fields are not offered
 dom:dangerously-set-inner-html	dom	unsupported	raw-html		R-17	Raw HTML is rejected; a safe rich-content API is planned
 dom:document-metadata	dom	supported	document-metadata	title and meta elements in markup		
 dom:resource-elements	dom	supported	resource-elements	style with href and precedence		Stylesheet links and async scripts are not covered

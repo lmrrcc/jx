@@ -66,6 +66,24 @@ public final class Hooks {
     public static <T> T use(Promise<T> promise) { return runtime().use(Objects.requireNonNull(promise)); }
     /** React's {@code use} for a context: as {@link #useContext}, but allowed in a condition or a loop. */
     public static <T> T use(Context<T> context) { return runtime().use(Objects.requireNonNull(context)); }
+    /** React's {@code useActionState} for a synchronous action: {@code action} receives the state
+     * the previous call returned and the submitted fields, and returns the next state. */
+    public static <S> ActionState<S> useActionState(BiFunction<S, FormData, S> action, S initial) { return runtime().actionState(Objects.requireNonNull(action), initial, false); }
+    /** React's {@code useActionState} for an asynchronous action, which returns the promise of the
+     * next state; {@link ActionState#pending()} is true until it is settled. A failed promise is
+     * reported like an error thrown while rendering. */
+    public static <S> ActionState<S> useActionStateAsync(BiFunction<S, FormData, Promise<S>> action, S initial) { return runtime().actionState(Objects.requireNonNull(action), initial, true); }
+    /** React's {@code useOptimistic}: the returned value is {@code value}, except while a
+     * transition or action is running in which the setter was called; then it is the value set
+     * there. When that transition ends the real value shows again. Call the setter only inside a
+     * transition or an action. */
+    public static <T> State<T> useOptimistic(T value) { return runtime().optimistic(value); }
+    /** As {@link #useOptimistic(Object)}, with a pure function that combines the current value
+     * and an optimistic action; it runs again when {@code value} changes during the transition. */
+    public static <S, A> ReducerState<S, A> useOptimistic(S value, BiFunction<S, A, S> update) { return runtime().optimistic(value, Objects.requireNonNull(update)); }
+    /** React DOM's {@code useFormStatus}: the submission state of the form that contains the
+     * calling component. It does not see a form rendered by the same component. */
+    public static FormStatus useFormStatus() { return runtime().formStatus(); }
     public static <T> T useSyncExternalStore(ExternalStore<T> store) { return runtime().externalStore(Objects.requireNonNull(store)); }
     public static String useId() { return runtime().id(); }
     /** Renderer bootstrap only. Replacing an active runtime would break mounted hook ownership. */
