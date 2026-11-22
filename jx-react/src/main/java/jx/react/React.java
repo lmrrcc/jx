@@ -224,6 +224,7 @@ public final class React {
                 return cleanup == null ? null : cleanup::run;
             }));
             else if (entry.value() instanceof FormAction action) setNative(result, entry.name(), Forms.function(action));
+            else if (entry.value() instanceof RawHtml raw) setNative(result, entry.name(), rawHtml(raw.html()));
             else if (entry.value() instanceof Style style) {
                 JSObject values = object();
                 style.properties().forEach((name, value) -> set(values, name, Interop.scalar(value)));
@@ -381,6 +382,7 @@ public final class React {
     @JSBody(params = "form", script = "ReactDOM.requestFormReset(form);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom")) private static native void requestFormResetNative(JSObject form);
     @JSFunctor interface PromiseAction extends JSObject { JSObject run(); }
     @JSBody(params = "action", script = "React.startTransition(function() { return action(); });", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native void startTransitionPromiseNative(PromiseAction action);
+    @JSBody(params = "html", script = "return {__html: html};") private static native JSObject rawHtml(String html);
     @JSBody(params = "child", script = "return React.createElement(React.StrictMode, null, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject strict(JSObject child);
     @JSBody(params = {"root", "child"}, script = "root.render(child);") private static native void renderRoot(JSObject root, JSObject child);
     @JSBody(params = "root", script = "root.unmount();") private static native void unmount(JSObject root);

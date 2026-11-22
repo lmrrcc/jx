@@ -60,7 +60,7 @@ portal	pass	pass
 prevent-default	pass	pass
 profiler	pass	pass
 props-update	pass	pass
-raw-html	pass	unsupported
+raw-html	pass	pass
 react-exports	pass	n/a
 reducer-batch	pass	pass
 reducer-lazy-init	pass	pass

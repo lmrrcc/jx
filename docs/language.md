@@ -258,7 +258,16 @@ backslash escapes belong inside a Java expression, not a markup quoted value.
 | Other objects or primitive arrays | Explicit runtime error |
 
 A Java string containing HTML remains text. Raw HTML is not accepted by the ordinary
-attribute API. Children need finite, bounded collections; streaming an unbounded
+attribute API. The one explicit way in is React's `dangerouslySetInnerHTML` with a
+`RawHtml` value, on an element without children:
+
+```java
+<div dangerouslySetInnerHTML={RawHtml.unsanitized(markup)} />
+```
+
+Nothing is escaped or sanitized. Markup that contains text from a user or a request
+lets that source run script in the page; pass only markup the application wrote or
+a sanitizer cleaned. A plain string is a compile error there. Children need finite, bounded collections; streaming an unbounded
 Iterable is not a rendering contract.
 
 HTML attributes otherwise use React DOM spelling. `class` aliases `className`

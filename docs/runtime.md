@@ -71,7 +71,7 @@ new snapshot or dependency identity.
 conditional children, scalar text, and context providers. Null and boolean children
 are absent. Strings remain escaped text. `Attributes` separates event callbacks
 from scalar props, normalizes `class`/`for`, and rejects string event handlers,
-raw HTML, reserved prototype assignment, and executable `javascript:` URLs. `Style`
+raw HTML that is not an explicit `RawHtml` value, reserved prototype assignment, and executable `javascript:` URLs. `Style`
 holds explicit CSS property values. `DomRef` exposes focus and value without
 leaking a server dependency into the core.
 

@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 
 /** Immutable DOM attribute collection: scalar attributes, Style, and separately typed event handlers.
- * class/for are translated to className/htmlFor. Raw HTML and string event handlers are rejected. */
+ * class/for are translated to className/htmlFor. String event handlers are rejected; raw HTML needs {@link RawHtml}. */
 public final class Attributes {
     public record Entry(String name, Object value) {}
     private final Map<String, Object> values;
@@ -49,6 +49,9 @@ public final class Attributes {
     public Attributes formAction(String url) { return attr("formAction", url); }
     /** A function as the action of a submit button; null adds nothing. */
     public Attributes formAction(FormAction action) { return action == null ? this : with("formAction", action); }
+    /** Replaces the element's content with parsed HTML, React's {@code dangerouslySetInnerHTML}.
+     * The element must have no children. Null adds nothing. See {@link RawHtml} for the risk. */
+    public Attributes dangerouslySetInnerHTML(RawHtml html) { return html == null ? this : with("dangerouslySetInnerHTML", html); }
     public Attributes on(String event, EventHandler handler) {
         validate(event);
         if (!event.matches("on[A-Z][A-Za-z]+")) throw new IllegalArgumentException("Use a React event name such as onClick");

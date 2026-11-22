@@ -126,8 +126,10 @@ final class Lowerer {
                 continue;
             }
             boolean handler = name.length() > 2 && name.startsWith("on") && Character.isUpperCase(name.charAt(2));
-            // ref, action and formAction have typed overloads so that a lambda gets its type.
+            // ref, action, formAction and raw HTML have typed methods, so a lambda gets its type
+            // and raw HTML cannot be a plain string.
             out.synthetic(name.equals("ref") ? ".ref(" : name.equals("action") ? ".action(" : name.equals("formAction") ? ".formAction("
+                    : name.equals("dangerouslySetInnerHTML") ? ".dangerouslySetInnerHTML("
                     : (handler ? ".on(" : ".attr(") + quote(name) + ", ", attribute.nameSpan().start());
             value(attribute);
             out.synthetic(")", attribute.span().end() - 1);
