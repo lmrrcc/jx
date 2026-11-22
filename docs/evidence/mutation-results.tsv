@@ -1,11 +1,11 @@
 id	result	detected-by	change
 effect-swap-layout	killed	insertion-effect,layout-effect-order	Layout and passive effects are swapped
-effect-drop-cleanup	killed	effect-cleanup,effect-dependencies,effect-event,layout-effect-dependencies,layout-effect-order,strict-nested	Effect cleanups are never registered
+effect-drop-cleanup	killed	activity,effect-cleanup,effect-dependencies,effect-event,layout-effect-dependencies,layout-effect-order,strict-nested	Effect cleanups are never registered
 effect-always-becomes-once	killed	batched-updates,effect-dependencies	An effect without dependencies runs only once
 effect-ignore-deps	killed	layout-effect-dependencies	Layout effects ignore their dependencies
 memo-ignore-deps	killed	callback-identity,flush-sync,memo-recompute,ref-callback	Memoized values are recomputed every render
 memo-never-recompute	killed	callback-identity,memo-recompute	Memoized values are never recomputed
-state-drop-updater	killed	batched-updates,callable-state,callback-identity,checkbox,children-prop,choice-inputs,conditional,context-nested,controlled-input,custom-elements,custom-hook,debug-value,document-metadata,dom-ref-focus,dynamic-component,effect-cleanup,effect-dependencies,effect-event,error-boundary,error-reporting,external-store,flush-sync,fragment,function-props,imperative-handle,key-event,keyed-list,layout-effect-dependencies,memo-recompute,memo-skip,portal,prevent-default,profiler,props-update,ref-callback,ref-persist,remount-by-key,state-counter,state-lazy-init,stop-propagation,strict-nested,uncontrolled-inputs	State updaters are ignored
+state-drop-updater	killed	activity,async-function,batched-updates,callable-state,callback-identity,checkbox,child-slots,children-prop,choice-inputs,conditional,context-nested,controlled-input,custom-elements,custom-hook,debug-value,deferred-value,document-metadata,dom-ref-focus,dynamic-component,effect-cleanup,effect-dependencies,effect-event,error-boundary,error-reporting,external-store,flush-sync,form-actions,fragment,function-props,imperative-handle,key-event,keyed-list,layout-effect-dependencies,memo-recompute,memo-skip,optimistic,portal,prevent-default,profiler,props-update,ref-callback,ref-persist,remount-by-key,start-transition,state-counter,state-lazy-init,stop-propagation,strict-nested,transition-pending,transition-promise,uncontrolled-inputs,view-transition	State updaters are ignored
 state-eager-initializer	killed	state-lazy-init	The lazy state initializer runs on every render
 reducer-ignore-action	killed	reducer-batch,reducer-lazy-init	Reducer actions are ignored
 ref-not-persistent	killed	callback-identity,ref-persist	A ref is recreated on every render
@@ -15,10 +15,10 @@ store-stale-snapshot	killed	external-store	External store changes do not rerende
 id-constant	killed	use-id	useId returns the same id everywhere
 strict-mode-off	killed	batched-updates,custom-hook,effect-cleanup,effect-dependencies,effect-event,layout-effect-dependencies,layout-effect-order,memo-recompute,memo-skip,reducer-lazy-init,ref-callback,state-lazy-init,strict-nested	Strict Mode is not applied
 key-dropped	killed	keyed-list,remount-by-key	Component keys are not passed to React
-text-child-as-fragment	killed	document-metadata,resource-elements	Text children are wrapped in fragments again
-provider-children-as-array	killed	context-nested	Provider children are passed as one array again
-provider-ignores-value	killed	context-nested	Providers supply the default value
-prevent-default-noop	killed	prevent-default	preventDefault does nothing
+text-child-as-fragment	killed	child-values,document-metadata,resource-elements	Text children are wrapped in fragments again
+provider-children-as-array	killed	context-nested,use-promise	Provider children are passed as one array again
+provider-ignores-value	killed	context-nested,use-promise	Providers supply the default value
+prevent-default-noop	killed	form-reset,prevent-default	preventDefault does nothing
 stop-propagation-noop	killed	stop-propagation	stopPropagation does nothing
 current-target-is-target	killed	event-payload	currentTarget reports the event target
 checked-inverted	killed	checkbox	The checked flag is inverted
@@ -30,7 +30,7 @@ touches-empty	killed	pointer-events	Touch lists are always empty
 focus-noop	killed	create-ref,dom-ref-focus,forward-ref,imperative-handle,ref-as-prop	DOM ref focus does nothing
 style-dropped	killed	attributes	Typed style values are not applied
 boolean-child-rejected	killed	child-values	Boolean children are no longer ignored
-nested-iterable-dropped	killed	child-slots,child-values,children-utilities,generic-list,keyed-list	Iterable children render nothing
+nested-iterable-dropped	killed	async-function,child-slots,child-values,children-utilities,generic-list,keyed-list	Iterable children render nothing
 array-child-dropped	killed	child-values	Array children render nothing
 for-alias-broken	killed	attributes,use-id	The for attribute is lowered to a wrong name
 memo-never-skips	killed	memo-skip	Memoized components render on every parent render
@@ -54,3 +54,26 @@ collection-flattened	killed	child-slots	Collection children are flattened into t
 transition-resolves-early	killed	transition-pending	Async transitions stop pending before the action completes
 deferred-initial-ignored	killed	deferred-value	The initial deferred value is ignored
 deferred-not-deferred	killed	deferred-value	Deferred values are returned at once
+await-does-not-wait	killed	async-function,form-status,optimistic,transition-promise	await returns before the promise is settled
+async-starts-late	killed	async-function	An asynchronous function no longer starts at once
+use-thenable-not-cached	killed	lazy-component,use-promise	use receives a new JavaScript promise on every render
+transition-promise-dropped	killed	transition-promise	A promise transition stops pending before the promise is settled
+suspense-fallback-dropped	killed	lazy-component,use-promise	Suspense shows no fallback
+use-context-default	killed	use-promise	use(context) ignores providers
+lazy-reloads-each-render	killed	lazy-component	The lazy loader runs on every render
+activity-always-visible	killed	activity	A hidden activity stays visible
+transition-type-dropped	killed	view-transition	Transition types are not passed to React
+view-transition-plain	killed	view-transition	ViewTransition renders its children without a boundary
+form-action-not-awaited	killed	form-status	An asynchronous form action is not pending
+form-data-wrong-field	killed	action-state,form-actions	Form data reads the wrong field
+action-state-drops-previous	killed	action-state	An action always receives the initial state
+optimistic-set-ignored	killed	optimistic	The optimistic setter does nothing
+form-reset-ignored	killed	form-reset	requestFormReset does nothing
+form-status-never-pending	killed	form-status	Form status never reports a pending submission
+raw-html-as-text	killed	raw-html	Raw HTML is escaped
+hint-preconnect-dropped	killed	resource-hints	preconnect adds nothing
+hint-prefetchDNS-dropped	killed	resource-hints	prefetchDNS adds nothing
+hint-preload-dropped	killed	resource-hints	preload adds nothing
+hint-preinit-dropped	killed	resource-hints	preinit adds nothing
+hint-preloadModule-dropped	killed	resource-hints	preloadModule adds nothing
+hint-preinitModule-dropped	killed	resource-hints	preinitModule adds nothing

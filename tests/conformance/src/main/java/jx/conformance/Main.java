@@ -83,6 +83,7 @@ import jx.conformance.cases.FormStatusCase;
 import jx.conformance.cases.FormActions;
 import jx.conformance.cases.FormReset;
 import jx.conformance.cases.RawHtmlCase;
+import jx.conformance.cases.ResourceHints;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -175,6 +176,7 @@ public final class Main {
             case "form-actions" -> React.mountStrict("app", FormActions.JX, null);
             case "form-reset" -> React.mountStrict("app", FormReset.JX, null);
             case "raw-html" -> React.mountStrict("app", RawHtmlCase.JX, null);
+            case "resource-hints" -> React.mountStrict("app", ResourceHints.JX, null);
             default -> Bench.unknown(id);
         }
     }

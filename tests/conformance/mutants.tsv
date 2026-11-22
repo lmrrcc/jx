@@ -71,3 +71,9 @@ optimistic-set-ignored	jx-react/src/main/java/jx/react/ReactHooks.java	update ->
 form-reset-ignored	jx-react/src/main/java/jx/react/React.java	script = "ReactDOM.requestFormReset(form);"	script = ""	requestFormReset does nothing
 form-status-never-pending	jx-react/src/main/java/jx/react/ReactHooks.java	script = "return !!status.pending;"	script = "return false;"	Form status never reports a pending submission
 raw-html-as-text	jx-react/src/main/java/jx/react/React.java	script = "return {__html: html};"	script = "return {__html: html.replace(/</g, String.fromCharCode(38) + String.fromCharCode(108) + String.fromCharCode(116) + String.fromCharCode(59))};"	Raw HTML is escaped
+hint-preconnect-dropped	jx-react/src/main/java/jx/react/Resources.java	if (crossOrigin === null) ReactDOM.preconnect(href);	if (crossOrigin === null) {}	preconnect adds nothing
+hint-prefetchDNS-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.prefetchDNS(href);"	script = ""	prefetchDNS adds nothing
+hint-preload-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.preload(href, options);"	script = ""	preload adds nothing
+hint-preinit-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.preinit(href, options);"	script = ""	preinit adds nothing
+hint-preloadModule-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.preloadModule(href, options);"	script = ""	preloadModule adds nothing
+hint-preinitModule-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.preinitModule(href, options);"	script = ""	preinitModule adds nothing
