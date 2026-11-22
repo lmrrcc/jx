@@ -292,3 +292,30 @@ test('deferred-value: the initial value renders first, then the real value', asy
   await page.getByRole('button', {name: 'Change'}).click();
   await expect(page.getByRole('status')).toHaveText('changed');
 });
+
+test('transition-promise: an async function as action keeps the transition pending until it ends', async ({page, open}) => {
+  await open('transition-promise');
+  await expect(page.getByRole('status')).toHaveText('idle none');
+  await page.getByRole('button', {name: 'Start'}).click();
+  await expect(page.getByRole('status')).toHaveText('pending');
+  await page.getByRole('button', {name: 'Finish'}).click();
+  await expect(page.getByRole('status')).toHaveText('started done');
+});
+
+test('async-function: an async function starts at once, suspends at await and catches a rejection', async ({page, open}) => {
+  await open('async-function');
+  const lines = () => page.getByRole('listitem').allTextContents();
+  await page.getByRole('button', {name: 'Run'}).click();
+  await expect.poll(lines).toEqual(['start', 'returned']);
+  await page.getByRole('button', {name: 'Release'}).click();
+  await expect.poll(lines).toEqual(['start', 'returned', 'first one']);
+  await page.getByRole('button', {name: 'Fail'}).click();
+  await expect.poll(lines).toEqual(['start', 'returned', 'first one', 'caught broken', 'finished']);
+});
+
+test('use-promise: use suspends on a promise, reads context, and may be conditional', async ({page, open}) => {
+  await open('use-promise');
+  await expect(page.getByRole('status')).toHaveText('loading');
+  await page.getByRole('button', {name: 'Resolve'}).click();
+  await expect(page.getByRole('status')).toHaveText('loaded bright');
+});

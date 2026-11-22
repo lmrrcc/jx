@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.Promise;
+import jx.View;
+import jx.conformance.Contexts;
+
+/** Reads a promise and, only when asked, a context with use. */
+@Component
+public final class UseLoaded {
+    static Promise.Resolver<String> VALUE_RESOLVER;
+    private static final Promise<String> VALUE = Promise.create(resolver -> VALUE_RESOLVER = resolver);
+
+    public record Props(boolean loud) {}
+
+    public static View render(Props props) {
+        String text = Hooks.use(VALUE);
+        // Unlike other hooks, use may be called conditionally.
+        String tone = props.loud() ? Hooks.use(Contexts.TONE) : "quiet";
+        return <p role="status">{text} {tone}</p>;
+    }
+}

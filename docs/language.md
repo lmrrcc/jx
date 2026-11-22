@@ -295,9 +295,14 @@ memo, context, external stores and ids:
 - `useDebugValue(value)` and `useDebugValue(value, format)` label a custom hook in
   React DevTools.
 - `useTransition()` returns a `TransitionState`: `pending()`, `start(action)` and
-  `startAsync(done -> ...)`. An asynchronous action receives a completion callback
-  in place of returning a promise; the transition stays pending until it is called.
+  `startAsync(...)`. An asynchronous action either returns a `Promise`, usually
+  `startAsync(() -> Async.run(() -> { ... }))`, or takes a completion callback,
+  `startAsync(done -> ...)`; the transition stays pending until the promise is
+  settled or the callback is called.
   `React.startTransition(action)` in `jx.react` is the standalone form.
+- `use(promise)` returns the value of a `Promise` or suspends the component, and
+  `use(context)` reads a context. Unlike other hooks, `use` may be called in a
+  condition or a loop. See Asynchronous functions below.
 - `useDeferredValue(value)` and `useDeferredValue(value, initial)` return the
   previous value while a render with the new one is prepared.
 - `useImperativeHandle` is described under Refs.
@@ -312,6 +317,56 @@ commits the updates made in `action` to the DOM before it returns.
 called in an interpolation, for example `{React.strictMode(<Panel />)}`. As in
 React, a nested `StrictMode` renders its children twice in development but repeats
 their effects only when it mounts after its parent.
+
+### Asynchronous functions, promises and Suspense
+
+`jx.Promise<T>` is the counterpart of a JavaScript promise: it is settled once,
+with a value or an error, and its callbacks (`whenSettled`, `map`, `flatMap`,
+`recover`) run after the current browser job. `Promise.create(resolver -> ...)`
+makes one; `React.promise(jsPromise)` and `React.thenable(promise)` in `jx.react`
+convert from and to JavaScript promises for browser APIs.
+
+`Async.run` is `async` and `Async.await` is `await`. The body is ordinary Java,
+including loops and `try`/`catch`, and really suspends at each `await` while the
+browser stays responsive:
+
+```java
+import static jx.Async.await;
+
+Promise<String> title = Async.run(() -> {
+    User user = await(loadUser(id));
+    try {
+        Team team = await(loadTeam(user.team()));
+        return user.name() + " of " + team.name();
+    } catch (IllegalStateException missing) {
+        return user.name();
+    }
+});
+```
+
+- The body starts at once and runs to its first `await`, as in JavaScript. Started
+  from inside another asynchronous function, it starts after the current browser job.
+- A failed promise throws at `await`: unchecked errors as they are, checked
+  exceptions wrapped in `AsyncException`. An exception that leaves the body rejects
+  the promise that `Async.run` returned.
+- `await` works only in Java code called from an `Async.run` body. It throws
+  `IllegalStateException` in an event handler, an effect or rendering; start an
+  asynchronous function there. It must not be called inside a callback that React
+  or the browser runs synchronously, such as the action of `React.flushSync`; that
+  misuse is not detected.
+- Only methods that can reach an `await` are compiled as suspendable code. Calling
+  `await` behind a widely used interface such as `Runnable` or `Supplier` makes
+  every caller of that interface suspendable and the bundle larger; `Async.Body`
+  and `Async.Action` exist to avoid that.
+
+In a component, read a promise with `Hooks.use(promise)` under
+`React.suspense(fallback, children...)`, React's `Suspense`. The promise must be
+the same object on every render: create it outside rendering, or keep it in state
+or a memo. A failed promise reaches the nearest `React.boundary`.
+
+```java
+{React.suspense(<p>Loading</p>, <Profile user={userPromise} />)}
+```
 
 The compiler checks conventional `useX` calls in render/custom-hook methods for
 placement inside branches, loops, callbacks, try/switch constructs, and after a

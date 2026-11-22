@@ -46,13 +46,6 @@ referenceOnly('form-reset: requestFormReset restores uncontrolled fields to thei
   await expect(page.getByLabel('Note')).toHaveValue('start');
 });
 
-referenceOnly('use-promise: use suspends on a promise, reads context, and may be conditional', async ({page, open}) => {
-  await open('use-promise');
-  await expect(page.getByRole('status')).toHaveText('loading');
-  await page.getByRole('button', {name: 'Resolve'}).click();
-  await expect(page.getByRole('status')).toHaveText('loaded bright');
-});
-
 referenceOnly('lazy-component: a lazy component shows the Suspense fallback until it loads', async ({page, open}) => {
   await open('lazy-component');
   await expect(page.getByRole('status')).toHaveText('loading');
