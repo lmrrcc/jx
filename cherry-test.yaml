@@ -1,0 +1,33 @@
+# Cherry Test (https://www.cherry-test.com/): unit tests with coverage, CRAP scores and PIT on
+# the Java files changed since main. One package per Maven module that has unit tests.
+defaults:
+  coverage: true
+  html_report: true
+  open_report: false
+  runs_base: target/cherry-test/runs
+  scope: none
+  diff_base: main
+projects:
+  jx:
+    path: .
+    packages:
+      jx-core:
+        adapter: maven
+        manifest: jx-core/pom.xml
+        kinds: [unit]
+      jx-elm:
+        adapter: maven
+        manifest: jx-elm/pom.xml
+        kinds: [unit]
+      jx-compiler:
+        adapter: maven
+        manifest: jx-compiler/pom.xml
+        kinds: [unit]
+      jx-maven-plugin:
+        adapter: maven
+        manifest: jx-maven-plugin/pom.xml
+        kinds: [unit]
+      jx-language-server:
+        adapter: maven
+        manifest: jx-language-server/pom.xml
+        kinds: [unit]
