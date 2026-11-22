@@ -303,3 +303,37 @@ VS Code suite and separate native JDT suite passed; the latter also proves Maven
 main/test visibility. At that revision, package identity checks confirmed that
 both installers contained the matching shared server and compiler/Java bridge
 dependencies. The IntelliJ-only 0.3.1 verification above does not rebuild the VSIX.
+
+## Coverage and CRAP scores with Cherry Test
+
+[Cherry Test](https://www.cherry-test.com/) runs the unit tests of the Maven modules
+that have them, measures line coverage with JaCoCo and reports a CRAP score per
+method (complexity against coverage). The modules are listed in
+[`cherry-test.yaml`](../cherry-test.yaml); the parent POM carries the JaCoCo agent and
+the build-directory property Cherry Test sets.
+
+```sh
+cherry-test --kinds unit --no-open
+```
+
+The report is `target/cherry-test/latest/reports/index.html`. Cherry Test starts
+Maven in each module's directory and looks for `mvnw` there, so with the single
+wrapper at the repository root a `mvn` command must be on the `PATH`; the modules
+must already be installed in the local repository that `mvn` uses.
+
+Baseline on 22 November 2026, Cherry Test 0.3.16, 82 unit tests:
+
+| Module | Lines covered by unit tests |
+| --- | --- |
+| `jx-compiler` | 899 of 997 (90.2%) |
+| `jx-elm` | 103 of 110 (93.6%) |
+| `jx-language-server` | 317 of 372 (85.2%) |
+| `jx-maven-plugin` | 395 of 637 (62.0%) |
+| `jx-core` | 164 of 305 (53.8%) |
+
+427 methods; 15 have a CRAP score of 30 or more, the worst being `DevMojo.execute`
+(240). These numbers see JVM unit tests only. Code that runs in the browser through
+TeaVM, which is most of `jx-core` and all of `jx-react`, is exercised by the
+conformance bench and is not counted here. Nothing fails on a score yet; the figures
+are a baseline, not a gate. Mutation testing with PIT through Cherry Test needs a
+newer Cherry Test than 0.3.16 and is not set up.
