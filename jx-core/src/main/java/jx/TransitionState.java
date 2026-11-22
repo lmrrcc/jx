@@ -2,6 +2,7 @@ package jx;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /** The result of {@link Hooks#useTransition()}: whether a transition of this component is still
  * pending, and the way to start one. Updates made inside a transition are not urgent: React keeps
@@ -13,6 +14,7 @@ public record TransitionState(boolean pending, Starter starter) {
     public interface Starter {
         void start(Runnable action);
         void startAsync(Consumer<Runnable> action);
+        void startPromise(Supplier<? extends Promise<?>> action);
     }
 
     /** Runs {@code action} now and marks the state updates it makes as a transition. */
@@ -24,4 +26,12 @@ public record TransitionState(boolean pending, Starter starter) {
      * wrapped in a transition again, as after an {@code await} in React. Always call the
      * callback, also on failure, or the transition stays pending. */
     public void startAsync(Consumer<Runnable> action) { starter.startAsync(Objects.requireNonNull(action)); }
+
+    /** Starts an asynchronous action that reports its end with a promise, like an async function
+     * passed to React's {@code startTransition}. {@code action} runs now; {@link #pending()} stays
+     * true until the promise it returns is settled. With {@link Async#run(Async.Action)} the
+     * updates made before the first {@code await} belong to the transition; later ones only when
+     * they are wrapped in a transition again. A failed promise is reported like an error thrown
+     * while rendering. */
+    public void startAsync(Supplier<? extends Promise<?>> action) { starter.startPromise(Objects.requireNonNull(action)); }
 }

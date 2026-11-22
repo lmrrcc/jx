@@ -102,6 +102,9 @@ final class ReactHooks implements HookRuntime {
         TransitionState.Starter starter = memoRaw(() -> new TransitionState.Starter() {
             @Override public void start(Runnable action) { startNative(start, action::run); }
             @Override public void startAsync(Consumer<Runnable> action) { startAsyncNative(start, resolve -> action.accept(() -> call(resolve))); }
+            @Override public void startPromise(Supplier<? extends Promise<?>> action) {
+                startPromiseNative(start, () -> AsyncBridge.thenable(java.util.Objects.requireNonNull(action.get(), "The transition action returned null")));
+            }
         }, Dependencies.none());
         return new TransitionState(pending(pair), starter);
     }
@@ -119,6 +122,11 @@ final class ReactHooks implements HookRuntime {
     @JSBody(params = "pair", script = "return !!pair[0];") private static native boolean pending(JSObject pair);
     @JSBody(params = {"start", "action"}, script = "start(function() { action(); });") private static native void startNative(JSObject start, Cleanup action);
     @JSBody(params = {"start", "action"}, script = "start(function() { return new Promise(function(resolve) { action(resolve); }); });") private static native void startAsyncNative(JSObject start, AsyncAction action);
+    @JSFunctor interface PromiseAction extends JSObject { JSObject run(); }
+    @JSBody(params = {"start", "action"}, script = "start(function() { return action(); });") private static native void startPromiseNative(JSObject start, PromiseAction action);
+    @Override public <T> T use(Promise<T> promise) { return Interop.value(useNative(AsyncBridge.thenable(promise))); }
+    @Override public <T> T use(Context<T> context) { return Interop.value(useNative(React.context(context))); }
+    @JSBody(params = "usable", script = "return React.use(usable);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object useNative(JSObject usable);
     @JSBody(params = "resolve", script = "resolve();") private static native void call(JSObject resolve);
     @JSBody(params = {"value", "initial", "hasInitial"}, script = "return hasInitial ? React.useDeferredValue(value, initial) : React.useDeferredValue(value);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object deferredNative(Object value, Object initial, boolean hasInitial);
     @Override public void effect(Effect effect, Dependencies dependencies, boolean layout) {

@@ -58,6 +58,14 @@ public final class Hooks {
     public static <T> T useCallback(T callback, Dependencies dependencies) { return useMemo(() -> callback, dependencies); }
     public static <T> Context<T> createContext(T defaultValue) { return new Context<>(defaultValue); }
     public static <T> T useContext(Context<T> context) { return runtime().context(Objects.requireNonNull(context)); }
+    /** React's {@code use} for a promise: returns its value, or suspends the component so that the
+     * nearest {@code React.suspense} shows its fallback until the promise is settled. A failed
+     * promise throws to the nearest error boundary. Unlike other hooks it may be called in a
+     * condition or a loop. Pass the same promise on every render: create it outside rendering or
+     * keep it in state or a memo. Do not call it inside {@code try}. */
+    public static <T> T use(Promise<T> promise) { return runtime().use(Objects.requireNonNull(promise)); }
+    /** React's {@code use} for a context: as {@link #useContext}, but allowed in a condition or a loop. */
+    public static <T> T use(Context<T> context) { return runtime().use(Objects.requireNonNull(context)); }
     public static <T> T useSyncExternalStore(ExternalStore<T> store) { return runtime().externalStore(Objects.requireNonNull(store)); }
     public static String useId() { return runtime().id(); }
     /** Renderer bootstrap only. Replacing an active runtime would break mounted hook ownership. */

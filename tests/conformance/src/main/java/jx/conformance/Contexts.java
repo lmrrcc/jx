@@ -9,4 +9,7 @@ public final class Contexts {
 
     /** Theme name; "light" when no provider is present. */
     public static final Context<String> THEME = Hooks.createContext("light");
+
+    /** Tone of a message; "plain" when no provider is present. */
+    public static final Context<String> TONE = Hooks.createContext("plain");
 }

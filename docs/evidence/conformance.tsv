@@ -13,16 +13,16 @@ react:useMemo	hook	supported	memo-recompute	Hooks.useMemo
 react:useCallback	hook	supported	callback-identity	Hooks.useCallback		
 react:useId	hook	supported	use-id	Hooks.useId		
 react:useSyncExternalStore	hook	supported	external-store	Hooks.useSyncExternalStore		Server snapshot argument is not offered
-react:useTransition	hook	supported	transition-pending	Hooks.useTransition, TransitionState		An async action takes a completion callback instead of returning a promise
+react:useTransition	hook	supported	transition-pending,transition-promise	Hooks.useTransition, TransitionState		An async action returns a jx.Promise, usually from Async.run, or takes a completion callback
 react:startTransition	api	supported	start-transition,transition-pending	React.startTransition		
 react:useDeferredValue	hook	supported	deferred-value	Hooks.useDeferredValue		Equal scalars compare by value
 react:useOptimistic	hook	unsupported	optimistic		R-16	
 react:useActionState	hook	unsupported	action-state		R-16	
-react:use	hook	unsupported	use-promise		R-13	Promise and context consumption
+react:use	hook	supported	use-promise	Hooks.use		Takes a jx.Promise or a Context
 react:useDebugValue	hook	supported	debug-value	Hooks.useDebugValue		The DevTools label itself is not asserted
 react:Fragment	component	supported	fragment	<>...</>, Views.fragment		
 react:StrictMode	component	supported	effect-cleanup,state-lazy-init,memo-recompute,strict-nested	React.mountStrict, React.strictMode		Nested use is a view factory, not a markup tag
-react:Suspense	component	unsupported	use-promise,lazy-component		R-13	
+react:Suspense	component	supported	use-promise	React.suspense		
 react:Activity	component	unsupported	activity		R-15	
 react:Profiler	component	supported	profiler	React.profiler		A view factory, not a markup tag
 react:ViewTransition	component	unsupported	view-transition		R-15	
@@ -92,6 +92,7 @@ jsx:generic-components	markup	supported	generic-list	generic Props record and re
 jsx:ref-as-prop	markup	supported	ref-as-prop	ref as a Props field		
 jsx:ref-callback	markup	supported	ref-callback	RefCallback, Attributes.ref		The returned cleanup runs on removal
 jsx:namespace-components	markup	equivalent	namespace-components	Fully qualified component class name		Java has no component namespace objects; the dotted form is a qualified class name
+jsx:async-functions	markup	equivalent	async-function,transition-promise	Async.run, Async.await, Promise		JavaScript async functions and promises; await works only in code called from Async.run
 dom:ref-on-element	dom	supported	dom-ref-focus	ref with Hooks.useDomRef		DomElement exposes focus and value only
 dom:attributes	dom	supported	attributes	Markup attributes		A sample of attributes; the full attribute table is not covered yet
 dom:style	dom	supported	attributes	Style		

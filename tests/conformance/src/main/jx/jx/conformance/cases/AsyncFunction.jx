@@ -1,0 +1,51 @@
+package jx.conformance.cases;
+
+import static jx.Async.await;
+
+import java.util.ArrayList;
+import java.util.List;
+import jx.Async;
+import jx.Component;
+import jx.Hooks;
+import jx.Promise;
+import jx.State;
+import jx.View;
+
+/** Case async-function: an asynchronous function starts at once, suspends at await, sees a
+ * rejection as an exception and settles the promise it returned. */
+@Component
+public final class AsyncFunction {
+    private static Promise.Resolver<String> gate;
+
+    private static Promise<String> gate() { return Promise.create(resolver -> gate = resolver); }
+
+    private static Promise<String> load(State<List<String>> lines) {
+        return Async.run(() -> {
+            add(lines, "start");
+            String first = await(gate());
+            add(lines, "first " + first);
+            try {
+                await(gate());
+            } catch (IllegalStateException error) {
+                add(lines, "caught " + error.getMessage());
+            }
+            return "finished";
+        });
+    }
+
+    private static void add(State<List<String>> lines, String line) {
+        lines.update(all -> { List<String> next = new ArrayList<>(all); next.add(line); return next; });
+    }
+
+    public static View render() {
+        State<List<String>> lines = Hooks.useState(List.of());
+        return (
+            <main>
+                <button onClick={event -> { load(lines).whenSettled(line -> add(lines, line), error -> {}); add(lines, "returned"); }}>Run</button>
+                <button onClick={event -> gate.resolve("one")}>Release</button>
+                <button onClick={event -> gate.reject(new IllegalStateException("broken"))}>Fail</button>
+                <ol>{java.util.stream.IntStream.range(0, lines.value().size()).mapToObj(index -> <li key={index}>{lines.value().get(index)}</li>).toList()}</ol>
+            </main>
+        );
+    }
+}

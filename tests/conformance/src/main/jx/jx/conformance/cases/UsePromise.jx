@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+import jx.conformance.Contexts;
+import jx.react.React;
+
+/** Case use-promise: use suspends on a promise, reads context, and may be conditional. */
+@Component
+public final class UsePromise {
+    public static View render() {
+        return (
+            <main>
+                <button onClick={event -> UseLoaded.VALUE_RESOLVER.resolve("loaded")}>Resolve</button>
+                {Contexts.TONE.provide("bright",
+                    React.suspense(<p role="status">loading</p>, <UseLoaded loud={true} />))}
+            </main>
+        );
+    }
+}

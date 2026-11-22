@@ -21,6 +21,7 @@ public final class React {
     @JSFunctor interface Detach extends JSObject { void run(); }
     @JSFunctor interface Attach extends JSObject { Detach attach(JSObject node); }
     @JSFunctor interface Compare extends JSObject { boolean same(Object previous, Object next); }
+    static { Async.installRuntime(AsyncBridge.INSTANCE); }
     private record NativeView(JSObject element) implements View.Extension {}
     /** Error boundary for descendant rendering/lifecycle errors, including Java exceptions.
      * Like React itself, this does not catch event callbacks or asynchronous work. */
@@ -47,6 +48,19 @@ public final class React {
     public static View strictMode(Object... children) {
         return new NativeView(strict(element(Views.fragment(children))));
     }
+    /** React's {@code Suspense}: shows {@code fallback} while a descendant is suspended, for
+     * example in {@link Hooks#use(Promise)}, and the children once they can render. {@code fallback}
+     * may be null to show nothing. */
+    public static View suspense(View fallback, Object... children) {
+        return new NativeView(suspenseNative(fallback == null ? null : element(fallback), element(Views.fragment(children))));
+    }
+    /** The JX promise that settles like a JavaScript promise or thenable, for browser APIs such as
+     * {@code fetch}. A rejection that is not a Java exception becomes an {@link IllegalStateException}
+     * with the JavaScript message. */
+    public static Promise<JSObject> promise(JSObject thenable) { return AsyncBridge.promise(Objects.requireNonNull(thenable)); }
+    /** The JavaScript promise that settles like {@code promise}, for explicit interop. The same
+     * object is returned for the same promise. */
+    public static JSObject thenable(Promise<?> promise) { return AsyncBridge.thenable(Objects.requireNonNull(promise)); }
     /** React's {@code createPortal}: renders the children into another DOM element while they stay
      * part of this React tree, so context and event bubbling follow the React parent. The target
      * comes from a {@link DomRef} or from {@link #documentBody()} and must stay in the document. */
@@ -304,6 +318,7 @@ public final class React {
     @JSBody(params = "children", script = "return React.createElement.apply(null, [React.Fragment, null].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject fragment(Object[] children);
     @JSBody(params = {"context", "value", "identity", "children"}, script = "return React.createElement.apply(null, [context.jxProvider, {value: value, identity: identity}].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject provider(JSObject context, Object value, Object identity, Object[] children);
     @JSBody(params = "elementId", script = "var element = document.getElementById(elementId); if (!element) throw new Error('Missing React root: ' + elementId); var hot = globalThis.__JX_HOT__; var options = hot && hot.enabled ? {onUncaughtError: function(error) { if (typeof hot.fail === 'function') hot.fail(error); if (typeof reportError === 'function') reportError(error); else console.error(error); }} : undefined; return ReactDOM.createRoot(element, options);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom/client")) private static native JSObject createRoot(String elementId);
+    @JSBody(params = {"fallback", "child"}, script = "return React.createElement(React.Suspense, {fallback: fallback}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject suspenseNative(JSObject fallback, JSObject child);
     @JSBody(params = "child", script = "return React.createElement(React.StrictMode, null, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject strict(JSObject child);
     @JSBody(params = {"root", "child"}, script = "root.render(child);") private static native void renderRoot(JSObject root, JSObject child);
     @JSBody(params = "root", script = "root.unmount();") private static native void unmount(JSObject root);

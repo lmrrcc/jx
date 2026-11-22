@@ -71,6 +71,9 @@ import jx.conformance.cases.ChildSlots;
 import jx.conformance.cases.TransitionPending;
 import jx.conformance.cases.StartTransition;
 import jx.conformance.cases.DeferredValue;
+import jx.conformance.cases.UsePromise;
+import jx.conformance.cases.AsyncFunction;
+import jx.conformance.cases.TransitionPromise;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -151,6 +154,9 @@ public final class Main {
             case "transition-pending" -> React.mountStrict("app", TransitionPending.JX, null);
             case "start-transition" -> React.mountStrict("app", StartTransition.JX, null);
             case "deferred-value" -> React.mountStrict("app", DeferredValue.JX, null);
+            case "use-promise" -> React.mountStrict("app", UsePromise.JX, null);
+            case "async-function" -> React.mountStrict("app", AsyncFunction.JX, null);
+            case "transition-promise" -> React.mountStrict("app", TransitionPromise.JX, null);
             default -> Bench.unknown(id);
         }
     }

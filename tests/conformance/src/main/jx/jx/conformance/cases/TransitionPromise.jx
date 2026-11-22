@@ -1,0 +1,37 @@
+package jx.conformance.cases;
+
+import static jx.Async.await;
+
+import jx.Async;
+import jx.Component;
+import jx.Hooks;
+import jx.Promise;
+import jx.State;
+import jx.TransitionState;
+import jx.View;
+import jx.react.React;
+
+/** Case transition-promise: an asynchronous function as transition action; the transition is
+ * pending until the function ends. */
+@Component
+public final class TransitionPromise {
+    private static Promise.Resolver<Void> finish;
+
+    public static View render() {
+        TransitionState transition = Hooks.useTransition();
+        State<String> step = Hooks.useState("idle");
+        State<String> result = Hooks.useState("none");
+        return (
+            <main>
+                <button onClick={event -> transition.startAsync(() -> Async.run(() -> {
+                    // Before the first await the update still belongs to the transition.
+                    step.set("started");
+                    await(Promise.<Void>create(resolver -> finish = resolver));
+                    React.startTransition(() -> result.set("done"));
+                }))}>Start</button>
+                <button onClick={event -> finish.resolve(null)}>Finish</button>
+                <p role="status">{transition.pending() ? "pending" : step.value() + " " + result.value()}</p>
+            </main>
+        );
+    }
+}

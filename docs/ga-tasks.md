@@ -6,7 +6,7 @@ by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
 Progress, 21 November 2026: M1-01 to M1-05 and R-01 to R-05 are done, committed as
 `75d79c2` with Verify green. `main` is protected: a change reaches it only through
-a pull request whose Verify check has passed. R-06 to R-12 and R-32 are done. The next task is R-13.
+a pull request whose Verify check has passed. R-06 to R-13 and R-32 are done; R-13 also added asynchronous functions (`Async.run`, `Async.await`, `Promise`). The next task is R-14.
 
 ## Rules
 
@@ -92,8 +92,8 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-11 | M2 | Typed equivalents of `Children`, `cloneElement` and `isValidElement` | 3 | done |
 | R-32 | M2 | Child positions: a null or boolean child and a nested list each keep one position among their siblings, so a later sibling keeps its state. Found by the `child-slots` case on 21 November 2026; `Children.count` then counts empty positions as React does | 1 | done |
 | R-12 | M3 | `useTransition`, `startTransition`, `useDeferredValue` | 3 | done |
-| R-13 | M3 | `Suspense` and `use` for promises and context | 2 | next |
-| R-14 | M3 | `lazy`, on the lazy-runtime boundary proven in M1 | 1 | planned |
+| R-13 | M3 | `Suspense` and `use` for promises and context; `Promise` and async/await in Java | 2 | done |
+| R-14 | M3 | `lazy`, on the lazy-runtime boundary proven in M1 | 1 | next |
 | R-15 | M3 | `Activity`; `ViewTransition` and `addTransitionType` | 3 | planned |
 | R-16 | M3 | Actions: form action functions, `useActionState`, `useFormStatus`, `useOptimistic`, `requestFormReset`, and the deprecated `useFormState` alias | 6 | planned |
 | R-17 | M3 | Raw HTML through an explicit, named API equal to `dangerouslySetInnerHTML` | 1 | planned |

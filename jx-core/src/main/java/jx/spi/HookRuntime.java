@@ -23,6 +23,10 @@ public interface HookRuntime {
     <H> void imperativeHandle(Ref<H> ref, Supplier<H> create, Dependencies dependencies);
     <T> T memo(Supplier<T> calculation, Dependencies dependencies);
     <T> T context(Context<T> context);
+    /** React's {@code use} for a promise; not bound to a hook position. */
+    <T> T use(Promise<T> promise);
+    /** React's {@code use} for a context; not bound to a hook position. */
+    <T> T use(Context<T> context);
     <T> T externalStore(ExternalStore<T> store);
     String id();
 }
