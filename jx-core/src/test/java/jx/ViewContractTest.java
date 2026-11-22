@@ -11,6 +11,10 @@ class ViewContractTest {
         Attributes attributes = Attributes.create();
         assertThrows(IllegalArgumentException.class, () -> attributes.attr("onClick", "alert(1)"));
         assertThrows(IllegalArgumentException.class, () -> attributes.attr("dangerouslySetInnerHTML", "<b>raw</b>"));
+        assertThrows(IllegalArgumentException.class, () -> attributes.attr("dangerouslySetInnerHTML", RawHtml.unsanitized("<b>raw</b>")),
+                "raw HTML goes through its own method only");
+        assertEquals("<b>raw</b>", ((RawHtml) attributes.dangerouslySetInnerHTML(RawHtml.unsanitized("<b>raw</b>")).entries().get(0).value()).html());
+        assertThrows(NullPointerException.class, () -> RawHtml.unsanitized(null));
         assertThrows(IllegalArgumentException.class, () -> attributes.attr("href", " jAvA\nScRiPt:alert(1)"));
         assertThrows(IllegalArgumentException.class, () -> attributes.attr("__proto__", "value"));
         assertThrows(IllegalArgumentException.class, () -> attributes.attr("count", new BigDecimal("1")));

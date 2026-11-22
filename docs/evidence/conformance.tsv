@@ -111,7 +111,7 @@ dom:radio-select-textarea	dom	supported	choice-inputs	checked, value and onChang
 dom:uncontrolled-inputs	dom	supported	uncontrolled-inputs	defaultValue and defaultChecked attributes		
 dom:form-submit	dom	supported	prevent-default	onSubmit		
 dom:form-actions	dom	supported	form-actions,action-state	FormAction, FormAction.async, FormData		File fields are not offered
-dom:dangerously-set-inner-html	dom	unsupported	raw-html		R-17	Raw HTML is rejected; a safe rich-content API is planned
+dom:dangerously-set-inner-html	dom	supported	raw-html	RawHtml.unsanitized, dangerouslySetInnerHTML		Nothing is sanitized; a plain string is rejected
 dom:document-metadata	dom	supported	document-metadata	title and meta elements in markup		
 dom:resource-elements	dom	supported	resource-elements	style with href and precedence		Stylesheet links and async scripts are not covered
 dom:custom-elements	dom	supported	custom-elements	Hyphenated tag names		Attributes only; properties and custom events are not covered

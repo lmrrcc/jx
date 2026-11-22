@@ -15,13 +15,6 @@ referenceOnly('resource-hints: the six resource functions add their elements to 
   await expect.poll(() => page.evaluate(() => [globalThis.__benchPreinit, globalThis.__benchPreinitModule])).toEqual([1, 1]);
 });
 
-referenceOnly('raw-html: explicitly supplied HTML is inserted as markup', async ({page, open}) => {
-  await open('raw-html');
-  const raw = page.getByTestId('raw');
-  expect(await raw.evaluate(node => [...node.children].map(child => child.tagName))).toEqual(['B', 'I']);
-  await expect(raw).toHaveText('bold and italic');
-});
-
 referenceOnly('hydrate-root: hydration attaches to server markup without replacing its nodes', async ({page, open}) => {
   await open('hydrate-root');
   const button = page.getByRole('button', {name: 'Increment'});

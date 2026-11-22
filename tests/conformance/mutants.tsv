@@ -70,3 +70,4 @@ action-state-drops-previous	jx-react/src/main/java/jx/react/ReactHooks.java	Obje
 optimistic-set-ignored	jx-react/src/main/java/jx/react/ReactHooks.java	update -> updateNative(set, old -> update.apply(Interop.value(old)))	update -> {}	The optimistic setter does nothing
 form-reset-ignored	jx-react/src/main/java/jx/react/React.java	script = "ReactDOM.requestFormReset(form);"	script = ""	requestFormReset does nothing
 form-status-never-pending	jx-react/src/main/java/jx/react/ReactHooks.java	script = "return !!status.pending;"	script = "return false;"	Form status never reports a pending submission
+raw-html-as-text	jx-react/src/main/java/jx/react/React.java	script = "return {__html: html};"	script = "return {__html: html.replace(/</g, String.fromCharCode(38) + String.fromCharCode(108) + String.fromCharCode(116) + String.fromCharCode(59))};"	Raw HTML is escaped

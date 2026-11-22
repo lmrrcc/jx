@@ -1,0 +1,17 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.RawHtml;
+import jx.View;
+
+/** Case raw-html: explicitly supplied HTML is inserted as markup. */
+@Component
+public final class RawHtmlCase {
+    public static View render() {
+        return (
+            <main>
+                <div data-testid="raw" dangerouslySetInnerHTML={RawHtml.unsanitized("<b>bold</b> and <i>italic</i>")} />
+            </main>
+        );
+    }
+}

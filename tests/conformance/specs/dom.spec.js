@@ -120,3 +120,10 @@ test('form-reset: requestFormReset restores uncontrolled fields to their default
   await page.getByRole('button', {name: 'Reset form'}).click();
   await expect(page.getByLabel('Note')).toHaveValue('start');
 });
+
+test('raw-html: explicitly supplied HTML is inserted as markup', async ({page, open}) => {
+  await open('raw-html');
+  const raw = page.getByTestId('raw');
+  expect(await raw.evaluate(node => [...node.children].map(child => child.tagName))).toEqual(['B', 'I']);
+  await expect(raw).toHaveText('bold and italic');
+});

@@ -273,6 +273,8 @@ test('transition-pending: useTransition reports pending while an async action ru
   await expect(page.getByRole('status')).toHaveText('idle');
   await page.getByRole('button', {name: 'Start'}).click();
   await expect(page.getByRole('status')).toHaveText('pending');
+  await page.waitForTimeout(250);
+  await expect(page.getByRole('status')).toHaveText('pending');
   await page.getByRole('button', {name: 'Finish'}).click();
   await expect(page.getByRole('status')).toHaveText('done');
 });
@@ -297,6 +299,9 @@ test('transition-promise: an async function as action keeps the transition pendi
   await open('transition-promise');
   await expect(page.getByRole('status')).toHaveText('idle none');
   await page.getByRole('button', {name: 'Start'}).click();
+  await expect(page.getByRole('status')).toHaveText('pending');
+  // Still pending a moment later: the transition lasts until the function ends.
+  await page.waitForTimeout(250);
   await expect(page.getByRole('status')).toHaveText('pending');
   await page.getByRole('button', {name: 'Finish'}).click();
   await expect(page.getByRole('status')).toHaveText('started done');
