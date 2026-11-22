@@ -3,6 +3,7 @@ package jx;
 import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /** Stable component identity. Declare descriptors once, normally as a static final field.
  * The renderer invokes the render function; applications compose descriptors through Views. */
@@ -33,6 +34,20 @@ public final class ComponentType<P> {
      * The comparison runs during rendering and must be pure. */
     public ComponentType<P> memo(BiPredicate<P, P> propsEqual) {
         return new ComponentType<>(name, stateSignature, render, Objects.requireNonNull(propsEqual));
+    }
+    /** A component that is loaded on first use, like React's {@code lazy}. {@code load} runs once,
+     * when the component first renders; until its promise is settled the nearest
+     * {@code React.suspense} shows its fallback, and a failed load reaches the nearest error
+     * boundary and is not retried. Declare the result once, outside rendering. This defers the
+     * work of {@code load}; it does not by itself move the component's code out of the bundle. */
+    public static <P> ComponentType<P> lazy(String name, Supplier<Promise<ComponentType<P>>> load) {
+        Objects.requireNonNull(load);
+        Object[] loading = new Object[1];
+        return new ComponentType<>(name, props -> {
+            if (loading[0] == null) loading[0] = Objects.requireNonNull(load.get(), "The lazy loader returned null");
+            @SuppressWarnings("unchecked") Promise<ComponentType<P>> promise = (Promise<ComponentType<P>>) loading[0];
+            return new View.ComponentView<>(Objects.requireNonNull(Hooks.use(promise), "The lazy component is null"), props, null);
+        });
     }
     /** The memo comparison, or null when every parent render renders this component. */
     public BiPredicate<P, P> propsEqual() { return propsEqual; }

@@ -1,0 +1,25 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.ComponentType;
+import jx.Promise;
+import jx.View;
+import jx.Views;
+import jx.react.React;
+
+/** Case lazy-component: a lazy component shows the Suspense fallback until it loads. */
+@Component
+public final class LazyComponent {
+    private static Promise.Resolver<ComponentType<Void>> load;
+    private static final ComponentType<Void> LATE =
+            ComponentType.lazy("Late", () -> Promise.create(resolver -> load = resolver));
+
+    public static View render() {
+        return (
+            <main>
+                <button onClick={event -> load.resolve(LateContent.JX)}>Load</button>
+                {React.suspense(<p role="status">loading</p>, Views.component(LATE, null))}
+            </main>
+        );
+    }
+}

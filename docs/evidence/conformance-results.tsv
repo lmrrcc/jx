@@ -49,7 +49,7 @@ key-event	pass	pass
 keyed-list	pass	pass
 layout-effect-dependencies	pass	pass
 layout-effect-order	pass	pass
-lazy-component	pass	unsupported
+lazy-component	pass	pass
 media-events	pass	pass
 memo-recompute	pass	pass
 memo-skip	pass	pass

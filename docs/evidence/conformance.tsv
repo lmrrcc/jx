@@ -22,12 +22,12 @@ react:use	hook	supported	use-promise	Hooks.use		Takes a jx.Promise or a Context
 react:useDebugValue	hook	supported	debug-value	Hooks.useDebugValue		The DevTools label itself is not asserted
 react:Fragment	component	supported	fragment	<>...</>, Views.fragment		
 react:StrictMode	component	supported	effect-cleanup,state-lazy-init,memo-recompute,strict-nested	React.mountStrict, React.strictMode		Nested use is a view factory, not a markup tag
-react:Suspense	component	supported	use-promise	React.suspense		
+react:Suspense	component	supported	use-promise,lazy-component	React.suspense		
 react:Activity	component	unsupported	activity		R-15	
 react:Profiler	component	supported	profiler	React.profiler		A view factory, not a markup tag
 react:ViewTransition	component	unsupported	view-transition		R-15	
 react:addTransitionType	api	unsupported	view-transition		R-15	
-react:lazy	api	unsupported	lazy-component		R-14	
+react:lazy	api	equivalent	lazy-component	ComponentType.lazy		Defers loading through a promise; does not split the bundle, which waits for M1-22 and M1-23
 react:memo	api	supported	memo-skip	@Memo, ComponentType.memo		Declared on the component with @Memo; a custom comparison is a static arePropsEqual method
 react:forwardRef	api	equivalent	forward-ref	ref as a Props field		Deprecated in React 19; a JX component receives ref as an ordinary prop
 react:createElement	api	equivalent	attributes,children-prop	Markup, Views.element, Views.component		
