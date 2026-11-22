@@ -46,28 +46,6 @@ referenceOnly('form-reset: requestFormReset restores uncontrolled fields to thei
   await expect(page.getByLabel('Note')).toHaveValue('start');
 });
 
-referenceOnly('activity: a hidden activity keeps state, hides its DOM and stops its effects', async ({page, open}) => {
-  await open('activity');
-  await page.getByRole('button', {name: 'Increment'}).click();
-  await expect(page.getByTestId('count')).toHaveText('1');
-  const before = await log(page);
-  expect(before.at(-1)).toEqual('effect on');
-  await page.getByRole('button', {name: 'Toggle activity'}).click();
-  await expect(page.getByTestId('count')).toBeHidden();
-  await expect.poll(async () => (await log(page)).at(-1)).toEqual('effect off');
-  await page.getByRole('button', {name: 'Toggle activity'}).click();
-  await expect(page.getByTestId('count')).toBeVisible();
-  await expect(page.getByTestId('count')).toHaveText('1');
-  await expect.poll(async () => (await log(page)).at(-1)).toEqual('effect on');
-});
-
-referenceOnly('view-transition: a typed transition updates content inside a ViewTransition', async ({page, open}) => {
-  await open('view-transition');
-  await expect(page.getByRole('status')).toHaveText('first');
-  await page.getByRole('button', {name: 'Go forward'}).click();
-  await expect(page.getByRole('status')).toHaveText('second');
-});
-
 referenceOnly('resource-hints: the six resource functions add their elements to the head', async ({page, open}) => {
   await open('resource-hints');
   const head = selector => page.locator('head ' + selector);

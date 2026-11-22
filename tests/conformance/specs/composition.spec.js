@@ -117,3 +117,35 @@ test('lazy-component: a lazy component shows the Suspense fallback until it load
   await page.getByRole('button', {name: 'Load'}).click();
   await expect(page.getByRole('status')).toHaveText('late content');
 });
+
+test('activity: a hidden activity keeps state, hides its DOM and stops its effects', async ({page, open}) => {
+  await open('activity');
+  await page.getByRole('button', {name: 'Increment'}).click();
+  await expect(page.getByTestId('count')).toHaveText('1');
+  const before = await log(page);
+  expect(before.at(-1)).toEqual('effect on');
+  await page.getByRole('button', {name: 'Toggle activity'}).click();
+  await expect(page.getByTestId('count')).toBeHidden();
+  await expect.poll(async () => (await log(page)).at(-1)).toEqual('effect off');
+  await page.getByRole('button', {name: 'Toggle activity'}).click();
+  await expect(page.getByTestId('count')).toBeVisible();
+  await expect(page.getByTestId('count')).toHaveText('1');
+  await expect.poll(async () => (await log(page)).at(-1)).toEqual('effect on');
+});
+
+test('view-transition: a typed transition updates content inside a ViewTransition', async ({page, open}) => {
+  await open('view-transition');
+  await expect(page.getByRole('status')).toHaveText('first');
+  // Record what React asks of the browser's view transition API.
+  await page.evaluate(() => {
+    const start = document.startViewTransition.bind(document);
+    globalThis.__benchTransitionTypes = [];
+    document.startViewTransition = options => {
+      globalThis.__benchTransitionTypes.push([...(options.types ?? [])]);
+      return start(options);
+    };
+  });
+  await page.getByRole('button', {name: 'Go forward'}).click();
+  await expect(page.getByRole('status')).toHaveText('second');
+  expect(await page.evaluate(() => globalThis.__benchTransitionTypes)).toEqual([['forward']]);
+});

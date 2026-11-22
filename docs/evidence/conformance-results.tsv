@@ -1,6 +1,6 @@
 case	reference	jx
 action-state	pass	unsupported
-activity	pass	unsupported
+activity	pass	pass
 async-function	pass	pass
 attributes	pass	pass
 batched-updates	pass	pass
@@ -95,4 +95,4 @@ uncontrolled-inputs	pass	pass
 unknown-case	pass	pass
 use-id	pass	pass
 use-promise	pass	pass
-view-transition	pass	unsupported
+view-transition	pass	pass
