@@ -6,7 +6,7 @@ by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
 Progress, 21 November 2026: M1-01 to M1-05 and R-01 to R-05 are done, committed as
 `75d79c2` with Verify green. `main` is protected: a change reaches it only through
-a pull request whose Verify check has passed. R-06 to R-17 and R-32 are done; R-13 also added asynchronous functions (`Async.run`, `Async.await`, `Promise`). R-14 delivers `lazy` without code splitting, which still depends on M1-22 and M1-23. The next task is R-18.
+a pull request whose Verify check has passed. R-06 to R-18 and R-32 are done; R-13 also added asynchronous functions (`Async.run`, `Async.await`, `Promise`). R-14 delivers `lazy` without code splitting, which still depends on M1-22 and M1-23. The next task is R-19.
 
 ## Rules
 
@@ -97,8 +97,8 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-15 | M3 | `Activity`; `ViewTransition` and `addTransitionType` | 3 | done |
 | R-16 | M3 | Actions: form action functions, `useActionState`, `useFormStatus`, `useOptimistic`, `requestFormReset`, and the deprecated `useFormState` alias | 6 | done |
 | R-17 | M3 | Raw HTML through an explicit, named API equal to `dangerouslySetInnerHTML` | 1 | done |
-| R-18 | M3 | Resource hints: `preconnect`, `prefetchDNS`, `preinit`, `preinitModule`, `preload`, `preloadModule` | 6 | next |
-| R-19 | M3 | Root options: caught, uncaught and recoverable error callbacks, identifier prefix | part of `createRoot` | planned |
+| R-18 | M3 | Resource hints: `preconnect`, `prefetchDNS`, `preinit`, `preinitModule`, `preload`, `preloadModule` | 6 | done |
+| R-19 | M3 | Root options: caught, uncaught and recoverable error callbacks, identifier prefix | part of `createRoot` | next |
 | R-20 | M4 | `renderToString`, `renderToStaticMarkup`, on the server-render proof from M1 | 2 | planned |
 | R-21 | M4 | `hydrateRoot`; server snapshot for external stores; `useId` across server and client | 1 | planned |
 | R-22 | M5 | Streaming: `renderToPipeableStream`, `renderToReadableStream`, with Suspense boundaries | 2 | planned |

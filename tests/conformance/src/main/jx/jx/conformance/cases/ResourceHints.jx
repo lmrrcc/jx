@@ -1,0 +1,19 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+import jx.react.Resources;
+
+/** Case resource-hints: the six resource functions add their elements to the head. */
+@Component
+public final class ResourceHints {
+    public static View render() {
+        Resources.preconnect("https://connect.example.test");
+        Resources.prefetchDNS("https://dns.example.test");
+        Resources.preload("data:text/css,.preloaded{}", "style");
+        Resources.preinit("data:text/javascript,globalThis.__benchPreinit=1", "script");
+        Resources.preloadModule("data:text/javascript,export default 1");
+        Resources.preinitModule("data:text/javascript,globalThis.__benchPreinitModule=1");
+        return <main><p role="status">hinted</p></main>;
+    }
+}

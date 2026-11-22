@@ -327,6 +327,11 @@ is `ViewTransition`; `React.viewTransition(options, children...)` adds a name an
 animation classes, and `React.addTransitionType(type)` labels the running
 transition. The event callbacks of `ViewTransition` are not offered.
 
+`Resources` in `jx.react` offers React DOM's resource hints: `preconnect`,
+`prefetchDNS`, `preload`, `preinit`, `preloadModule` and `preinitModule`. Each adds
+its element to the document head once per URL; `Resources.Options` carries the
+optional settings.
+
 `React.profiler(id, onRender, children...)` and `React.strictMode(children...)` in
 `jx.react` are React's `Profiler` and nested `StrictMode`. They are view factories
 called in an interpolation, for example `{React.strictMode(<Panel />)}`. As in

@@ -50,12 +50,12 @@ react-dom:createPortal	api	supported	portal	React.portal, React.documentBody		A 
 react-dom:flushSync	api	supported	flush-sync	React.flushSync		
 react-dom:useFormStatus	hook	supported	form-status	Hooks.useFormStatus, FormStatus		The action field is not offered
 react-dom:requestFormReset	api	supported	form-reset	React.requestFormReset		
-react-dom:preconnect	resource	unsupported	resource-hints		R-18	
-react-dom:prefetchDNS	resource	unsupported	resource-hints		R-18	
-react-dom:preinit	resource	unsupported	resource-hints		R-18	
-react-dom:preinitModule	resource	unsupported	resource-hints		R-18	
-react-dom:preload	resource	unsupported	resource-hints		R-18	
-react-dom:preloadModule	resource	unsupported	resource-hints		R-18	
+react-dom:preconnect	resource	supported	resource-hints	Resources.preconnect		
+react-dom:prefetchDNS	resource	supported	resource-hints	Resources.prefetchDNS		
+react-dom:preinit	resource	supported	resource-hints	Resources.preinit		
+react-dom:preinitModule	resource	supported	resource-hints	Resources.preinitModule		
+react-dom:preload	resource	supported	resource-hints	Resources.preload		The image settings imageSrcSet and imageSizes are not offered
+react-dom:preloadModule	resource	supported	resource-hints	Resources.preloadModule		
 react-dom:useFormState	hook	excluded			R-16	Deprecated alias of useActionState
 react-dom:unstable_batchedUpdates	unstable	excluded			R-29	Unstable legacy API; batching is automatic
 react-dom:browser	constant	excluded			none	Build marker, not an API
