@@ -312,6 +312,12 @@ into another DOM element, taken from a `DomRef` or `React.documentBody()`, while
 context and event bubbling still follow the React parent. `React.flushSync(action)`
 commits the updates made in `action` to the DOM before it returns.
 
+`React.activity(visible, children...)` is React's `Activity`: hidden children keep
+their state and DOM while their effects are cleaned up. `React.viewTransition(children...)`
+is `ViewTransition`; `React.viewTransition(options, children...)` adds a name and
+animation classes, and `React.addTransitionType(type)` labels the running
+transition. The event callbacks of `ViewTransition` are not offered.
+
 `React.profiler(id, onRender, children...)` and `React.strictMode(children...)` in
 `jx.react` are React's `Profiler` and nested `StrictMode`. They are view factories
 called in an interpolation, for example `{React.strictMode(<Panel />)}`. As in

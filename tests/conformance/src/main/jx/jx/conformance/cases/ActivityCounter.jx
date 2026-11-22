@@ -1,0 +1,26 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.Bench;
+
+/** A counter that logs its effect lifecycle, for the activity case. */
+@Component
+public final class ActivityCounter {
+    public static View render() {
+        State<Integer> count = Hooks.useState(0);
+        Hooks.useEffect(() -> {
+            Bench.log("effect on");
+            return () -> Bench.log("effect off");
+        }, Dependencies.none());
+        return (
+            <section aria-label="Kept">
+                <p data-testid="count">{count.value()}</p>
+                <button onClick={event -> count.update(previous -> previous + 1)}>Increment</button>
+            </section>
+        );
+    }
+}

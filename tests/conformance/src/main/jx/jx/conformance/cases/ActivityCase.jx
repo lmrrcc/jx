@@ -1,0 +1,21 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.react.React;
+
+/** Case activity: a hidden activity keeps state, hides its DOM and stops its effects. */
+@Component
+public final class ActivityCase {
+    public static View render() {
+        State<Boolean> visible = Hooks.useState(true);
+        return (
+            <main>
+                <button onClick={event -> visible.update(previous -> !previous)}>Toggle activity</button>
+                {React.activity(visible.value(), <ActivityCounter />)}
+            </main>
+        );
+    }
+}

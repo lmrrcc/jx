@@ -61,6 +61,40 @@ public final class React {
     /** The JavaScript promise that settles like {@code promise}, for explicit interop. The same
      * object is returned for the same promise. */
     public static JSObject thenable(Promise<?> promise) { return AsyncBridge.thenable(Objects.requireNonNull(promise)); }
+    /** React's {@code Activity}: while {@code visible} is false the children are hidden in the DOM
+     * and their effects are cleaned up, but their state and DOM are kept; showing them again runs
+     * the effects again. */
+    public static View activity(boolean visible, Object... children) {
+        return new NativeView(activityNative(visible ? "visible" : "hidden", element(Views.fragment(children))));
+    }
+    /** Names and CSS classes of a {@link #viewTransition(ViewTransitionOptions, Object...)}; React's
+     * {@code name}, {@code default}, {@code enter}, {@code exit}, {@code update} and {@code share}
+     * props. A null component keeps React's default. */
+    public record ViewTransitionOptions(String name, String defaultClass, String enter, String exit, String update, String share) {
+        /** Only a name, to pair this boundary with another one in a shared element transition. */
+        public static ViewTransitionOptions named(String name) { return new ViewTransitionOptions(Objects.requireNonNull(name), null, null, null, null, null); }
+    }
+    /** React's {@code ViewTransition}: when the children change inside a transition, the browser
+     * animates between the old and the new picture. Browsers without view transitions apply the
+     * update without animation. */
+    public static View viewTransition(Object... children) { return viewTransition(new ViewTransitionOptions(null, null, null, null, null, null), children); }
+    /** As {@link #viewTransition(Object...)}, with a name and animation classes. The event
+     * callbacks of React's component are not offered. */
+    public static View viewTransition(ViewTransitionOptions options, Object... children) {
+        Objects.requireNonNull(options);
+        JSObject props = object();
+        if (options.name() != null) set(props, "name", Interop.text(options.name()));
+        if (options.defaultClass() != null) set(props, "default", Interop.text(options.defaultClass()));
+        if (options.enter() != null) set(props, "enter", Interop.text(options.enter()));
+        if (options.exit() != null) set(props, "exit", Interop.text(options.exit()));
+        if (options.update() != null) set(props, "update", Interop.text(options.update()));
+        if (options.share() != null) set(props, "share", Interop.text(options.share()));
+        return new NativeView(viewTransitionNative(props, element(Views.fragment(children))));
+    }
+    /** React's {@code addTransitionType}: labels the running transition, so that CSS and view
+     * transition classes can tell for example forward from backward navigation. Call it inside a
+     * transition action. */
+    public static void addTransitionType(String type) { addTransitionTypeNative(Objects.requireNonNull(type)); }
     /** React's {@code createPortal}: renders the children into another DOM element while they stay
      * part of this React tree, so context and event bubbling follow the React parent. The target
      * comes from a {@link DomRef} or from {@link #documentBody()} and must stay in the document. */
@@ -319,6 +353,9 @@ public final class React {
     @JSBody(params = {"context", "value", "identity", "children"}, script = "return React.createElement.apply(null, [context.jxProvider, {value: value, identity: identity}].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject provider(JSObject context, Object value, Object identity, Object[] children);
     @JSBody(params = "elementId", script = "var element = document.getElementById(elementId); if (!element) throw new Error('Missing React root: ' + elementId); var hot = globalThis.__JX_HOT__; var options = hot && hot.enabled ? {onUncaughtError: function(error) { if (typeof hot.fail === 'function') hot.fail(error); if (typeof reportError === 'function') reportError(error); else console.error(error); }} : undefined; return ReactDOM.createRoot(element, options);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom/client")) private static native JSObject createRoot(String elementId);
     @JSBody(params = {"fallback", "child"}, script = "return React.createElement(React.Suspense, {fallback: fallback}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject suspenseNative(JSObject fallback, JSObject child);
+    @JSBody(params = {"mode", "child"}, script = "return React.createElement(React.Activity, {mode: mode}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject activityNative(String mode, JSObject child);
+    @JSBody(params = {"props", "child"}, script = "return React.createElement(React.ViewTransition, props, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject viewTransitionNative(JSObject props, JSObject child);
+    @JSBody(params = "type", script = "React.addTransitionType(type);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native void addTransitionTypeNative(String type);
     @JSBody(params = "child", script = "return React.createElement(React.StrictMode, null, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject strict(JSObject child);
     @JSBody(params = {"root", "child"}, script = "root.render(child);") private static native void renderRoot(JSObject root, JSObject child);
     @JSBody(params = "root", script = "root.unmount();") private static native void unmount(JSObject root);

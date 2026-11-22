@@ -75,6 +75,8 @@ import jx.conformance.cases.UsePromise;
 import jx.conformance.cases.AsyncFunction;
 import jx.conformance.cases.TransitionPromise;
 import jx.conformance.cases.LazyComponent;
+import jx.conformance.cases.ActivityCase;
+import jx.conformance.cases.ViewTransitionCase;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -159,6 +161,8 @@ public final class Main {
             case "async-function" -> React.mountStrict("app", AsyncFunction.JX, null);
             case "transition-promise" -> React.mountStrict("app", TransitionPromise.JX, null);
             case "lazy-component" -> React.mountStrict("app", LazyComponent.JX, null);
+            case "activity" -> React.mountStrict("app", ActivityCase.JX, null);
+            case "view-transition" -> React.mountStrict("app", ViewTransitionCase.JX, null);
             default -> Bench.unknown(id);
         }
     }

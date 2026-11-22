@@ -1,0 +1,24 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.react.React;
+
+/** Case view-transition: a typed transition updates content inside a ViewTransition. */
+@Component
+public final class ViewTransitionCase {
+    public static View render() {
+        State<String> page = Hooks.useState("first");
+        return (
+            <main>
+                <button onClick={event -> React.startTransition(() -> {
+                    React.addTransitionType("forward");
+                    page.set("second");
+                })}>Go forward</button>
+                {React.viewTransition(<p role="status">{page.value()}</p>)}
+            </main>
+        );
+    }
+}
