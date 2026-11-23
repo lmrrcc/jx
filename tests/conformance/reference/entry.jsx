@@ -66,6 +66,7 @@ import { FormStatus } from './cases/form-status.jsx';
 import { FormActions } from './cases/form-actions.jsx';
 import { FormReset } from './cases/form-reset.jsx';
 import { UsePromise } from './cases/use-promise.jsx';
+import { HydratedPage } from './cases/hydrate-server.jsx';
 import { RootOptions, rootOptions } from './cases/root-options.jsx';
 import { FormState } from './cases/form-state.jsx';
 import { AsyncFunction } from './cases/async-function.jsx';
@@ -155,6 +156,7 @@ const cases = {
   'form-actions': FormActions,
   'form-reset': FormReset,
   'use-promise': UsePromise,
+  'hydrate-server': HydratedPage,
   'root-options': RootOptions,
   'form-state': FormState,
   'async-function': AsyncFunction,
@@ -187,6 +189,12 @@ if (id === 'hydrate-root') {
   // Server markup first, then hydration over the same nodes.
   const container = document.getElementById('app');
   container.innerHTML = renderToString(<StrictMode><Case /></StrictMode>);
+  container.querySelector('button').benchServerNode = true;
+  hydrateRoot(container, <StrictMode><Case /></StrictMode>);
+} else if (id === 'hydrate-server') {
+  // The markup was rendered in Node; the test hands it to the page before the script runs.
+  const container = document.getElementById('app');
+  container.innerHTML = globalThis.__benchServerHtml;
   container.querySelector('button').benchServerNode = true;
   hydrateRoot(container, <StrictMode><Case /></StrictMode>);
 } else if (id === 'root-options') {

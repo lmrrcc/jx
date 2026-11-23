@@ -20,6 +20,7 @@ final class Server {
 
     static void install() {
         register("renderToString", () -> ReactServer.renderToString(page()));
+        register("renderHydratable", () -> ReactServer.renderToString(jx.react.React.strictMode(Views.component(jx.conformance.cases.HydratedPage.JX, null))));
         register("renderToStaticMarkup", () -> ReactServer.renderToStaticMarkup(page()));
     }
 

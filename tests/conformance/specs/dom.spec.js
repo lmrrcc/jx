@@ -1,4 +1,4 @@
-import {test, expect, log} from './bench.js';
+import {test, expect, log, serverOf} from './bench.js';
 
 test('choice-inputs: controlled radio group, select and textarea', async ({page, open}) => {
   await open('choice-inputs');
@@ -163,4 +163,29 @@ test('root-options: the root reports caught, recoverable and uncaught errors and
   await page.getByRole('button', {name: 'Break root'}).click();
   await expect(page.locator('#app')).toBeEmpty();
   await expect.poll(async () => (await log(page)).at(-1)).toEqual('uncaught root exploded');
+});
+
+test('hydrate-root: hydration attaches to server markup without replacing its nodes', async ({page, open}) => {
+  await open('hydrate-root');
+  const button = page.getByRole('button', {name: 'Increment'});
+  await button.click();
+  await expect(page.getByRole('status')).toHaveText('1');
+  // The marker was put on the server-rendered node before hydration.
+  expect(await button.evaluate(node => node.benchServerNode)).toBe(true);
+});
+
+test('hydrate-server: the browser hydrates HTML rendered in Node, keeping nodes and ids', async ({page, open}, info) => {
+  const html = await (await serverOf(info)).renderHydratable();
+  expect(html).toContain('<p data-testid="origin">server</p>');
+  const id = /<input id="([^"]+)"/.exec(html)[1];
+  await page.addInitScript(markup => { globalThis.__benchServerHtml = markup; }, html);
+  // Any hydration mismatch is a console error, which fails the test.
+  await open('hydrate-server');
+  // After hydration the store switches from its server snapshot to the browser one.
+  await expect(page.getByTestId('origin')).toHaveText('client');
+  expect(await page.getByLabel('Name').getAttribute('id')).toEqual(id);
+  const button = page.getByRole('button', {name: 'Increment'});
+  await button.click();
+  await expect(page.getByRole('status')).toHaveText('1');
+  expect(await button.evaluate(node => node.benchServerNode)).toBe(true);
 });

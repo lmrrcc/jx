@@ -1,0 +1,33 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.ExternalStore;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Case hydrate-server: the browser hydrates HTML rendered in Node, keeping nodes and ids. */
+@Component
+public final class HydratedPage {
+    /** A store whose server snapshot differs from the browser one. */
+    private static final ExternalStore<String> STORE = new ExternalStore<>() {
+        @Override public String snapshot() { return "client"; }
+        @Override public String serverSnapshot() { return "server"; }
+        @Override public Runnable subscribe(Runnable listener) { return () -> {}; }
+    };
+
+    public static View render() {
+        String id = Hooks.useId();
+        State<Integer> count = Hooks.useState(0);
+        String origin = Hooks.useSyncExternalStore(STORE);
+        return (
+            <main>
+                <label for={id}>Name</label>
+                <input id={id} defaultValue="Ada" />
+                <p data-testid="origin">{origin}</p>
+                <p role="status">{count.value()}</p>
+                <button onClick={event -> count.update(previous -> previous + 1)}>Increment</button>
+            </main>
+        );
+    }
+}

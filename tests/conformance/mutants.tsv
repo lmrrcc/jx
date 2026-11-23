@@ -85,3 +85,5 @@ root-stack-dropped	jx-react/src/main/java/jx/react/React.java	return info && inf
 root-cause-dropped	jx-react/src/main/java/jx/react/React.java	cause == null ? null : throwable(cause));	null);	The cause of a recovered error is lost
 server-string-without-markers	jx-react/src/main/java/jx/react/ReactServer.java	return ReactDOMServer.renderToString(element,	return ReactDOMServer.renderToStaticMarkup(element,	renderToString loses the hydration markers
 server-static-with-markers	jx-react/src/main/java/jx/react/ReactServer.java	return ReactDOMServer.renderToStaticMarkup(element, prefix	return ReactDOMServer.renderToString(element, prefix	renderToStaticMarkup keeps the hydration markers
+hydrate-replaces-tree	jx-react/src/main/java/jx/react/React.java	ReactDOM.hydrateRoot(element, tree, options);	(function() { var created = ReactDOM.createRoot(element, options); created.render(tree); return created; })();	Hydration replaces the server nodes
+store-server-snapshot-ignored	jx-react/src/main/java/jx/react/ReactHooks.java	serverSnapshot = store::serverSnapshot;	serverSnapshot = store::snapshot;	The server snapshot of a store is ignored

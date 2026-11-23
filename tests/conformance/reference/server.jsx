@@ -1,5 +1,6 @@
 // Framework-owned reference fixture: React's server and static rendering APIs, run in Node.
-import { Suspense, use } from 'react';
+import { StrictMode, Suspense, use } from 'react';
+import { HydratedPage } from './cases/hydrate-server.jsx';
 import { Writable } from 'node:stream';
 import {
   renderToPipeableStream, renderToReadableStream, renderToStaticMarkup, renderToString,
@@ -55,6 +56,7 @@ async function postponed(render) {
 }
 
 export const server = {
+  renderHydratable: async () => renderToString(<StrictMode><HydratedPage /></StrictMode>),
   renderToString: async () => renderToString(<Page name="Ada" />),
   renderToStaticMarkup: async () => renderToStaticMarkup(<Page name="Ada" />),
   renderToReadableStream: async () => {
