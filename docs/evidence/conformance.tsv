@@ -65,8 +65,8 @@ react-dom/client:hydrateRoot	api	unsupported	hydrate-root		R-21
 react-dom/client:version	constant	excluded			R-29	Constant
 react-dom/server:renderToPipeableStream	server	unsupported	server-pipeable-stream		R-22	
 react-dom/server:renderToReadableStream	server	unsupported	server-readable-stream		R-22	
-react-dom/server:renderToStaticMarkup	server	unsupported	server-render-to-static-markup		R-20	
-react-dom/server:renderToString	server	unsupported	server-render-to-string		R-20	
+react-dom/server:renderToStaticMarkup	server	supported	server-render-to-static-markup	ReactServer.renderToStaticMarkup		Runs in a Node host
+react-dom/server:renderToString	server	supported	server-render-to-string	ReactServer.renderToString		Runs in a Node host; the options other than identifierPrefix are not offered
 react-dom/server:resume	server	unsupported	server-resume		R-24	
 react-dom/server:resumeToPipeableStream	server	unsupported	server-resume-pipeable		R-24	
 react-dom/server:version	constant	excluded			R-29	Constant

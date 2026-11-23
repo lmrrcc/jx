@@ -182,7 +182,9 @@ public final class MutateBench {
 
     private boolean build() throws Exception {
         return step("build", "./mvnw", "-o", "-B", "-ntp", "-q", "-Dmaven.repo.local=.cache/maven-repository",
-                "-DskipTests", "-pl", String.join(",", MODULES), "install");
+                "-DskipTests", "-pl", String.join(",", MODULES), "install")
+                // The Node host bundle wraps the compiled application, so it follows every build.
+                && step("server bundle", "npm", "run", "build:bench-server");
     }
 
     private boolean bench() throws Exception {

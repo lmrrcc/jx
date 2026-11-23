@@ -74,8 +74,8 @@ resource-hints	pass	pass
 root-options	pass	pass
 server-pipeable-stream	pass	unsupported
 server-readable-stream	pass	unsupported
-server-render-to-static-markup	pass	unsupported
-server-render-to-string	pass	unsupported
+server-render-to-static-markup	pass	pass
+server-render-to-string	pass	pass
 server-resume	pass	unsupported
 server-resume-pipeable	pass	unsupported
 spread-props	pass	pass

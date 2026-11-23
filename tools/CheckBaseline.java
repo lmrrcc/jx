@@ -42,7 +42,7 @@ public final class CheckBaseline {
     private static final Pattern FEATURE = Pattern.compile("[a-z][a-z/-]*:[A-Za-z_][A-Za-z0-9_-]*");
     private static final String TASKS = "docs/ga-tasks.md";
     private static final Pattern PARITY_TASK = Pattern.compile("R-[0-9]{2}");
-    private static final Pattern BENCH_CASE = Pattern.compile("(?m)^(test|referenceOnly|serverOnly)\\('([a-z0-9-]+): ");
+    private static final Pattern BENCH_CASE = Pattern.compile("(?m)^(test|referenceOnly|serverOnly|onServer)\\('([a-z0-9-]+): ");
     private static final Pattern COMMIT = Pattern.compile("[0-9a-f]{7,40}");
     private static final String VERSIONS_HEADER = "id\tvalue\tsource\tnote";
     private static final List<String> LEDGER_COLUMNS = List.of("id", "area", "capability", "status", "owner",
@@ -431,7 +431,8 @@ public final class CheckBaseline {
                     Matcher matcher = BENCH_CASE.matcher(Files.readString(file, StandardCharsets.UTF_8));
                     while (matcher.find()) {
                         require(cases.add(matcher.group(2)), "bench case id is used by two tests: " + matcher.group(2));
-                        if (!matcher.group(1).equals("test")) {
+                        // test and onServer run on both sides; the other two are reference-only.
+                        if (!matcher.group(1).equals("test") && !matcher.group(1).equals("onServer")) {
                             waiting.add(matcher.group(2));
                         }
                     }

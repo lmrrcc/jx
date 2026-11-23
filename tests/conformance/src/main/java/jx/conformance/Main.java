@@ -93,6 +93,7 @@ public final class Main {
     private Main() {}
 
     public static void main(String[] arguments) {
+        if (Server.active()) { Server.install(); return; }
         String id = Bench.caseId();
         switch (id) {
             case "state-counter" -> React.mountStrict("app", StateCounter.JX, null);
