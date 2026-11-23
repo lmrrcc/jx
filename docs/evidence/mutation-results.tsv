@@ -5,14 +5,14 @@ effect-always-becomes-once	killed	batched-updates,effect-dependencies	An effect 
 effect-ignore-deps	killed	layout-effect-dependencies	Layout effects ignore their dependencies
 memo-ignore-deps	killed	callback-identity,flush-sync,memo-recompute,ref-callback	Memoized values are recomputed every render
 memo-never-recompute	killed	callback-identity,memo-recompute	Memoized values are never recomputed
-state-drop-updater	killed	activity,async-function,batched-updates,callable-state,callback-identity,checkbox,child-slots,children-prop,choice-inputs,conditional,context-nested,controlled-input,custom-elements,custom-hook,debug-value,deferred-value,document-metadata,dom-ref-focus,dynamic-component,effect-cleanup,effect-dependencies,effect-event,error-boundary,error-reporting,external-store,flush-sync,form-actions,fragment,function-props,imperative-handle,key-event,keyed-list,layout-effect-dependencies,memo-recompute,memo-skip,optimistic,portal,prevent-default,profiler,props-update,ref-callback,ref-persist,remount-by-key,start-transition,state-counter,state-lazy-init,stop-propagation,strict-nested,transition-pending,transition-promise,uncontrolled-inputs,view-transition	State updaters are ignored
+state-drop-updater	killed	activity,async-function,batched-updates,callable-state,callback-identity,checkbox,child-slots,children-prop,choice-inputs,conditional,context-nested,controlled-input,custom-elements,custom-hook,debug-value,deferred-value,document-metadata,dom-ref-focus,dynamic-component,effect-cleanup,effect-dependencies,effect-event,error-boundary,error-reporting,external-store,flush-sync,form-actions,fragment,function-props,imperative-handle,key-event,keyed-list,layout-effect-dependencies,memo-recompute,memo-skip,optimistic,portal,prevent-default,profiler,props-update,ref-callback,ref-persist,remount-by-key,root-options,start-transition,state-counter,state-lazy-init,stop-propagation,strict-nested,transition-pending,transition-promise,uncontrolled-inputs,view-transition	State updaters are ignored
 state-eager-initializer	killed	state-lazy-init	The lazy state initializer runs on every render
 reducer-ignore-action	killed	reducer-batch,reducer-lazy-init	Reducer actions are ignored
 ref-not-persistent	killed	callback-identity,ref-persist	A ref is recreated on every render
 context-always-default	killed	context-nested	useContext ignores providers
 store-no-unsubscribe	killed	external-store	External stores are never unsubscribed
 store-stale-snapshot	killed	external-store	External store changes do not rerender
-id-constant	killed	use-id	useId returns the same id everywhere
+id-constant	killed	root-options,use-id	useId returns the same id everywhere
 strict-mode-off	killed	batched-updates,custom-hook,effect-cleanup,effect-dependencies,effect-event,layout-effect-dependencies,layout-effect-order,memo-recompute,memo-skip,reducer-lazy-init,ref-callback,state-lazy-init,strict-nested	Strict Mode is not applied
 key-dropped	killed	keyed-list,remount-by-key	Component keys are not passed to React
 text-child-as-fragment	killed	child-values,document-metadata,resource-elements	Text children are wrapped in fragments again
@@ -65,8 +65,8 @@ activity-always-visible	killed	activity	A hidden activity stays visible
 transition-type-dropped	killed	view-transition	Transition types are not passed to React
 view-transition-plain	killed	view-transition	ViewTransition renders its children without a boundary
 form-action-not-awaited	killed	form-status	An asynchronous form action is not pending
-form-data-wrong-field	killed	action-state,form-actions	Form data reads the wrong field
-action-state-drops-previous	killed	action-state	An action always receives the initial state
+form-data-wrong-field	killed	action-state,form-actions,form-state	Form data reads the wrong field
+action-state-drops-previous	killed	action-state,form-state	An action always receives the initial state
 optimistic-set-ignored	killed	optimistic	The optimistic setter does nothing
 form-reset-ignored	killed	form-reset	requestFormReset does nothing
 form-status-never-pending	killed	form-status	Form status never reports a pending submission
@@ -77,3 +77,9 @@ hint-preload-dropped	killed	resource-hints	preload adds nothing
 hint-preinit-dropped	killed	resource-hints	preinit adds nothing
 hint-preloadModule-dropped	killed	resource-hints	preloadModule adds nothing
 hint-preinitModule-dropped	killed	resource-hints	preinitModule adds nothing
+root-caught-dropped	killed	root-options	Caught errors are not reported to the root callback
+root-recoverable-dropped	killed	root-options	Recoverable errors are not reported
+root-uncaught-dropped	killed	root-options	Uncaught errors are not reported to the root callback
+root-prefix-dropped	killed	root-options	The identifier prefix is ignored
+root-stack-dropped	killed	root-options	The component stack is not passed on
+root-cause-dropped	killed	root-options	The cause of a recovered error is lost
