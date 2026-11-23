@@ -59,6 +59,26 @@ public final class ReactStatic {
         return start(view, options, true);
     }
 
+    /** React's {@code resumeAndPrerender}: finishes an aborted prerender as static HTML, a web
+     * stream. {@code view} must be the view that was prerendered. */
+    public static Prerendering resumeAndPrerender(View view, Postponed postponed, ReactServer.StreamOptions options) {
+        return continued(view, postponed, options, false);
+    }
+
+    /** React's {@code resumeAndPrerenderToNodeStream}: as {@link #resumeAndPrerender}, a Node stream. */
+    public static Prerendering resumeAndPrerenderToNodeStream(View view, Postponed postponed, ReactServer.StreamOptions options) {
+        return continued(view, postponed, options, true);
+    }
+
+    private static Prerendering continued(View view, Postponed postponed, ReactServer.StreamOptions options, boolean node) {
+        Hooks.installRuntime(ReactHooks.INSTANCE);
+        JSObject state = Objects.requireNonNull(postponed).state;
+        JSObject settings = ReactServer.settings(Objects.requireNonNull(options));
+        JSObject controller = ReactServer.controller(settings);
+        JSObject element = React.element(Objects.requireNonNull(view));
+        return running(node ? resumeNodeNative(element, state, settings) : resumeNative(element, state, settings), controller, node);
+    }
+
     private static Prerendering start(View view, ReactServer.StreamOptions options, boolean node) {
         Hooks.installRuntime(ReactHooks.INSTANCE);
         JSObject settings = ReactServer.settings(Objects.requireNonNull(options));
@@ -92,6 +112,10 @@ public final class ReactStatic {
             + " readable.on('data', function(chunk) { text += typeof chunk === 'string' ? chunk : decoder.decode(chunk, {stream: true}); });"
             + " readable.on('end', function() { resolve(text + decoder.decode()); }); readable.on('error', reject); });")
     private static native JSObject readNode(JSObject readable);
+    @JSBody(params = {"element", "state", "settings"}, script = "return ReactDOMStatic.resumeAndPrerender(element, state, settings);", imports = @JSBodyImport(alias = "ReactDOMStatic", fromModule = "react-dom/static"))
+    private static native JSObject resumeNative(JSObject element, JSObject state, JSObject settings);
+    @JSBody(params = {"element", "state", "settings"}, script = "return ReactDOMStatic.resumeAndPrerenderToNodeStream(element, state, settings);", imports = @JSBodyImport(alias = "ReactDOMStatic", fromModule = "react-dom/static"))
+    private static native JSObject resumeNodeNative(JSObject element, JSObject state, JSObject settings);
     @JSBody(params = {"element", "settings"}, script = "return ReactDOMStatic.prerender(element, settings);", imports = @JSBodyImport(alias = "ReactDOMStatic", fromModule = "react-dom/static"))
     private static native JSObject prerenderNative(JSObject element, JSObject settings);
     @JSBody(params = {"element", "settings"}, script = "return ReactDOMStatic.prerenderToNodeStream(element, settings);", imports = @JSBodyImport(alias = "ReactDOMStatic", fromModule = "react-dom/static"))

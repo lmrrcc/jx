@@ -360,6 +360,12 @@ boundary, so the output has no fallbacks. Each returns a `Prerendering` with the
 promise of the result (`prelude()`, `text()`) and `abort()`, which ends the wait
 early and leaves a `postponed()` state to continue from.
 
+That state is continued later, with the same view: `ReactServer.resume` and
+`ReactServer.resumeToPipeableStream` stream the rest, and
+`ReactStatic.resumeAndPrerender` and `resumeAndPrerenderToNodeStream` finish it as
+static HTML. `Postponed.json()` and `Postponed.fromJson` store the state between
+the two steps; only state that came from `json()` may be passed back.
+
 `React.profiler(id, onRender, children...)` and `React.strictMode(children...)` in
 `jx.react` are React's `Profiler` and nested `StrictMode`. They are view factories
 called in an interpolation, for example `{React.strictMode(<Panel />)}`. As in

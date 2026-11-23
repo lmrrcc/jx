@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 24 tasks done, R-24 next, 7 planned; complete remaining APIs, options, rendering modes and combinations. |
+| React parity track / GA-18 | 🟡 Partial | 25 tasks done, R-25 next, 6 planned; complete remaining APIs, options, rendering modes and combinations. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -47,9 +47,11 @@ The React track has 19 complete tasks; the R-16 gap that review found (the
 `useFormState` alias) was closed the same day. There are 93 supported/equivalent feature
 rows out of 120; the bench records 86 JX passes, 11 unsupported cases and one
 not-applicable case. These are coverage counts, not a GA completion percentage.
-R-19 (root options) was added later the same day; R-20 is the next scheduled feature. G0 remains open: component JARs, exact shared
-contracts, authenticated packaged Spring, lazy chunks and SSR→hydration still need
-their proof tasks. Milestone dates have not been advanced or declared complete
+Update, 24 November 2026: R-19 to R-24 are done. The feature register has 104 supported/equivalent
+rows out of 120 and none unsupported; the bench records 100 JX passes and no reference-only case.
+R-25 is the next scheduled feature. G0 remains open: component JARs, exact shared
+contracts, authenticated packaged Spring and lazy chunks still need their proof tasks, and the
+SSR→hydration proof still lacks its protected data route (M1-26). Milestone dates have not been advanced or declared complete
 because client React work reached features originally assigned to M2/M3.
 
 Revision, 21 November 2026: implementation now follows the
