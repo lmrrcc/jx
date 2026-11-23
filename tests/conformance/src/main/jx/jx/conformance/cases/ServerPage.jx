@@ -1,0 +1,14 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+
+/** The page the server cases render; the reference renders the same markup. */
+@Component
+public final class ServerPage {
+    public record Props(String name) {}
+
+    public static View render(Props props) {
+        return <main><h1>Hello {props.name()}</h1><p>static</p></main>;
+    }
+}

@@ -1,5 +1,5 @@
 import {expect} from '@playwright/test';
-import {serverOnly} from './bench.js';
+import {server as onServer, serverOnly} from './bench.js';
 
 // React's server and static rendering APIs, run in Node on the reference side.
 const withMarkers = '<main><h1>Hello <!-- -->Ada</h1><p>static</p></main>';
@@ -11,11 +11,11 @@ const resumed = result => {
   expect(result.rest).toContain('<p>data <!-- -->arrived</p>');
 };
 
-serverOnly('server-render-to-string: renders HTML with hydration markers', async server => {
+onServer('server-render-to-string: renders HTML with hydration markers', async server => {
   expect(await server.renderToString()).toEqual(withMarkers);
 });
 
-serverOnly('server-render-to-static-markup: renders HTML without React markers', async server => {
+onServer('server-render-to-static-markup: renders HTML without React markers', async server => {
   expect(await server.renderToStaticMarkup()).toEqual('<main><h1>Hello Ada</h1><p>static</p></main>');
 });
 

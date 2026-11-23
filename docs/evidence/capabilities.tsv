@@ -43,3 +43,4 @@ editor.vscode	Editors	VS Code highlighting and native Java editing through Red H
 editor.vscode.component-rename	Editors	VS Code component class and file rename	proposed	T					Rejected atomically today; planned in GA-25	
 editor.browser-debugging	Editors	.jx breakpoints and stepping in the browser	proposed	T					Planned in GA-23	
 release.published-artifacts	Release	Published, signed artifacts installed by a clean consumer	proposed	Q					Local snapshot versions only; planned in GA-09	
+runtime.server-rendering	Runtime	ReactServer.renderToString and renderToStaticMarkup, run by starting the compiled application in Node	spike	R		tests/conformance/specs/server.spec.js	npm run test:bench		One static page compared with React output; no request isolation, data loading, streaming or hydration yet	2026-11-23

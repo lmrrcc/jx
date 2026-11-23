@@ -338,6 +338,12 @@ optional settings.
 Each callback receives a `RootError` with the Java exception and the component
 stack. Supplying `withUncaughtError` replaces React's default report to the browser.
 
+`ReactServer.renderToString(view)` and `ReactServer.renderToStaticMarkup(view)` in
+`jx.react` are React's synchronous server renderers. They need no document: the
+compiled application is started in a Node host and calls them there. Effects do
+not run and handlers are not attached. Hydrating that HTML in the browser is not
+offered yet.
+
 `React.profiler(id, onRender, children...)` and `React.strictMode(children...)` in
 `jx.react` are React's `Profiler` and nested `StrictMode`. They are view factories
 called in an interpolation, for example `{React.strictMode(<Panel />)}`. As in
