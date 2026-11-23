@@ -164,9 +164,50 @@ public final class React {
     public static <P> Root mountStrict(String elementId, ComponentType<P> component, P props) {
         return mount(elementId, component, props, true);
     }
+    /** An error reported to a root callback. {@code error} is the Java exception that was thrown,
+     * or an {@link IllegalStateException} with the JavaScript message; for a recoverable error its
+     * {@linkplain Throwable#getCause() cause} is the error React recovered from, when known.
+     * {@code componentStack} names the components around the failure and may be empty. */
+    public record RootError(Throwable error, String componentStack) {}
+    /** React's {@code createRoot} options. A null component keeps React's default.
+     * {@code onCaughtError} reports errors an error boundary caught, {@code onUncaughtError}
+     * errors no boundary caught (React then removes the tree; supplying this replaces React's
+     * default report to the browser), {@code onRecoverableError} errors React recovered from by
+     * rendering again. The callbacks run outside rendering. {@code identifierPrefix} is put in
+     * front of every {@link Hooks#useId()} of the root, to keep several roots on one page apart. */
+    public record RootOptions(String identifierPrefix, Consumer<RootError> onCaughtError, Consumer<RootError> onUncaughtError, Consumer<RootError> onRecoverableError) {
+        public static RootOptions defaults() { return new RootOptions(null, null, null, null); }
+        public RootOptions withIdentifierPrefix(String prefix) { return new RootOptions(prefix, onCaughtError, onUncaughtError, onRecoverableError); }
+        public RootOptions withCaughtError(Consumer<RootError> callback) { return new RootOptions(identifierPrefix, callback, onUncaughtError, onRecoverableError); }
+        public RootOptions withUncaughtError(Consumer<RootError> callback) { return new RootOptions(identifierPrefix, onCaughtError, callback, onRecoverableError); }
+        public RootOptions withRecoverableError(Consumer<RootError> callback) { return new RootOptions(identifierPrefix, onCaughtError, onUncaughtError, callback); }
+    }
+    /** As {@link #mount(String, ComponentType, Object)}, with root options. */
+    public static <P> Root mount(String elementId, ComponentType<P> component, P props, RootOptions options) {
+        return mount(elementId, component, props, false, Objects.requireNonNull(options));
+    }
+    /** As {@link #mountStrict(String, ComponentType, Object)}, with root options. */
+    public static <P> Root mountStrict(String elementId, ComponentType<P> component, P props, RootOptions options) {
+        return mount(elementId, component, props, true, Objects.requireNonNull(options));
+    }
     private static <P> Root mount(String elementId, ComponentType<P> component, P props, boolean strict) {
+        return mount(elementId, component, props, strict, RootOptions.defaults());
+    }
+    @JSFunctor interface ErrorReport extends JSObject { void report(JSObject error, String componentStack); }
+    private static ErrorReport report(Consumer<RootError> callback) {
+        return callback == null ? null : (error, stack) -> callback.accept(new RootError(throwable(error), stack));
+    }
+    /** The Java exception behind a JavaScript error, or a stand-in that keeps message and cause. */
+    private static Throwable throwable(JSObject error) {
+        Throwable java = JSExceptions.getJavaException(error);
+        if (java != null) return java;
+        JSObject cause = errorCause(error);
+        return new IllegalStateException(errorMessage(error), cause == null ? null : throwable(cause));
+    }
+    private static <P> Root mount(String elementId, ComponentType<P> component, P props, boolean strict, RootOptions options) {
         Hooks.installRuntime(ReactHooks.INSTANCE);
-        JSObject root = createRoot(Objects.requireNonNull(elementId));
+        JSObject root = createRoot(Objects.requireNonNull(elementId), options.identifierPrefix(),
+                report(options.onCaughtError()), report(options.onUncaughtError()), report(options.onRecoverableError()));
         JSObject child = component(new View.ComponentView<>(component, props, null), HotReload.rootPath(elementId, component.name()), true);
         Root owner = new Root(root, elementId);
         HotReload.root(elementId, owner);
@@ -374,7 +415,17 @@ public final class React {
     @JSBody(params = "text", script = "return React.createElement(React.Fragment, null, text);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject nativeText(String text);
     @JSBody(params = "children", script = "return React.createElement.apply(null, [React.Fragment, null].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject fragment(Object[] children);
     @JSBody(params = {"context", "value", "identity", "children"}, script = "return React.createElement.apply(null, [context.jxProvider, {value: value, identity: identity}].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject provider(JSObject context, Object value, Object identity, Object[] children);
-    @JSBody(params = "elementId", script = "var element = document.getElementById(elementId); if (!element) throw new Error('Missing React root: ' + elementId); var hot = globalThis.__JX_HOT__; var options = hot && hot.enabled ? {onUncaughtError: function(error) { if (typeof hot.fail === 'function') hot.fail(error); if (typeof reportError === 'function') reportError(error); else console.error(error); }} : undefined; return ReactDOM.createRoot(element, options);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom/client")) private static native JSObject createRoot(String elementId);
+    @JSBody(params = "error", script = "var cause = error && error.cause; return cause && typeof cause === 'object' ? cause : null;") private static native JSObject errorCause(JSObject error);
+    @JSBody(params = {"elementId", "prefix", "caught", "uncaught", "recoverable"}, script = "var element = document.getElementById(elementId); if (!element) throw new Error('Missing React root: ' + elementId);"
+            + " var stack = function(info) { return info && info.componentStack ? String(info.componentStack) : ''; };"
+            + " var options = {}; if (prefix !== null) options.identifierPrefix = prefix;"
+            + " if (caught) options.onCaughtError = function(error, info) { caught(error, stack(info)); };"
+            + " if (recoverable) options.onRecoverableError = function(error, info) { recoverable(error, stack(info)); };"
+            + " var hot = globalThis.__JX_HOT__; var hotFail = hot && hot.enabled && typeof hot.fail === 'function' ? hot.fail : null;"
+            // The hot-reload overlay hears of uncaught errors first; without an application callback the error is still reported to the browser.
+            + " if (uncaught || hotFail || (hot && hot.enabled)) options.onUncaughtError = function(error, info) { if (hotFail) hotFail(error); if (uncaught) uncaught(error, stack(info)); else if (typeof reportError === 'function') reportError(error); else console.error(error); };"
+            + " return ReactDOM.createRoot(element, options);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom/client"))
+    private static native JSObject createRoot(String elementId, String prefix, ErrorReport caught, ErrorReport uncaught, ErrorReport recoverable);
     @JSBody(params = {"fallback", "child"}, script = "return React.createElement(React.Suspense, {fallback: fallback}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject suspenseNative(JSObject fallback, JSObject child);
     @JSBody(params = {"mode", "child"}, script = "return React.createElement(React.Activity, {mode: mode}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject activityNative(String mode, JSObject child);
     @JSBody(params = {"props", "child"}, script = "return React.createElement(React.ViewTransition, props, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject viewTransitionNative(JSObject props, JSObject child);

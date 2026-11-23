@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.View;
+
+/** Fails the first time it renders armed; React recovers by rendering again. */
+@Component
+public final class RootFlaky {
+    private static boolean thrown;
+
+    public record Props(boolean armed) {}
+
+    public static View render(Props props) {
+        if (props.armed() && !thrown) {
+            thrown = true;
+            throw new IllegalStateException("flaky once");
+        }
+        return <p data-testid="flaky">{props.armed() ? "recovered" : "calm"}</p>;
+    }
+}

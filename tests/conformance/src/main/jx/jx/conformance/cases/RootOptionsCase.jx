@@ -1,0 +1,36 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.Bench;
+import jx.react.React;
+
+/** Case root-options: the root reports caught, recoverable and uncaught errors and prefixes ids. */
+@Component
+public final class RootOptionsCase {
+    /** Options for the root; Main mounts this case with them. */
+    public static final React.RootOptions OPTIONS = React.RootOptions.defaults()
+            .withIdentifierPrefix("bench-")
+            .withCaughtError(report -> Bench.log("caught " + report.error().getMessage() + (report.componentStack().isEmpty() ? "" : " with stack")))
+            .withUncaughtError(report -> Bench.log("uncaught " + report.error().getMessage()))
+            .withRecoverableError(report -> Bench.log("recoverable "
+                    + (report.error().getCause() != null ? report.error().getCause() : report.error()).getMessage()));
+
+    public static View render() {
+        String id = Hooks.useId();
+        State<Boolean> armed = Hooks.useState(false);
+        State<Boolean> broken = Hooks.useState(false);
+        if (broken.value()) throw new IllegalStateException("root exploded");
+        return (
+            <main>
+                <p data-testid="id">{id}</p>
+                {React.boundary(<RootExploder />, error -> <p role="alert">failed</p>)}
+                <RootFlaky armed={armed.value()} />
+                <button onClick={event -> React.startTransition(() -> armed.set(true))}>Arm</button>
+                <button onClick={event -> broken.set(true)}>Break root</button>
+            </main>
+        );
+    }
+}

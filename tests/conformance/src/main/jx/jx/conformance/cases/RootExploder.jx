@@ -1,0 +1,16 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Throws while rendering after its button is clicked; for the root-options case. */
+@Component
+public final class RootExploder {
+    public static View render() {
+        State<Boolean> broken = Hooks.useState(false);
+        if (broken.value()) throw new IllegalStateException("child exploded");
+        return <button onClick={event -> broken.set(true)}>Explode child</button>;
+    }
+}

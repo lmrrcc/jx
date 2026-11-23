@@ -77,3 +77,9 @@ hint-preload-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "Re
 hint-preinit-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.preinit(href, options);"	script = ""	preinit adds nothing
 hint-preloadModule-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.preloadModule(href, options);"	script = ""	preloadModule adds nothing
 hint-preinitModule-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.preinitModule(href, options);"	script = ""	preinitModule adds nothing
+root-caught-dropped	jx-react/src/main/java/jx/react/React.java	if (caught) options.onCaughtError =	if (false) options.onCaughtError =	Caught errors are not reported to the root callback
+root-recoverable-dropped	jx-react/src/main/java/jx/react/React.java	if (recoverable) options.onRecoverableError =	if (false) options.onRecoverableError =	Recoverable errors are not reported
+root-uncaught-dropped	jx-react/src/main/java/jx/react/React.java	if (uncaught) uncaught(error, stack(info)); else	if (uncaught) {} else	Uncaught errors are not reported to the root callback
+root-prefix-dropped	jx-react/src/main/java/jx/react/React.java	if (prefix !== null) options.identifierPrefix = prefix;	if (prefix !== null) {}	The identifier prefix is ignored
+root-stack-dropped	jx-react/src/main/java/jx/react/React.java	return info && info.componentStack ? String(info.componentStack) : '';	return '';	The component stack is not passed on
+root-cause-dropped	jx-react/src/main/java/jx/react/React.java	cause == null ? null : throwable(cause));	null);	The cause of a recovered error is lost

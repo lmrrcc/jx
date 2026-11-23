@@ -60,7 +60,7 @@ react-dom:useFormState	hook	equivalent	form-state	Hooks.useFormState, Hooks.useF
 react-dom:unstable_batchedUpdates	unstable	excluded			R-29	Unstable legacy API; batching is automatic
 react-dom:browser	constant	excluded			none	Build marker, not an API
 react-dom:version	constant	excluded			R-29	Constant; pinned in the version manifest
-react-dom/client:createRoot	api	supported	state-counter,unknown-case	React.mount, React.mountStrict		Root options such as error callbacks are not exposed
+react-dom/client:createRoot	api	supported	state-counter,unknown-case,root-options	React.mount, React.mountStrict, React.RootOptions		The three error callbacks and identifierPrefix; onDefaultTransitionIndicator is not offered
 react-dom/client:hydrateRoot	api	unsupported	hydrate-root		R-21	
 react-dom/client:version	constant	excluded			R-29	Constant
 react-dom/server:renderToPipeableStream	server	unsupported	server-pipeable-stream		R-22	
@@ -115,7 +115,7 @@ dom:dangerously-set-inner-html	dom	supported	raw-html	RawHtml.unsanitized, dange
 dom:document-metadata	dom	supported	document-metadata	title and meta elements in markup		
 dom:resource-elements	dom	supported	resource-elements	style with href and precedence		Stylesheet links and async scripts are not covered
 dom:custom-elements	dom	supported	custom-elements	Hyphenated tag names		Attributes only; properties and custom events are not covered
-dom:error-reporting	dom	supported	error-reporting	Default reporting of handler and render errors		Custom root error callbacks are part of R-19
+dom:error-reporting	dom	supported	error-reporting,root-options	Default reporting; React.RootOptions error callbacks		
 framework:server-components	server	excluded			R-30	Deferred framework protocol; in scope under the 21 November all-features decision, pending feasibility proof
 framework:directives	server	excluded			R-30	use client and use server belong to server-component frameworks
 framework:react-compiler	compiler	excluded			none	Optional build tool for JavaScript sources
