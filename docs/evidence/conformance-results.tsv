@@ -84,8 +84,8 @@ spread-props	pass	pass
 start-transition	pass	pass
 state-counter	pass	pass
 state-lazy-init	pass	pass
-static-prerender	pass	unsupported
-static-prerender-node	pass	unsupported
+static-prerender	pass	pass
+static-prerender-node	pass	pass
 static-resume-prerender	pass	unsupported
 static-resume-prerender-node	pass	unsupported
 stop-propagation	pass	pass

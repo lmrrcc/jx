@@ -354,6 +354,12 @@ returns a `PipeableStream` with `shellReady()` and `allReady()` promises and
 promise of a `ReadableStream` that wraps the web stream. `StreamOptions` carries
 the identifier prefix, the bootstrap scripts and modules, and an error callback.
 
+`ReactStatic.prerender(view, options)` and `ReactStatic.prerenderToNodeStream(view, options)`
+produce static HTML ahead of a request: they wait for every `React.suspense`
+boundary, so the output has no fallbacks. Each returns a `Prerendering` with the
+promise of the result (`prelude()`, `text()`) and `abort()`, which ends the wait
+early and leaves a `postponed()` state to continue from.
+
 `React.profiler(id, onRender, children...)` and `React.strictMode(children...)` in
 `jx.react` are React's `Profiler` and nested `StrictMode`. They are view factories
 called in an interpolation, for example `{React.strictMode(<Panel />)}`. As in

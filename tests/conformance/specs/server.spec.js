@@ -38,11 +38,11 @@ onServer('server-stream-suspense: a boundary sends its fallback first and its co
   expect(html.slice(fallback)).toContain('hidden');
 });
 
-serverOnly('static-prerender: prerenders to a web stream after all data is ready', async server => {
+onServer('static-prerender: prerenders to a web stream after all data is ready', async server => {
   expect(await server.prerender()).toEqual(withMarkers);
 });
 
-serverOnly('static-prerender-node: prerenders to a Node stream', async server => {
+onServer('static-prerender-node: prerenders to a Node stream', async server => {
   expect(await server.prerenderToNodeStream()).toEqual(withMarkers);
 });
 

@@ -133,7 +133,7 @@ public final class ReactServer {
     @JSFunctor interface Failure extends JSObject { void fail(JSObject error); }
     @JSFunctor interface Chunk extends JSObject { void write(String html); }
 
-    private static JSObject settings(StreamOptions options) {
+    static JSObject settings(StreamOptions options) {
         JSObject settings = object();
         if (options.identifierPrefix() != null) setText(settings, "identifierPrefix", options.identifierPrefix());
         if (options.bootstrapScripts() != null) setList(settings, "bootstrapScripts", options.bootstrapScripts().toArray(String[]::new));
@@ -148,8 +148,8 @@ public final class ReactServer {
     @JSBody(params = {"object", "name", "values"}, script = "object[name] = Array.prototype.slice.call(values);") private static native void setList(JSObject object, String name, String[] values);
     @JSBody(params = {"object", "name", "call"}, script = "object[name] = function() { call(); };") private static native void setCall(JSObject object, String name, Call call);
     @JSBody(params = {"object", "name", "fail"}, script = "object[name] = function(error) { fail(error); };") private static native void setError(JSObject object, String name, Failure fail);
-    @JSBody(params = "settings", script = "var controller = new AbortController(); settings.signal = controller.signal; return controller;") private static native JSObject controller(JSObject settings);
-    @JSBody(params = "target", script = "target.abort();") private static native void abortNative(JSObject target);
+    @JSBody(params = "settings", script = "var controller = new AbortController(); settings.signal = controller.signal; return controller;") static native JSObject controller(JSObject settings);
+    @JSBody(params = "target", script = "target.abort();") static native void abortNative(JSObject target);
     @JSBody(params = {"element", "settings"}, script = "return ReactDOMServer.renderToPipeableStream(element, settings);", imports = @JSBodyImport(alias = "ReactDOMServer", fromModule = "react-dom/server"))
     private static native JSObject pipeableNative(JSObject element, JSObject settings);
     @JSBody(params = {"element", "settings"}, script = "return ReactDOMServer.renderToReadableStream(element, settings);", imports = @JSBodyImport(alias = "ReactDOMServer", fromModule = "react-dom/server"))
@@ -167,8 +167,8 @@ public final class ReactServer {
     @JSBody(params = "stream", script = "var reader = stream.getReader(); var decoder = new TextDecoder(); var text = '';"
             + " var next = function() { return reader.read().then(function(part) { if (part.done) return text + decoder.decode(); text += decoder.decode(part.value, {stream: true}); return next(); }); };"
             + " return next();")
-    private static native JSObject readNative(JSObject stream);
-    @JSBody(params = "value", script = "return String(value);") private static native String string(JSObject value);
+    static native JSObject readNative(JSObject stream);
+    @JSBody(params = "value", script = "return String(value);") static native String string(JSObject value);
 
     @JSBody(params = {"element", "prefix"}, script = "return ReactDOMServer.renderToString(element, prefix === null ? undefined : {identifierPrefix: prefix});", imports = @JSBodyImport(alias = "ReactDOMServer", fromModule = "react-dom/server"))
     private static native String stringNative(JSObject element, String prefix);
