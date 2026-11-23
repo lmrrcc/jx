@@ -93,6 +93,21 @@ public final class ReactServer {
     /** React's {@code renderToPipeableStream}: streaming rendering for a Node host. Content under
      * a {@code React.suspense} boundary that is not ready is sent later, after its fallback. */
     public static PipeableStream renderToPipeableStream(View view, StreamOptions options) {
+        return pipeable(view, options, null);
+    }
+
+    /** React's {@code resumeToPipeableStream}: continues a prerender that was aborted, sending
+     * what {@code postponed} left out. {@code view} must be the view that was prerendered. */
+    public static PipeableStream resumeToPipeableStream(View view, ReactStatic.Postponed postponed, StreamOptions options) {
+        return pipeable(view, options, Objects.requireNonNull(postponed));
+    }
+
+    /** React's {@code resume}: as {@link #resumeToPipeableStream}, to a web stream. */
+    public static Promise<ReadableStream> resume(View view, ReactStatic.Postponed postponed, StreamOptions options) {
+        return readable(view, options, Objects.requireNonNull(postponed));
+    }
+
+    private static PipeableStream pipeable(View view, StreamOptions options, ReactStatic.Postponed postponed) {
         Hooks.installRuntime(ReactHooks.INSTANCE);
         JSObject settings = settings(Objects.requireNonNull(options));
         Signal shell = new Signal();
@@ -100,7 +115,8 @@ public final class ReactServer {
         setCall(settings, "onShellReady", () -> shell.resolver.resolve(null));
         setError(settings, "onShellError", error -> shell.resolver.reject(React.throwable(error)));
         setCall(settings, "onAllReady", () -> all.resolver.resolve(null));
-        JSObject stream = pipeableNative(React.element(Objects.requireNonNull(view)), settings);
+        JSObject element = React.element(Objects.requireNonNull(view));
+        JSObject stream = postponed == null ? pipeableNative(element, settings) : resumePipeableNative(element, postponed.state, settings);
         return new PipeableStream() {
             @Override public Promise<Void> shellReady() { return shell.promise; }
             @Override public Promise<Void> allReady() { return all.promise; }
@@ -113,10 +129,15 @@ public final class ReactServer {
     /** React's {@code renderToReadableStream}: streaming rendering to a web stream. The promise is
      * settled when the shell is rendered and fails when the shell threw. */
     public static Promise<ReadableStream> renderToReadableStream(View view, StreamOptions options) {
+        return readable(view, options, null);
+    }
+
+    private static Promise<ReadableStream> readable(View view, StreamOptions options, ReactStatic.Postponed postponed) {
         Hooks.installRuntime(ReactHooks.INSTANCE);
         JSObject settings = settings(Objects.requireNonNull(options));
         JSObject controller = controller(settings);
-        return React.promise(readableNative(React.element(Objects.requireNonNull(view)), settings)).map(stream -> new ReadableStream() {
+        JSObject element = React.element(Objects.requireNonNull(view));
+        return React.promise(postponed == null ? readableNative(element, settings) : resumeNative(element, postponed.state, settings)).map(stream -> new ReadableStream() {
             @Override public JSObject stream() { return stream; }
             @Override public Promise<Void> allReady() { return React.promise(allReadyNative(stream)).map(ignored -> null); }
             @Override public Promise<String> text() { return React.promise(readNative(stream)).map(ReactServer::string); }
@@ -154,6 +175,10 @@ public final class ReactServer {
     private static native JSObject pipeableNative(JSObject element, JSObject settings);
     @JSBody(params = {"element", "settings"}, script = "return ReactDOMServer.renderToReadableStream(element, settings);", imports = @JSBodyImport(alias = "ReactDOMServer", fromModule = "react-dom/server"))
     private static native JSObject readableNative(JSObject element, JSObject settings);
+    @JSBody(params = {"element", "state", "settings"}, script = "return ReactDOMServer.resumeToPipeableStream(element, state, settings);", imports = @JSBodyImport(alias = "ReactDOMServer", fromModule = "react-dom/server"))
+    private static native JSObject resumePipeableNative(JSObject element, JSObject state, JSObject settings);
+    @JSBody(params = {"element", "state", "settings"}, script = "return ReactDOMServer.resume(element, state, settings);", imports = @JSBodyImport(alias = "ReactDOMServer", fromModule = "react-dom/server"))
+    private static native JSObject resumeNative(JSObject element, JSObject state, JSObject settings);
     @JSBody(params = {"stream", "writable"}, script = "stream.pipe(writable);") private static native void pipeNative(JSObject stream, JSObject writable);
     // React writes to anything shaped like a Node Writable; this one decodes the bytes for a Java sink.
     @JSBody(params = {"stream", "write", "end"}, script = "var decoder = new TextDecoder();"

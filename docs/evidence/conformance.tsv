@@ -67,13 +67,13 @@ react-dom/server:renderToPipeableStream	server	supported	server-pipeable-stream,
 react-dom/server:renderToReadableStream	server	supported	server-readable-stream	ReactServer.renderToReadableStream		Options: identifier prefix, bootstrap scripts and modules, onError
 react-dom/server:renderToStaticMarkup	server	supported	server-render-to-static-markup	ReactServer.renderToStaticMarkup		Runs in a Node host
 react-dom/server:renderToString	server	supported	server-render-to-string	ReactServer.renderToString		Runs in a Node host; the options other than identifierPrefix are not offered
-react-dom/server:resume	server	unsupported	server-resume		R-24	
-react-dom/server:resumeToPipeableStream	server	unsupported	server-resume-pipeable		R-24	
+react-dom/server:resume	server	supported	server-resume	ReactServer.resume		
+react-dom/server:resumeToPipeableStream	server	supported	server-resume-pipeable	ReactServer.resumeToPipeableStream		
 react-dom/server:version	constant	excluded			R-29	Constant
-react-dom/static:prerender	server	supported	static-prerender	ReactStatic.prerender		Abort and postponed state are exercised by the resume cases of R-24
+react-dom/static:prerender	server	supported	static-prerender,server-resume	ReactStatic.prerender		Abort and the postponed state are exercised by the resume cases
 react-dom/static:prerenderToNodeStream	server	supported	static-prerender-node	ReactStatic.prerenderToNodeStream		
-react-dom/static:resumeAndPrerender	server	unsupported	static-resume-prerender		R-24	
-react-dom/static:resumeAndPrerenderToNodeStream	server	unsupported	static-resume-prerender-node		R-24	
+react-dom/static:resumeAndPrerender	server	supported	static-resume-prerender	ReactStatic.resumeAndPrerender		
+react-dom/static:resumeAndPrerenderToNodeStream	server	supported	static-resume-prerender-node	ReactStatic.resumeAndPrerenderToNodeStream		
 react-dom/static:version	constant	excluded			R-29	Constant
 jsx:key	markup	supported	keyed-list,remount-by-key	key attribute		
 jsx:children	markup	supported	children-prop	children property of type View		

@@ -1,5 +1,5 @@
 import {expect} from '@playwright/test';
-import {server as onServer, serverOnly} from './bench.js';
+import {server as onServer} from './bench.js';
 
 // React's server and static rendering APIs, run in Node on the reference side.
 const withMarkers = '<main><h1>Hello <!-- -->Ada</h1><p>static</p></main>';
@@ -9,6 +9,8 @@ const resumed = result => {
   expect(result.shell).toContain('<p>waiting</p>');
   expect(result.shell).not.toContain('arrived');
   expect(result.rest).toContain('<p>data <!-- -->arrived</p>');
+  // Resuming sends only what was left out; rendering the page again would repeat the shell.
+  expect(result.rest).not.toContain('<h1>shell</h1>');
 };
 
 onServer('server-render-to-string: renders HTML with hydration markers', async server => {
@@ -46,21 +48,21 @@ onServer('static-prerender-node: prerenders to a Node stream', async server => {
   expect(await server.prerenderToNodeStream()).toEqual(withMarkers);
 });
 
-serverOnly('server-resume: continues an aborted prerender as a web stream', async server => {
+onServer('server-resume: continues an aborted prerender as a web stream', async server => {
   resumed(await server.resume());
 });
 
-serverOnly('server-resume-pipeable: continues an aborted prerender as a Node stream', async server => {
+onServer('server-resume-pipeable: continues an aborted prerender as a Node stream', async server => {
   resumed(await server.resumeToPipeableStream());
 });
 
-serverOnly('static-resume-prerender: finishes an aborted prerender statically', async server => {
+onServer('static-resume-prerender: finishes an aborted prerender statically', async server => {
   const result = await server.resumeAndPrerender();
   resumed(result);
   expect(result.finished).toBe(true);
 });
 
-serverOnly('static-resume-prerender-node: finishes an aborted prerender to a Node stream', async server => {
+onServer('static-resume-prerender-node: finishes an aborted prerender to a Node stream', async server => {
   const result = await server.resumeAndPrerenderToNodeStream();
   resumed(result);
   expect(result.finished).toBe(true);

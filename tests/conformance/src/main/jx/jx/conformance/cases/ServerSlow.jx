@@ -1,0 +1,14 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.View;
+import jx.conformance.ServerData;
+
+/** Waits for the data of the server cases. */
+@Component
+public final class ServerSlow {
+    public static View render() {
+        return <p>data {Hooks.use(ServerData.current)}</p>;
+    }
+}

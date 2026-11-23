@@ -77,8 +77,8 @@ server-pipeable-stream	pass	pass
 server-readable-stream	pass	pass
 server-render-to-static-markup	pass	pass
 server-render-to-string	pass	pass
-server-resume	pass	unsupported
-server-resume-pipeable	pass	unsupported
+server-resume	pass	pass
+server-resume-pipeable	pass	pass
 server-stream-suspense	pass	pass
 spread-props	pass	pass
 start-transition	pass	pass
@@ -86,8 +86,8 @@ state-counter	pass	pass
 state-lazy-init	pass	pass
 static-prerender	pass	pass
 static-prerender-node	pass	pass
-static-resume-prerender	pass	unsupported
-static-resume-prerender-node	pass	unsupported
+static-resume-prerender	pass	pass
+static-resume-prerender-node	pass	pass
 stop-propagation	pass	pass
 strict-nested	pass	pass
 svg	pass	pass
