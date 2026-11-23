@@ -73,12 +73,13 @@ remount-by-key	pass	pass
 resource-elements	pass	pass
 resource-hints	pass	pass
 root-options	pass	pass
-server-pipeable-stream	pass	unsupported
-server-readable-stream	pass	unsupported
+server-pipeable-stream	pass	pass
+server-readable-stream	pass	pass
 server-render-to-static-markup	pass	pass
 server-render-to-string	pass	pass
 server-resume	pass	unsupported
 server-resume-pipeable	pass	unsupported
+server-stream-suspense	pass	pass
 spread-props	pass	pass
 start-transition	pass	pass
 state-counter	pass	pass

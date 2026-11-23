@@ -1,0 +1,16 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.Promise;
+import jx.View;
+
+/** Suspends until its promise is settled. */
+@Component
+public final class ServerLate {
+    public record Props(Promise<String> late) {}
+
+    public static View render(Props props) {
+        return <p>data {Hooks.use(props.late())}</p>;
+    }
+}

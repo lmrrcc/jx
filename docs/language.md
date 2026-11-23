@@ -346,6 +346,14 @@ attach the same component to that HTML in the browser and keep its DOM nodes; th
 first render must produce the same output as the server did. `ExternalStore.serverSnapshot()`
 is the value a store shows on the server and during hydration.
 
+`ReactServer.renderToPipeableStream(view, options)` and
+`ReactServer.renderToReadableStream(view, options)` stream the HTML: content under a
+`React.suspense` boundary that is not ready is sent after its fallback. The first
+returns a `PipeableStream` with `shellReady()` and `allReady()` promises and
+`pipe(sink)`, to a Java `HtmlSink` or a Node `Writable`; the second returns the
+promise of a `ReadableStream` that wraps the web stream. `StreamOptions` carries
+the identifier prefix, the bootstrap scripts and modules, and an error callback.
+
 `React.profiler(id, onRender, children...)` and `React.strictMode(children...)` in
 `jx.react` are React's `Profiler` and nested `StrictMode`. They are view factories
 called in an interpolation, for example `{React.strictMode(<Panel />)}`. As in

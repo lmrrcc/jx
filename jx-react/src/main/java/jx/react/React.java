@@ -219,7 +219,7 @@ public final class React {
         return callback == null ? null : (error, stack) -> callback.accept(new RootError(throwable(error), stack));
     }
     /** The Java exception behind a JavaScript error, or a stand-in that keeps message and cause. */
-    private static Throwable throwable(JSObject error) {
+    static Throwable throwable(JSObject error) {
         Throwable java = JSExceptions.getJavaException(error);
         if (java != null) return java;
         JSObject cause = errorCause(error);

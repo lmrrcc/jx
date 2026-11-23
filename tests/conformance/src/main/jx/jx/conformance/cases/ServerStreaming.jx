@@ -1,0 +1,16 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Promise;
+import jx.View;
+import jx.react.React;
+
+/** The page of server-stream-suspense: a boundary whose content arrives after the shell. */
+@Component
+public final class ServerStreaming {
+    public record Props(Promise<String> late) {}
+
+    public static View render(Props props) {
+        return <main><h1>shell</h1>{React.suspense(<p>waiting</p>, <ServerLate late={props.late()} />)}</main>;
+    }
+}
