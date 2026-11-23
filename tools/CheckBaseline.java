@@ -198,6 +198,7 @@ public final class CheckBaseline {
             checker.checkLedger();
             checker.checkPortfolio();
             checker.checkConformance();
+            checker.checkMutants();
             if (!checker.failures.isEmpty()) {
                 checker.failures.forEach(message -> System.err.println("FAIL: " + message));
                 System.exit(1);
@@ -527,6 +528,30 @@ public final class CheckBaseline {
     }
 
     /** Returns the file's text, or null after recording that it is missing. */
+    /** Every curated mutant must still apply: its target text occurs exactly once in its file
+     * and differs from its replacement. Otherwise a mutant goes stale silently when code moves. */
+    private void checkMutants() throws IOException {
+        Path list = root.resolve("tests/conformance/mutants.tsv");
+        if (!Files.exists(list)) return;
+        List<String> lines = Files.readAllLines(list, StandardCharsets.UTF_8);
+        Set<String> ids = new java.util.HashSet<>();
+        for (int index = 1; index < lines.size(); index++) {
+            if (lines.get(index).isEmpty()) continue;
+            String[] cells = lines.get(index).split("\t", -1);
+            String where = "tests/conformance/mutants.tsv:" + (index + 1);
+            if (cells.length != 5) { failures.add(where + " needs 5 columns"); continue; }
+            where += " (" + cells[0] + ")";
+            require(ids.add(cells[0]), where + " repeats an id");
+            require(!cells[2].isEmpty() && !cells[2].equals(cells[3]), where + " changes nothing");
+            Path file = root.resolve(cells[1]).normalize();
+            if (!file.startsWith(root) || !Files.isRegularFile(file)) { failures.add(where + " names a missing file: " + cells[1]); continue; }
+            String text = Files.readString(file, StandardCharsets.UTF_8);
+            int count = 0;
+            for (int at = text.indexOf(cells[2]); at >= 0 && !cells[2].isEmpty(); at = text.indexOf(cells[2], at + 1)) count++;
+            require(count == 1, where + " target text occurs " + count + " times in " + cells[1] + "; it must occur once");
+        }
+    }
+
     private String source(String file) throws IOException {
         if (!sources.containsKey(file)) {
             Path path = root.resolve(file);
