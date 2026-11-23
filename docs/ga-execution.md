@@ -10,7 +10,7 @@ No GitHub issues, scheduled jobs, deployments or releases were created by this p
 Progress: **GA-01 and GA-02 are complete**. GA-14, GA-15 and GA-18 have substantial
 partial implementations through the React parity tasks; their broader acceptance
 outcomes below are not yet complete. The [dated status review](status.md#progress-review--23-november-2026)
-records current counts, the reopened R-16 alias gap and green code CI. G0 remains
+records current counts, the R-16 alias gap (closed the same day) and green code CI. G0 remains
 open, including all five mandatory integration proofs. Existing editor packages,
 the todo API and hot updates are useful baselines, not completion of their GA
 qualification packages. The Cherry Test unit/coverage baseline is delivered;

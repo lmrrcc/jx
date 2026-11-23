@@ -56,7 +56,7 @@ react-dom:preinit	resource	supported	resource-hints	Resources.preinit
 react-dom:preinitModule	resource	supported	resource-hints	Resources.preinitModule		
 react-dom:preload	resource	supported	resource-hints	Resources.preload		The image settings imageSrcSet and imageSizes are not offered
 react-dom:preloadModule	resource	supported	resource-hints	Resources.preloadModule		
-react-dom:useFormState	hook	excluded			R-16	Deprecated alias of useActionState; promised alias is absent, so R-16 was reopened as partial on 23 November
+react-dom:useFormState	hook	equivalent	form-state	Hooks.useFormState, Hooks.useFormStateAsync		Deprecated alias that delegates to useActionState
 react-dom:unstable_batchedUpdates	unstable	excluded			R-29	Unstable legacy API; batching is automatic
 react-dom:browser	constant	excluded			none	Build marker, not an API
 react-dom:version	constant	excluded			R-29	Constant; pinned in the version manifest

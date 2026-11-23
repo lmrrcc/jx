@@ -21,7 +21,7 @@ import javax.tools.JavaFileObject;
 final class HookSignatures {
     private static final Set<String> BUILT_INS = Set.of("useState", "useStateLazy", "useReducer", "useEffect",
             "useLayoutEffect", "useRef", "useImperativeHandle",
-            "useTransition", "useDeferredValue", "useActionState", "useActionStateAsync", "useOptimistic", "useFormStatus", "useReducerLazy", "useInsertionEffect", "useEffectEvent", "useDebugValue", "useDomRef", "useMemo", "useCallback", "useContext", "useSyncExternalStore", "useId");
+            "useTransition", "useDeferredValue", "useActionState", "useActionStateAsync", "useFormState", "useFormStateAsync", "useOptimistic", "useFormStatus", "useReducerLazy", "useInsertionEffect", "useEffectEvent", "useDebugValue", "useDomRef", "useMemo", "useCallback", "useContext", "useSyncExternalStore", "useId");
     private static final Set<String> STATE = Set.of("useState", "useStateLazy", "useReducer", "useReducerLazy");
 
     static Map<String, String> compute(List<GeneratedSource> generated, List<ComponentMetadata> components) {
