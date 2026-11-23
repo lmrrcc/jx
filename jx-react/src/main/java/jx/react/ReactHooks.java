@@ -199,17 +199,19 @@ final class ReactHooks implements HookRuntime {
     @Override public <T> T externalStore(ExternalStore<T> store) {
         HotReload.slot("external-store");
         StoreBinding<T> binding = memoRaw(() -> new StoreBinding<>(store), Dependencies.of(store));
-        return Interop.value(storeNative(binding.subscribe, binding.snapshot));
+        return Interop.value(storeNative(binding.subscribe, binding.snapshot, binding.serverSnapshot));
     }
     private static final class StoreBinding<T> {
         final Subscribe subscribe;
         final Factory snapshot;
+        final Factory serverSnapshot;
         StoreBinding(ExternalStore<T> store) {
             subscribe = listener -> {
                 Runnable unsubscribe = store.subscribe(listener::run);
                 return unsubscribe::run;
             };
             snapshot = store::snapshot;
+            serverSnapshot = store::serverSnapshot;
         }
     }
     @Override public String id() { HotReload.slot("id"); return idNative(); }
@@ -227,5 +229,5 @@ final class ReactHooks implements HookRuntime {
     @JSBody(params = "initial", script = "return React.useRef(initial).current;", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object refNative(Object initial);
     @JSBody(params = {"factory", "deps"}, script = "return React.useMemo(factory, deps === null ? undefined : deps);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object memoNative(Factory factory, Object[] deps);
     @JSBody(params = "context", script = "return React.useContext(context);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object contextNative(JSObject context);
-    @JSBody(params = {"subscribe", "snapshot"}, script = "return React.useSyncExternalStore(subscribe, snapshot);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object storeNative(Subscribe subscribe, Factory snapshot);
+    @JSBody(params = {"subscribe", "snapshot", "serverSnapshot"}, script = "return React.useSyncExternalStore(subscribe, snapshot, serverSnapshot);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object storeNative(Subscribe subscribe, Factory snapshot, Factory serverSnapshot);
 }

@@ -341,8 +341,10 @@ stack. Supplying `withUncaughtError` replaces React's default report to the brow
 `ReactServer.renderToString(view)` and `ReactServer.renderToStaticMarkup(view)` in
 `jx.react` are React's synchronous server renderers. They need no document: the
 compiled application is started in a Node host and calls them there. Effects do
-not run and handlers are not attached. Hydrating that HTML in the browser is not
-offered yet.
+not run and handlers are not attached. `React.hydrate` and `React.hydrateStrict`
+attach the same component to that HTML in the browser and keep its DOM nodes; the
+first render must produce the same output as the server did. `ExternalStore.serverSnapshot()`
+is the value a store shows on the server and during hydration.
 
 `React.profiler(id, onRender, children...)` and `React.strictMode(children...)` in
 `jx.react` are React's `Profiler` and nested `StrictMode`. They are view factories

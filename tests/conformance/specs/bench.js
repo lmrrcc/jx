@@ -43,11 +43,14 @@ export function referenceOnly(title, body) {
 /** A case that runs in Node, without a page, on both sides: React's server APIs in the
  * reference, the JX application started as a Node host on the JX side. */
 export function server(title, body) {
-  base(title, async ({}, info) => {
-    const file = info.project.name === 'jx' ? '../target/jx-server/server.cjs' : '../target/reference-site/server.cjs';
-    const module = await import(file);
-    await body((module.default || module).server);
-  });
+  base(title, async ({}, info) => body(await serverOf(info)));
+}
+
+/** The server functions of the project a test runs in. */
+export async function serverOf(info) {
+  const file = info.project.name === 'jx' ? '../target/jx-server/server.cjs' : '../target/reference-site/server.cjs';
+  const module = await import(file);
+  return (module.default || module).server;
 }
 
 /** A reference-only case that runs React's server APIs in Node, without a page. */

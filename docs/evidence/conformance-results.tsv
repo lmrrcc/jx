@@ -42,7 +42,8 @@ forward-ref	pass	pass
 fragment	pass	pass
 function-props	pass	pass
 generic-list	pass	pass
-hydrate-root	pass	unsupported
+hydrate-root	pass	pass
+hydrate-server	pass	pass
 imperative-handle	pass	pass
 insertion-effect	pass	pass
 is-valid-element	pass	pass

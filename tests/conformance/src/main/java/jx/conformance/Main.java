@@ -86,6 +86,8 @@ import jx.conformance.cases.RawHtmlCase;
 import jx.conformance.cases.ResourceHints;
 import jx.conformance.cases.FormStateCase;
 import jx.conformance.cases.RootOptionsCase;
+import jx.conformance.cases.HydrateRoot;
+import jx.conformance.cases.HydratedPage;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -182,6 +184,16 @@ public final class Main {
             case "resource-hints" -> React.mountStrict("app", ResourceHints.JX, null);
             case "form-state" -> React.mountStrict("app", FormStateCase.JX, null);
             case "root-options" -> React.mountStrict("app", RootOptionsCase.JX, null, RootOptionsCase.OPTIONS);
+            case "hydrate-root" -> {
+                // Server markup first, then hydration over the same nodes.
+                Bench.seed(jx.react.ReactServer.renderToString(React.strictMode(jx.Views.component(HydrateRoot.JX, null))));
+                React.hydrateStrict("app", HydrateRoot.JX, null);
+            }
+            case "hydrate-server" -> {
+                // The markup was rendered in Node; the test hands it to the page.
+                Bench.seed(Bench.serverMarkup());
+                React.hydrateStrict("app", HydratedPage.JX, null);
+            }
             default -> Bench.unknown(id);
         }
     }

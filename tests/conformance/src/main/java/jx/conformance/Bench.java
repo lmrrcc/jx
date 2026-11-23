@@ -17,6 +17,16 @@ public final class Bench {
     @JSBody(params = "entry", script = "(globalThis.__benchLog = globalThis.__benchLog || []).push(entry);")
     public static native void log(String entry);
 
+    /** The markup a test rendered in Node and handed to the page, or an empty string. */
+    @JSBody(script = "return typeof globalThis.__benchServerHtml === 'string' ? globalThis.__benchServerHtml : '';")
+    public static native String serverMarkup();
+
+    /** Puts server markup into the root element and marks its button, so that a test can tell
+     * whether hydration kept the node. */
+    @JSBody(params = "html", script = "var e = document.getElementById('app'); e.innerHTML = html;"
+            + "e.querySelector('button').benchServerNode = true;")
+    public static native void seed(String html);
+
     /** Reports a case id that this implementation does not provide. */
     @JSBody(params = "id", script = "var e = document.getElementById('app');"
             + "e.setAttribute('data-bench', 'unknown'); e.textContent = 'unknown case: ' + id;")

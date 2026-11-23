@@ -184,14 +184,35 @@ public final class React {
     }
     /** As {@link #mount(String, ComponentType, Object)}, with root options. */
     public static <P> Root mount(String elementId, ComponentType<P> component, P props, RootOptions options) {
-        return mount(elementId, component, props, false, Objects.requireNonNull(options));
+        return mount(elementId, component, props, false, Objects.requireNonNull(options), false);
     }
     /** As {@link #mountStrict(String, ComponentType, Object)}, with root options. */
     public static <P> Root mountStrict(String elementId, ComponentType<P> component, P props, RootOptions options) {
-        return mount(elementId, component, props, true, Objects.requireNonNull(options));
+        return mount(elementId, component, props, true, Objects.requireNonNull(options), false);
     }
     private static <P> Root mount(String elementId, ComponentType<P> component, P props, boolean strict) {
-        return mount(elementId, component, props, strict, RootOptions.defaults());
+        return mount(elementId, component, props, strict, RootOptions.defaults(), false);
+    }
+    /** React's {@code hydrateRoot}: attaches the component to HTML that
+     * {@link ReactServer#renderToString(View)} produced for the same component and props, keeping
+     * the existing DOM nodes. The first render must produce the same output as the server did;
+     * React reports a difference as a recoverable error and renders that part again. */
+    public static <P> Root hydrate(String elementId, ComponentType<P> component, P props) {
+        return mount(elementId, component, props, false, RootOptions.defaults(), true);
+    }
+    /** As {@link #hydrate(String, ComponentType, Object)}, with React's development checks. The
+     * server must then have rendered inside {@link #strictMode(Object...)} as well. */
+    public static <P> Root hydrateStrict(String elementId, ComponentType<P> component, P props) {
+        return mount(elementId, component, props, true, RootOptions.defaults(), true);
+    }
+    /** As {@link #hydrate(String, ComponentType, Object)}, with root options. The identifier
+     * prefix must equal the one given to the server renderer. */
+    public static <P> Root hydrate(String elementId, ComponentType<P> component, P props, RootOptions options) {
+        return mount(elementId, component, props, false, Objects.requireNonNull(options), true);
+    }
+    /** As {@link #hydrateStrict(String, ComponentType, Object)}, with root options. */
+    public static <P> Root hydrateStrict(String elementId, ComponentType<P> component, P props, RootOptions options) {
+        return mount(elementId, component, props, true, Objects.requireNonNull(options), true);
     }
     @JSFunctor interface ErrorReport extends JSObject { void report(JSObject error, String componentStack); }
     private static ErrorReport report(Consumer<RootError> callback) {
@@ -204,14 +225,16 @@ public final class React {
         JSObject cause = errorCause(error);
         return new IllegalStateException(errorMessage(error), cause == null ? null : throwable(cause));
     }
-    private static <P> Root mount(String elementId, ComponentType<P> component, P props, boolean strict, RootOptions options) {
+    private static <P> Root mount(String elementId, ComponentType<P> component, P props, boolean strict, RootOptions options, boolean hydrate) {
         Hooks.installRuntime(ReactHooks.INSTANCE);
-        JSObject root = createRoot(Objects.requireNonNull(elementId), options.identifierPrefix(),
+        JSObject child = component(new View.ComponentView<>(component, props, null), HotReload.rootPath(Objects.requireNonNull(elementId), component.name()), true);
+        JSObject tree = strict ? strict(child) : child;
+        // hydrateRoot takes the tree at creation; createRoot renders it afterwards.
+        JSObject root = createRoot(elementId, hydrate ? tree : null, options.identifierPrefix(),
                 report(options.onCaughtError()), report(options.onUncaughtError()), report(options.onRecoverableError()));
-        JSObject child = component(new View.ComponentView<>(component, props, null), HotReload.rootPath(elementId, component.name()), true);
         Root owner = new Root(root, elementId);
         HotReload.root(elementId, owner);
-        renderRoot(root, strict ? strict(child) : child);
+        if (!hydrate) renderRoot(root, tree);
         return owner;
     }
     /** Owned React root. Closing is idempotent and disposes effects and subscriptions. */
@@ -416,7 +439,7 @@ public final class React {
     @JSBody(params = "children", script = "return React.createElement.apply(null, [React.Fragment, null].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject fragment(Object[] children);
     @JSBody(params = {"context", "value", "identity", "children"}, script = "return React.createElement.apply(null, [context.jxProvider, {value: value, identity: identity}].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject provider(JSObject context, Object value, Object identity, Object[] children);
     @JSBody(params = "error", script = "var cause = error && error.cause; return cause && typeof cause === 'object' ? cause : null;") private static native JSObject errorCause(JSObject error);
-    @JSBody(params = {"elementId", "prefix", "caught", "uncaught", "recoverable"}, script = "var element = document.getElementById(elementId); if (!element) throw new Error('Missing React root: ' + elementId);"
+    @JSBody(params = {"elementId", "tree", "prefix", "caught", "uncaught", "recoverable"}, script = "var element = document.getElementById(elementId); if (!element) throw new Error('Missing React root: ' + elementId);"
             + " var stack = function(info) { return info && info.componentStack ? String(info.componentStack) : ''; };"
             + " var options = {}; if (prefix !== null) options.identifierPrefix = prefix;"
             + " if (caught) options.onCaughtError = function(error, info) { caught(error, stack(info)); };"
@@ -424,8 +447,8 @@ public final class React {
             + " var hot = globalThis.__JX_HOT__; var hotFail = hot && hot.enabled && typeof hot.fail === 'function' ? hot.fail : null;"
             // The hot-reload overlay hears of uncaught errors first; without an application callback the error is still reported to the browser.
             + " if (uncaught || hotFail || (hot && hot.enabled)) options.onUncaughtError = function(error, info) { if (hotFail) hotFail(error); if (uncaught) uncaught(error, stack(info)); else if (typeof reportError === 'function') reportError(error); else console.error(error); };"
-            + " return ReactDOM.createRoot(element, options);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom/client"))
-    private static native JSObject createRoot(String elementId, String prefix, ErrorReport caught, ErrorReport uncaught, ErrorReport recoverable);
+            + " return tree === null ? ReactDOM.createRoot(element, options) : ReactDOM.hydrateRoot(element, tree, options);", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom/client"))
+    private static native JSObject createRoot(String elementId, JSObject tree, String prefix, ErrorReport caught, ErrorReport uncaught, ErrorReport recoverable);
     @JSBody(params = {"fallback", "child"}, script = "return React.createElement(React.Suspense, {fallback: fallback}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject suspenseNative(JSObject fallback, JSObject child);
     @JSBody(params = {"mode", "child"}, script = "return React.createElement(React.Activity, {mode: mode}, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject activityNative(String mode, JSObject child);
     @JSBody(params = {"props", "child"}, script = "return React.createElement(React.ViewTransition, props, child);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject viewTransitionNative(JSObject props, JSObject child);

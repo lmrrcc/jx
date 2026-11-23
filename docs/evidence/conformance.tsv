@@ -12,7 +12,7 @@ react:createContext	api	supported	context-nested	Hooks.createContext, Context.pr
 react:useMemo	hook	supported	memo-recompute	Hooks.useMemo		
 react:useCallback	hook	supported	callback-identity	Hooks.useCallback		
 react:useId	hook	supported	use-id	Hooks.useId		
-react:useSyncExternalStore	hook	supported	external-store	Hooks.useSyncExternalStore		Server snapshot argument is not offered
+react:useSyncExternalStore	hook	supported	external-store,hydrate-server	Hooks.useSyncExternalStore, ExternalStore.serverSnapshot		
 react:useTransition	hook	supported	transition-pending,transition-promise	Hooks.useTransition, TransitionState		An async action returns a jx.Promise, usually from Async.run, or takes a completion callback
 react:startTransition	api	supported	start-transition,transition-pending	React.startTransition		
 react:useDeferredValue	hook	supported	deferred-value	Hooks.useDeferredValue		Equal scalars compare by value
@@ -61,7 +61,7 @@ react-dom:unstable_batchedUpdates	unstable	excluded			R-29	Unstable legacy API; 
 react-dom:browser	constant	excluded			none	Build marker, not an API
 react-dom:version	constant	excluded			R-29	Constant; pinned in the version manifest
 react-dom/client:createRoot	api	supported	state-counter,unknown-case,root-options	React.mount, React.mountStrict, React.RootOptions		The three error callbacks and identifierPrefix; onDefaultTransitionIndicator is not offered
-react-dom/client:hydrateRoot	api	unsupported	hydrate-root		R-21	
+react-dom/client:hydrateRoot	api	supported	hydrate-root,hydrate-server	React.hydrate, React.hydrateStrict		Takes the same RootOptions as mount
 react-dom/client:version	constant	excluded			R-29	Constant
 react-dom/server:renderToPipeableStream	server	unsupported	server-pipeable-stream		R-22	
 react-dom/server:renderToReadableStream	server	unsupported	server-readable-stream		R-22	
