@@ -43,4 +43,4 @@ editor.vscode	Editors	VS Code highlighting and native Java editing through Red H
 editor.vscode.component-rename	Editors	VS Code component class and file rename	proposed	T					Rejected atomically today; planned in GA-25	
 editor.browser-debugging	Editors	.jx breakpoints and stepping in the browser	proposed	T					Planned in GA-23	
 release.published-artifacts	Release	Published, signed artifacts installed by a clean consumer	proposed	Q					Local snapshot versions only; planned in GA-09	
-runtime.server-rendering	Runtime	ReactServer.renderToString and renderToStaticMarkup in a Node host, and React.hydrate of that HTML in the browser	spike	R		tests/conformance/specs/dom.spec.js	npm run test:bench		One static page and one hydrated page compared with React; no request isolation, data loading or streaming yet	2026-11-23
+runtime.server-rendering	Runtime	ReactServer string and streaming renderers in a Node host, and React.hydrate of that HTML in the browser	spike	R		tests/conformance/specs/dom.spec.js	npm run test:bench		Static, hydrated and Suspense-streamed pages compared with React; no request isolation or data loading yet	2026-11-23

@@ -7,12 +7,12 @@ by the roadmap's milestones. Work proceeds down this list, one task at a time.
 Progress, 23 November 2026: M1-01 to M1-05 are done. R-01 to R-18 and R-32 were
 recorded complete; the audit of that day reopened R-16 because its promised
 `useFormState` alias was absent, and the alias with its bench case was added the
-same day. That makes 19 complete React tasks; R-19 (root options) followed, also on 23 November, making 20. M1-24 and R-20 (server rendering to a string, in a Node host) followed on 24 November, making 21. M1-25 and R-21 (hydration of Node-rendered HTML) followed the same day, making 22. The latest code revision `2667d2c` has
+same day. That makes 19 complete React tasks; R-19 (root options) followed, also on 23 November, making 20. M1-24 and R-20 (server rendering to a string, in a Node host) followed on 24 November, making 21. M1-25 and R-21 (hydration of Node-rendered HTML) followed the same day, making 22. R-22 (streaming server rendering) followed, making 23. The latest code revision `2667d2c` has
 [Verify green](https://github.com/lmrrcc/jx/actions/runs/45015947179).
 `main` is protected: a change reaches it only through a pull request whose Verify
 check has passed. R-13 added `Async.run`, `Async.await` and `Promise`; R-14 delivers
-`lazy` without code splitting, which still depends on M1-22 and M1-23. R-22 (streaming server
-rendering) is the next scheduled React task; M1-26 (protected data route) is the
+`lazy` without code splitting, which still depends on M1-22 and M1-23. R-23 (static prerender)
+is the next scheduled React task; M1-26 (protected data route) is the
 remaining server-render proof. See the [dated status review](status.md#progress-review--23-november-2026)
 for remaining platform work and evidence limits. G0 has not passed.
 
@@ -115,8 +115,8 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-19 | M3 | Root options: caught, uncaught and recoverable error callbacks, identifier prefix | part of `createRoot` | ✅ done |
 | R-20 | M4 | `renderToString`, `renderToStaticMarkup`, on the server-render proof from M1 | 2 | ✅ done |
 | R-21 | M4 | `hydrateRoot`; server snapshot for external stores; `useId` across server and client | 1 | ✅ done |
-| R-22 | M5 | Streaming: `renderToPipeableStream`, `renderToReadableStream`, with Suspense boundaries | 2 | ➡️ next |
-| R-23 | M5 | Static rendering: `prerender`, `prerenderToNodeStream` | 2 | ⬜ planned |
+| R-22 | M5 | Streaming: `renderToPipeableStream`, `renderToReadableStream`, with Suspense boundaries | 2 | ✅ done |
+| R-23 | M5 | Static rendering: `prerender`, `prerenderToNodeStream` | 2 | ➡️ next |
 | R-24 | M6 | Resume: `resume`, `resumeToPipeableStream`, `resumeAndPrerender`, `resumeAndPrerenderToNodeStream` | 4 | ⬜ planned |
 | R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ⬜ planned |
 | R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | ⬜ planned |

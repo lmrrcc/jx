@@ -22,7 +22,7 @@ react:use	hook	supported	use-promise	Hooks.use		Takes a jx.Promise or a Context
 react:useDebugValue	hook	supported	debug-value	Hooks.useDebugValue		The DevTools label itself is not asserted
 react:Fragment	component	supported	fragment	<>...</>, Views.fragment		
 react:StrictMode	component	supported	effect-cleanup,state-lazy-init,memo-recompute,strict-nested	React.mountStrict, React.strictMode		Nested use is a view factory, not a markup tag
-react:Suspense	component	supported	use-promise,lazy-component	React.suspense		
+react:Suspense	component	supported	use-promise,lazy-component,server-stream-suspense	React.suspense		
 react:Activity	component	supported	activity	React.activity		A view factory with a visible flag
 react:Profiler	component	supported	profiler	React.profiler		A view factory, not a markup tag
 react:ViewTransition	component	supported	view-transition	React.viewTransition		Name and classes only; the event callbacks are not offered
@@ -63,8 +63,8 @@ react-dom:version	constant	excluded			R-29	Constant; pinned in the version manif
 react-dom/client:createRoot	api	supported	state-counter,unknown-case,root-options	React.mount, React.mountStrict, React.RootOptions		The three error callbacks and identifierPrefix; onDefaultTransitionIndicator is not offered
 react-dom/client:hydrateRoot	api	supported	hydrate-root,hydrate-server	React.hydrate, React.hydrateStrict		Takes the same RootOptions as mount
 react-dom/client:version	constant	excluded			R-29	Constant
-react-dom/server:renderToPipeableStream	server	unsupported	server-pipeable-stream		R-22	
-react-dom/server:renderToReadableStream	server	unsupported	server-readable-stream		R-22	
+react-dom/server:renderToPipeableStream	server	supported	server-pipeable-stream,server-stream-suspense	ReactServer.renderToPipeableStream		Shell and all-ready are promises; pipes to a Java sink or a Node Writable
+react-dom/server:renderToReadableStream	server	supported	server-readable-stream	ReactServer.renderToReadableStream		Options: identifier prefix, bootstrap scripts and modules, onError
 react-dom/server:renderToStaticMarkup	server	supported	server-render-to-static-markup	ReactServer.renderToStaticMarkup		Runs in a Node host
 react-dom/server:renderToString	server	supported	server-render-to-string	ReactServer.renderToString		Runs in a Node host; the options other than identifierPrefix are not offered
 react-dom/server:resume	server	unsupported	server-resume		R-24	

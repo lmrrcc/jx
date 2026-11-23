@@ -55,7 +55,27 @@ async function postponed(render) {
   return result;
 }
 
+// A boundary whose content arrives after the shell was sent.
+let late = new Promise(() => {});
+function Late() {
+  return <p>data {use(late)}</p>;
+}
+function Streaming() {
+  return <main><h1>shell</h1><Suspense fallback={<p>waiting</p>}><Late /></Suspense></main>;
+}
+
 export const server = {
+  streamSuspense: () => new Promise((resolve, reject) => {
+    let release = () => {};
+    late = new Promise(done => { release = done; });
+    const stream = renderToPipeableStream(<Streaming />, {
+      onShellReady() {
+        readNode(sink => stream.pipe(sink)).then(resolve, reject);
+        setTimeout(() => release('arrived'), 20);
+      },
+      onError: reject
+    });
+  }),
   renderHydratable: async () => renderToString(<StrictMode><HydratedPage /></StrictMode>),
   renderToString: async () => renderToString(<Page name="Ada" />),
   renderToStaticMarkup: async () => renderToStaticMarkup(<Page name="Ada" />),

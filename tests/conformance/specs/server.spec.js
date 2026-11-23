@@ -19,12 +19,23 @@ onServer('server-render-to-static-markup: renders HTML without React markers', a
   expect(await server.renderToStaticMarkup()).toEqual('<main><h1>Hello Ada</h1><p>static</p></main>');
 });
 
-serverOnly('server-readable-stream: streams HTML as a web stream', async server => {
+onServer('server-readable-stream: streams HTML as a web stream', async server => {
   expect(await server.renderToReadableStream()).toEqual(withMarkers);
 });
 
-serverOnly('server-pipeable-stream: streams HTML as a Node stream', async server => {
+onServer('server-pipeable-stream: streams HTML as a Node stream', async server => {
   expect(await server.renderToPipeableStream()).toEqual(withMarkers);
+});
+
+onServer('server-stream-suspense: a boundary sends its fallback first and its content later', async server => {
+  const html = await server.streamSuspense();
+  expect(html).toContain('<h1>shell</h1>');
+  const fallback = html.indexOf('<p>waiting</p>');
+  const content = html.indexOf('arrived');
+  expect(fallback).toBeGreaterThan(-1);
+  expect(content).toBeGreaterThan(fallback);
+  // The late content travels in a hidden element with the script that moves it into place.
+  expect(html.slice(fallback)).toContain('hidden');
 });
 
 serverOnly('static-prerender: prerenders to a web stream after all data is ready', async server => {
