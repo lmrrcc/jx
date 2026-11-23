@@ -150,3 +150,17 @@ test('form-state: the deprecated useFormState name keeps state across submission
   await page.getByRole('button', {name: 'Add'}).click();
   await expect(page.getByRole('status')).toHaveText('20');
 });
+
+test('root-options: the root reports caught, recoverable and uncaught errors and prefixes ids', async ({page, open}) => {
+  await open('root-options', {expectErrors: true});
+  expect(await page.getByTestId('id').textContent()).toContain('bench-');
+  await page.getByRole('button', {name: 'Explode child'}).click();
+  await expect(page.getByRole('alert')).toHaveText('failed');
+  await expect.poll(() => log(page)).toEqual(['caught child exploded with stack']);
+  await page.getByRole('button', {name: 'Arm'}).click();
+  await expect(page.getByTestId('flaky')).toHaveText('recovered');
+  await expect.poll(() => log(page)).toEqual(['caught child exploded with stack', 'recoverable flaky once']);
+  await page.getByRole('button', {name: 'Break root'}).click();
+  await expect(page.locator('#app')).toBeEmpty();
+  await expect.poll(async () => (await log(page)).at(-1)).toEqual('uncaught root exploded');
+});

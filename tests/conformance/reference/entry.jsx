@@ -66,6 +66,7 @@ import { FormStatus } from './cases/form-status.jsx';
 import { FormActions } from './cases/form-actions.jsx';
 import { FormReset } from './cases/form-reset.jsx';
 import { UsePromise } from './cases/use-promise.jsx';
+import { RootOptions, rootOptions } from './cases/root-options.jsx';
 import { FormState } from './cases/form-state.jsx';
 import { AsyncFunction } from './cases/async-function.jsx';
 import { TransitionPromise } from './cases/transition-promise.jsx';
@@ -154,6 +155,7 @@ const cases = {
   'form-actions': FormActions,
   'form-reset': FormReset,
   'use-promise': UsePromise,
+  'root-options': RootOptions,
   'form-state': FormState,
   'async-function': AsyncFunction,
   'transition-promise': TransitionPromise,
@@ -187,6 +189,9 @@ if (id === 'hydrate-root') {
   container.innerHTML = renderToString(<StrictMode><Case /></StrictMode>);
   container.querySelector('button').benchServerNode = true;
   hydrateRoot(container, <StrictMode><Case /></StrictMode>);
+} else if (id === 'root-options') {
+  // The only case with root options: an identifier prefix and the three error callbacks.
+  createRoot(document.getElementById('app'), rootOptions).render(<StrictMode><Case /></StrictMode>);
 } else if (id === 'strict-nested') {
   // The only case without a root StrictMode: it places StrictMode itself.
   createRoot(document.getElementById('app')).render(<Case />);

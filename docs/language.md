@@ -332,6 +332,12 @@ transition. The event callbacks of `ViewTransition` are not offered.
 its element to the document head once per URL; `Resources.Options` carries the
 optional settings.
 
+`React.mount` and `React.mountStrict` take an optional `React.RootOptions`:
+`withIdentifierPrefix` for the ids of `useId`, and `withCaughtError`,
+`withUncaughtError` and `withRecoverableError` for React's root error callbacks.
+Each callback receives a `RootError` with the Java exception and the component
+stack. Supplying `withUncaughtError` replaces React's default report to the browser.
+
 `React.profiler(id, onRender, children...)` and `React.strictMode(children...)` in
 `jx.react` are React's `Profiler` and nested `StrictMode`. They are view factories
 called in an interpolation, for example `{React.strictMode(<Panel />)}`. As in

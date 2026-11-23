@@ -20,10 +20,10 @@ builds, browser tests or installed-editor tests.
 | Evidence | Recorded result | What it establishes |
 | --- | --- | --- |
 | [React feature register](evidence/conformance.tsv) | 120 rows: 78 supported, 15 equivalent, 11 unsupported, 16 excluded, 0 untested | Coverage of the listed API shapes; individual rows still have option and environment limits. |
-| [Differential bench](evidence/conformance-results.tsv) | 98 cases: React reference 98 pass; JX 86 pass, 11 unsupported, 1 not applicable | Matching outcomes for the exercised scenarios. The not-applicable case inventories React exports. JX server rendering is not yet implemented. |
+| [Differential bench](evidence/conformance-results.tsv) | 99 cases: React reference 99 pass; JX 87 pass, 11 unsupported, 1 not applicable | Matching outcomes for the exercised scenarios. The not-applicable case inventories React exports. JX server rendering is not yet implemented. |
 | [Curated mutation results](evidence/mutation-results.tsv) | 78 of 78 mutants detected | Detection of the listed hand-written defects; this is not PIT or exhaustive mutation coverage. |
 | Foundation tasks | GA-01 and GA-02; M1-01 through M1-05 complete | Green baseline, version/evidence checks, portfolio inventory and differential bench. |
-| React implementation tasks | 19 complete | R-01–R-18 and R-32 complete. This audit found R-16 without its promised `useFormState` alias; the alias and a bench case were added the same day. |
+| React implementation tasks | 20 complete | R-01–R-19 and R-32 complete. This audit found R-16 without its promised `useFormState` alias; the alias and a bench case were added the same day. |
 
 These counts are **not a percentage of GA completion**. Of the 16 excluded feature
 rows, only the build marker and React Compiler are intended permanent exclusions;
@@ -38,7 +38,7 @@ the others remain assigned work under the all-React-features goal.
 | Editors | IntelliJ and VS Code packages with native Java integration, mixed highlighting and dev launch | Scale/latency and native-action qualification, broader version matrix, closed-file edits and composed `.jx` browser debugging. TurboJ integration remains planned. |
 | Qualification | Verify, Chrome bench, curated mutations; Cherry Test unit coverage/CRAP baseline | Browser/integration orchestration, screenshot baselines, manual gallery, PIT setup, root-wrapper discovery and agreed quality thresholds; broader browsers, security, performance and release evidence. |
 
-The immediate scheduled feature is **R-19**. The five G0 proofs remain
+The immediate scheduled feature is **R-20**; R-19 (root options) was added on 23 November. The five G0 proofs remain
 open: external component JAR, exact shared contract, authenticated packaged
 Spring/dev-origin prototype, safe lazy-runtime boundary, and React SSR→hydration.
 Progress on later React tasks does not close those foundation gates.

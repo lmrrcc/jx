@@ -71,6 +71,7 @@ ref-persist	pass	pass
 remount-by-key	pass	pass
 resource-elements	pass	pass
 resource-hints	pass	pass
+root-options	pass	pass
 server-pipeable-stream	pass	unsupported
 server-readable-stream	pass	unsupported
 server-render-to-static-markup	pass	unsupported

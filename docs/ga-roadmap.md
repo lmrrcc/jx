@@ -15,9 +15,10 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 19 tasks done, R-19 next, 12 planned; complete remaining APIs, options, rendering modes and combinations. |
+| React parity track / GA-18 | 🟡 Partial | 20 tasks done, R-20 next, 11 planned; complete remaining APIs, options, rendering modes and combinations. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
-| R-19 root options | ➡️ Next | Error callbacks and identifier prefix. |
+| R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
+| R-20 server rendering to a string | ➡️ Next | `renderToString` and `renderToStaticMarkup`; needs the server-render proof of M1. |
 | G0 foundation proofs | ⬜ To do | Component JAR, exact shared contract, authenticated packaged Spring, safe lazy chunks and SSR→hydration. |
 | Shared contracts and complete Spring integration | ⬜ To do | Generated clients/codecs, starter/BOM, one packaged UI/API and authenticated development. The existing todo API is the baseline. |
 | JX server rendering and hydration | ⬜ To do | SSR/SSG, hydration, streaming/resume and the RSC protocol track. |
@@ -45,7 +46,7 @@ The React track has 19 complete tasks; the R-16 gap that review found (the
 `useFormState` alias) was closed the same day. There are 93 supported/equivalent feature
 rows out of 120; the bench records 86 JX passes, 11 unsupported cases and one
 not-applicable case. These are coverage counts, not a GA completion percentage.
-R-19 is the next scheduled feature. G0 remains open: component JARs, exact shared
+R-19 (root options) was added later the same day; R-20 is the next scheduled feature. G0 remains open: component JARs, exact shared
 contracts, authenticated packaged Spring, lazy chunks and SSR→hydration still need
 their proof tasks. Milestone dates have not been advanced or declared complete
 because client React work reached features originally assigned to M2/M3.
