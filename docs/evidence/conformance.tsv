@@ -70,8 +70,8 @@ react-dom/server:renderToString	server	supported	server-render-to-string	ReactSe
 react-dom/server:resume	server	unsupported	server-resume		R-24	
 react-dom/server:resumeToPipeableStream	server	unsupported	server-resume-pipeable		R-24	
 react-dom/server:version	constant	excluded			R-29	Constant
-react-dom/static:prerender	server	unsupported	static-prerender		R-23	
-react-dom/static:prerenderToNodeStream	server	unsupported	static-prerender-node		R-23	
+react-dom/static:prerender	server	supported	static-prerender	ReactStatic.prerender		Abort and postponed state are exercised by the resume cases of R-24
+react-dom/static:prerenderToNodeStream	server	supported	static-prerender-node	ReactStatic.prerenderToNodeStream		
 react-dom/static:resumeAndPrerender	server	unsupported	static-resume-prerender		R-24	
 react-dom/static:resumeAndPrerenderToNodeStream	server	unsupported	static-resume-prerender-node		R-24	
 react-dom/static:version	constant	excluded			R-29	Constant

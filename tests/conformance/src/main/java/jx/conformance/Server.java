@@ -8,6 +8,7 @@ import jx.conformance.cases.ServerPage;
 import jx.conformance.cases.ServerStreaming;
 import jx.react.React;
 import jx.react.ReactServer;
+import jx.react.ReactStatic;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSFunctor;
 import org.teavm.jso.JSObject;
@@ -36,6 +37,10 @@ final class Server {
             ReactServer.PipeableStream stream = ReactServer.renderToPipeableStream(page(), ReactServer.StreamOptions.defaults());
             return later(stream.allReady().flatMap(ready -> collect(stream)));
         });
+        registerLater("prerender", () -> later(
+                ReactStatic.prerender(page(), ReactServer.StreamOptions.defaults()).result().flatMap(ReactStatic.Prerendered::text)));
+        registerLater("prerenderToNodeStream", () -> later(
+                ReactStatic.prerenderToNodeStream(page(), ReactServer.StreamOptions.defaults()).result().flatMap(ReactStatic.Prerendered::text)));
         registerLater("streamSuspense", () -> {
             Promise.Resolver<String>[] release = newResolvers();
             Promise<String> late = Promise.create(resolver -> release[0] = resolver);
