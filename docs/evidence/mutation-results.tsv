@@ -5,17 +5,17 @@ effect-always-becomes-once	killed	batched-updates,effect-dependencies	An effect 
 effect-ignore-deps	killed	layout-effect-dependencies	Layout effects ignore their dependencies
 memo-ignore-deps	killed	callback-identity,flush-sync,memo-recompute,ref-callback	Memoized values are recomputed every render
 memo-never-recompute	killed	callback-identity,memo-recompute	Memoized values are never recomputed
-state-drop-updater	killed	activity,async-function,batched-updates,callable-state,callback-identity,checkbox,child-slots,children-prop,choice-inputs,conditional,context-nested,controlled-input,custom-elements,custom-hook,debug-value,deferred-value,document-metadata,dom-ref-focus,dynamic-component,effect-cleanup,effect-dependencies,effect-event,error-boundary,error-reporting,external-store,flush-sync,form-actions,fragment,function-props,imperative-handle,key-event,keyed-list,layout-effect-dependencies,memo-recompute,memo-skip,optimistic,portal,prevent-default,profiler,props-update,ref-callback,ref-persist,remount-by-key,root-options,start-transition,state-counter,state-lazy-init,stop-propagation,strict-nested,transition-pending,transition-promise,uncontrolled-inputs,view-transition	State updaters are ignored
+state-drop-updater	killed	activity,async-function,batched-updates,callable-state,callback-identity,checkbox,child-slots,children-prop,choice-inputs,conditional,context-nested,controlled-input,custom-elements,custom-hook,debug-value,deferred-value,document-metadata,dom-ref-focus,dynamic-component,effect-cleanup,effect-dependencies,effect-event,error-boundary,error-reporting,external-store,flush-sync,form-actions,fragment,function-props,hydrate-root,hydrate-server,imperative-handle,key-event,keyed-list,layout-effect-dependencies,memo-recompute,memo-skip,optimistic,portal,prevent-default,profiler,props-update,ref-callback,ref-persist,remount-by-key,root-options,start-transition,state-counter,state-lazy-init,stop-propagation,strict-nested,transition-pending,transition-promise,uncontrolled-inputs,view-transition	State updaters are ignored
 state-eager-initializer	killed	state-lazy-init	The lazy state initializer runs on every render
 reducer-ignore-action	killed	reducer-batch,reducer-lazy-init	Reducer actions are ignored
 ref-not-persistent	killed	callback-identity,ref-persist	A ref is recreated on every render
 context-always-default	killed	context-nested	useContext ignores providers
 store-no-unsubscribe	killed	external-store	External stores are never unsubscribed
-store-stale-snapshot	killed	external-store	External store changes do not rerender
+store-stale-snapshot	killed	external-store,hydrate-server	External store changes do not rerender
 id-constant	killed	root-options,use-id	useId returns the same id everywhere
 strict-mode-off	killed	batched-updates,custom-hook,effect-cleanup,effect-dependencies,effect-event,layout-effect-dependencies,layout-effect-order,memo-recompute,memo-skip,reducer-lazy-init,ref-callback,state-lazy-init,strict-nested	Strict Mode is not applied
 key-dropped	killed	keyed-list,remount-by-key	Component keys are not passed to React
-text-child-as-fragment	killed	child-values,document-metadata,resource-elements	Text children are wrapped in fragments again
+text-child-as-fragment	killed	child-values,custom-hook,document-metadata,resource-elements	Text children are wrapped in fragments again
 provider-children-as-array	killed	context-nested,use-promise	Provider children are passed as one array again
 provider-ignores-value	killed	context-nested,use-promise	Providers supply the default value
 prevent-default-noop	killed	form-reset,prevent-default	preventDefault does nothing
@@ -32,7 +32,7 @@ style-dropped	killed	attributes	Typed style values are not applied
 boolean-child-rejected	killed	child-values	Boolean children are no longer ignored
 nested-iterable-dropped	killed	async-function,child-slots,child-values,children-utilities,generic-list,keyed-list	Iterable children render nothing
 array-child-dropped	killed	child-values	Array children render nothing
-for-alias-broken	killed	attributes,use-id	The for attribute is lowered to a wrong name
+for-alias-broken	killed	attributes,hydrate-server,use-id	The for attribute is lowered to a wrong name
 memo-never-skips	killed	memo-skip	Memoized components render on every parent render
 memo-always-skips	killed	memo-skip	Memoized components never see new props
 memo-field-ignored	killed	memo-skip	Generated memo comparison ignores the Props fields
@@ -58,7 +58,7 @@ await-does-not-wait	killed	async-function,form-status,optimistic,transition-prom
 async-starts-late	killed	async-function	An asynchronous function no longer starts at once
 use-thenable-not-cached	killed	lazy-component,use-promise	use receives a new JavaScript promise on every render
 transition-promise-dropped	killed	transition-promise	A promise transition stops pending before the promise is settled
-suspense-fallback-dropped	killed	lazy-component,use-promise	Suspense shows no fallback
+suspense-fallback-dropped	killed	lazy-component,server-resume,server-resume-pipeable,server-stream-suspense,static-resume-prerender,static-resume-prerender-node,use-promise	Suspense shows no fallback
 use-context-default	killed	use-promise	use(context) ignores providers
 lazy-reloads-each-render	killed	lazy-component	The lazy loader runs on every render
 activity-always-visible	killed	activity	A hidden activity stays visible
@@ -83,3 +83,16 @@ root-uncaught-dropped	killed	root-options	Uncaught errors are not reported to th
 root-prefix-dropped	killed	root-options	The identifier prefix is ignored
 root-stack-dropped	killed	root-options	The component stack is not passed on
 root-cause-dropped	killed	root-options	The cause of a recovered error is lost
+server-string-without-markers	killed	server-render-to-string	renderToString loses the hydration markers
+server-static-with-markers	killed	server-render-to-static-markup	renderToStaticMarkup keeps the hydration markers
+hydrate-replaces-tree	killed	hydrate-root,hydrate-server	Hydration replaces the server nodes
+store-server-snapshot-ignored	killed	hydrate-server	The server snapshot of a store is ignored
+stream-chunks-dropped	killed	server-pipeable-stream,server-resume-pipeable,server-stream-suspense	A piped stream loses its chunks
+stream-shell-never-ready	killed	server-stream-suspense	The shell of a stream is never reported ready
+stream-text-empty	killed	server-readable-stream,server-resume,server-resume-pipeable,static-prerender,static-resume-prerender,static-resume-prerender-node	Reading a web stream as text drops its content
+prerender-node-text-empty	killed	static-prerender-node,static-resume-prerender-node	Reading a Node prelude as text drops its content
+prerender-web-as-node	killed	server-resume,server-resume-pipeable,static-prerender,static-resume-prerender,static-resume-prerender-node	prerender returns a Node stream in place of a web stream
+resume-ignores-state	killed	server-resume-pipeable	Resuming to a Node stream renders the whole page again
+resume-web-ignores-state	killed	server-resume	Resuming to a web stream renders the whole page again
+prerender-abort-ignored	killed	server-resume,server-resume-pipeable,static-resume-prerender,static-resume-prerender-node	Aborting a prerender does nothing
+postponed-state-dropped	killed	server-resume,server-resume-pipeable,static-resume-prerender,static-resume-prerender-node	An aborted prerender reports no postponed state

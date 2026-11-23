@@ -11,7 +11,7 @@ reducer-ignore-action	jx-react/src/main/java/jx/react/ReactHooks.java	S next = r
 ref-not-persistent	jx-react/src/main/java/jx/react/ReactHooks.java	script = "return React.useRef(initial).current;"	script = "return initial;"	A ref is recreated on every render
 context-always-default	jx-react/src/main/java/jx/react/ReactHooks.java	return Interop.value(contextNative(React.context(context)));	return context.defaultValue();	useContext ignores providers
 store-no-unsubscribe	jx-react/src/main/java/jx/react/ReactHooks.java	return unsubscribe::run;	return () -> {};	External stores are never unsubscribed
-store-stale-snapshot	jx-react/src/main/java/jx/react/ReactHooks.java	script = "return React.useSyncExternalStore(subscribe, snapshot);"	script = "return snapshot();"	External store changes do not rerender
+store-stale-snapshot	jx-react/src/main/java/jx/react/ReactHooks.java	script = "return React.useSyncExternalStore(subscribe, snapshot, serverSnapshot);"	script = "return snapshot();"	External store changes do not rerender
 id-constant	jx-react/src/main/java/jx/react/ReactHooks.java	script = "return React.useId();"	script = "React.useId(); return 'fixed';"	useId returns the same id everywhere
 strict-mode-off	jx-react/src/main/java/jx/react/React.java	script = "return React.createElement(React.StrictMode, null, child);"	script = "return child;"	Strict Mode is not applied
 key-dropped	jx-react/src/main/java/jx/react/React.java	if (key !== null) values.key = key;		Component keys are not passed to React
