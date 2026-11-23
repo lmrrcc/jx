@@ -5,8 +5,50 @@ This is an initial, executable implementation of the
 compatibility profile. It is not a promise of every Java library, React feature,
 browser, or editor distribution.
 
-The [GA roadmap](ga-roadmap.md) proposes the next year of work, measurable release
+The [GA roadmap](ga-roadmap.md) defines the next year of work, measurable release
 gates and portfolio migrations. Its planned capabilities are not delivered status.
+
+## Progress review — 23 November 2026
+
+The client React runtime has advanced substantially. The full-stack GA foundation
+is still incomplete: **G0 has not passed**. This review checked source at `2667d2c`
+and incorporates the test-tooling record merged as `52bcd2f`. Code revision `2667d2c`
+has a successful [Verify run](https://github.com/lmrrcc/jx/actions/runs/45015947179),
+the latest application evidence used here. This review did not rerun application
+builds, browser tests or installed-editor tests.
+
+| Evidence | Recorded result | What it establishes |
+| --- | --- | --- |
+| [React feature register](evidence/conformance.tsv) | 120 rows: 78 supported, 14 equivalent, 11 unsupported, 17 excluded, 0 untested | Coverage of the listed API shapes; individual rows still have option and environment limits. |
+| [Differential bench](evidence/conformance-results.tsv) | 97 cases: React reference 97 pass; JX 85 pass, 11 unsupported, 1 not applicable | Matching outcomes for the exercised scenarios. The not-applicable case inventories React exports. JX server rendering is not yet implemented. |
+| [Curated mutation results](evidence/mutation-results.tsv) | 78 of 78 mutants detected | Detection of the listed hand-written defects; this is not PIT or exhaustive mutation coverage. |
+| Foundation tasks | GA-01 and GA-02; M1-01 through M1-05 complete | Green baseline, version/evidence checks, portfolio inventory and differential bench. |
+| React implementation tasks | 18 complete; R-16 partial after this audit | R-01–R-15, R-17–R-18 and R-32 complete. R-16 delivers actions but omits its promised `useFormState` alias. |
+
+These counts are **not a percentage of GA completion**. Of the 17 excluded feature
+rows, only the build marker and React Compiler are intended permanent exclusions;
+the others remain assigned work under the all-React-features goal.
+
+| Area | Delivered | Still required |
+| --- | --- | --- |
+| Language and React client | Typed/default/optional/generic props, typed forwarding, events, memo, callback/component refs, portals, transitions, Suspense, Java promises/async, lazy component factories, Activity/ViewTransition, actions/optimistic state, resource hints | R-19 root options; complete HTML/SVG schema; class components; remaining API options, rendering modes and combined scenarios. `lazy` does not split the bundle. |
+| Application framework | Counter and todo browser apps; Elm store, routing, bounded JSON HTTP; compatible hot-state checkpoints | Unified async ownership, nested routes/loaders/cache, complex forms, uploads/streaming, authentication and production-scale evidence. |
+| Shared Java and Spring | Browser Java profile and runnable Spring todo API | One contract definition with generated clients/codecs, exact-value round trips, certified standard-library methods, optional starter/BOM, packaged authenticated UI/API and same-origin sessions/CSRF. |
+| Server and distribution | Browser assets and local snapshot artifacts | Actual JX SSR/SSG/hydration/streaming/resume, RSC feasibility/protocol, safe lazy chunks, independent component JAR consumers and clean artifact installation. |
+| Editors | IntelliJ and VS Code packages with native Java integration, mixed highlighting and dev launch | Scale/latency and native-action qualification, broader version matrix, closed-file edits and composed `.jx` browser debugging. TurboJ integration remains planned. |
+| Qualification | Verify, Chrome bench, curated mutations; Cherry Test unit coverage/CRAP baseline | Browser/integration orchestration, screenshot baselines, manual gallery, PIT setup, root-wrapper discovery and agreed quality thresholds; broader browsers, security, performance and release evidence. |
+
+The immediate scheduled feature remains **R-19**. First resolve the R-16 completion
+discrepancy in the [implementation sequence](ga-tasks.md). The five G0 proofs remain
+open: external component JAR, exact shared contract, authenticated packaged
+Spring/dev-origin prototype, safe lazy-runtime boundary, and React SSR→hydration.
+Progress on later React tasks does not close those foundation gates.
+
+The portfolio inventory covers **21 browser surfaces and 40 journeys**. Selected
+website pilots are `lmrr.cc`, `stacktrace.cc` and `luca4j.com`; the application pilot
+is a separate Stack Sensei implementation with one-to-one behavior. Existing
+products come after the bench and platform proofs. No migration is complete, and
+the existing Stack Sensei site is not to be changed for the pilot.
 
 ## Delivered boundaries
 
@@ -15,7 +57,7 @@ gates and portfolio migrations. Its planned capabilities are not delivered statu
 | Java/browser feasibility | Java 25, TeaVM 0.16.0, actual React/React DOM 19.3.1; real Chrome tests include offline clicks, independent instances, captured snapshots, and cleanup. |
 | `.jx` compiler | Java lexical scanning plus javac component metadata; typed record props, markup lowering, fragments/children/keys, source maps, original-source syntax/type diagnostics, and practical hook-placement checks. |
 | Maven | `generate`, `generate-test`, `check`, `check-test`, `browser`, and `dev`; output ownership, TeaVM and locked bundling, isolated development assets, atomic successful-build publication, state-preserving updates, and optional loopback API proxy. |
-| Runtime | Typed components, events, hooks, context, refs, error boundaries, safe text rendering, and explicitly bound React interoperability in both directions. |
+| Runtime | Typed components/events/hooks, memo, context, refs, portals, transitions, Suspense, async/lazy factories, actions, error boundaries, resource hints and explicit React interoperability. Raw HTML uses the explicitly unsanitized `RawHtml.unsanitized` API. |
 | Elm | Immutable transitions, pure updates, serialized committed store snapshots, keyed commands/subscriptions, cancellation, stale-response protection, and Strict Mode lifecycle tests. |
 | Browser services | Same-origin asynchronous bounded JSON HTTP, typed outcomes, cancellation/timeouts, history, route parameters, query strings, and back/forward navigation. |
 | Shared LSP | Compiler diagnostics, component/property completion, declared Java type hover, definition navigation, symbols, incomplete markup, UTF-16 positions, cancellation, and version handling. |
@@ -94,10 +136,12 @@ need their own measurements.
    classpaths; native Java services use the editors' Java engines. Whole-file
    formatting, arbitrary refactorings and additional IDE versions need their own
    verification. See the [editor matrix](tooling.md) for supported operations.
-4. The [capability ledger](evidence/capabilities.tsv) and the [runtime guide](runtime.md)
-   track unimplemented portals, lazy/code-split components, Suspense,
-   transitions/deferred values, ref forwarding, SSR, and hydration. Loading flags
-   do not constitute Suspense support.
+4. The [feature register](evidence/conformance.tsv) and [runtime guide](runtime.md)
+   track implemented client APIs and their limits. Root options, actual lazy code
+   splitting, JX server/static rendering, hydration, resume and the RSC protocol
+   remain open. API names marked supported do not imply all options or modes:
+   external-store server snapshots, action permalinks, `FormStatus.action`,
+   ViewTransition callbacks and image preload source-set options are not exposed.
 5. The demo is one local workspace, bound to loopback with no login or sessions.
    Its transactional capacity limit is 500 tasks, so successful creates remain
    visible after reload. A hosted multi-user product needs its own

@@ -217,8 +217,15 @@ and safe resets after fingerprint/schema changes. The dev workflow additionally
 needs source-edit/build tests; a successful checkpoint transfer alone does not
 prove watcher/editor integration.
 
-Portals, transitions, deferred values, Suspense, lazy-module loading, SSR,
-hydration, component ref forwarding, and `.jx` debugger stepping are not advertised
-as implemented by this runtime. Source maps are generated for the TeaVM output;
-compiler/editor source mapping is a separate contract. No payload-size or speed
-claim is made from the development fixture's unminified bundle.
+As of 23 November 2026, portals, transitions/deferred values, Suspense, promise-based
+lazy component factories and component refs are implemented with differential
+browser cases in the [feature register](evidence/conformance.tsv). `ComponentType.lazy`
+defers its factory; it does not yet split the application into separately fetched
+TeaVM modules. Root options, JX SSR/static rendering, hydration, resume, the RSC
+protocol and `.jx` debugger stepping remain planned. The register records narrower
+API options as well; a passing client case does not qualify server or other-browser
+behavior. See the [dated progress review](status.md#progress-review--23-november-2026).
+
+Source maps are generated for the TeaVM output; compiler/editor source mapping is
+a separate contract. No payload-size or speed claim is made from the development
+fixture's unminified bundle.

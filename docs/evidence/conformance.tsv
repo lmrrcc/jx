@@ -38,8 +38,8 @@ react:createRef	legacy	equivalent	create-ref	new DomRef(), new Ref<>(initial)		R
 react:Component	legacy	equivalent	error-boundary	React.boundary	R-28	Only the error-boundary use is offered; class components are not authored in JX
 react:PureComponent	legacy	excluded			R-28	Class component API; its function equivalent is memo, listed separately
 react:act	test	excluded			R-29	Test utility, not application behavior
-react:cache	server	excluded			R-30	React Server Components only; outside the 1.0 contract
-react:cacheSignal	server	excluded			R-30	React Server Components only; outside the 1.0 contract
+react:cache	server	excluded			R-30	Deferred to the server-component protocol proof; in scope under the 21 November all-features decision
+react:cacheSignal	server	excluded			R-30	Deferred to the server-component protocol proof; in scope under the 21 November all-features decision
 react:captureOwnerStack	debug	excluded			R-29	Development-only debugging aid
 react:unstable_useCacheRefresh	unstable	excluded			R-29	Unstable API
 react:version	constant	excluded			R-29	Constant; pinned in the version manifest
@@ -56,7 +56,7 @@ react-dom:preinit	resource	supported	resource-hints	Resources.preinit
 react-dom:preinitModule	resource	supported	resource-hints	Resources.preinitModule		
 react-dom:preload	resource	supported	resource-hints	Resources.preload		The image settings imageSrcSet and imageSizes are not offered
 react-dom:preloadModule	resource	supported	resource-hints	Resources.preloadModule		
-react-dom:useFormState	hook	excluded			R-16	Deprecated alias of useActionState
+react-dom:useFormState	hook	excluded			R-16	Deprecated alias of useActionState; promised alias is absent, so R-16 was reopened as partial on 23 November
 react-dom:unstable_batchedUpdates	unstable	excluded			R-29	Unstable legacy API; batching is automatic
 react-dom:browser	constant	excluded			none	Build marker, not an API
 react-dom:version	constant	excluded			R-29	Constant; pinned in the version manifest
@@ -116,6 +116,6 @@ dom:document-metadata	dom	supported	document-metadata	title and meta elements in
 dom:resource-elements	dom	supported	resource-elements	style with href and precedence		Stylesheet links and async scripts are not covered
 dom:custom-elements	dom	supported	custom-elements	Hyphenated tag names		Attributes only; properties and custom events are not covered
 dom:error-reporting	dom	supported	error-reporting	Default reporting of handler and render errors		Custom root error callbacks are part of R-19
-framework:server-components	server	excluded			R-30	Framework protocol; outside the 1.0 contract by roadmap decision
+framework:server-components	server	excluded			R-30	Deferred framework protocol; in scope under the 21 November all-features decision, pending feasibility proof
 framework:directives	server	excluded			R-30	use client and use server belong to server-component frameworks
 framework:react-compiler	compiler	excluded			none	Optional build tool for JavaScript sources

@@ -1,22 +1,54 @@
 # JX general availability roadmap
 
-Version: **0.1 — proposed plan for review**, 19 November 2026.
+Version: **0.2 — progress reconciled**, 23 November 2026. Original plan: 19 November 2026.
 Evidence baseline: repository commit `78c9836`; IntelliJ 0.3.2, VS Code 0.2.0,
 Java 25, TeaVM 0.16.0, React/React DOM 19.3.1. These are observed pins, not a
 promise to freeze upstream dependencies for a year.
+
+## Progress flags — 23 November 2026
+
+**✅ Done · 🟡 Partial · ⬜ Planned / to do · ➡️ Next · ⛔ Blocked.**
+Flags apply to the stated acceptance scope, not merely to the existence of code.
+Every task in the [implementation sequence](ga-tasks.md) and every work package
+in the [execution register](ga-execution.md) has an explicit status.
+
+| Work | Flag | Remaining acceptance |
+| --- | --- | --- |
+| GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
+| React parity track / GA-18 | 🟡 Partial | 18 tasks done, R-16 partial, R-19 next, 12 planned; complete remaining APIs, options, rendering modes and combinations. |
+| R-16 actions | 🟡 Partial | Add and test the promised `useFormState` alias or record an approved scope change. |
+| R-19 root options | ➡️ Next | Error callbacks and identifier prefix. |
+| G0 foundation proofs | ⬜ To do | Component JAR, exact shared contract, authenticated packaged Spring, safe lazy chunks and SSR→hydration. |
+| Shared contracts and complete Spring integration | ⬜ To do | Generated clients/codecs, starter/BOM, one packaged UI/API and authenticated development. The existing todo API is the baseline. |
+| JX server rendering and hydration | ⬜ To do | SSR/SSG, hydration, streaming/resume and the RSC protocol track. |
+| IntelliJ and VS Code experience | 🟡 Partial | Existing packages work within documented limits; GA qualification, scale, remaining editing actions and browser debugging are open. |
+| TT-01 Cherry Test orchestration | 🟡 Partial | Unit coverage/CRAP delivered; integration and browser kinds still open. |
+| TT-04 PIT through Cherry Test | ⛔ Blocked | Installed Cherry Test update and first verified PIT run. |
+| Production pilots and GA release | ⬜ To do | Complete platform gates, qualify pilots, then pass RC/release evidence gates. |
 
 Progress, 21 November 2026: [GA-01](ga-01-baseline.md) is done, with CI green at
 `3688d25`. It found `78c9836` red in CI (counter example), restored a
 green baseline and added the [baseline record](evidence/baseline.md),
 [version manifest](evidence/versions.tsv) and [capability ledger](evidence/capabilities.tsv).
 
-Progress, 21 November 2026: [GA-02](ga-02-portfolio.md) is implemented and awaits
-Luca's end-to-end check. It registered 21 browser surfaces and 40 journeys, measured
+Progress, 21 November 2026: [GA-02](ga-02-portfolio.md) is done. It registered
+21 browser surfaces and 40 journeys, measured
 the deployed public sites and three production bundles in the
 [portfolio baseline](evidence/portfolio-baseline.md), and recorded Luca's decisions:
 website pilots `lmrr.cc`, `stacktrace.cc` and `luca4j.com`; application pilot Stack
 Sensei as a separate implementation with one-to-one behavior and no change to the
-existing site. No later work package has started.
+existing site.
+
+Progress, 23 November 2026: the [status review](status.md#progress-review--23-november-2026)
+reconciles source, the feature register and CI through code revision `2667d2c`.
+The React track has 18 complete tasks and one partial task (R-16: actions delivered,
+promised `useFormState` alias absent). There are 92 supported/equivalent feature
+rows out of 120; the bench records 85 JX passes, 11 unsupported cases and one
+not-applicable case. These are coverage counts, not a GA completion percentage.
+R-19 is the next scheduled feature. G0 remains open: component JARs, exact shared
+contracts, authenticated packaged Spring, lazy chunks and SSR→hydration still need
+their proof tasks. Milestone dates have not been advanced or declared complete
+because client React work reached features originally assigned to M2/M3.
 
 Revision, 21 November 2026: implementation now follows the
 [implementation sequence](ga-tasks.md), an ordered list of change-sized tasks
@@ -91,12 +123,12 @@ of the pinned React release. Refs and callbacks must work through third-party
 bindings as well as through JX-owned components.
 
 React Server Components and Server Functions are a distinct framework protocol,
-not an automatic consequence of supporting JSX. Their exact compatibility is a
-first-month decision and an explicit research track. The proposed 1.0 contract
-requires server data loading, typed mutations, SSR and hydration, but does **not**
-claim React Flight or Next.js drop-in compatibility. If literal RSC protocol
-parity is required for 1.0, add it as a blocking gate and re-estimate the schedule;
-do not silently label a normal HTTP client as a Server Function implementation.
+not an automatic consequence of supporting JSX. Under the 21 November scope
+decision, R-30 now includes the server-component protocol in the parity track,
+with a feasibility proof and decision record before implementation. This is
+unfinished scope, not delivered React Flight or Next.js drop-in compatibility.
+Server data loading, typed HTTP mutations, SSR and hydration alone do not complete
+R-30. Re-estimate capacity and dates at the gates as its feasibility becomes known.
 
 ## 2. Evidence at the starting line
 
@@ -445,7 +477,7 @@ Proposed defaults allow work to begin without pretending decisions are final:
 | --- | --- | --- |
 | Initial release users | Java teams building Spring apps, with backend-neutral interop preserved | D7; affects template and documentation priorities |
 | First pilot | **Decided 21 November 2026:** websites `lmrr.cc`, `stacktrace.cc`, `luca4j.com`; application Stack Sensei, built beside the existing frontend without modifying it. First routes are chosen when the pilots start | No production cutover yet |
-| Exact parity scope | Stable pinned React DOM application APIs; explicit separate RSC track | D15; strict Flight parity changes critical path |
+| Exact parity scope | **Decided 21 November 2026:** all React features, including the R-30 server-component protocol track; only explicitly approved exclusions | Feasibility/ABI decision still required; re-estimate the critical path at the gates |
 | SSR operations | CSR/SSG single Boot JAR; candidate isolated JS renderer for request-time SSR | D30–M2; require proof and operator acceptance |
 | Contract authority | Java-first for new Java apps; OpenAPI/import adapters for existing/non-Java APIs | D15; no two handwritten authorities |
 | Staffing and dates | Four workstreams with 30% stabilization allowance | D7 and monthly; one-year target is conditional |
