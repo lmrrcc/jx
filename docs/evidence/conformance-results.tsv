@@ -36,6 +36,7 @@ external-store	pass	pass
 flush-sync	pass	pass
 form-actions	pass	pass
 form-reset	pass	pass
+form-state	pass	pass
 form-status	pass	pass
 forward-ref	pass	pass
 fragment	pass	pass

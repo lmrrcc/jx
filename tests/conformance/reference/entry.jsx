@@ -66,6 +66,7 @@ import { FormStatus } from './cases/form-status.jsx';
 import { FormActions } from './cases/form-actions.jsx';
 import { FormReset } from './cases/form-reset.jsx';
 import { UsePromise } from './cases/use-promise.jsx';
+import { FormState } from './cases/form-state.jsx';
 import { AsyncFunction } from './cases/async-function.jsx';
 import { TransitionPromise } from './cases/transition-promise.jsx';
 import { LazyComponent } from './cases/lazy-component.jsx';
@@ -153,6 +154,7 @@ const cases = {
   'form-actions': FormActions,
   'form-reset': FormReset,
   'use-promise': UsePromise,
+  'form-state': FormState,
   'async-function': AsyncFunction,
   'transition-promise': TransitionPromise,
   'lazy-component': LazyComponent,

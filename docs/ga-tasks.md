@@ -5,15 +5,14 @@ the [work package register](ga-execution.md) into an ordered list of tasks, grou
 by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
 Progress, 23 November 2026: M1-01 to M1-05 are done. R-01 to R-18 and R-32 were
-recorded complete; this audit reopens R-16 as `partial` because its promised
-`useFormState` alias is absent. That leaves 18 complete React tasks and one partial
-task. The latest code revision `2667d2c` has
+recorded complete; the audit of that day reopened R-16 because its promised
+`useFormState` alias was absent, and the alias with its bench case was added the
+same day. That makes 19 complete React tasks. The latest code revision `2667d2c` has
 [Verify green](https://github.com/lmrrcc/jx/actions/runs/45015947179).
 `main` is protected: a change reaches it only through a pull request whose Verify
 check has passed. R-13 added `Async.run`, `Async.await` and `Promise`; R-14 delivers
-`lazy` without code splitting, which still depends on M1-22 and M1-23. R-19 remains
-the next scheduled feature; resolve the R-16 gap before treating that task as
-complete. See the [dated status review](status.md#progress-review--23-november-2026)
+`lazy` without code splitting, which still depends on M1-22 and M1-23. R-19 is
+the next scheduled feature. See the [dated status review](status.md#progress-review--23-november-2026)
 for remaining platform work and evidence limits. G0 has not passed.
 
 ## Rules
@@ -109,7 +108,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-13 | M3 | `Suspense` and `use` for promises and context; `Promise` and async/await in Java | 2 | ✅ done |
 | R-14 | M3 | Promise-based `lazy` component factory; separate chunk loading remains M1-22/M1-23 | 1 | ✅ done |
 | R-15 | M3 | `Activity`; `ViewTransition` and `addTransitionType` | 3 | ✅ done |
-| R-16 | M3 | Actions: form action functions, `useActionState`, `useFormStatus`, `useOptimistic`, `requestFormReset`, and the deprecated `useFormState` alias | 5 delivered; alias open | 🟡 partial |
+| R-16 | M3 | Actions: form action functions, `useActionState`, `useFormStatus`, `useOptimistic`, `requestFormReset`, and the deprecated `useFormState` alias | 6 | ✅ done |
 | R-17 | M3 | Raw HTML through an explicit, named API equal to `dangerouslySetInnerHTML` | 1 | ✅ done |
 | R-18 | M3 | Resource hints: `preconnect`, `prefetchDNS`, `preinit`, `preinitModule`, `preload`, `preloadModule` | 6 | ✅ done |
 | R-19 | M3 | Root options: caught, uncaught and recoverable error callbacks, identifier prefix | part of `createRoot` | ➡️ next |
@@ -130,6 +129,9 @@ Audit, 23 November 2026: R-16's primary action APIs and browser cases are delive
 but `useFormState` has no Java API or case and remains excluded in the feature
 register. Add the alias and a differential consumer case, or obtain an explicit
 scope decision; an exclusion is not completion under the all-features goal.
+Resolved the same day: `Hooks.useFormState` and `Hooks.useFormStateAsync` are
+deprecated aliases of the action-state hooks, with the differential case
+`form-state`; the feature row is `equivalent`.
 Other rows marked supported have recorded limits: `useActionState` lacks permalink,
 `FormStatus` lacks action, ViewTransition lacks callbacks, resource preloads lack
 image source-set/sizes, and external stores lack server snapshots (R-21). Include

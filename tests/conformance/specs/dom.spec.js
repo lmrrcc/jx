@@ -139,3 +139,14 @@ test('resource-hints: the six resource functions add their elements to the head'
   await expect(head('script[type="module"][src^="data:text/javascript,globalThis.__benchPreinitModule"]')).toHaveCount(1);
   await expect.poll(() => page.evaluate(() => [globalThis.__benchPreinit, globalThis.__benchPreinitModule])).toEqual([1, 1]);
 });
+
+test('form-state: the deprecated useFormState name keeps state across submissions', async ({page, open}) => {
+  // React reports the deprecated name in the console; the behavior is what is compared.
+  await open('form-state', {expectErrors: true});
+  await expect(page.getByRole('status')).toHaveText('10');
+  await page.getByRole('button', {name: 'Add'}).click();
+  await expect(page.getByRole('status')).toHaveText('13');
+  await page.getByLabel('Step').fill('7');
+  await page.getByRole('button', {name: 'Add'}).click();
+  await expect(page.getByRole('status')).toHaveText('20');
+});

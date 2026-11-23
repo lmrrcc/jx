@@ -15,8 +15,8 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 18 tasks done, R-16 partial, R-19 next, 12 planned; complete remaining APIs, options, rendering modes and combinations. |
-| R-16 actions | 🟡 Partial | Add and test the promised `useFormState` alias or record an approved scope change. |
+| React parity track / GA-18 | 🟡 Partial | 19 tasks done, R-19 next, 12 planned; complete remaining APIs, options, rendering modes and combinations. |
+| R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ➡️ Next | Error callbacks and identifier prefix. |
 | G0 foundation proofs | ⬜ To do | Component JAR, exact shared contract, authenticated packaged Spring, safe lazy chunks and SSR→hydration. |
 | Shared contracts and complete Spring integration | ⬜ To do | Generated clients/codecs, starter/BOM, one packaged UI/API and authenticated development. The existing todo API is the baseline. |
@@ -41,9 +41,9 @@ existing site.
 
 Progress, 23 November 2026: the [status review](status.md#progress-review--23-november-2026)
 reconciles source, the feature register and CI through code revision `2667d2c`.
-The React track has 18 complete tasks and one partial task (R-16: actions delivered,
-promised `useFormState` alias absent). There are 92 supported/equivalent feature
-rows out of 120; the bench records 85 JX passes, 11 unsupported cases and one
+The React track has 19 complete tasks; the R-16 gap that review found (the
+`useFormState` alias) was closed the same day. There are 93 supported/equivalent feature
+rows out of 120; the bench records 86 JX passes, 11 unsupported cases and one
 not-applicable case. These are coverage counts, not a GA completion percentage.
 R-19 is the next scheduled feature. G0 remains open: component JARs, exact shared
 contracts, authenticated packaged Spring, lazy chunks and SSR→hydration still need

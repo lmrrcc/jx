@@ -1,0 +1,24 @@
+package jx.conformance.cases;
+
+import jx.ActionState;
+import jx.Component;
+import jx.Hooks;
+import jx.View;
+
+/** Case form-state: the deprecated useFormState name behaves like useActionState. */
+@Component
+public final class FormStateCase {
+    @SuppressWarnings("deprecation")
+    public static View render() {
+        ActionState<Integer> total = Hooks.useFormState((previous, data) -> previous + Integer.parseInt(data.get("step")), 10);
+        return (
+            <main>
+                <form action={total.action()}>
+                    <input name="step" defaultValue="3" aria-label="Step" />
+                    <button type="submit">Add</button>
+                </form>
+                <p role="status">{String.valueOf(total.state())}</p>
+            </main>
+        );
+    }
+}

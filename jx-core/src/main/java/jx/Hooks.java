@@ -73,6 +73,12 @@ public final class Hooks {
      * next state; {@link ActionState#pending()} is true until it is settled. A failed promise is
      * reported like an error thrown while rendering. */
     public static <S> ActionState<S> useActionStateAsync(BiFunction<S, FormData, Promise<S>> action, S initial) { return runtime().actionState(Objects.requireNonNull(action), initial, true); }
+    /** React DOM's {@code useFormState}, the former name of {@link #useActionState}.
+     * @deprecated use {@link #useActionState}; React keeps this name only for older code. */
+    @Deprecated public static <S> ActionState<S> useFormState(BiFunction<S, FormData, S> action, S initial) { return useActionState(action, initial); }
+    /** The former name of {@link #useActionStateAsync}.
+     * @deprecated use {@link #useActionStateAsync}. */
+    @Deprecated public static <S> ActionState<S> useFormStateAsync(BiFunction<S, FormData, Promise<S>> action, S initial) { return useActionStateAsync(action, initial); }
     /** React's {@code useOptimistic}: the returned value is {@code value}, except while a
      * transition or action is running in which the setter was called; then it is the value set
      * there. When that transition ends the real value shows again. Call the setter only inside a
