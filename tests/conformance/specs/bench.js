@@ -9,7 +9,7 @@ import {readFileSync} from 'node:fs';
  */
 /** 'reference' or 'jx': the implementation a test runs against. */
 export const sideOf = info => info.project.name.split('-')[0];
-/** 'client', 'hydrate' or 'static': the rendering mode a test runs in. */
+/** 'client', 'hydrate', 'static' or 'lazy': the rendering mode a test runs in. */
 export const modeOf = info => info.project.name.includes('-') ? info.project.name.split('-')[1] : 'client';
 
 // Cases that do not apply to a mode, with the reason: tests/conformance/modes.tsv.
@@ -31,7 +31,22 @@ const extended = base.extend({
         await page.addInitScript(markup => { globalThis.__benchServerHtml = markup; }, html);
         query += '&mode=hydrate';
       }
+      const routeRequests = [];
+      if (modeOf(info) === 'lazy') {
+        query += '&mode=lazy';
+        page.on('request', request => {
+          if (new URL(request.url()).pathname.endsWith('/route.js')) routeRequests.push(request.url());
+        });
+      }
       await page.goto(query);
+      if (modeOf(info) === 'lazy') {
+        await expect(page.getByTestId('bench-open-route')).toBeVisible();
+        expect(routeRequests).toHaveLength(0);
+        await page.getByTestId('bench-open-route').click();
+        await expect.poll(() => page.evaluate(() => globalThis.__benchLazyReady === true)).toBe(true);
+        expect(routeRequests).toHaveLength(1);
+        await expect(page.getByTestId('bench-route-loading')).toHaveCount(0);
+      }
       await expect(page.locator('#app > *, #app[data-bench]').first()).toBeAttached();
       return problems;
     });

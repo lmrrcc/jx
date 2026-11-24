@@ -1,0 +1,32 @@
+package jx.conformance;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.Views;
+import jx.react.React;
+
+/** The initial page contains no case; route activation is a real user event. */
+@Component
+public final class LazyHostPage {
+    public static View render() {
+        State<Boolean> opened = Hooks.useState(false);
+        State<Integer> attempt = Hooks.useState(0);
+        if (!opened.value()) {
+            return (<button data-testid="bench-open-route" onClick={event -> opened.set(true)}>Open route</button>);
+        }
+        View route = React.suspense(<p data-testid="bench-route-loading">Loading route</p>,
+            Views.component(LazyHost.ROUTE.type(), null));
+        // This case deliberately tests the root's uncaught-error policy.
+        if (Bench.caseId().equals("error-reporting")) return route;
+        return (<div key={attempt.value()}>{React.boundary(route,
+            error -> (<div data-testid="bench-route-error">
+                <p>{error.getMessage()}</p>
+                <button data-testid="bench-route-retry" onClick={event -> {
+                    LazyHost.ROUTE.retry();
+                    attempt.update(previous -> previous + 1);
+                }}>Retry route</button>
+            </div>))}</div>);
+    }
+}

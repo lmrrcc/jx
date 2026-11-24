@@ -6,13 +6,17 @@ import {fileURLToPath} from 'node:url';
 export const MODULES = ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', 'react-dom/server', 'react-dom/static'];
 export const FILE = fileURLToPath(new URL('./react-exports.txt', import.meta.url));
 
-/** Returns sorted `module:name` entries for every named export, without bundler internals. */
+/** Returns sorted `module:name` entries, without bundler or CommonJS interop internals. */
 export async function installedExports() {
   const entries = [];
   for (const name of MODULES) {
     const module = await import(name);
     for (const key of Object.keys(module)) {
-      if (key !== 'default' && !key.startsWith('__')) entries.push(name + ':' + key);
+      // Node 23+ adds an alias of `default` to these CommonJS React entry points.
+      // Preserve the name if React actually exports a property with that name.
+      const commonJsMarker = key === 'module.exports' && module.default != null
+        && module[key] === module.default && !Object.hasOwn(module.default, key);
+      if (key !== 'default' && !key.startsWith('__') && !commonJsMarker) entries.push(name + ':' + key);
     }
   }
   return entries.sort();

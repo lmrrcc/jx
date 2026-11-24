@@ -1,6 +1,6 @@
 # GA implementation sequence
 
-Revision 5, 23 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
+Revision 6, 24 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
 the [work package register](ga-execution.md) into an ordered list of tasks, grouped
 by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
@@ -11,9 +11,11 @@ same day. That makes 19 complete React tasks; R-19 (root options) followed, also
 elements, attributes and event names) followed on 24 November, making 26. The latest code revision `2667d2c` has
 [Verify green](https://github.com/lmrrcc/jx/actions/runs/45015947179).
 `main` is protected: a change reaches it only through a pull request whose Verify
-check has passed. R-13 added `Async.run`, `Async.await` and `Promise`; R-14 delivers
-`lazy` without code splitting, which still depends on M1-22 and M1-23. R-26 (every case in every
-rendering mode) is the next scheduled React task; M1-26 (protected data route) is the
+check has passed. R-13 added `Async.run`, `Async.await` and `Promise`; R-14 delivered
+the `lazy` factory, and M1-22/M1-23 subsequently proved independently compiled
+modules across a serialized boundary. R-26 (every case in every applicable
+rendering mode) is implemented and in review, awaiting Luca's try-it check and
+green Verify. R-27 is the next React parity task after acceptance; M1-26 (protected data route) is the
 remaining server-render proof. See the [dated status review](status.md#progress-review--23-november-2026)
 for remaining platform work and evidence limits. G0 has not passed.
 
@@ -56,8 +58,10 @@ test bench, not against the existing products. The products come later, as pilot
   observable outcome and runs unchanged against both.
 - **The reference must pass.** That proves the spec describes real React behavior.
   The JX result is `pass`, `fail` or `unsupported`.
-- **Isolation:** each case mounts alone on a fresh page load with its own root, no
-  network and no shared state. One build per side keeps the run fast.
+- **Isolation:** each case mounts alone on a fresh page load with its own root and
+  no shared application state or external backend. Lazy-mode checks control local
+  chunk requests. Independent host and route builds keep case code out of the
+  initial lazy-mode download.
 - **Coverage is enumerated, not guessed.** The list of stable exports of the pinned
   `react` and `react-dom` packages is generated; each export must map to a case or
   to an exclusion with a reason. A React upgrade that adds an export fails the check
@@ -120,8 +124,8 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-23 | M5 | Static rendering: `prerender`, `prerenderToNodeStream` | 2 | ✅ done |
 | R-24 | M6 | Resume: `resume`, `resumeToPipeableStream`, `resumeAndPrerender`, `resumeAndPrerenderToNodeStream` | 4 | ✅ done |
 | R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ✅ done |
-| R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | 🟡 partial: hydrate mode (79 cases) and static HTML mode (85 cases) done on 24 November on both sides; lazy-route mode waits for M1-22 and M1-23 |
-| R-27 | M6 | Combined scenarios so that every pair of features meets at least once | adds pair coverage | ⬜ planned |
+| R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | 🟡 review: 715 local checks pass across four modes, including 90 lazy cases per side; Luca try-it and green Verify required |
+| R-27 | M6 | Combined scenarios so that every pair of features meets at least once | adds pair coverage | ➡️ next after R-26 acceptance; not started |
 | R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | ⬜ planned |
 | R-29 | M7 | Remaining small surface: `act` for JX tests, `captureOwnerStack`, version constants, `unstable_batchedUpdates`, `unstable_useCacheRefresh` | 9 | ⬜ planned |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | ⬜ planned |
@@ -161,6 +165,28 @@ survivor (layout effects ignoring their dependencies) showed a missing case, whi
 was added as `layout-effect-dependencies`; rerun alone, that mutant is now killed.
 Results are in `docs/evidence/mutation-results.tsv`. The mutants are hand-written,
 not generated, so this measures the listed defects only.
+
+R-26 review, 24 November 2026: all four rendering modes are wired into the bench.
+The complete local run passes: client 104 reference / 103 JX, hydrate 79 per side,
+static HTML 85 per side, and lazy route 90 per side (715 checks, 133 structurally
+inapplicable cells across 106 case IDs). The lazy totals
+include the two new loading and failure/retry scenarios. The host/route static
+import graph and TeaVM source maps must prove that cases are absent from the
+initial download, alongside real request timing, error UI and explicit retry.
+DOM element, attribute and event comparisons use the same mode on both sides.
+Root-owning scenarios and the unknown route have explicit lazy exclusions;
+`error-reporting` retains its uncaught root-error policy. Details and commands are
+in the [bench guide](../tests/conformance/README.md) and
+[ADR 0005](decisions/0005-lazy-module-boundary.md).
+
+Try it after the Maven build: `npm run test:bench`. Run the two new curated
+mutations separately, with no concurrent build or browser suite:
+`java tools/MutateBench.java --only lazy-route-eager,lazy-host-includes-cases`.
+The scoped run on 24 November killed both mutants: early activation fails the
+lazy cases; an eager case registry fails `lazy-route-loading`'s source-map check.
+Neither mutant survived or failed to compile. This does not replace the complete
+mutation evidence table or claim a full 102-mutant rerun. R-26 stays
+in review until Luca runs the try-it check and Verify passes; R-27 has not started.
 
 Expected count of `unsupported` rows after each milestone: M1 48, M2 32, M3 11,
 M6 0. These are planning figures. R-30 is the largest single item and the one most
