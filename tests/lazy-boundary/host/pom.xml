@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent><groupId>dev.jx</groupId><artifactId>jx-parent</artifactId><version>0.1.0-SNAPSHOT</version><relativePath>../../../pom.xml</relativePath></parent>
+  <artifactId>lazy-boundary-host</artifactId><name>JX lazy boundary fixture: host application</name>
+  <dependencies>
+    <dependency><groupId>dev.jx</groupId><artifactId>lazy-boundary-contract</artifactId><version>${project.version}</version></dependency>
+    <dependency><groupId>dev.jx</groupId><artifactId>jx-react</artifactId><version>${project.version}</version></dependency>
+    <dependency><groupId>org.teavm</groupId><artifactId>teavm-classlib</artifactId><version>${teavm.version}</version></dependency>
+  </dependencies>
+  <build><plugins>
+    <plugin><groupId>dev.jx</groupId><artifactId>jx-maven-plugin</artifactId><version>${project.version}</version>
+      <executions>
+        <execution><id>jx-main</id><goals><goal>generate</goal></goals></execution>
+        <execution><id>jx-check</id><goals><goal>check</goal></goals></execution>
+      </executions>
+    </plugin>
+    <plugin><groupId>org.teavm</groupId><artifactId>teavm-maven-plugin</artifactId><version>${teavm.version}</version>
+      <executions><execution><goals><goal>compile</goal></goals><phase>process-classes</phase></execution></executions>
+      <configuration>
+        <mainClass>jx.fixture.lazy.host.Host</mainClass><targetType>JAVASCRIPT</targetType><jsModuleType>ES2015</jsModuleType>
+        <targetDirectory>${project.build.directory}/browser</targetDirectory><targetFileName>application.js</targetFileName>
+        <minifying>false</minifying><sourceMapsGenerated>true</sourceMapsGenerated><sourceFilesCopied>true</sourceFilesCopied>
+      </configuration>
+    </plugin>
+  </plugins></build>
+</project>

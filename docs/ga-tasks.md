@@ -196,8 +196,8 @@ as a test, with a recorded decision.
 | M1-19 | 04 | Generated browser codec for the one contract value replaces the hand-written one | `npm run test:todo` | ⬜ planned |
 | M1-20 | 13 | The todo API packaged as one executable JAR that serves the built UI; started from an empty directory in a test | `npm run test:packaged` | ⬜ planned |
 | M1-21 | 13 | Session login and CSRF on the todo API; development proxy forwards cookies to its one allowed backend | `npm run test:auth` | ⬜ planned |
-| M1-22 | 06 | Fixture with a second TeaVM module loaded on demand; test records what crosses: record, context, callback | `npm run test:lazy` | ⬜ planned |
-| M1-23 | 06 | Chosen boundary (shared runtime or serialized ABI) with chunk-failure and retry tests; ADR 0004 | `npm run test:lazy` | ⬜ planned |
+| M1-22 | 06 | Fixture with a second TeaVM module loaded on demand; test records what crosses: record, context, callback | `npm run test:lazy` | ✅ done |
+| M1-23 | 06 | Chosen boundary (shared runtime or serialized ABI) with chunk-failure and retry tests; ADR 0005 | `npm run test:lazy` | ✅ done |
 | M1-24 | 07 | Node host renders a JX component to HTML with React's server renderer | `npm run test:ssr` | ✅ done |
 | M1-25 | 07 | Browser hydrates that HTML without replacing the tree | `npm run test:ssr` | ✅ done |
 | M1-26 | 07 | Protected data route: two simultaneous identities, immutable snapshot, abort, no second fetch | `npm run test:ssr` | ⬜ planned |

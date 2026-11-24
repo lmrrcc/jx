@@ -1,0 +1,32 @@
+package jx.fixture.lazy.module;
+
+import java.util.function.Consumer;
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.fixture.lazy.Greeting;
+import jx.fixture.lazy.Themes;
+
+/** The lazily loaded component: it shows what reached it and keeps state of its own. */
+@Component
+public final class LateGreeting {
+    public record Props(Greeting greeting, Consumer<String> onPick, boolean explode) {}
+
+    public static View render(Props props) {
+        Greeting greeting = props.greeting();
+        State<Integer> clicks = Hooks.useState(0);
+        // This application's own context object: a provider in the host is a different context.
+        String theme = Hooks.useContext(Themes.THEME);
+        if (props.explode()) throw new UnsupportedOperationException("late module exploded");
+        return (
+            <section aria-label="Late">
+                <p data-testid="late-greeting">{greeting.loud() ? greeting.name().toUpperCase() : greeting.name()} {greeting.count()} {String.valueOf(greeting.serial())}</p>
+                <p data-testid="late-theme">{theme}</p>
+                <p data-testid="late-clicks">{clicks.value()}</p>
+                <button onClick={event -> clicks.update(previous -> previous + 1)}>Count in module</button>
+                <button onClick={event -> props.onPick().accept("picked " + greeting.name())}>Pick</button>
+            </section>
+        );
+    }
+}

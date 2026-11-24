@@ -451,8 +451,16 @@ uncontrolled fields afterwards:
 
 `ComponentType.lazy(name, () -> promiseOfComponent)` is React's `lazy`: the loader
 runs once, when the component first renders, and the nearest `React.suspense`
-shows its fallback until the promise is settled. It defers the loader's work; it
-does not yet move the component's code into a separate file.
+shows its fallback until the promise is settled. `LazyComponent.of(name, loader)` is
+the same with `retry()`, which forgets a failed load so that the next render tries
+again.
+
+To keep code out of the first download, the loader calls `LazyModules.load(url)` for
+a second, separately compiled JX module and wraps the component it exports with
+`React.binding`. Java objects do not cross between the two modules: props are
+encoded into a plain JavaScript object on one side and decoded on the other, a
+context of the host is not seen, and an exception arrives with its message but not
+its type. See the [decision record](decisions/0005-lazy-module-boundary.md).
 
 The compiler checks conventional `useX` calls in render/custom-hook methods for
 placement inside branches, loops, callbacks, try/switch constructs, and after a
