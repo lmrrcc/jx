@@ -1,0 +1,31 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.Memo;
+import jx.State;
+import jx.View;
+import jx.conformance.ActivityStore;
+import jx.conformance.Bench;
+
+/** Store updates must reach a memoized reader; Activity owns its effects, not its state. */
+@Component
+@Memo
+public final class CombinedActivityReader {
+    public static View render() {
+        Integer snapshot = Hooks.useSyncExternalStore(ActivityStore.SHARED);
+        State<Integer> local = Hooks.useState(0);
+        Hooks.useEffect(() -> {
+            Bench.log("activity mounted");
+            return () -> Bench.log("activity cleaned");
+        }, Dependencies.none());
+        return (
+            <section aria-label="Activity reader">
+                <p data-testid="store-value">{snapshot}</p>
+                <p data-testid="local-value">{local.value()}</p>
+                <button onClick={event -> local.update(value -> value + 1)}>Increment local</button>
+            </section>
+        );
+    }
+}

@@ -1,11 +1,11 @@
 # JX general availability roadmap
 
-Version: **0.2 — progress reconciled**, 23 November 2026. Original plan: 19 November 2026.
-Evidence baseline: repository commit `78c9836`; IntelliJ 0.3.2, VS Code 0.2.0,
+Version: **0.3 — interaction evidence**, 24 November 2026. Original plan: 19 November 2026.
+Original evidence baseline: repository commit `78c9836`; IntelliJ 0.3.2, VS Code 0.2.0,
 Java 25, TeaVM 0.16.0, React/React DOM 19.3.1. These are observed pins, not a
 promise to freeze upstream dependencies for a year.
 
-## Progress flags — 23 November 2026
+## Progress flags — 24 November 2026
 
 **✅ Done · 🟡 Partial · ⬜ Planned / to do · ➡️ Next · ⛔ Blocked.**
 Flags apply to the stated acceptance scope, not merely to the existence of code.
@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27 next. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01 locally evidences 19 / 5,356 active pairs, with 5,337 open. Complete remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -27,6 +27,15 @@ in the [execution register](ga-execution.md) has an explicit status.
 | TT-01 Cherry Test orchestration | 🟡 Partial | Unit coverage/CRAP delivered; integration and browser kinds still open. |
 | TT-04 PIT through Cherry Test | ⛔ Blocked | Installed Cherry Test update and first verified PIT run. |
 | Production pilots and GA release | ⬜ To do | Complete platform gates, qualify pilots, then pass RC/release evidence gates. |
+
+Execution order confirmed by Luca on 24 November: continue through complete React
+parity and G0, then the JX/Spring starter and faster hot reload. R-27-01's complete
+local bench reports 731 passes and 133 skipped cells; both scoped mutants were
+killed and Verify acceptance is pending. The [interaction evidence record](ga-react-interactions.md)
+keeps the 19 proven pairs separate from the remaining inventory. The eventual
+118-feature / 6,903-pair universe includes 1,547 additional deferred-feature pairs;
+the scope is not reduced to the initial scenarios. Human qualification and
+explicit applicability decisions remain recorded requirements.
 
 Progress, 21 November 2026: [GA-01](ga-01-baseline.md) is done, with CI green at
 `3688d25`. It found `78c9836` red in CI (counter example), restored a

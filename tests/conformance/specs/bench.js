@@ -74,6 +74,18 @@ export function test(title, body) {
 test.skip = extended.skip;
 export {expect};
 
+/** Records pair evidence only after the named assertions succeed; a later case failure cancels credit. */
+export async function interaction(ids, body) {
+  const witnesses = typeof ids === 'string' ? [ids] : ids;
+  if (!Array.isArray(witnesses) || !witnesses.length
+      || witnesses.some(id => typeof id !== 'string' || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id))
+      || new Set(witnesses).size !== witnesses.length) {
+    throw new Error('interaction requires unique, nonempty witness IDs');
+  }
+  await base.step('interaction: ' + witnesses.join(', '), body);
+  for (const id of witnesses) base.info().annotations.push({type: 'interaction', description: id});
+}
+
 /** The page's ordered lifecycle log, written by both implementations. */
 export const log = page => page.evaluate(() => globalThis.__benchLog || []);
 

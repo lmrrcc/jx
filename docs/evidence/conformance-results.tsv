@@ -14,6 +14,8 @@ children-prop	pass	pass	pass	pass	pass	pass	pass	pass
 children-utilities	pass	pass	pass	pass	pass	pass	pass	pass
 choice-inputs	pass	pass	pass	pass	pass	pass	pass	pass
 clone-element	pass	pass	pass	pass	pass	pass	pass	pass
+combined-activity-store	pass	pass	pass	pass	pass	pass	pass	pass
+combined-keyed-context	pass	pass	pass	pass	pass	pass	pass	pass
 conditional	pass	pass	pass	pass	pass	pass	pass	pass
 context-nested	pass	pass	pass	pass	pass	pass	pass	pass
 controlled-input	pass	pass	pass	pass	pass	pass	pass	pass

@@ -1,6 +1,6 @@
 # GA execution backlog and daily review
 
-Draft 0.2, progress reviewed 23 November 2026. Parent: [GA roadmap](ga-roadmap.md).
+Draft 0.3, progress reviewed 24 November 2026. Parent: [GA roadmap](ga-roadmap.md).
 The Status column flags every work package: **✅ done · 🟡 partial · ⬜ planned**.
 It tracks the package's acceptance outcome; an existing baseline implementation
 does not complete its planned GA qualification work. IDs are stable for future
@@ -9,12 +9,21 @@ No GitHub issues, scheduled jobs, deployments or releases were created by this p
 
 Progress: **GA-01 and GA-02 are complete**. GA-14, GA-15 and GA-18 have substantial
 partial implementations through the React parity tasks; their broader acceptance
-outcomes below are not yet complete. The [dated status review](status.md#progress-review--23-november-2026)
-records current counts, the R-16 alias gap (closed the same day) and green code CI. G0 remains
-open, including all five mandatory integration proofs. Existing editor packages,
+outcomes below are not yet complete. R-26 is accepted. R-27-01's complete local
+bench passes 731 checks and records 19 / 5,356 active feature pairs, with 5,337
+still uncovered; both scoped mutants were killed and Verify acceptance is pending. See the
+[interaction evidence record](ga-react-interactions.md) for the unchanged eventual
+118-feature / 6,903-pair scope and its limits. G0 remains open: the serialized lazy
+boundary and basic Node rendering/hydration proofs are delivered, while component
+JARs, exact shared contracts, authenticated packaging and protected SSR data still
+need their complete evidence. Existing editor packages,
 the todo API and hot updates are useful baselines, not completion of their GA
 qualification packages. The Cherry Test unit/coverage baseline is delivered;
 TT-01–TT-06 in the implementation sequence track the remaining test tooling.
+
+Luca authorized continued implementation of React parity and G0 on 24 November,
+followed by the JX/Spring starter and faster hot reload. Preserve the automated
+gates and record human qualification or applicability decisions explicitly.
 
 ## Work package register
 
@@ -35,8 +44,8 @@ exists, not when its document or skeleton module lands.
 | GA-03 | Browser async ownership design / R | GA-01 | M1 / S | One HTTP/Elm/loader/Suspense cancellation/error model demonstrated in a spike | ⬜ planned |
 | GA-04 | Shared contract, codec and exact-value spike / C | GA-03 | M1 / M | One DTO/operation definition; real Spring/browser round trip, decimal/long/null boundaries | ⬜ planned |
 | GA-05 | Component-library JAR ABI spike / L | GA-01 | M1 / S | Independent producer and consumer, no source copying, metadata version failure tested | ⬜ planned |
-| GA-06 | Lazy-chunk Java identity spike / R | GA-05 | M1 / M | Lazy route absent initially; domain values/context/callbacks cross safely; no duplicate React | ⬜ planned |
-| GA-07 | React SSR→hydration spike / W | GA-03 | M1 / M | Protected data-dependent route, scoped API/auth, two simultaneous identities, immutable hydration snapshot, abort and no duplicate fetch/mutation | ⬜ planned |
+| GA-06 | Lazy-chunk Java identity spike / R | GA-05 | M1 / M | Lazy route absent initially; domain values/context/callbacks cross safely; no duplicate React. M1-22/M1-23 prove the serialized boundary; independent library consumption and automatic application packaging remain | 🟡 partial |
+| GA-07 | React SSR→hydration spike / W | GA-03 | M1 / M | Protected data-dependent route, scoped API/auth, two simultaneous identities, immutable hydration snapshot, abort and no duplicate fetch/mutation. Basic Node rendering/hydration is delivered; protected data isolation remains | 🟡 partial |
 | GA-08 | Native editor architecture/performance decision / T | GA-01 | M1 / M | Scale baseline; precise projection limits; source-preserving structural proof or explicit revised design | ⬜ planned |
 | GA-09 | Artifact identities and clean distribution rehearsal / Q | GA-01 | M1–M3 / M | Namespaces/owners verified; external consumer installs candidate artifacts without workspace caches | ⬜ planned |
 | GA-10 | Contract IR and generators v1 / C | GA-04 | M2–M3 / L | Java authority + generated async client/codecs/server boundary/schema; incompatible wire change fails | ⬜ planned |
@@ -47,7 +56,7 @@ exists, not when its document or skeleton module lands.
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
 | GA-17 | Forms, validation, i18n and accessible primitives / A | GA-10, GA-15 | M3–M5 / L | Complex form, arrays/errors, locale/RTL, keyboard/reader, shared pure rules and server errors | ⬜ planned |
-| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures | 🟡 partial |
+| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-01 locally evidences 19 active pairs; 5,337 active pairs plus deferred-feature interactions remain | 🟡 partial |
 | GA-19 | HTTP headers/binary/upload/stream capabilities / C | GA-03, GA-10, GA-13 | M3–M5 / L | Auth/CSRF headers, upload progress, download, SSE/WS lifecycle, bounds/reconnect tested | ⬜ planned |
 | GA-20 | Real ecosystem binding SDK and catalog / R | GA-15, GA-18 | M4–M7 / L | Selected grid/editor/chart/headless/media bindings with refs/assets/cleanup; Java consumer examples | ⬜ planned |
 | GA-21 | Complex authenticated reference product / A | GA-12, GA-13, GA-16, GA-17, GA-19 | M4–M6 / L | Workspace/project workflow with roles, search/table/detail, forms/files/activity and two-tenant tests | ⬜ planned |

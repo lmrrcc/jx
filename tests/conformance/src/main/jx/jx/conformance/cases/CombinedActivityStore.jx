@@ -1,0 +1,28 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.ActivityStore;
+import jx.react.React;
+
+/** Distinguishes hiding, revealing and unmounting a subscribed, memoized component. */
+@Component
+public final class CombinedActivityStore {
+    public static View render() {
+        State<Boolean> visible = Hooks.useState(true);
+        State<Boolean> attached = Hooks.useState(true);
+        State<String> subscriptions = Hooks.useState("uninspected");
+        return (
+            <main>
+                <button onClick={event -> visible.update(value -> !value)}>Toggle visibility</button>
+                <button onClick={event -> attached.update(value -> !value)}>Toggle attachment</button>
+                <button onClick={event -> ActivityStore.SHARED.increment()}>Publish store</button>
+                <button onClick={event -> subscriptions.set(Integer.toString(ActivityStore.SHARED.subscribers()))}>Inspect subscriptions</button>
+                <output data-testid="subscriptions">{subscriptions.value()}</output>
+                {attached.value() ? React.activity(visible.value(), <CombinedActivityReader />) : null}
+            </main>
+        );
+    }
+}

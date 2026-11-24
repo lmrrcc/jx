@@ -1,0 +1,20 @@
+id	feature-a	feature-b	case	modes	behavior
+key-state	jsx:key	react:useState	combined-keyed-context	client,hydrate,lazy	Local count follows reordered keys and resets after removal and reinsertion
+key-input	dom:controlled-input	jsx:key	combined-keyed-context	client,hydrate,lazy	Controlled draft and input node stay with their keyed row on reorder
+key-effect	jsx:key	react:useEffect	combined-keyed-context	client,hydrate,lazy	Reordering retains mounted effects while removing a key cleans up its effect
+memo-context	react:memo	react:useContext	combined-keyed-context	client,hydrate,lazy	Context updates reach a memoized consumer with equal props
+context-state	react:useContext	react:useState	combined-keyed-context	client,hydrate,lazy	A changed context value retains each consumer's local state
+context-effect	react:useContext	react:useEffect	combined-keyed-context	client,hydrate,lazy	Effects clean up the old context and set up with the new value
+memo-props	jsx:props-update	react:memo	combined-keyed-context	client,hydrate,lazy	Equal props skip the memoized row while changed props update it without resetting state
+memo-store	react:memo	react:useSyncExternalStore	combined-activity-store	client,hydrate,lazy	External snapshot updates reach a memoized reader with equal props
+activity-store	react:Activity	react:useSyncExternalStore	combined-activity-store	client,hydrate,lazy	Hiding releases real subscriptions and revealing reads the latest snapshot with one subscription
+activity-state	react:Activity	react:useState	combined-activity-store	client,hydrate,lazy	Hiding retains local state and DOM while unmounting resets local state
+activity-effects	react:Activity	react:useEffect	combined-activity-store	client,hydrate,lazy	Hiding cleans effects and revealing restores them without leaking active effects
+strict-effects	react:StrictMode	react:useEffect	effect-cleanup	client,hydrate,lazy	Strict Mode exercises setup cleanup setup before user interactions
+layout-passive-order	react:useEffect	react:useLayoutEffect	layout-effect-order	client,hydrate,lazy	Layout setup precedes passive setup and Strict Mode repeats the ordered lifecycle
+lazy-suspense	react:Suspense	react:lazy	lazy-component	client,lazy	A lazy component shows Suspense fallback until explicit load completion
+async-transition	jsx:async-functions	react:useTransition	transition-promise	client,hydrate,lazy	The transition remains pending until the async action is explicitly completed
+hydrate-store	react-dom/client:hydrateRoot	react:useSyncExternalStore	hydrate-server	client	Hydration switches from the server snapshot to the client snapshot without replacing its button
+hydrate-id	react-dom/client:hydrateRoot	react:useId	hydrate-server	client	The server generated input identifier survives hydration unchanged
+portal-events	dom:mouse-events	react-dom:createPortal	portal	client,lazy	A portal click reaches its React ancestor despite separate DOM placement
+stream-suspense	react-dom/server:renderToPipeableStream	react:Suspense	server-stream-suspense	client	Collected stream HTML contains the shell and orders the Suspense fallback before the delayed content; early delivery is not measured

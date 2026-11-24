@@ -5,13 +5,13 @@
 // The full npm command sets BENCH_REQUIRE_COMPLETE=1; focused Playwright runs do not.
 import {readFileSync, writeFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
+import {InteractionReport, PROJECTS} from './interaction-report.js';
 
-const PROJECTS = ['reference', 'jx', 'reference-hydrate', 'jx-hydrate', 'reference-static', 'jx-static',
-  'reference-lazy', 'jx-lazy'];
 const RECORD = fileURLToPath(new URL('../../docs/evidence/conformance-results.tsv', import.meta.url));
+const INTERACTIONS = fileURLToPath(new URL('../../docs/evidence/interaction-results.tsv', import.meta.url));
 
 export default class ConformanceReport {
-  constructor() { this.rows = new Map(); }
+  constructor() { this.rows = new Map(); this.interactions = new InteractionReport(); }
 
   onTestEnd(test, result) {
     const id = test.title.split(':')[0];
@@ -20,6 +20,7 @@ export default class ConformanceReport {
     row[test.parent.project().name] = result.status === 'skipped' ? 'n/a'
       : result.status !== 'passed' ? 'FAIL' : unsupported ? 'unsupported' : 'pass';
     this.rows.set(id, row);
+    this.interactions.onTestEnd(test, result);
   }
 
   onEnd() {
@@ -38,16 +39,26 @@ export default class ConformanceReport {
     console.log('hydrate mode: reference ' + count('reference-hydrate') + ' pass; jx ' + count('jx-hydrate') + ' pass');
     console.log('static mode: reference ' + count('reference-static') + ' pass; jx ' + count('jx-static') + ' pass');
     console.log('lazy mode: reference ' + count('reference-lazy') + ' pass; jx ' + count('jx-lazy') + ' pass');
+    console.log(this.interactions.summary());
 
     const table = ['case', ...PROJECTS].join('\t') + '\n' + rows.map(([id, row]) => line(id, row)).join('\n') + '\n';
-    if (process.env.BENCH_NO_COMPARE === '1') return;
+    const interactionErrors = this.interactions.errors();
+    if (interactionErrors.length) {
+      interactionErrors.forEach(error => console.log(error));
+      return {status: 'failed'};
+    }
+    // Mutation runs skip golden-file comparison, but never selected assertion checks
+    // or an explicitly requested complete run.
+    const skipComparison = process.env.BENCH_NO_COMPARE === '1';
+    const requireComplete = process.env.BENCH_UPDATE === '1' || process.env.BENCH_REQUIRE_COMPLETE === '1';
+    if (skipComparison && !requireComplete) return;
     let recorded = '';
     try { recorded = readFileSync(RECORD, 'utf8'); } catch { /* reported below */ }
     const before = new Map(recorded.split('\n').slice(1).filter(Boolean).map(line => [line.split('\t')[0], line]));
     const missingCases = [...before.keys()].filter(id => !this.rows.has(id));
-    if (!rows.length || rows.length < before.size || missingCases.length
+    if (!rows.length || rows.length < before.size || missingCases.length || !this.interactions.complete()
         || rows.some(([, row]) => PROJECTS.some(name => row[name] === undefined))) {
-      if (process.env.BENCH_UPDATE === '1' || process.env.BENCH_REQUIRE_COMPLETE === '1') {
+      if (requireComplete) {
         console.log('Incomplete run: every recorded case must run in every project. Recorded results were not changed.');
         if (missingCases.length) console.log('Missing recorded cases: ' + missingCases.join(', '));
         return {status: 'failed'};
@@ -55,9 +66,11 @@ export default class ConformanceReport {
       console.log('Partial run: recorded results were not compared.');
       return;
     }
+    if (skipComparison) return;
     if (process.env.BENCH_UPDATE === '1') {
       writeFileSync(RECORD, table);
-      console.log('Recorded results in docs/evidence/conformance-results.tsv');
+      writeFileSync(INTERACTIONS, this.interactions.table());
+      console.log('Recorded case and interaction results in docs/evidence/.');
       return;
     }
     const changes = [];
@@ -65,12 +78,17 @@ export default class ConformanceReport {
       const now = line(id, row);
       if (before.get(id) !== now) changes.push((before.get(id) || id + '\t(new)').replaceAll('\t', ' ') + '  ->  ' + now.replaceAll('\t', ' '));
     }
+    let recordedInteractions = '';
+    try { recordedInteractions = readFileSync(INTERACTIONS, 'utf8'); } catch { /* comparison fails below */ }
+    if (recordedInteractions !== this.interactions.table()) {
+      changes.push('docs/evidence/interaction-results.tsv differs from the executed interaction assertions');
+    }
     if (changes.length) {
       console.log('\nResults differ from docs/evidence/conformance-results.tsv:');
       changes.forEach(change => console.log('  ' + change));
       console.log('If the change is intended, rerun with BENCH_UPDATE=1 and review the file.');
       return {status: 'failed'};
     }
-    console.log('Results match docs/evidence/conformance-results.tsv.');
+    console.log('Results match docs/evidence/conformance-results.tsv and interaction-results.tsv.');
   }
 }

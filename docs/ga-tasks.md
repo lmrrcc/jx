@@ -1,8 +1,15 @@
 # GA implementation sequence
 
-Revision 7, 24 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
+Revision 8, 24 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
 the [work package register](ga-execution.md) into an ordered list of tasks, grouped
 by the roadmap's milestones. Work proceeds down this list, one task at a time.
+
+Execution order confirmed by Luca on 24 November 2026: continue implementation
+through the complete React parity track and the G0 proofs, then deliver the
+JX/Spring starter and the new fast hot-reload workflow. Keep one PR per coherent
+slice and preserve automated gates. Record outstanding human qualification or
+applicability decisions explicitly; the request to continue is not evidence that
+an untested capability works.
 
 Progress, 23 November 2026: M1-01 to M1-05 are done. R-01 to R-18 and R-32 were
 recorded complete; the audit of that day reopened R-16 because its promised
@@ -17,7 +24,11 @@ modules across a serialized boundary. R-26 (every case in every applicable
 rendering mode) is complete: Luca's try-it run matched all recorded results on
 24 November, and code revision `eb5a18a` passed
 [Verify](https://github.com/lmrrcc/jx/actions/runs/45372691183).
-That makes 27 complete React tasks. R-27 is the next React parity task;
+That makes 27 complete React tasks. R-27-01 now adds 19 executed pair witnesses;
+the full local bench passes 731 checks, while 5,337 current pairs remain without
+complete evidence. R-27 remains partial; its slice status and the
+[interaction evidence record](ga-react-interactions.md) distinguish local results
+from outstanding acceptance.
 M1-26 (protected data route) is the
 remaining server-render proof. See the [dated status review](status.md#progress-review--23-november-2026)
 for remaining platform work and evidence limits. G0 has not passed.
@@ -128,7 +139,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-24 | M6 | Resume: `resume`, `resumeToPipeableStream`, `resumeAndPrerender`, `resumeAndPrerenderToNodeStream` | 4 | ✅ done |
 | R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ✅ done |
 | R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | ✅ done: Luca's try-it confirms 715 passes and 133 inapplicable cells; Verify green at eb5a18a, 24 November |
-| R-27 | M6 | Combined scenarios so that every pair of features meets at least once | adds pair coverage | ➡️ next; not started |
+| R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-27-01 has local evidence for 19 / 5,356 active pairs; 5,337 remain open, plus deferred-feature pairs |
 | R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | ⬜ planned |
 | R-29 | M7 | Remaining small surface: `act` for JX tests, `captureOwnerStack`, version constants, `unstable_batchedUpdates`, `unstable_useCacheRefresh` | 9 | ⬜ planned |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | ⬜ planned |
@@ -191,7 +202,47 @@ Neither mutant survived or failed to compile. This does not replace the complete
 mutation evidence table or claim a full 102-mutant rerun. Luca's try-it run reports
 715 passed, 133 skipped and an exact match with the recorded table. Together with
 [green Verify at eb5a18a](https://github.com/lmrrcc/jx/actions/runs/45372691183),
-this closes R-26. R-27 has not started.
+this closes R-26.
+
+### R-27 implementation slices
+
+Split before implementation on 24 November 2026 under working rule 5. The ledger
+contains 104 supported/equivalent feature IDs, giving 5,356 candidate unordered
+pairs. Excluding only the two permanent non-API rows (`react-dom:browser` and
+`framework:react-compiler`), the eventual universe is 118 features / 6,903 pairs;
+1,547 additional pairs depend on the 14 deferred features. Alias rows remain
+distinct until an explicit applicability decision is reviewed. These counts are
+candidate relationships, not a claim that every pair has a meaningful interaction.
+
+A pair earns evidence only through a named, executed assertion of an interaction
+on both React and JX. Co-occurrence in a fixture or feature table earns no credit.
+Static HTML equality does not establish an interactive lifecycle assertion.
+Unlisted pairs remain uncovered; a new feature automatically expands the universe.
+No broad area-level exclusion or reduction to feature families closes this task.
+
+| Task | Deliverable | Status |
+| --- | --- | --- |
+| R-27-01 | Pair register and gate; real keyed/memo/context and Activity/store lifecycle scenarios; explicit assertion evidence and scoped mutation checks | 🟡 review: 19 pair witnesses, 731 local bench passes and both scoped mutants killed; Verify pending |
+| R-27-02 | Extend identity, refs, composition, DOM and event interactions from the remaining pair inventory | ⬜ planned |
+| R-27-03 | Extend async, form action, optimistic, transition and external-store interactions, including controlled failure/recovery | ⬜ planned |
+| R-27-04 | Extend SSR, hydration, streaming and resource interactions with mode-specific assertions | ⬜ planned |
+| R-27-05 | Add deferred-feature interactions after R-28–R-30; review every remaining pair's applicability and close coverage gaps | ⬜ planned |
+
+These are delivery slices, not a disjoint assignment of every pair. Each follow-up
+must select explicit remaining pair IDs and remain in progress while its inventory
+is open. R-27 closes only when every application-feature pair has evidence or an
+approved, reasoned not-applicable decision; none is granted by this initial split.
+
+R-27-01 local evidence, 24 November 2026: the complete bench reports 731 passed and
+133 skipped cells: client 106 reference / 105 JX, hydrate 81 per side, static 87 per
+side and lazy 92 per side. Nineteen pairs have an executed assertion witness in
+every declared mode on both implementations; 5,337 active pairs remain uncovered.
+Static HTML checks do not credit interactive witnesses. The
+[interaction evidence record](ga-react-interactions.md) documents the marker
+contract, exact scenarios, mode limits, commands and pending acceptance. The
+104-entry curated mutant catalog is not a fresh full-run result; R-27-01's two
+new mutants were killed in a scoped run after its unmutated baseline passed.
+There were no survivors or unusable mutants.
 
 Expected count of `unsupported` rows after each milestone: M1 48, M2 32, M3 11,
 M6 0. These are planning figures. R-30 is the largest single item and the one most

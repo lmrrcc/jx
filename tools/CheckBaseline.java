@@ -37,6 +37,13 @@ public final class CheckBaseline {
     private static final String REACT_EXPORTS = "tests/conformance/react-exports.txt";
     private static final String BENCH_SPECS = "tests/conformance/specs";
     private static final List<String> CONFORMANCE_COLUMNS = List.of("feature", "area", "jx", "cases", "jx-api", "task", "note");
+    private static final String INTERACTIONS = "tests/conformance/interactions.tsv";
+    private static final List<String> INTERACTION_COLUMNS = List.of("id", "feature-a", "feature-b", "case", "modes", "behavior");
+    private static final String INTERACTION_RESULTS = "docs/evidence/interaction-results.tsv";
+    private static final List<String> INTERACTION_RESULT_COLUMNS = List.of("interaction", "reference", "jx",
+            "reference-hydrate", "jx-hydrate", "reference-static", "jx-static", "reference-lazy", "jx-lazy");
+    private static final Set<String> BENCH_MODES = Set.of("client", "hydrate", "static", "lazy");
+    private static final Set<String> NON_APPLICATION_FEATURES = Set.of("react-dom:browser", "framework:react-compiler");
     /** supported and equivalent need a passing case; untested is a claim without one; excluded needs a reason. */
     private static final Set<String> FEATURE_STATES = Set.of("supported", "equivalent", "untested", "unsupported", "excluded");
     private static final Pattern FEATURE = Pattern.compile("[a-z][a-z/-]*:[A-Za-z_][A-Za-z0-9_-]*");
@@ -65,6 +72,10 @@ public final class CheckBaseline {
 
     /** Every match of group 1 in the file must equal the named pin's value. */
     private record Copy(String pin, String source, String regex) {}
+
+    private record FeaturePair(String first, String second) {}
+    private record CaseMode(String caseId, String mode) {}
+    private record InteractionClaim(FeaturePair pair, CaseMode location, String behavior) {}
 
     private static final List<Pin> PINS = List.of(
             new Pin("jx.framework", "pom.xml", "<artifactId>jx-parent</artifactId><version>" + V + "<", "Maven artifacts"),
@@ -174,6 +185,10 @@ public final class CheckBaseline {
     private final Map<String, Integer> featureStates = new java.util.TreeMap<>();
     private int benchCases;
     private int waitingCases;
+    private int interactionCount;
+    private int registeredPairs;
+    private int implementedFeatures;
+    private int eventualFeatures;
 
     private CheckBaseline(Path root) throws IOException {
         this.root = root.toRealPath();
@@ -208,6 +223,11 @@ public final class CheckBaseline {
                     PINS.size(), checker.copyCount, checker.rowCount, checker.surfaceCount, checker.journeyCount);
             System.out.printf("React features: %s; %d bench cases, %d of them reference-only.%n",
                     checker.featureStates, checker.benchCases, checker.waitingCases);
+            System.out.printf("Interaction declarations: %d witnesses, %d unique registered pairs; "
+                    + "implemented universe %d features / %d pairs; eventual universe %d features / %d pairs.%n",
+                    checker.interactionCount, checker.registeredPairs,
+                    checker.implementedFeatures, pairCount(checker.implementedFeatures),
+                    checker.eventualFeatures, pairCount(checker.eventualFeatures));
             System.out.println("Checks recorded evidence structure only; no application build or tests were run.");
         } catch (IOException exception) {
             System.err.println("FAIL: cannot inspect baseline: " + exception.getMessage());
@@ -426,12 +446,16 @@ public final class CheckBaseline {
         }
         Set<String> cases = new HashSet<>();
         Set<String> waiting = new HashSet<>();
+        Set<String> serverCases = new HashSet<>();
         if (Files.isDirectory(specs)) {
             try (var files = Files.list(specs)) {
                 for (Path file : files.filter(path -> path.toString().endsWith(".spec.js")).toList()) {
                     Matcher matcher = BENCH_CASE.matcher(Files.readString(file, StandardCharsets.UTF_8));
                     while (matcher.find()) {
                         require(cases.add(matcher.group(2)), "bench case id is used by two tests: " + matcher.group(2));
+                        if (matcher.group(1).equals("onServer") || matcher.group(1).equals("serverOnly")) {
+                            serverCases.add(matcher.group(2));
+                        }
                         // test and onServer run on both sides; the other two are reference-only.
                         if (!matcher.group(1).equals("test") && !matcher.group(1).equals("onServer")) {
                             waiting.add(matcher.group(2));
@@ -445,9 +469,9 @@ public final class CheckBaseline {
         benchCases = cases.size();
         // A case left out of a rendering mode names an existing case, a known mode and its reason.
         Path modes = root.resolve("tests/conformance/modes.tsv");
+        Set<CaseMode> excludedModes = new HashSet<>();
         if (Files.exists(modes)) {
             List<String> rows = Files.readAllLines(modes, StandardCharsets.UTF_8);
-            Set<String> listed = new HashSet<>();
             for (int index = 1; index < rows.size(); index++) {
                 if (rows.get(index).isEmpty()) continue;
                 String[] row = rows.get(index).split("\t", -1);
@@ -457,12 +481,13 @@ public final class CheckBaseline {
                 require(row[1].equals("hydrate") || row[1].equals("static") || row[1].equals("lazy"),
                         at + " has unknown mode '" + row[1] + "'");
                 require(!row[2].isBlank(), at + " needs a reason");
-                require(listed.add(row[0] + " " + row[1]), at + " repeats " + row[0] + " in " + row[1]);
+                require(excludedModes.add(new CaseMode(row[0], row[1])), at + " repeats " + row[0] + " in " + row[1]);
             }
         }
         waitingCases = waiting.size();
         Set<String> ids = new HashSet<>();
         Set<String> covered = new HashSet<>();
+        Map<String, Set<String>> implemented = new LinkedHashMap<>();
         for (String[] cells : features) {
             String where = CONFORMANCE + " (" + cells[0] + ")";
             String state = cells[2];
@@ -471,6 +496,8 @@ public final class CheckBaseline {
             require(!cells[1].isEmpty(), where + " needs an area");
             require(FEATURE_STATES.contains(state), where + " has unknown state '" + state + "'");
             boolean claimed = state.equals("supported") || state.equals("equivalent");
+            if (claimed) implemented.put(cells[0], cells[3].isEmpty() ? Set.of() : Set.copyOf(List.of(cells[3].split(","))));
+            if (!NON_APPLICATION_FEATURES.contains(cells[0]) || !cells[5].equals("none")) eventualFeatures++;
             require(!claimed || !cells[3].isEmpty(), where + " is " + state + " without a bench case");
             boolean unsupported = state.equals("unsupported");
             require(claimed || unsupported || cells[3].isEmpty(), where + " lists cases but is " + state);
@@ -503,6 +530,67 @@ public final class CheckBaseline {
                 .forEach(line -> failures.add(CONFORMANCE + " lacks React export " + line));
         cases.stream().filter(id -> !covered.contains(id) && !id.equals("react-exports")).sorted()
                 .forEach(id -> failures.add("bench case '" + id + "' is not listed against any feature in " + CONFORMANCE));
+        implementedFeatures = implemented.size();
+        checkInteractions(implemented, cases, serverCases, excludedModes);
+    }
+
+    /** Checks declared witnesses, not whether their behavioral assertions executed or proved a pair. */
+    private void checkInteractions(Map<String, Set<String>> implemented, Set<String> cases,
+            Set<String> serverCases, Set<CaseMode> excludedModes) throws IOException {
+        List<String[]> rows = table(INTERACTIONS, INTERACTION_COLUMNS);
+        if (rows == null) return;
+        Map<String, Set<String>> modesById = new LinkedHashMap<>();
+        Set<FeaturePair> pairs = new HashSet<>();
+        Set<InteractionClaim> claims = new HashSet<>();
+        for (String[] row : rows) {
+            String at = INTERACTIONS + " (" + row[0] + ")";
+            for (int index = 0; index < row.length; index++) {
+                require(!row[index].isBlank(), at + " needs " + INTERACTION_COLUMNS.get(index));
+            }
+            require(row[0].matches("[a-z0-9]+(?:-[a-z0-9]+)*"), at + " needs a kebab-case id");
+            require(row[1].compareTo(row[2]) < 0, at + " needs distinct features in canonical order");
+            FeaturePair pair = new FeaturePair(row[1], row[2]);
+            pairs.add(pair);
+            for (String feature : List.of(row[1], row[2])) {
+                require(implemented.containsKey(feature), at + " names unknown or unimplemented feature '" + feature + "'");
+                require(implemented.getOrDefault(feature, Set.of()).contains(row[3]),
+                        at + " case '" + row[3] + " is not linked from feature '" + feature + "'");
+            }
+            require(cases.contains(row[3]), at + " names unknown bench case '" + row[3] + "'");
+            Set<String> modes = new HashSet<>();
+            for (String mode : row[4].split(",", -1)) {
+                require(BENCH_MODES.contains(mode), at + " names unknown mode '" + mode + "'");
+                require(modes.add(mode), at + " repeats mode '" + mode + "'");
+                CaseMode location = new CaseMode(row[3], mode);
+                require(!excludedModes.contains(location), at + " declares an excluded case/mode: " + location);
+                require(!serverCases.contains(row[3]) || mode.equals("client"), at + " server cases run only in client projects");
+                require(claims.add(new InteractionClaim(pair, location, row[5])), at + " repeats the same pair/case/mode behavior");
+            }
+            require(modesById.putIfAbsent(row[0], Set.copyOf(modes)) == null, at + " repeats an id");
+        }
+        interactionCount = modesById.size();
+        registeredPairs = pairs.size();
+        List<String[]> results = table(INTERACTION_RESULTS, INTERACTION_RESULT_COLUMNS);
+        if (results == null) return;
+        Set<String> recorded = new HashSet<>();
+        for (String[] row : results) {
+            String at = INTERACTION_RESULTS + " (" + row[0] + ")";
+            require(recorded.add(row[0]), at + " repeats an id");
+            Set<String> modes = modesById.get(row[0]);
+            require(modes != null, at + " names an unknown interaction");
+            if (modes == null) continue;
+            for (int index = 1; index < row.length; index++) {
+                String project = INTERACTION_RESULT_COLUMNS.get(index);
+                String mode = project.contains("-") ? project.substring(project.indexOf('-') + 1) : "client";
+                require(modes.contains(mode) ? Set.of("pass", "FAIL").contains(row[index]) : row[index].equals("n/a"),
+                        at + " has invalid result for " + project + " and its declared modes");
+            }
+        }
+        for (String id : modesById.keySet()) require(recorded.contains(id), INTERACTION_RESULTS + " lacks interaction '" + id + "'");
+    }
+
+    private static long pairCount(int features) {
+        return (long) features * (features - 1) / 2;
     }
 
     /** Reads a tab-separated register, or returns null after recording why it is unusable. */

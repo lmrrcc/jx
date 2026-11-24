@@ -1,4 +1,4 @@
-import {test, expect, log} from './bench.js';
+import {test, expect, log, interaction} from './bench.js';
 
 test('custom-hook: two calls of one custom hook keep independent state and effects', async ({page, open}) => {
   await open('custom-hook');
@@ -113,9 +113,11 @@ test('clone-element: a cloned element merges new props and children', async ({pa
 
 test('lazy-component: a lazy component shows the Suspense fallback until it loads', async ({page, open}) => {
   await open('lazy-component');
-  await expect(page.getByRole('status')).toHaveText('loading');
-  await page.getByRole('button', {name: 'Load'}).click();
-  await expect(page.getByRole('status')).toHaveText('late content');
+  await interaction('lazy-suspense', async () => {
+    await expect(page.getByRole('status')).toHaveText('loading');
+    await page.getByRole('button', {name: 'Load'}).click();
+    await expect(page.getByRole('status')).toHaveText('late content');
+  });
 });
 
 test('activity: a hidden activity keeps state, hides its DOM and stops its effects', async ({page, open}) => {

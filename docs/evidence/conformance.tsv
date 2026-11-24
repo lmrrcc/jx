@@ -1,18 +1,18 @@
 feature	area	jx	cases	jx-api	task	note
-react:useState	hook	supported	state-counter,state-lazy-init,callable-state,batched-updates	Hooks.useState, Hooks.useStateLazy		
+react:useState	hook	supported	state-counter,state-lazy-init,callable-state,batched-updates,combined-keyed-context,combined-activity-store	Hooks.useState, Hooks.useStateLazy		Also exercised with keyed identity, context updates and Activity
 react:useReducer	hook	supported	reducer-batch,reducer-lazy-init	Hooks.useReducer, Hooks.useReducerLazy		
-react:useEffect	hook	supported	effect-cleanup,effect-dependencies	Hooks.useEffect		
+react:useEffect	hook	supported	effect-cleanup,effect-dependencies,combined-keyed-context,combined-activity-store,layout-effect-order	Hooks.useEffect		Also exercised with keyed removal, context changes and Activity cleanup
 react:useLayoutEffect	hook	supported	layout-effect-order,layout-effect-dependencies,dom-ref-focus	Hooks.useLayoutEffect		
 react:useInsertionEffect	hook	supported	insertion-effect	Hooks.useInsertionEffect		
 react:useEffectEvent	hook	supported	effect-event	Hooks.useEffectEvent		Typed for Runnable and Consumer callbacks
 react:useRef	hook	supported	ref-persist,dom-ref-focus	Hooks.useRef, Hooks.useDomRef		
 react:useImperativeHandle	hook	supported	imperative-handle	Hooks.useImperativeHandle		The handle is published through a Ref passed as a prop
-react:useContext	hook	supported	context-nested	Hooks.useContext		
+react:useContext	hook	supported	context-nested,combined-keyed-context	Hooks.useContext		Memoized consumers retain local state while context changes
 react:createContext	api	supported	context-nested	Hooks.createContext, Context.provide		
 react:useMemo	hook	supported	memo-recompute	Hooks.useMemo		
 react:useCallback	hook	supported	callback-identity	Hooks.useCallback		
-react:useId	hook	supported	use-id	Hooks.useId		
-react:useSyncExternalStore	hook	supported	external-store,hydrate-server	Hooks.useSyncExternalStore, ExternalStore.serverSnapshot		
+react:useId	hook	supported	use-id,hydrate-server	Hooks.useId		Server and client identifiers compared across hydration
+react:useSyncExternalStore	hook	supported	external-store,hydrate-server,combined-activity-store	Hooks.useSyncExternalStore, ExternalStore.serverSnapshot		Activity hides subscriptions and restores the latest snapshot
 react:useTransition	hook	supported	transition-pending,transition-promise	Hooks.useTransition, TransitionState		An async action returns a jx.Promise, usually from Async.run, or takes a completion callback
 react:startTransition	api	supported	start-transition,transition-pending	React.startTransition		
 react:useDeferredValue	hook	supported	deferred-value	Hooks.useDeferredValue		Equal scalars compare by value
@@ -23,12 +23,12 @@ react:useDebugValue	hook	supported	debug-value	Hooks.useDebugValue		The DevTools
 react:Fragment	component	supported	fragment	<>...</>, Views.fragment		
 react:StrictMode	component	supported	effect-cleanup,state-lazy-init,memo-recompute,strict-nested	React.mountStrict, React.strictMode		Nested use is a view factory, not a markup tag
 react:Suspense	component	supported	use-promise,lazy-component,server-stream-suspense	React.suspense		
-react:Activity	component	supported	activity	React.activity		A view factory with a visible flag
+react:Activity	component	supported	activity,combined-activity-store	React.activity		A view factory with a visible flag
 react:Profiler	component	supported	profiler	React.profiler		A view factory, not a markup tag
 react:ViewTransition	component	supported	view-transition	React.viewTransition		Name and classes only; the event callbacks are not offered
 react:addTransitionType	api	supported	view-transition	React.addTransitionType		
 react:lazy	api	equivalent	lazy-component,lazy-route-loading,lazy-route-retry	ComponentType.lazy, LazyModules.load		The bench loads a separately compiled route; ordinary application splitting still needs Maven plugin wiring
-react:memo	api	supported	memo-skip	@Memo, ComponentType.memo		Declared on the component with @Memo; a custom comparison is a static arePropsEqual method
+react:memo	api	supported	memo-skip,combined-keyed-context,combined-activity-store	@Memo, ComponentType.memo		Declared on the component with @Memo; a custom comparison is a static arePropsEqual method
 react:forwardRef	api	equivalent	forward-ref	ref as a Props field		Deprecated in React 19; a JX component receives ref as an ordinary prop
 react:createElement	api	equivalent	attributes,children-prop	Markup, Views.element, Views.component		
 react:cloneElement	legacy	equivalent	clone-element	Views.cloneElement		DOM element views only; a component view is rebuilt from a new Props record
@@ -75,14 +75,14 @@ react-dom/static:prerenderToNodeStream	server	supported	static-prerender-node	Re
 react-dom/static:resumeAndPrerender	server	supported	static-resume-prerender	ReactStatic.resumeAndPrerender		
 react-dom/static:resumeAndPrerenderToNodeStream	server	supported	static-resume-prerender-node	ReactStatic.resumeAndPrerenderToNodeStream		
 react-dom/static:version	constant	excluded			R-29	Constant
-jsx:key	markup	supported	keyed-list,remount-by-key	key attribute		
+jsx:key	markup	supported	keyed-list,remount-by-key,combined-keyed-context	key attribute		Combined scenarios retain local state and drafts while reordering
 jsx:children	markup	supported	children-prop	children property of type View		
 jsx:conditional-rendering	markup	supported	conditional	Java ternary and null		
 jsx:list-rendering	markup	supported	keyed-list,child-values	Iterable and array children		
 jsx:child-values	markup	supported	child-values	Views child normalization		
 jsx:child-slot-identity	markup	supported	child-slots	View.Empty, View.Items		A null or boolean child and a collection child each keep one position
 jsx:text-and-entities	markup	supported	text-escaping			
-jsx:props-update	markup	supported	props-update	Typed record props		
+jsx:props-update	markup	supported	props-update,combined-keyed-context	Typed record props		Changed props reach memoized rows without resetting state
 jsx:custom-hooks	markup	supported	custom-hook	Ordinary static methods named useX		
 jsx:function-props	markup	supported	function-props	Runnable and Function record fields		
 jsx:dynamic-component	markup	supported	dynamic-component	Views.component with a ComponentType value		Markup tags name a component statically; a run-time choice goes through Views.component
@@ -97,7 +97,7 @@ dom:ref-on-element	dom	supported	dom-ref-focus	ref with Hooks.useDomRef		DomElem
 dom:attributes	dom	supported	attributes,dom-attributes	Markup attributes		Every name in React DOM table rendered on an HTML and an SVG element and compared with React; 16 names are covered by dedicated cases
 dom:style	dom	supported	attributes	Style		
 dom:svg	dom	supported	svg,dom-elements	svg		Every SVG element compared with React
-dom:mouse-events	dom	supported	state-counter,stop-propagation,dom-events	onClick and every other handler name		Every handler name is called as in React for a plain synthetic event; payloads are covered by the event cases
+dom:mouse-events	dom	supported	state-counter,stop-propagation,dom-events,portal	onClick and every other handler name		Every handler name is called as in React for a plain synthetic event; payloads are covered by the event cases
 dom:keyboard-events	dom	supported	key-event,event-payload	Event.key, code, repeat and modifier keys		
 dom:event-default-and-propagation	dom	supported	prevent-default,stop-propagation	Event.preventDefault, Event.stopPropagation		
 dom:event-payload	dom	supported	event-payload	Event and EventTarget accessors		One Event interface for all families; inapplicable accessors return empty values
@@ -105,7 +105,7 @@ dom:capture-phase-events	dom	supported	capture-phase,dom-events	onClickCapture a
 dom:focus-pointer-touch-wheel-events	dom	supported	pointer-events	Event.relatedTarget, pointerType, deltaY, touches		
 dom:composition-clipboard-drag-events	dom	supported	transfer-events	Event.data, transferData, setTransferData		Files and drag effects are not exposed
 dom:media-and-animation-events	dom	supported	media-events,dom-events	Event.animationName, propertyName, EventTarget.paused		Every media handler name is called as in React
-dom:controlled-input	dom	supported	controlled-input,key-event			
+dom:controlled-input	dom	supported	controlled-input,key-event,combined-keyed-context			Keyed input drafts and DOM identity are checked together
 dom:controlled-checkbox	dom	supported	checkbox			
 dom:radio-select-textarea	dom	supported	choice-inputs	checked, value and onChange on radio, select and textarea		
 dom:uncontrolled-inputs	dom	supported	uncontrolled-inputs	defaultValue and defaultChecked attributes		

@@ -1,0 +1,37 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.Memo;
+import jx.State;
+import jx.View;
+import jx.conformance.Bench;
+
+/** A memoized context consumer with instance-owned draft/count and a theme-scoped effect. */
+@Component
+@Memo
+public final class CombinedKeyedContextRow {
+    public record Props(String id, String label) {}
+
+    public static View render(Props props) {
+        String id = props.id();
+        String theme = Hooks.useContext(CombinedKeyedContext.THEME);
+        State<Integer> count = Hooks.useState(0);
+        State<String> draft = Hooks.useState("");
+        Bench.log("render " + id + " " + props.label() + " " + theme);
+        Hooks.useEffect(() -> {
+            Bench.log("setup " + id + " " + theme);
+            return () -> Bench.log("cleanup " + id + " " + theme);
+        }, Dependencies.of(theme));
+        return (
+            <li data-row={id} data-theme={theme}>
+                <h2>{props.label() + " " + id}</h2>
+                <p data-testid={"theme-" + id}>{theme}</p>
+                <span role="status">{count.value()}</span>
+                <input aria-label={"Draft " + id} value={draft.value()} onChange={event -> draft.set(event.targetValue())} />
+                <button onClick={event -> count.update(previous -> previous + 1)}>Increment {id}</button>
+            </li>
+        );
+    }
+}
