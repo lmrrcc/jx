@@ -13,16 +13,16 @@ context-always-default	killed	context-nested	useContext ignores providers
 store-no-unsubscribe	killed	external-store	External stores are never unsubscribed
 store-stale-snapshot	killed	external-store,hydrate-server	External store changes do not rerender
 id-constant	killed	root-options,use-id	useId returns the same id everywhere
-strict-mode-off	killed	batched-updates,custom-hook,effect-cleanup,effect-dependencies,effect-event,layout-effect-dependencies,layout-effect-order,memo-recompute,memo-skip,reducer-lazy-init,ref-callback,state-lazy-init,strict-nested	Strict Mode is not applied
+strict-mode-off	killed	batched-updates,custom-hook,document-metadata,effect-cleanup,effect-dependencies,effect-event,layout-effect-dependencies,layout-effect-order,memo-recompute,memo-skip,reducer-lazy-init,ref-callback,state-lazy-init,strict-nested	Strict Mode is not applied
 key-dropped	killed	keyed-list,remount-by-key	Component keys are not passed to React
-text-child-as-fragment	killed	child-values,custom-hook,document-metadata,resource-elements	Text children are wrapped in fragments again
+text-child-as-fragment	killed	child-values,document-metadata,resource-elements	Text children are wrapped in fragments again
 provider-children-as-array	killed	context-nested,use-promise	Provider children are passed as one array again
 provider-ignores-value	killed	context-nested,use-promise	Providers supply the default value
 prevent-default-noop	killed	form-reset,prevent-default	preventDefault does nothing
 stop-propagation-noop	killed	stop-propagation	stopPropagation does nothing
 current-target-is-target	killed	event-payload	currentTarget reports the event target
 checked-inverted	killed	checkbox	The checked flag is inverted
-key-name-empty	killed	event-payload,key-event	Keyboard events report no key
+key-name-empty	killed	custom-hook,dynamic-component,event-payload,function-props,hydrate-server,key-event,memo-skip,namespace-components	Keyboard events report no key
 modifier-ignored	killed	event-payload	The shift modifier is never reported
 related-target-missing	killed	pointer-events	relatedTarget is never reported
 transfer-data-empty	killed	transfer-events	Clipboard and drag data read as empty
@@ -83,8 +83,8 @@ root-uncaught-dropped	killed	root-options	Uncaught errors are not reported to th
 root-prefix-dropped	killed	root-options	The identifier prefix is ignored
 root-stack-dropped	killed	root-options	The component stack is not passed on
 root-cause-dropped	killed	root-options	The cause of a recovered error is lost
-server-string-without-markers	killed	server-render-to-string	renderToString loses the hydration markers
-server-static-with-markers	killed	server-render-to-static-markup	renderToStaticMarkup keeps the hydration markers
+server-string-without-markers	killed	activity,child-slots,child-values,children-utilities,choice-inputs,effect-event,function-props,keyed-list,memo-skip,prevent-default,remount-by-key,server-render-to-string,start-transition,stop-propagation	renderToString loses the hydration markers
+server-static-with-markers	killed	activity,child-slots,child-values,children-utilities,choice-inputs,effect-event,function-props,keyed-list,lazy-component,memo-skip,prevent-default,remount-by-key,server-render-to-static-markup,start-transition,stop-propagation,use-promise	renderToStaticMarkup keeps the hydration markers
 hydrate-replaces-tree	killed	hydrate-root,hydrate-server	Hydration replaces the server nodes
 store-server-snapshot-ignored	killed	hydrate-server	The server snapshot of a store is ignored
 stream-chunks-dropped	killed	server-pipeable-stream,server-resume-pipeable,server-stream-suspense	A piped stream loses its chunks
@@ -96,3 +96,6 @@ resume-ignores-state	killed	server-resume-pipeable	Resuming to a Node stream ren
 resume-web-ignores-state	killed	server-resume	Resuming to a web stream renders the whole page again
 prerender-abort-ignored	killed	server-resume,server-resume-pipeable,static-resume-prerender,static-resume-prerender-node	Aborting a prerender does nothing
 postponed-state-dropped	killed	server-resume,server-resume-pipeable,static-resume-prerender,static-resume-prerender-node	An aborted prerender reports no postponed state
+attribute-name-lowercased	killed	action-state,attributes,clone-element,custom-elements,dom-attributes,form-actions,form-reset,form-state,hydrate-server,resource-elements,svg,uncontrolled-inputs,use-id	Attribute names lose their capital letters
+capture-handler-merged	killed	capture-phase,dom-events	Capture handlers replace the bubble handlers
+style-order-lost	killed	attributes	Style properties lose the order in which they were added
