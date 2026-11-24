@@ -1,0 +1,38 @@
+package jx.conformance.cases;
+
+import java.util.List;
+import jx.Component;
+import jx.Context;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Combined case: keyed memoized rows retain local state while their shared context changes. */
+@Component
+public final class CombinedKeyedContext {
+    static final Context<String> THEME = Hooks.createContext("outside");
+
+    public static View render() {
+        State<Boolean> reversed = Hooks.useState(false);
+        State<Boolean> showA = Hooks.useState(true);
+        State<String> theme = Hooks.useState("light");
+        State<String> label = Hooks.useState("Row");
+        State<Integer> tick = Hooks.useState(0);
+        List<String> ids = reversed.value() ? List.of("b", "a") : List.of("a", "b");
+        return (
+            <main>
+                <h1>Combined keyed context</h1>
+                <p data-testid="parent-tick">{tick.value()}</p>
+                <button onClick={event -> tick.update(previous -> previous + 1)}>Rerender parent</button>
+                <button onClick={event -> label.set("Updated")}>Change labels</button>
+                <button onClick={event -> reversed.update(previous -> !previous)}>Reverse rows</button>
+                <button onClick={event -> showA.set(false)}>Remove a</button>
+                <button onClick={event -> showA.set(true)}>Restore a</button>
+                <button onClick={event -> theme.update(previous -> previous.equals("light") ? "dark" : "light")}>Change theme</button>
+                {THEME.provide(theme.value(),
+                    <ul>{ids.stream().filter(id -> showA.value() || !id.equals("a"))
+                        .map(id -> <CombinedKeyedContextRow key={id} id={id} label={label.value()} />).toList()}</ul>)}
+            </main>
+        );
+    }
+}

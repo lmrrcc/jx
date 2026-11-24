@@ -1,6 +1,6 @@
 # React conformance bench
 
-Each case is one React behavior, implemented twice and checked by one spec:
+Each case is a focused or combined React behavior, implemented twice and checked by one spec:
 
 | Part | Location |
 | --- | --- |
@@ -92,8 +92,9 @@ updating the feature list; the checker rejects a mismatch between the two.
 
 ## Recorded results
 
-Every full run compares its table with `docs/evidence/conformance-results.tsv` and
-fails on any difference, in either direction. After an intended change, rerun with
+Every full run compares its case table with `docs/evidence/conformance-results.tsv`
+and its executed pair witnesses with `docs/evidence/interaction-results.tsv`.
+It fails on any difference, in either direction. After an intended change, rerun with
 `BENCH_UPDATE=1 npm run test:bench` and review the file's diff.
 Only a full run can update that table: a filtered run leaves it untouched, and
 combining a partial run with `BENCH_UPDATE=1` fails. `npm run test:bench` also sets
@@ -106,6 +107,29 @@ for R-26's accepted try-it and Verify results.
 The bench caps concurrency at two workers because each may run both Chrome and
 a Node-hosted TeaVM application. This avoids tying memory pressure to CPU count;
 test timeouts and assertions remain unchanged.
+
+## Interaction evidence
+
+R-27-01 adds `interactions.tsv`: one named witness links two feature IDs, a case,
+applicable modes and an observable interaction. Specs wrap the relevant assertions
+in `await interaction(id, async () => { ... })`. The helper emits its annotation
+only after that assertion step succeeds; a later case failure cancels its credit.
+The reporter rejects missing or misplaced markers. Features merely appearing in
+the same case earn no pair evidence.
+
+The complete local run on 24 November passes 731 checks, with 133 skipped cells:
+client 106 reference / 105 JX, hydrate 81 per side, static 87 per side, lazy 92 per
+side. Nineteen pairs have complete evidence in their declared modes; 5,337 of the
+5,356 current candidates remain open. The eventual universe includes 118 features
+and 6,903 candidate pairs. **R-27 remains partial.** See the
+[interaction evidence record](../../docs/ga-react-interactions.md) for the two
+combined scenarios, eight existing assertion witnesses and acceptance status.
+
+Static HTML equality does not execute interactive assertion blocks, so it does
+not credit those witnesses. Hydration-owned and Node-only scenarios can carry
+interaction evidence in the client projects without implying other mode coverage.
+`npm run test:bench` runs the reporter regression checks and the full matrix.
+Focused runs never replace complete case or interaction tables.
 
 ## Mutation check
 
@@ -128,6 +152,19 @@ java tools/MutateBench.java --only lazy-route-eager,lazy-host-includes-cases
 The runner checks its unmutated scratch build first. A scoped run reports only
 the selected mutants and does not rewrite the full mutation evidence table.
 Adding these two entries does not establish a new complete 102-mutant result.
+
+R-27-01 adds `combined-unstable-key` and `combined-store-leak`, bringing the catalog
+to 104 entries. Repeat their scoped check with:
+
+```sh
+java tools/MutateBench.java --only combined-unstable-key,combined-store-leak
+```
+
+The unmutated scratch baseline passed, then both mutants were killed by
+`combined-keyed-context` and `combined-activity-store`, respectively, with no
+survivors or unusable mutants. The historical full result still covers 100
+mutants; the R-26 and R-27-01 scoped runs do not constitute a fresh full
+104-mutant campaign.
 
 ## Feature list
 

@@ -89,8 +89,12 @@ import { PointerEvents } from './cases/pointer-events.jsx';
 import { TransferEvents } from './cases/transfer-events.jsx';
 import { MediaEvents } from './cases/media-events.jsx';
 import { LayoutEffectDependencies } from './cases/layout-effect-dependencies.jsx';
+import { CombinedKeyedContext } from './cases/combined-keyed-context.jsx';
+import { CombinedActivityStore } from './cases/combined-activity-store.jsx';
 
 export const cases = {
+  'combined-keyed-context': CombinedKeyedContext,
+  'combined-activity-store': CombinedActivityStore,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,
   'callable-state': CallableState,

@@ -1,4 +1,4 @@
-import {test, expect, log} from './bench.js';
+import {test, expect, log, interaction} from './bench.js';
 
 test('state-counter: render snapshots and queued functional updates', async ({page, open}) => {
   await open('state-counter');
@@ -42,7 +42,9 @@ test('reducer-batch: two dispatches in one event are reduced in order', async ({
 test('effect-cleanup: setup and cleanup on mount, dependency change and unmount', async ({page, open}) => {
   await open('effect-cleanup');
   // Strict Mode in development mounts, cleans up and mounts effects again.
-  await expect.poll(() => log(page)).toEqual(['setup a', 'cleanup a', 'setup a']);
+  await interaction('strict-effects', async () => {
+    await expect.poll(() => log(page)).toEqual(['setup a', 'cleanup a', 'setup a']);
+  });
   await page.getByRole('button', {name: 'Rerender only'}).click();
   await expect(page.getByTestId('renders')).toHaveText('1');
   expect(await log(page)).toEqual(['setup a', 'cleanup a', 'setup a']);
@@ -65,8 +67,10 @@ test('effect-dependencies: no dependency list runs every commit, an empty list r
 
 test('layout-effect-order: layout effects run before passive effects', async ({page, open}) => {
   await open('layout-effect-order');
-  await expect.poll(() => log(page)).toEqual(
-    ['layout', 'effect', 'cleanup layout', 'cleanup effect', 'layout', 'effect']);
+  await interaction('layout-passive-order', async () => {
+    await expect.poll(() => log(page)).toEqual(
+      ['layout', 'effect', 'cleanup layout', 'cleanup effect', 'layout', 'effect']);
+  });
 });
 
 test('batched-updates: two state updates in one event produce one commit', async ({page, open}) => {
@@ -297,14 +301,16 @@ test('deferred-value: the initial value renders first, then the real value', asy
 
 test('transition-promise: an async function as action keeps the transition pending until it ends', async ({page, open}) => {
   await open('transition-promise');
-  await expect(page.getByRole('status')).toHaveText('idle none');
-  await page.getByRole('button', {name: 'Start'}).click();
-  await expect(page.getByRole('status')).toHaveText('pending');
-  // Still pending a moment later: the transition lasts until the function ends.
-  await page.waitForTimeout(250);
-  await expect(page.getByRole('status')).toHaveText('pending');
-  await page.getByRole('button', {name: 'Finish'}).click();
-  await expect(page.getByRole('status')).toHaveText('started done');
+  await interaction('async-transition', async () => {
+    await expect(page.getByRole('status')).toHaveText('idle none');
+    await page.getByRole('button', {name: 'Start'}).click();
+    await expect(page.getByRole('status')).toHaveText('pending');
+    // Still pending a moment later: the transition lasts until the function ends.
+    await page.waitForTimeout(250);
+    await expect(page.getByRole('status')).toHaveText('pending');
+    await page.getByRole('button', {name: 'Finish'}).click();
+    await expect(page.getByRole('status')).toHaveText('started done');
+  });
 });
 
 test('async-function: an async function starts at once, suspends at await and catches a rejection', async ({page, open}) => {

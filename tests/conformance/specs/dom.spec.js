@@ -1,4 +1,4 @@
-import {test, expect, log, serverOf, sideOf, modeOf} from './bench.js';
+import {test, expect, log, serverOf, sideOf, modeOf, interaction} from './bench.js';
 
 test('choice-inputs: controlled radio group, select and textarea', async ({page, open}) => {
   await open('choice-inputs');
@@ -81,11 +81,13 @@ test('error-reporting: handler errors are reported and keep the UI; an uncaught 
 
 test('portal: portal content renders elsewhere in the DOM but events reach the React parent', async ({page, open}) => {
   await open('portal');
-  const ported = page.getByTestId('ported');
-  expect(await ported.evaluate(node => node.parentElement === document.body)).toBe(true);
-  expect(await page.getByTestId('owner').evaluate(node => node.querySelector('[data-testid="ported"]'))).toBeNull();
-  await ported.click();
-  await expect(page.getByRole('status')).toHaveText('1');
+  await interaction('portal-events', async () => {
+    const ported = page.getByTestId('ported');
+    expect(await ported.evaluate(node => node.parentElement === document.body)).toBe(true);
+    expect(await page.getByTestId('owner').evaluate(node => node.querySelector('[data-testid="ported"]'))).toBeNull();
+    await ported.click();
+    await expect(page.getByRole('status')).toHaveText('1');
+  });
 });
 
 test('flush-sync: the DOM is updated before flushSync returns', async ({page, open}) => {
@@ -175,19 +177,21 @@ test('hydrate-root: hydration attaches to server markup without replacing its no
 });
 
 test('hydrate-server: the browser hydrates HTML rendered in Node, keeping nodes and ids', async ({page, open}, info) => {
-  const html = await (await serverOf(info)).renderHydratable();
-  expect(html).toContain('<p data-testid="origin">server</p>');
-  const id = /<input id="([^"]+)"/.exec(html)[1];
-  await page.addInitScript(markup => { globalThis.__benchServerHtml = markup; }, html);
-  // Any hydration mismatch is a console error, which fails the test.
-  await open('hydrate-server');
-  // After hydration the store switches from its server snapshot to the browser one.
-  await expect(page.getByTestId('origin')).toHaveText('client');
-  expect(await page.getByLabel('Name').getAttribute('id')).toEqual(id);
-  const button = page.getByRole('button', {name: 'Increment'});
-  await button.click();
-  await expect(page.getByRole('status')).toHaveText('1');
-  expect(await button.evaluate(node => node.benchServerNode)).toBe(true);
+  await interaction(['hydrate-store', 'hydrate-id'], async () => {
+    const html = await (await serverOf(info)).renderHydratable();
+    expect(html).toContain('<p data-testid="origin">server</p>');
+    const id = /<input id="([^"]+)"/.exec(html)[1];
+    await page.addInitScript(markup => { globalThis.__benchServerHtml = markup; }, html);
+    // Any hydration mismatch is a console error, which fails the test.
+    await open('hydrate-server');
+    // After hydration the store switches from its server snapshot to the browser one.
+    await expect(page.getByTestId('origin')).toHaveText('client');
+    expect(await page.getByLabel('Name').getAttribute('id')).toEqual(id);
+    const button = page.getByRole('button', {name: 'Increment'});
+    await button.click();
+    await expect(page.getByRole('status')).toHaveText('1');
+    expect(await button.evaluate(node => node.benchServerNode)).toBe(true);
+  });
 });
 
 // Open the same case and mode for generated DOM/event comparisons.

@@ -1,5 +1,5 @@
 import {expect} from '@playwright/test';
-import {server as onServer} from './bench.js';
+import {server as onServer, interaction} from './bench.js';
 
 // React's server and static rendering APIs, run in Node on the reference side.
 const withMarkers = '<main><h1>Hello <!-- -->Ada</h1><p>static</p></main>';
@@ -30,14 +30,16 @@ onServer('server-pipeable-stream: streams HTML as a Node stream', async server =
 });
 
 onServer('server-stream-suspense: a boundary sends its fallback first and its content later', async server => {
-  const html = await server.streamSuspense();
-  expect(html).toContain('<h1>shell</h1>');
-  const fallback = html.indexOf('<p>waiting</p>');
-  const content = html.indexOf('arrived');
-  expect(fallback).toBeGreaterThan(-1);
-  expect(content).toBeGreaterThan(fallback);
-  // The late content travels in a hidden element with the script that moves it into place.
-  expect(html.slice(fallback)).toContain('hidden');
+  await interaction('stream-suspense', async () => {
+    const html = await server.streamSuspense();
+    expect(html).toContain('<h1>shell</h1>');
+    const fallback = html.indexOf('<p>waiting</p>');
+    const content = html.indexOf('arrived');
+    expect(fallback).toBeGreaterThan(-1);
+    expect(content).toBeGreaterThan(fallback);
+    // The late content travels in a hidden element with the script that moves it into place.
+    expect(html.slice(fallback)).toContain('hidden');
+  });
 });
 
 onServer('static-prerender: prerenders to a web stream after all data is ready', async server => {

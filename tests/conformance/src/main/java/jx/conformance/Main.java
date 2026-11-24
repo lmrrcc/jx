@@ -8,6 +8,8 @@ import jx.conformance.cases.CheckboxCase;
 import jx.conformance.cases.ChildValues;
 import jx.conformance.cases.ChildrenProp;
 import jx.conformance.cases.Conditional;
+import jx.conformance.cases.CombinedKeyedContext;
+import jx.conformance.cases.CombinedActivityStore;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
 import jx.conformance.cases.DomRefFocus;
@@ -189,6 +191,8 @@ public final class Main {
             case "dom-elements" -> DomElements.JX;
             case "dom-attributes" -> DomAttributes.JX;
             case "dom-events" -> DomEvents.JX;
+            case "combined-keyed-context" -> CombinedKeyedContext.JX;
+            case "combined-activity-store" -> CombinedActivityStore.JX;
             default -> null;
         };
     }
