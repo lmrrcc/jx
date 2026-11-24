@@ -91,9 +91,9 @@ their own tests.
 
 ## Children traversal, composed keys and native nodes
 
-R-27-02a, 24 November 2026, is in progress. The contracts below pass JVM, full
+R-27-02a, 24 November 2026, merged in [PR #39](https://github.com/lmrrcc/jx/pull/39). The contracts below pass JVM, full
 browser-matrix and runtime hot-replacement checks; all three scoped mutants were
-killed and Verify is pending. See the [interaction evidence](ga-react-interactions.md#r-27-02a-children-contracts-in-progress)
+killed and Verify passed. See the [interaction evidence](ga-react-interactions.md#r-27-02a-children-contracts)
 for the reproduction and current limits.
 
 `Views.childrenValue` represents a component's implicit `children` prop. No

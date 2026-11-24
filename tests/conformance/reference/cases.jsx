@@ -93,6 +93,8 @@ import { CombinedKeyedContext } from './cases/combined-keyed-context.jsx';
 import { CombinedActivityStore } from './cases/combined-activity-store.jsx';
 import { CombinedChildrenMap, CombinedChildrenList } from './cases/combined-children-map.jsx';
 import { CombinedChildrenContract } from './cases/combined-children-contract.jsx';
+import { CombinedKeyedRefs } from './cases/combined-keyed-refs.jsx';
+import { CombinedImperativeHandles } from './cases/combined-imperative-handles.jsx';
 
 export const cases = {
   'combined-keyed-context': CombinedKeyedContext,
@@ -100,6 +102,8 @@ export const cases = {
   'combined-children-map': CombinedChildrenMap,
   'combined-children-list': CombinedChildrenList,
   'combined-children-contract': CombinedChildrenContract,
+  'combined-keyed-refs': CombinedKeyedRefs,
+  'combined-imperative-handles': CombinedImperativeHandles,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,
   'callable-state': CallableState,

@@ -117,14 +117,24 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The complete R-27-02a local run on 24 November passes 755 checks, with 133 skipped
-cells: client 109 reference / 108 JX, hydrate 84 per side, static 90 per side, lazy
-95 per side. Twenty-five pairs have complete evidence in their declared modes; 5,331 of the
+The complete R-27-02b local run on 24 November passes 771 checks, with 133 skipped
+cells across 113 case IDs: client 111 reference / 110 JX, hydrate 86 per side,
+static 92 per side and lazy 97 per side. Thirty-two pairs have complete evidence
+in their declared modes; 5,324 of the
 5,356 current candidates remain open. The eventual universe includes 118 features
 and 6,903 candidate pairs. **R-27 remains partial.** See the
 [interaction evidence record](../../docs/ga-react-interactions.md) for the two
-initial combined scenarios, children-composition regressions, existing assertion
-witnesses and acceptance status.
+initial combined scenarios, children-composition regressions, seven new ref
+witnesses and acceptance status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
+at `413558b636679dd5926f4d7bf1c987ea707ed95c`, after its 755-check bench and green
+Verify. R-27-02b's Verify remains pending. Browser evidence is Chrome-only and
+does not establish additional human or cross-browser qualification.
+
+The ref scenarios use actual Playwright element handles to compare DOM identity,
+real imperative-handle identity, and input value/focus operations. They cover
+callback stability, layout attachment, Strict Mode cleanup, keyed removal,
+current captured props and switching ref ownership. Future R-27-03a actions,
+R-27-03b optimistic/store and R-27-03c transition slices remain planned.
 
 Static HTML equality does not execute interactive assertion blocks, so it does
 not credit those witnesses. Hydration-owned and Node-only scenarios can carry
@@ -166,6 +176,20 @@ The unmutated scratch baseline passed, then both mutants were killed by
 survivors or unusable mutants. The historical full result still covers 100
 mutants; the R-26 and R-27-01 scoped runs do not constitute a fresh full
 104-mutant campaign.
+
+R-27-02a added `children-source-key-lost` and adapted the existing children and
+Strict Mode mutations. Its unmutated baseline passed and all three scoped
+mutants were killed, bringing that slice's catalog to 105 entries.
+R-27-02b adds `imperative-stale-props`; the unmutated baseline passed, then
+`combined-imperative-handles` killed it: **1 killed, 0 survived, 0 unusable**.
+Repeat its check exclusively:
+
+```sh
+java tools/MutateBench.java --only imperative-stale-props
+```
+
+The current catalog has **106 entries**; the historical full result still covers
+100. These scoped campaigns do not establish a fresh full 106-mutant result.
 
 ## Feature list
 

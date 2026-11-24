@@ -6,24 +6,27 @@ reporting and two combined scenarios. Its tested head `56e247d` merged as
 `f6018a4` in [PR #38](https://github.com/lmrrcc/jx/pull/38), with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45435501261)
 and [green CI](https://github.com/lmrrcc/jx/actions/runs/45435438849).
-Its complete local bench and scoped mutation run pass. R-27-02a is in progress;
-its complete bench and runtime suite pass, with all three scoped mutants killed
-and Verify pending.
+Its complete local bench and scoped mutation run pass. R-27-02a merged as
+`413558b636679dd5926f4d7bf1c987ea707ed95c` in [PR #39](https://github.com/lmrrcc/jx/pull/39),
+with [green CI](https://github.com/lmrrcc/jx/actions/runs/45443187836) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45442627237).
+R-27-02b has a passing complete local bench and its scoped mutant was killed;
+Verify is pending for that slice.
 No additional human or cross-browser
 qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
 
-The passing counts below include the complete R-27-02a local run. Its six new
-pairs increase the merged R-27-01 baseline of 19 to **25 / 5,356**, with **5,331**
+The passing counts below include the complete R-27-02b local run. Its seven new
+ref pairs increase the merged R-27-02a baseline of 25 to **32 / 5,356**, with **5,324**
 remaining. This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
 | --- | --- |
 | Currently supported/equivalent feature IDs | 104 |
 | Candidate unordered pairs among those IDs | 5,356 |
-| Pairs with a passing witness in every declared mode, on both React and JX | 25 |
-| Current candidate pairs without complete evidence | 5,331 |
+| Pairs with a passing witness in every declared mode, on both React and JX | 32 |
+| Current candidate pairs without complete evidence | 5,324 |
 | Eventual application-feature IDs | 118 |
 | Eventual candidate pairs | 6,903 |
 | Additional pairs involving the 14 deferred feature IDs | 1,547 |
@@ -83,10 +86,11 @@ golden-file comparison but retain checks on the assertions they execute.
 | `combined-activity-store` | Four pairs: memo with an external store; Activity with store subscriptions, state and effects. Hiding releases subscriptions/effects while retaining DOM and state; revealing reads the latest snapshot; unmounting resets local state. |
 | Existing focused cases | Eight pairs: Strict Mode/effects, layout/passive effect order, lazy/Suspense, async/transition, hydration/store, hydration/IDs, portal/events and streaming/Suspense. Named assertion blocks now record the existing behavioral evidence. |
 | R-27-02a children cases | Six pairs: Children with keys, state, list rendering, children props, explicit fragments and child values. Mapping and flattening preserve composed identity; shape and validity checks match native React. |
+| R-27-02b ref cases | Seven pairs: callback refs with keys, callbacks, layout effects and Strict Mode; imperative handles with keys, changed props and ref props. Reordering retains real nodes and handles; removal clears refs; dependency and ref changes update ownership without replacing the input. |
 
 The combined scenarios run their assertions in client, hydrate and lazy modes.
-Static mode renders both scenarios and compares HTML, but does not execute their
-interactive assertion blocks and therefore earns no pair credit. None of the 25
+Static mode renders the combined scenarios and compares HTML, but does not execute their
+interactive assertion blocks and therefore earns no pair credit. None of the 32
 current witnesses claims static interaction coverage.
 
 The register explicitly limits lazy/Suspense and portal/events to client/lazy.
@@ -100,7 +104,52 @@ The streaming witness checks shell/fallback/delayed-content ordering in the
 collected HTML. It does not measure early network delivery; that requires a
 separate controlled streaming assertion in R-27-04.
 
-## R-27-02a: children contracts in progress
+## R-27-02b: keyed refs and imperative handles
+
+Two differential scenarios add seven explicit pair witnesses:
+
+| Case | Witnesses and observable behavior |
+| --- | --- |
+| `combined-keyed-refs` | `key-callback-ref`, `callback-ref-identity`, `layout-callback-ref`, `strict-callback-ref`: stable callbacks avoid reattachment on parent rerenders; changed dependencies detach the old callback and attach the new one to the same node. Keyed reordering retains nodes; removal cleans only the removed row; restoration creates a fresh node. Layout reads the attached input, and final removal balances Strict Mode's attachment/cleanup calls. |
+| `combined-imperative-handles` | `key-imperative-handle`, `props-imperative-handle`, `refprop-imperative-handle`: handles and their DOM nodes follow keys; changed props create fresh handles whose methods use the current prefix; switching the supplied ref clears the old owner and populates the new one without replacing the input. Unmount clears the published handles. |
+
+The specs compare actual Playwright element handles for DOM identity. The fixtures
+remember actual imperative-handle objects and compare Java identity (`==`) with
+the reference's JavaScript identity (`===`); `fill`, `read` and focus operate on
+the real input. Layout assertion refinement additionally reads the row-specific
+input value, so two different `INPUT` elements cannot satisfy it merely by sharing
+a tag name. All eight focused rendering projects pass after this refinement;
+Verify is pending.
+
+The recorded complete local bench passes **771 checks, with 133 skipped, across
+113 case IDs**:
+
+| Mode | React reference | JX |
+| --- | --- | --- |
+| Client, including Node API cases | 111 / 111 | 110 / 110 |
+| Hydration | 86 / 86 | 86 / 86 |
+| Static HTML | 92 / 92 | 92 / 92 |
+| Lazy route | 97 / 97 | 97 / 97 |
+
+All seven new witnesses pass on both sides in client, hydrate and lazy modes,
+raising complete pair evidence to **32 / 5,356**, with **5,324** active pairs open.
+Static HTML equality contributes no interactive pair credit. These are Chrome
+automated results, not additional human or cross-browser qualification.
+
+The unmutated scratch baseline passed, then `imperative-stale-props` was killed by
+`combined-imperative-handles`: **1 killed, 0 survived, 0 unusable**. This mutation
+removes the imperative handle's reactive dependencies, exposing stale captured
+props. Run it exclusively, without another build or browser suite:
+
+```sh
+java tools/MutateBench.java --only imperative-stale-props
+```
+
+The catalog now has **106 entries**. The historical full campaign still covers
+100; the scoped R-26/R-27 runs do not establish a fresh complete 106-mutant result.
+R-27-02b remains under review until Verify passes.
+
+## R-27-02a: children contracts
 
 Three differential reproduction cases passed on React and failed on JX before
 the fixes. They exposed lost mapped keys and the conflation of component children
@@ -157,9 +206,12 @@ mode, raising complete pair evidence to **25 / 5,356**. The unmutated scratch
 baseline passed, then all three scoped mutants were killed, with zero survivors
 or unusable mutants. `strict-mode-dropped` failed `strict-nested`;
 `children-not-listed` failed the existing child utilities and new contract/list
-cases; `children-source-key-lost` also failed the mapped-child case. Verify remains
-pending; R-27-02a is not yet closed.
-The catalog has 105 entries (one added, two adapted for this slice); the historical
+cases; `children-source-key-lost` also failed the mapped-child case. R-27-02a merged
+in [PR #39](https://github.com/lmrrcc/jx/pull/39) as
+`413558b636679dd5926f4d7bf1c987ea707ed95c`, with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45443187836) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45442627237).
+At this slice the catalog had 105 entries (one added, two adapted); the historical
 full campaign still covers 100. A scoped result must not be reported as a full
 105-mutant campaign.
 
@@ -213,8 +265,11 @@ fresh full 104-mutant campaign.
 
 ## Follow-up and acceptance
 
-R-27-02 extends identity/composition/DOM interactions, R-27-03 extends async/forms
-and stores, and R-27-04 extends server/resource interactions. Each selects explicit
+R-27-02 extends identity/composition/DOM interactions. R-27-03 is split before
+implementation into planned R-27-03a (form actions and failure/recovery), R-27-03b
+(optimistic updates over external-store snapshots) and R-27-03c (transition
+interactions). Staged fixtures are preparation, not completed evidence.
+R-27-04 extends server/resource interactions. Each selects explicit
 remaining pair IDs. R-27-05 follows R-28–R-30, exercises the deferred features and
 reviews the remaining applicability decisions. The parent R-27 stays open until
 every eventual application-feature pair has evidence or an explicitly accepted

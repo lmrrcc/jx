@@ -2,15 +2,15 @@ feature	area	jx	cases	jx-api	task	note
 react:useState	hook	supported	state-counter,state-lazy-init,callable-state,batched-updates,combined-keyed-context,combined-activity-store,combined-children-map	Hooks.useState, Hooks.useStateLazy		Also exercised with keyed identity, context updates, mapped children and Activity
 react:useReducer	hook	supported	reducer-batch,reducer-lazy-init	Hooks.useReducer, Hooks.useReducerLazy		
 react:useEffect	hook	supported	effect-cleanup,effect-dependencies,combined-keyed-context,combined-activity-store,layout-effect-order	Hooks.useEffect		Also exercised with keyed removal, context changes and Activity cleanup
-react:useLayoutEffect	hook	supported	layout-effect-order,layout-effect-dependencies,dom-ref-focus	Hooks.useLayoutEffect		
+react:useLayoutEffect	hook	supported	layout-effect-order,layout-effect-dependencies,dom-ref-focus,combined-keyed-refs	Hooks.useLayoutEffect		Layout reads callback ref attachment in combined scenarios
 react:useInsertionEffect	hook	supported	insertion-effect	Hooks.useInsertionEffect		
 react:useEffectEvent	hook	supported	effect-event	Hooks.useEffectEvent		Typed for Runnable and Consumer callbacks
 react:useRef	hook	supported	ref-persist,dom-ref-focus	Hooks.useRef, Hooks.useDomRef		
-react:useImperativeHandle	hook	supported	imperative-handle	Hooks.useImperativeHandle		The handle is published through a Ref passed as a prop
+react:useImperativeHandle	hook	supported	imperative-handle,combined-imperative-handles	Hooks.useImperativeHandle		The handle is published through a Ref passed as a prop
 react:useContext	hook	supported	context-nested,combined-keyed-context	Hooks.useContext		Memoized consumers retain local state while context changes
 react:createContext	api	supported	context-nested	Hooks.createContext, Context.provide		
 react:useMemo	hook	supported	memo-recompute	Hooks.useMemo		
-react:useCallback	hook	supported	callback-identity	Hooks.useCallback		
+react:useCallback	hook	supported	callback-identity,combined-keyed-refs	Hooks.useCallback		Memoized callback refs replace attachments only when dependencies change
 react:useId	hook	supported	use-id,hydrate-server	Hooks.useId		Server and client identifiers compared across hydration
 react:useSyncExternalStore	hook	supported	external-store,hydrate-server,combined-activity-store	Hooks.useSyncExternalStore, ExternalStore.serverSnapshot		Activity hides subscriptions and restores the latest snapshot
 react:useTransition	hook	supported	transition-pending,transition-promise	Hooks.useTransition, TransitionState		An async action returns a jx.Promise, usually from Async.run, or takes a completion callback
@@ -21,7 +21,7 @@ react:useActionState	hook	supported	action-state	Hooks.useActionState, Hooks.use
 react:use	hook	supported	use-promise	Hooks.use		Takes a jx.Promise or a Context
 react:useDebugValue	hook	supported	debug-value	Hooks.useDebugValue		The DevTools label itself is not asserted
 react:Fragment	component	supported	fragment,combined-children-contract	<>...</>, Views.fragment		Explicit fragments are opaque to Children traversal
-react:StrictMode	component	supported	effect-cleanup,state-lazy-init,memo-recompute,strict-nested	React.mountStrict, React.strictMode		Nested use is a view factory, not a markup tag
+react:StrictMode	component	supported	effect-cleanup,state-lazy-init,memo-recompute,strict-nested,combined-keyed-refs	React.mountStrict, React.strictMode		Nested use is a view factory, not a markup tag
 react:Suspense	component	supported	use-promise,lazy-component,server-stream-suspense	React.suspense		
 react:Activity	component	supported	activity,combined-activity-store	React.activity		A view factory with a visible flag
 react:Profiler	component	supported	profiler	React.profiler		A view factory, not a markup tag
@@ -75,22 +75,22 @@ react-dom/static:prerenderToNodeStream	server	supported	static-prerender-node	Re
 react-dom/static:resumeAndPrerender	server	supported	static-resume-prerender	ReactStatic.resumeAndPrerender		
 react-dom/static:resumeAndPrerenderToNodeStream	server	supported	static-resume-prerender-node	ReactStatic.resumeAndPrerenderToNodeStream		
 react-dom/static:version	constant	excluded			R-29	Constant
-jsx:key	markup	supported	keyed-list,remount-by-key,combined-keyed-context,combined-children-map	key attribute		Combined scenarios retain local state and drafts while reordering
+jsx:key	markup	supported	keyed-list,remount-by-key,combined-keyed-context,combined-children-map,combined-keyed-refs,combined-imperative-handles	key attribute		Combined scenarios retain state, drafts, DOM refs and handles while reordering
 jsx:children	markup	supported	children-prop,combined-children-contract	children property of type View		Scalar children and arrays remain distinct from explicit fragments
 jsx:conditional-rendering	markup	supported	conditional	Java ternary and null		
 jsx:list-rendering	markup	supported	keyed-list,child-values,combined-children-list	Iterable and array children		Flattened nested collections retain independent key namespaces
 jsx:child-values	markup	supported	child-values,combined-children-contract	Views child normalization		Children traversal preserves empty positions and rejects non-elements in only
 jsx:child-slot-identity	markup	supported	child-slots	View.Empty, View.Items		A null or boolean child and a collection child each keep one position
 jsx:text-and-entities	markup	supported	text-escaping			
-jsx:props-update	markup	supported	props-update,combined-keyed-context	Typed record props		Changed props reach memoized rows without resetting state
+jsx:props-update	markup	supported	props-update,combined-keyed-context,combined-imperative-handles	Typed record props		Changed props reach memoized rows and refresh imperative handles without resetting state
 jsx:custom-hooks	markup	supported	custom-hook	Ordinary static methods named useX		
 jsx:function-props	markup	supported	function-props	Runnable and Function record fields		
 jsx:dynamic-component	markup	supported	dynamic-component	Views.component with a ComponentType value		Markup tags name a component statically; a run-time choice goes through Views.component
 jsx:spread-props	markup	equivalent	spread-props	{...attributes} on elements, {...props} on components		Elements merge an Attributes value in source order; a component takes its whole Props record and no other property
 jsx:default-and-optional-props	markup	supported	default-props	@OptionalProp		Defaults are set in the Props compact constructor
 jsx:generic-components	markup	supported	generic-list	generic Props record and render method		The component class itself stays non-generic
-jsx:ref-as-prop	markup	supported	ref-as-prop	ref as a Props field		
-jsx:ref-callback	markup	supported	ref-callback	RefCallback, Attributes.ref		The returned cleanup runs on removal
+jsx:ref-as-prop	markup	supported	ref-as-prop,combined-imperative-handles	ref as a Props field		Switching supplied refs clears the old handle owner
+jsx:ref-callback	markup	supported	ref-callback,combined-keyed-refs	RefCallback, Attributes.ref		The returned cleanup runs on removal
 jsx:namespace-components	markup	equivalent	namespace-components	Fully qualified component class name		Java has no component namespace objects; the dotted form is a qualified class name
 jsx:async-functions	markup	equivalent	async-function,transition-promise	Async.run, Async.await, Promise		JavaScript async functions and promises; await works only in code called from Async.run
 dom:ref-on-element	dom	supported	dom-ref-focus	ref with Hooks.useDomRef		DomElement exposes focus and value only

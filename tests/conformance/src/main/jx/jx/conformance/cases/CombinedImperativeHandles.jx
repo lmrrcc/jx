@@ -1,0 +1,61 @@
+package jx.conformance.cases;
+
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import jx.Component;
+import jx.Hooks;
+import jx.Ref;
+import jx.State;
+import jx.View;
+
+/** Stable keyed fields expose handles whose captured props and assigned ref follow committed updates. */
+@Component
+public final class CombinedImperativeHandles {
+    public record Handle(String id, String prefix, Consumer<String> fill, Supplier<String> read) {}
+
+    public static View render() {
+        Ref<Handle> primary = Hooks.useRef(null);
+        Ref<Handle> alternate = Hooks.useRef(null);
+        Ref<Handle> second = Hooks.useRef(null);
+        Ref<Handle> rememberedA = Hooks.useRef(null);
+        Ref<Handle> rememberedB = Hooks.useRef(null);
+        State<Boolean> useAlternate = Hooks.useState(false);
+        State<Boolean> reversed = Hooks.useState(false);
+        State<Boolean> showA = Hooks.useState(true);
+        State<Boolean> mounted = Hooks.useState(true);
+        State<String> prefix = Hooks.useState("old");
+        State<String> inspection = Hooks.useState("uninspected");
+        Ref<Handle> activeA = useAlternate.value() ? alternate : primary;
+        List<String> ids = reversed.value() ? List.of("b", "a") : List.of("a", "b");
+        return (
+            <main>
+                <p data-testid="handle-snapshot">{inspection.value()}</p>
+                <button onClick={event -> {
+                    rememberedA.set(activeA.current());
+                    rememberedB.set(second.current());
+                    inspection.set("remembered");
+                }}>Remember handles</button>
+                <button onClick={event -> inspection.set("primary=" + describe(primary) + ";alternate=" + describe(alternate)
+                        + ";b=" + describe(second) + ";same-a=" + (rememberedA.current() == activeA.current())
+                        + ";same-b=" + (rememberedB.current() == second.current()))}>Inspect handles</button>
+                <button onClick={event -> activeA.current().fill().accept("written-a")}>Fill a</button>
+                <button onClick={event -> second.current().fill().accept("written-b")}>Fill b</button>
+                <button onClick={event -> prefix.set("new")}>Change prefixes</button>
+                <button onClick={event -> useAlternate.update(value -> !value)}>Switch a ref</button>
+                <button onClick={event -> reversed.update(value -> !value)}>Reverse rows</button>
+                <button onClick={event -> showA.set(false)}>Remove a</button>
+                <button onClick={event -> showA.set(true)}>Restore a</button>
+                <button onClick={event -> mounted.set(false)}>Clear rows</button>
+                <ul>{mounted.value() ? ids.stream().filter(id -> showA.value() || !id.equals("a"))
+                    .map(id -> <CombinedImperativeField key={id} id={id} prefix={prefix.value()}
+                        ref={id.equals("a") ? activeA : second} />).toList() : null}</ul>
+            </main>
+        );
+    }
+
+    private static String describe(Ref<Handle> ref) {
+        Handle handle = ref.current();
+        return handle == null ? "null" : handle.id() + "/" + handle.prefix() + "/" + handle.read().get();
+    }
+}

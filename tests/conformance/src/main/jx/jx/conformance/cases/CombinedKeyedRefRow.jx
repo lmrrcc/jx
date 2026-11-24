@@ -1,0 +1,39 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.DomElement;
+import jx.Hooks;
+import jx.Ref;
+import jx.RefCallback;
+import jx.View;
+import jx.conformance.Bench;
+
+/** Logs real callback-ref attachment/cleanup and reads the attached node in a layout effect. */
+@Component
+public final class CombinedKeyedRefRow {
+    public record Props(String id, int revision) {}
+
+    public static View render(Props props) {
+        Ref<DomElement> attached = Hooks.useRef(null);
+        RefCallback callback = Hooks.useCallback(node -> {
+            attached.set(node);
+            Bench.log("attach " + props.id() + " " + props.revision() + " " + node.tagName());
+            return () -> {
+                Bench.log("detach " + props.id() + " " + props.revision());
+                attached.set(null);
+            };
+        }, Dependencies.of(props.id(), props.revision()));
+        Hooks.useLayoutEffect(() -> {
+            Bench.log("layout " + props.id() + " " + props.revision() + " "
+                    + (attached.current() == null ? "missing"
+                        : attached.current().tagName() + " " + attached.current().value()));
+            return () -> Bench.log("layout-cleanup " + props.id() + " " + props.revision());
+        }, Dependencies.of(props.id(), props.revision()));
+        return (
+            <li data-row={props.id()}>
+                <input ref={callback} aria-label={"Ref " + props.id()} defaultValue={props.id() + "-initial"} />
+            </li>
+        );
+    }
+}

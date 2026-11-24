@@ -13,6 +13,8 @@ import jx.conformance.cases.CombinedActivityStore;
 import jx.conformance.cases.CombinedChildrenMap;
 import jx.conformance.cases.CombinedChildrenList;
 import jx.conformance.cases.CombinedChildrenContract;
+import jx.conformance.cases.CombinedKeyedRefs;
+import jx.conformance.cases.CombinedImperativeHandles;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
 import jx.conformance.cases.DomRefFocus;
@@ -199,6 +201,8 @@ public final class Main {
             case "combined-children-map" -> CombinedChildrenMap.JX;
             case "combined-children-list" -> CombinedChildrenList.JX;
             case "combined-children-contract" -> CombinedChildrenContract.JX;
+            case "combined-keyed-refs" -> CombinedKeyedRefs.JX;
+            case "combined-imperative-handles" -> CombinedImperativeHandles.JX;
             default -> null;
         };
     }

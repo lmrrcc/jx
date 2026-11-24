@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01 is merged, and R-27-02a locally evidences 25 / 5,356 active pairs, with 5,331 open. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01 and R-27-02a merged with green Verify. R-27-02b locally evidences 32 / 5,356 active pairs, with 5,324 open and Verify pending. Complete remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -29,13 +29,18 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Production pilots and GA release | ⬜ To do | Complete platform gates, qualify pilots, then pass RC/release evidence gates. |
 
 Execution order confirmed by Luca on 24 November: continue through complete React
-parity and G0, then the JX/Spring starter and faster hot reload. R-27-01 merged with
-green Verify. R-27-02a's complete local bench reports 755 passes and 133 skipped
-cells; all three scoped mutants were killed and Verify is pending. The [interaction evidence record](ga-react-interactions.md)
-keeps the 25 proven pairs separate from the remaining inventory. The eventual
+parity and G0, then the JX/Spring starter and faster hot reload. R-27-01 and
+R-27-02a merged with green Verify; Children landed in [PR #39](https://github.com/lmrrcc/jx/pull/39)
+at `413558b636679dd5926f4d7bf1c987ea707ed95c`.
+R-27-02b's complete local bench reports 771 passes and 133 skipped cells across
+113 case IDs. Its scoped `imperative-stale-props` mutant was killed; Verify is
+pending. The [interaction evidence record](ga-react-interactions.md)
+keeps the 32 proven pairs separate from the remaining inventory. R-27-03 is split
+into planned actions, optimistic/store and transition slices. The eventual
 118-feature / 6,903-pair universe includes 1,547 additional deferred-feature pairs;
-the scope is not reduced to the initial scenarios. Human qualification and
-explicit applicability decisions remain recorded requirements.
+the scope is not reduced to the initial scenarios. Cross-browser and human
+qualification, and explicit applicability decisions, remain recorded requirements
+that the Chrome automated results do not satisfy.
 
 Progress, 21 November 2026: [GA-01](ga-01-baseline.md) is done, with CI green at
 `3688d25`. It found `78c9836` red in CI (counter example), restored a
