@@ -1,0 +1,50 @@
+package jx.conformance.cases;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import jx.Component;
+import jx.Hooks;
+import jx.Ref;
+import jx.State;
+import jx.View;
+import jx.conformance.TransitionCancellation.Request;
+import jx.conformance.TransitionCancellation.Transport;
+
+/** The parent retains only the controlled transport and audit when a worker is removed. */
+@Component
+public final class CombinedTransitionCancel {
+    public static View render() {
+        State<Boolean> mounted = Hooks.useState(true);
+        State<Integer> instance = Hooks.useState(1);
+        State<List<String>> audit = Hooks.useState(List.of());
+        Ref<Transport> transport = Hooks.useRef(new Transport());
+        Consumer<String> append = line -> audit.update(previous -> {
+            if (previous.size() >= 64) throw new IllegalStateException("Fixture audit exceeded its bounded scenario");
+            List<String> next = new ArrayList<>(previous);
+            next.add(line);
+            return List.copyOf(next);
+        });
+        return (
+            <main>
+                <button disabled={!mounted.value()} onClick={event -> mounted.set(false)}>Unmount worker</button>
+                <button disabled={mounted.value()} onClick={event -> {
+                    instance.update(value -> value + 1);
+                    mounted.set(true);
+                }}>Mount worker</button>
+                <section aria-label="Transport controls">
+                    {List.of(Request.values()).stream().map(request -> <div key={request.name()}>
+                        <button disabled={!transport.current().pending(request)} onClick={event -> {
+                            transport.current().complete(request);
+                            append.accept("released " + request);
+                        }}>Resolve {request.name()}</button>
+                        <p data-testid={"transport-" + request.name()}>{transport.current().status(request)}</p>
+                    </div>).toList()}
+                </section>
+                <pre data-testid="transition-audit">{String.join("\n", audit.value())}</pre>
+                {mounted.value() ? <TransitionCancelWorker key={instance.value().toString()}
+                    instance={instance.value()} transport={transport.current()} onAudit={append} /> : null}
+            </main>
+        );
+    }
+}

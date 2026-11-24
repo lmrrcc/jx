@@ -1,0 +1,93 @@
+package jx.conformance.cases;
+
+import static jx.Async.await;
+
+import java.util.List;
+import java.util.function.Consumer;
+import jx.Async;
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.Ref;
+import jx.State;
+import jx.TransitionState;
+import jx.View;
+import jx.conformance.TransitionCancellation.Operation;
+import jx.conformance.TransitionCancellation.Outcome;
+import jx.conformance.TransitionCancellation.Owner;
+import jx.conformance.TransitionCancellation.Request;
+import jx.conformance.TransitionCancellation.Transport;
+import jx.react.React;
+
+/** Only this mounted worker owns its operations. The controlled input remains an urgent update. */
+@Component
+public final class TransitionCancelWorker {
+    public record Props(int instance, Transport transport, Consumer<String> onAudit) {}
+
+    public static View render(Props props) {
+        State<String> draft = Hooks.useState("");
+        State<String> result = Hooks.useState("none");
+        State<Boolean> ready = Hooks.useState(false);
+        Ref<Owner> owner = Hooks.useRef(new Owner());
+        Ref<Operation> replacement = Hooks.useRef(null);
+        TransitionState transition = Hooks.useTransition();
+        Hooks.useEffect(() -> {
+            owner.current().activate();
+            ready.set(true);
+            return owner.current()::dispose;
+        }, Dependencies.none());
+        return (
+            <section data-testid="transition-worker" aria-label="Transition worker">
+                <p data-testid="worker-instance">{props.instance()}</p>
+                <p data-testid="worker-ready">{ready.value() ? "ready" : "preparing"}</p>
+                <label for="urgent-draft">Urgent draft</label>
+                <input id="urgent-draft" value={draft.value()} onChange={event -> draft.set(event.targetValue())} />
+                <p data-testid="urgent-value">{draft.value()}</p>
+                <p data-testid="transition-pending">{transition.pending() ? "pending" : "idle"}</p>
+                <p data-testid="transition-result">{result.value()}</p>
+                {List.of(Request.values()).stream()
+                    .filter(request -> request != Request.RACE_OLD && request != Request.RACE_NEW)
+                    .map(request -> <button key={request.name()}
+                        disabled={!ready.value() || props.transport().started(request)}
+                        onClick={event -> start(request, props, owner.current(), transition, result)}>
+                        Start {request.name()}
+                    </button>).toList()}
+                <button disabled={!ready.value() || props.transport().started(Request.RACE_OLD)} onClick={event -> {
+                    Operation original = start(Request.RACE_OLD, props, owner.current(), transition, result);
+                    props.transport().afterCompletion(Request.RACE_OLD, () -> {
+                        if (owner.current().owns(original)) {
+                            replacement.set(owner.current().begin(Request.RACE_NEW, props.transport(), props.onAudit()));
+                        }
+                    });
+                }}>Start completion race</button>
+                <button disabled={replacement.current() == null} onClick={event -> {
+                    Operation operation = replacement.current();
+                    replacement.set(null);
+                    observe(operation, props, owner.current(), transition, result);
+                }}>Await replacement</button>
+                <button disabled={!ready.value()} onClick={event -> owner.current().cancel()}>Cancel current</button>
+            </section>
+        );
+    }
+
+    private static Operation start(Request request, Props props, Owner owner,
+            TransitionState transition, State<String> result) {
+        Operation operation = owner.begin(request, props.transport(), props.onAudit());
+        observe(operation, props, owner, transition, result);
+        return operation;
+    }
+
+    private static void observe(Operation operation, Props props, Owner owner,
+            TransitionState transition, State<String> result) {
+        Request request = operation.request();
+        transition.startAsync(() -> Async.run(() -> {
+            Outcome outcome = await(operation.consumer());
+            props.onAudit().accept("consumer " + request + (outcome.cancelled() ? " cancelled" : " completed"));
+            if (!outcome.cancelled() && owner.owns(operation)) {
+                React.startTransition(() -> result.set(outcome.value()));
+                props.onAudit().accept("published " + request + " instance " + props.instance());
+                owner.finish(operation);
+            }
+        }));
+    }
+}
