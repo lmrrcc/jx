@@ -20,7 +20,7 @@ builds, browser tests or installed-editor tests.
 | Evidence | Recorded result | What it establishes |
 | --- | --- | --- |
 | [React feature register](evidence/conformance.tsv) | 120 rows: 89 supported, 15 equivalent, 0 unsupported, 16 excluded, 0 untested (updated 24 November) | Coverage of the listed API shapes; individual rows still have option and environment limits. |
-| [Differential bench](evidence/conformance-results.tsv) | 101 cases: React reference 101 pass; JX 100 pass, 0 unsupported, 1 not applicable (updated 24 November) | Matching outcomes for the exercised scenarios. The not-applicable case inventories React exports. JX server rendering is not yet implemented. |
+| [Differential bench](evidence/conformance-results.tsv) | 103 cases: React reference 103 pass; JX 102 pass, 0 unsupported, 1 not applicable (updated 24 November) | Matching outcomes for the exercised scenarios. The not-applicable case inventories React exports. JX server rendering is not yet implemented. |
 | [Curated mutation results](evidence/mutation-results.tsv) | 97 of 97 mutants detected | Detection of the listed hand-written defects; this is not PIT or exhaustive mutation coverage. |
 | Foundation tasks | GA-01 and GA-02; M1-01 through M1-05 complete | Green baseline, version/evidence checks, portfolio inventory and differential bench. |
 | React implementation tasks | 25 complete | R-01–R-24 and R-32 complete (R-20–R-24, server rendering, on 24 November). This audit found R-16 without its promised `useFormState` alias; the alias and a bench case were added the same day. |

@@ -118,7 +118,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-22 | M5 | Streaming: `renderToPipeableStream`, `renderToReadableStream`, with Suspense boundaries | 2 | ✅ done |
 | R-23 | M5 | Static rendering: `prerender`, `prerenderToNodeStream` | 2 | ✅ done |
 | R-24 | M6 | Resume: `resume`, `resumeToPipeableStream`, `resumeAndPrerender`, `resumeAndPrerenderToNodeStream` | 4 | ✅ done |
-| R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ➡️ next |
+| R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | 🟡 partial: elements and attributes done on 24 November; event names open |
 | R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | ⬜ planned |
 | R-27 | M6 | Combined scenarios so that every pair of features meets at least once | adds pair coverage | ⬜ planned |
 | R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | ⬜ planned |
