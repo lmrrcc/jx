@@ -1,4 +1,8 @@
 interaction	reference	jx	reference-hydrate	jx-hydrate	reference-static	jx-static	reference-lazy	jx-lazy
+action-queue-async	pass	pass	pass	pass	n/a	n/a	pass	pass
+action-queue-error	pass	pass	pass	pass	n/a	n/a	pass	pass
+action-queue-form	pass	pass	pass	pass	n/a	n/a	pass	pass
+action-queue-status	pass	pass	pass	pass	n/a	n/a	pass	pass
 activity-effects	pass	pass	pass	pass	n/a	n/a	pass	pass
 activity-state	pass	pass	pass	pass	n/a	n/a	pass	pass
 activity-store	pass	pass	pass	pass	n/a	n/a	pass	pass
