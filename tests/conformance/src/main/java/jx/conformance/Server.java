@@ -22,12 +22,14 @@ final class Server {
     @JSFunctor interface Render extends JSObject { String render(); }
     @JSFunctor interface RenderLater extends JSObject { JSObject render(); }
     @JSFunctor interface Task extends JSObject { void run(); }
+    @JSFunctor interface RenderCase extends JSObject { String render(String id); }
 
     /** True when there is no document, that is, outside a browser. */
     @JSBody(script = "return typeof document === 'undefined';")
     static native boolean active();
 
     static void install() {
+        registerCase("renderCase", id -> ReactServer.renderToString(React.strictMode(caseView(Main.component(id)))));
         register("renderToString", () -> ReactServer.renderToString(page()));
         register("renderHydratable", () -> ReactServer.renderToString(React.strictMode(Views.component(HydratedPage.JX, null))));
         register("renderToStaticMarkup", () -> ReactServer.renderToStaticMarkup(page()));
@@ -97,6 +99,9 @@ final class Server {
         }));
     }
 
+    /** Any client case as a view, for the hydrate mode of the bench. */
+    private static <P> View caseView(jx.ComponentType<P> component) { return Views.component(component, null); }
+
     private static View page() { return Views.component(ServerPage.JX, new ServerPage.Props("Ada")); }
 
     /** A JavaScript promise of the JavaScript string, for the test that awaits it. */
@@ -104,6 +109,8 @@ final class Server {
 
     @JSBody(params = "value", script = "return value;") private static native JSObject text(String value);
     @JSBody(params = {"task", "milliseconds"}, script = "setTimeout(function() { task(); }, milliseconds);") private static native void delay(Task task, int milliseconds);
+    @JSBody(params = {"name", "render"}, script = "(globalThis.__jxBenchServer = globalThis.__jxBenchServer || {})[name] = render;")
+    private static native void registerCase(String name, RenderCase render);
     @JSBody(params = {"name", "render"}, script = "(globalThis.__jxBenchServer = globalThis.__jxBenchServer || {})[name] = render;")
     private static native void register(String name, Render render);
     @JSBody(params = {"name", "render"}, script = "(globalThis.__jxBenchServer = globalThis.__jxBenchServer || {})[name] = render;")

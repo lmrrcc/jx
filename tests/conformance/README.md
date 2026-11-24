@@ -29,6 +29,15 @@ Run from the repository root after the Maven build:
 npm run test:bench
 ```
 
+## Rendering modes
+
+Every case also runs in **hydrate mode** (projects `reference-hydrate` and
+`jx-hydrate`): the same implementation renders the case to HTML in Node, the page
+hydrates that markup, and the unchanged spec runs against it. A hydration mismatch
+is a console error and fails the test. A case that does not apply to a mode is
+listed in `modes.tsv` with the reason, decided by what React itself does there;
+server cases have no page and run in client mode only.
+
 ## Features JX does not have yet
 
 A case for an unsupported feature is declared with `referenceOnly(...)`, or with

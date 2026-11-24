@@ -1,0 +1,14 @@
+case	mode	reason
+hydrate-root	hydrate	the case is itself a hydration scenario with its own root
+hydrate-server	hydrate	the case is itself a hydration scenario with its own root
+root-options	hydrate	the case mounts its own root with options
+strict-nested	hydrate	the case mounts its own root without Strict Mode
+unknown-case	hydrate	there is no component to render
+lazy-component	hydrate	the component is still loading on the server, so renderToString gives up on the boundary and React reports the switch to client rendering as an error
+use-promise	hydrate	the promise is still pending on the server, so renderToString gives up on the boundary and React reports the switch to client rendering as an error
+portal	hydrate	a portal needs a DOM element as target, and the server has no document
+resource-hints	hydrate	on the server React writes resource hints into the HTML it returns, not into the head of the test page
+resource-elements	hydrate	on the server React writes hoisted styles into the HTML it returns, not into the head of the test page
+dom-attributes	hydrate	the sample values are not valid for many attributes; React's server and client normalize them differently and React reports the difference
+external-store	hydrate	the store of the case has no server snapshot, which React requires for server rendering
+media-events	hydrate	the image in the server markup finishes loading before hydration attaches the load handler, so the handler is not called

@@ -3,6 +3,11 @@ export function caseId() {
   return new URLSearchParams(location.search).get('case') || '';
 }
 
+/** The rendering mode of the page: 'client' (the default) or 'hydrate'. */
+export function mode() {
+  return new URLSearchParams(location.search).get('mode') || 'client';
+}
+
 export function log(entry) {
   (globalThis.__benchLog = globalThis.__benchLog || []).push(entry);
 }

@@ -30,7 +30,7 @@ public final class MutateBench {
     private static final String RESULTS = "docs/evidence/mutation-results.tsv";
     private static final List<String> MODULES = List.of("jx-core", "jx-react", "jx-compiler", "jx-maven-plugin",
             "tests/conformance");
-    private static final Pattern FAILED_CASE = Pattern.compile("(?m)^\\s+\\d+\\) \\[jx\\] › \\S+ › ([a-z0-9-]+): ");
+    private static final Pattern FAILED_CASE = Pattern.compile("(?m)^\\s+\\d+\\) \\[jx(?:-hydrate)?\\] › \\S+ › ([a-z0-9-]+): ");
     private static final long STEP_TIMEOUT_MINUTES = 6;
 
     private record Mutant(String id, String file, String find, String replace, String change) {}
@@ -188,7 +188,7 @@ public final class MutateBench {
     }
 
     private boolean bench() throws Exception {
-        return step("bench", "npx", "playwright", "test", "-c", "tests/conformance/playwright.config.js", "--project=jx");
+        return step("bench", "npx", "playwright", "test", "-c", "tests/conformance/playwright.config.js", "--project=jx", "--project=jx-hydrate");
     }
 
     /** Runs one bounded step in the scratch copy; its output replaces the step log. */
