@@ -26,7 +26,8 @@ public final class CombinedKeyedRefRow {
         }, Dependencies.of(props.id(), props.revision()));
         Hooks.useLayoutEffect(() -> {
             Bench.log("layout " + props.id() + " " + props.revision() + " "
-                    + (attached.current() == null ? "missing" : attached.current().tagName()));
+                    + (attached.current() == null ? "missing"
+                        : attached.current().tagName() + " " + attached.current().value()));
             return () -> Bench.log("layout-cleanup " + props.id() + " " + props.revision());
         }, Dependencies.of(props.id(), props.revision()));
         return (

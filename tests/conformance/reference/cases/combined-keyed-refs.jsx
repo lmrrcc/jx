@@ -12,7 +12,8 @@ function Row({id, revision}) {
     };
   }, [id, revision]);
   useLayoutEffect(() => {
-    log('layout ' + id + ' ' + revision + ' ' + (attached.current === null ? 'missing' : attached.current.tagName));
+    log('layout ' + id + ' ' + revision + ' ' + (attached.current === null ? 'missing'
+      : attached.current.tagName + ' ' + attached.current.value));
     return () => log('layout-cleanup ' + id + ' ' + revision);
   }, [id, revision]);
   return <li data-row={id}><input ref={callback} aria-label={'Ref ' + id} defaultValue={id + '-initial'} /></li>;

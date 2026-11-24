@@ -19,9 +19,10 @@ test('combined-keyed-refs: keyed callback refs retain nodes, track dependencies 
       await interaction('layout-callback-ref', async () => {
         for (const id of ['a', 'b']) {
           const entries = await lifecycle(id);
-          expect(entries.filter(entry => entry.startsWith('layout '))).toEqual([`layout ${id} 0 INPUT`, `layout ${id} 0 INPUT`]);
-          expect(entries.indexOf(`attach ${id} 0 INPUT`)).toBeLessThan(entries.indexOf(`layout ${id} 0 INPUT`));
-          expect(entries.lastIndexOf(`attach ${id} 0 INPUT`)).toBeLessThan(entries.lastIndexOf(`layout ${id} 0 INPUT`));
+          const expected = `layout ${id} 0 INPUT ${id}-initial`;
+          expect(entries.filter(entry => entry.startsWith('layout '))).toEqual([expected, expected]);
+          expect(entries.indexOf(`attach ${id} 0 INPUT`)).toBeLessThan(entries.indexOf(expected));
+          expect(entries.lastIndexOf(`attach ${id} 0 INPUT`)).toBeLessThan(entries.lastIndexOf(expected));
         }
       });
       await input('a').fill('draft a');
@@ -37,8 +38,9 @@ test('combined-keyed-refs: keyed callback refs retain nodes, track dependencies 
         for (const id of ['a', 'b']) {
           expect((await refs(id)).slice(-2)).toEqual([`detach ${id} 0`, `attach ${id} 1 INPUT`]);
           const entries = await lifecycle(id);
-          expect(entries).toContain(`layout ${id} 1 INPUT`);
-          expect(entries.indexOf(`attach ${id} 1 INPUT`)).toBeLessThan(entries.indexOf(`layout ${id} 1 INPUT`));
+          const expected = `layout ${id} 1 INPUT draft ${id}`;
+          expect(entries).toContain(expected);
+          expect(entries.indexOf(`attach ${id} 1 INPUT`)).toBeLessThan(entries.indexOf(expected));
         }
         expect(await input('a').evaluate((node, old) => node === old, originalA)).toBe(true);
         expect(await input('b').evaluate((node, old) => node === old, originalB)).toBe(true);
@@ -62,6 +64,8 @@ test('combined-keyed-refs: keyed callback refs retain nodes, track dependencies 
         await page.getByRole('button', {name: 'Restore a', exact: true}).click();
         await expect.poll(order).toEqual(['b', 'a']);
         await expect.poll(async () => (await refs('a')).slice(-3)).toEqual(['attach a 1 INPUT', 'detach a 1', 'attach a 1 INPUT']);
+        expect((await lifecycle('a')).filter(entry => entry.startsWith('layout ')).slice(-2))
+          .toEqual(['layout a 1 INPUT a-initial', 'layout a 1 INPUT a-initial']);
         expect(await input('a').evaluate((node, old) => node === old, originalA)).toBe(false);
         expect(await input('b').evaluate((node, old) => node === old, originalB)).toBe(true);
         await expect(input('a')).toHaveValue('a-initial');
