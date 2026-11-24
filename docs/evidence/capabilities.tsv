@@ -44,3 +44,4 @@ editor.vscode.component-rename	Editors	VS Code component class and file rename	p
 editor.browser-debugging	Editors	.jx breakpoints and stepping in the browser	proposed	T					Planned in GA-23	
 release.published-artifacts	Release	Published, signed artifacts installed by a clean consumer	proposed	Q					Local snapshot versions only; planned in GA-09	
 runtime.server-rendering	Runtime	ReactServer string and streaming renderers in a Node host, and React.hydrate of that HTML in the browser	spike	R		tests/conformance/specs/dom.spec.js	npm run test:bench		Static, hydrated and Suspense-streamed pages compared with React; no request isolation or data loading yet	2026-11-23
+runtime.lazy-modules	Runtime	LazyModules.load and LazyComponent: a second compiled JX module loaded on demand across a serialized boundary	spike	R		tests/lazy-boundary/tests/lazy.spec.js	npm run test:lazy		Hand-written props codec; no context sharing; the Maven plugin does not build lazy chunks	2026-11-24

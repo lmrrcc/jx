@@ -30,6 +30,7 @@ jobs:
       - run: npm run build:runtime
       - run: npm run test:runtime
       - run: npm run test:bench
+      - run: npm run test:lazy
       - run: npm run test:counter
       - run: npm run test:todo
       - run: npm run test:hot

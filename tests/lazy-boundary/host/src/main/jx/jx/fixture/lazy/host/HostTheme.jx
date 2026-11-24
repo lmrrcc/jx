@@ -1,0 +1,14 @@
+package jx.fixture.lazy.host;
+
+import jx.Component;
+import jx.Hooks;
+import jx.View;
+import jx.fixture.lazy.Themes;
+
+/** Reads the theme inside the host application, where the provider is. */
+@Component
+public final class HostTheme {
+    public static View render() {
+        return <p data-testid="host-theme">{Hooks.useContext(Themes.THEME)}</p>;
+    }
+}

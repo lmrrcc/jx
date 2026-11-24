@@ -104,4 +104,12 @@ class PromiseTest {
         assertEquals(List.of(), seen, "the loader waits for the first render");
         assertThrows(NullPointerException.class, () -> ComponentType.lazy("Late", null));
     }
+
+    @Test void aLazyComponentKeepsItsDescriptorAndRejectsANullLoader() {
+        LazyComponent<Void> lazy = LazyComponent.of("Late", () -> { seen.add("loaded"); return Promise.create(resolver -> {}); });
+        assertSame(lazy.type(), lazy.type());
+        lazy.retry();
+        assertEquals(List.of(), seen, "retry does not load by itself");
+        assertThrows(NullPointerException.class, () -> LazyComponent.of("Late", null));
+    }
 }

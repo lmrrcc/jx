@@ -1,0 +1,47 @@
+package jx.fixture.lazy.host;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.Views;
+import jx.fixture.lazy.Greeting;
+import jx.fixture.lazy.Themes;
+import jx.react.React;
+
+/** Shows the lazily loaded component on request, with what the host sends and receives. */
+@Component
+public final class HostPage {
+    public static View render() {
+        State<Boolean> shown = Hooks.useState(false);
+        State<Integer> count = Hooks.useState(1);
+        State<Integer> attempt = Hooks.useState(0);
+        State<Boolean> explode = Hooks.useState(false);
+        State<String> picked = Hooks.useState("nothing picked");
+        Greeting greeting = new Greeting("Ada", count.value(), true, 9007199254740993L);
+        return (
+            <main>
+                <button onClick={event -> shown.set(true)}>Show late part</button>
+                <button onClick={event -> count.update(previous -> previous + 1)}>Change props</button>
+                <button onClick={event -> explode.set(true)}>Break late part</button>
+                <p data-testid="picked">{picked.value()}</p>
+                {Themes.THEME.provide("dark", <HostTheme />,
+                    shown.value()
+                        ? <div key={attempt.value()}>{React.boundary(
+                            React.suspense(<p role="status">loading</p>,
+                                Views.component(Late.COMPONENT.type(), new Late.Props(greeting, picked::set, explode.value()))),
+                            error -> (
+                                <div role="alert">
+                                    <p data-testid="failure">{error.getClass().getSimpleName()}: {error.getMessage()}</p>
+                                    <button onClick={event -> {
+                                        Late.COMPONENT.retry();
+                                        explode.set(false);
+                                        attempt.update(previous -> previous + 1);
+                                    }}>Try again</button>
+                                </div>
+                            ))}</div>
+                        : null)}
+            </main>
+        );
+    }
+}

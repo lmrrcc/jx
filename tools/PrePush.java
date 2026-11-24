@@ -41,6 +41,7 @@ public final class PrePush {
             "npm run build:runtime",
             "npm run test:runtime",
             "npm run test:bench",
+            "npm run test:lazy",
             "npm run test:counter",
             "npm run test:todo",
             "npm run test:hot");
