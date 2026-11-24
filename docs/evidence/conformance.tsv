@@ -7,7 +7,7 @@ react:useInsertionEffect	hook	supported	insertion-effect	Hooks.useInsertionEffec
 react:useEffectEvent	hook	supported	effect-event	Hooks.useEffectEvent		Typed for Runnable and Consumer callbacks
 react:useRef	hook	supported	ref-persist,dom-ref-focus,combined-transition-cancel	Hooks.useRef, Hooks.useDomRef		A ref retains the fixture-local operation owner across urgent and transition renders
 react:useImperativeHandle	hook	supported	imperative-handle,combined-imperative-handles	Hooks.useImperativeHandle		The handle is published through a Ref passed as a prop
-react:useContext	hook	supported	context-nested,combined-keyed-context,combined-portal-lifecycle	Hooks.useContext		Memoized consumers retain local state while context changes
+react:useContext	hook	supported	context-nested,combined-keyed-context,combined-portal-lifecycle,combined-server-stream	Hooks.useContext		Memoized consumers retain local state while context changes
 react:createContext	api	supported	context-nested	Hooks.createContext, Context.provide		
 react:useMemo	hook	supported	memo-recompute	Hooks.useMemo		
 react:useCallback	hook	supported	callback-identity,combined-keyed-refs	Hooks.useCallback		Memoized callback refs replace attachments only when dependencies change
@@ -18,7 +18,7 @@ react:startTransition	api	supported	start-transition,transition-pending	React.st
 react:useDeferredValue	hook	supported	deferred-value	Hooks.useDeferredValue		Equal scalars compare by value
 react:useOptimistic	hook	supported	optimistic,combined-optimistic-store	Hooks.useOptimistic		Returns a State, or a ReducerState with an update function
 react:useActionState	hook	supported	action-state,combined-action-queue	Hooks.useActionState, Hooks.useActionStateAsync, ActionState		The permalink argument is not offered
-react:use	hook	supported	use-promise	Hooks.use		Takes a jx.Promise or a Context
+react:use	hook	supported	use-promise,combined-server-stream	Hooks.use		Takes a jx.Promise or a Context
 react:useDebugValue	hook	supported	debug-value	Hooks.useDebugValue		The DevTools label itself is not asserted
 react:Fragment	component	supported	fragment,combined-children-contract	<>...</>, Views.fragment		Explicit fragments are opaque to Children traversal
 react:StrictMode	component	supported	effect-cleanup,state-lazy-init,memo-recompute,strict-nested,combined-keyed-refs	React.mountStrict, React.strictMode		Nested use is a view factory, not a markup tag
@@ -54,19 +54,19 @@ react-dom:preconnect	resource	supported	resource-hints	Resources.preconnect
 react-dom:prefetchDNS	resource	supported	resource-hints	Resources.prefetchDNS		
 react-dom:preinit	resource	supported	resource-hints	Resources.preinit		
 react-dom:preinitModule	resource	supported	resource-hints	Resources.preinitModule		
-react-dom:preload	resource	supported	resource-hints	Resources.preload		The image settings imageSrcSet and imageSizes are not offered
+react-dom:preload	resource	supported	resource-hints,combined-resource-hydration	Resources.preload		The image settings imageSrcSet and imageSizes are not offered
 react-dom:preloadModule	resource	supported	resource-hints	Resources.preloadModule		
 react-dom:useFormState	hook	equivalent	form-state	Hooks.useFormState, Hooks.useFormStateAsync		Deprecated alias that delegates to useActionState
 react-dom:unstable_batchedUpdates	unstable	excluded			R-29	Unstable legacy API; batching is automatic
 react-dom:browser	constant	excluded			none	Build marker, not an API
 react-dom:version	constant	excluded			R-29	Constant; pinned in the version manifest
 react-dom/client:createRoot	api	supported	state-counter,unknown-case,root-options	React.mount, React.mountStrict, React.RootOptions		The three error callbacks and identifierPrefix; onDefaultTransitionIndicator is not offered
-react-dom/client:hydrateRoot	api	supported	hydrate-root,hydrate-server	React.hydrate, React.hydrateStrict		Takes the same RootOptions as mount
+react-dom/client:hydrateRoot	api	supported	hydrate-root,hydrate-server,combined-resource-hydration	React.hydrate, React.hydrateStrict		Takes the same RootOptions as mount
 react-dom/client:version	constant	excluded			R-29	Constant
-react-dom/server:renderToPipeableStream	server	supported	server-pipeable-stream,server-stream-suspense	ReactServer.renderToPipeableStream		Shell and all-ready are promises; pipes to a Java sink or a Node Writable
+react-dom/server:renderToPipeableStream	server	supported	server-pipeable-stream,server-stream-suspense,combined-server-stream	ReactServer.renderToPipeableStream		Shell and all-ready are promises; pipes to a Java sink or a Node Writable
 react-dom/server:renderToReadableStream	server	supported	server-readable-stream	ReactServer.renderToReadableStream		Options: identifier prefix, bootstrap scripts and modules, onError
 react-dom/server:renderToStaticMarkup	server	supported	server-render-to-static-markup	ReactServer.renderToStaticMarkup		Runs in a Node host
-react-dom/server:renderToString	server	supported	server-render-to-string	ReactServer.renderToString		Runs in a Node host; the options other than identifierPrefix are not offered
+react-dom/server:renderToString	server	supported	server-render-to-string,combined-resource-hydration	ReactServer.renderToString		Runs in a Node host; the options other than identifierPrefix are not offered
 react-dom/server:resume	server	supported	server-resume	ReactServer.resume		
 react-dom/server:resumeToPipeableStream	server	supported	server-resume-pipeable	ReactServer.resumeToPipeableStream		
 react-dom/server:version	constant	excluded			R-29	Constant

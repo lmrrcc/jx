@@ -1,0 +1,25 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Context;
+import jx.Hooks;
+import jx.Promise;
+import jx.View;
+import jx.react.React;
+
+/** Every render owns its data promise and provider value; only the context descriptor is shared. */
+@Component
+public final class CombinedServerStream {
+    static final Context<String> REQUEST = Hooks.createContext("outside-request");
+
+    public record Props(String request, Promise<String> data) {}
+
+    public static View render(Props props) {
+        return REQUEST.provide(props.request(),
+            <main>
+                <h1>{"shell-" + props.request()}</h1>
+                {React.suspense(<p data-testid="fallback">{"waiting-" + props.request()}</p>,
+                    <CombinedServerResult data={props.data()} />)}
+            </main>);
+    }
+}

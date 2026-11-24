@@ -1,0 +1,18 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.Promise;
+import jx.View;
+
+/** The request context must be restored when this suspended component resumes. */
+@Component
+public final class CombinedServerResult {
+    public record Props(Promise<String> data) {}
+
+    public static View render(Props props) {
+        String result = Hooks.use(props.data());
+        String request = Hooks.useContext(CombinedServerStream.REQUEST);
+        return <p data-testid="arrived" data-request={request}>{request + ":" + result}</p>;
+    }
+}
