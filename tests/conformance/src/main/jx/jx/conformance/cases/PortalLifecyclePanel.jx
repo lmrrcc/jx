@@ -1,0 +1,40 @@
+package jx.conformance.cases;
+
+import java.util.function.Consumer;
+import jx.Component;
+import jx.Dependencies;
+import jx.DomElement;
+import jx.DomRef;
+import jx.Hooks;
+import jx.View;
+
+/** Reads context across the portal and focuses its committed DOM node in a layout effect. */
+@Component
+public final class PortalLifecyclePanel {
+    public record Props(DomRef input, boolean stopped, Consumer<String> onEvent, Consumer<String> onLayout) {}
+
+    public static View render(Props props) {
+        String theme = Hooks.useContext(CombinedPortalLifecycle.THEME);
+        Hooks.useLayoutEffect(() -> {
+            DomElement node = props.input().current();
+            if (node == null) throw new IllegalStateException("The portal ref was not attached before its layout effect");
+            node.focus();
+            props.onLayout().accept("attached " + node.tagName());
+            return () -> props.onLayout().accept("cleaned");
+        }, Dependencies.of(props.input()));
+        return (
+            <section id="portal-panel" data-testid="portal-panel" role="dialog" aria-label="Portal inspector"
+                     onClickCapture={event -> props.onEvent().accept(CombinedPortalLifecycle.eventLine("panel-capture", event))}
+                     onClick={event -> props.onEvent().accept(CombinedPortalLifecycle.eventLine("panel-bubble", event))}>
+                <p data-testid="portal-theme">Theme: {theme}</p>
+                <label for="portal-draft">Portal draft</label>
+                <input id="portal-draft" ref={props.input()} defaultValue="portal draft" />
+                <a id="portal-action" href="#portal-destination" onClick={event -> {
+                    event.preventDefault();
+                    if (props.stopped()) event.stopPropagation();
+                    props.onEvent().accept(CombinedPortalLifecycle.eventLine("target", event));
+                }}><span id="portal-action-label" data-testid="portal-action-label">Portal action</span></a>
+            </section>
+        );
+    }
+}

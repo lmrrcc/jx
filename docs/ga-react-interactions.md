@@ -10,23 +10,27 @@ Its complete local bench and scoped mutation run pass. R-27-02a merged as
 `413558b636679dd5926f4d7bf1c987ea707ed95c` in [PR #39](https://github.com/lmrrcc/jx/pull/39),
 with [green CI](https://github.com/lmrrcc/jx/actions/runs/45443187836) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45442627237).
-R-27-02b has a passing complete local bench and its scoped mutant was killed;
-Verify is pending for that slice.
+R-27-02b merged as `15c0c6eee36f506910e854c568547ebc6d3758ea` in
+[PR #40](https://github.com/lmrrcc/jx/pull/40), with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45452120669) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45452801956).
+R-27-02c has a passing complete local bench and its scoped mutant was killed;
+Verify is pending.
 No additional human or cross-browser
 qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
 
-The passing counts below include the complete R-27-02b local run. Its seven new
-ref pairs increase the merged R-27-02a baseline of 25 to **32 / 5,356**, with **5,324**
+The passing counts below include the complete R-27-02c local run. Its six new
+portal pairs increase the merged R-27-02b baseline of 32 to **38 / 5,356**, with **5,318**
 remaining. This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
 | --- | --- |
 | Currently supported/equivalent feature IDs | 104 |
 | Candidate unordered pairs among those IDs | 5,356 |
-| Pairs with a passing witness in every declared mode, on both React and JX | 32 |
-| Current candidate pairs without complete evidence | 5,324 |
+| Pairs with a passing witness in every declared mode, on both React and JX | 38 |
+| Current candidate pairs without complete evidence | 5,318 |
 | Eventual application-feature IDs | 118 |
 | Eventual candidate pairs | 6,903 |
 | Additional pairs involving the 14 deferred feature IDs | 1,547 |
@@ -87,10 +91,11 @@ golden-file comparison but retain checks on the assertions they execute.
 | Existing focused cases | Eight pairs: Strict Mode/effects, layout/passive effect order, lazy/Suspense, async/transition, hydration/store, hydration/IDs, portal/events and streaming/Suspense. Named assertion blocks now record the existing behavioral evidence. |
 | R-27-02a children cases | Six pairs: Children with keys, state, list rendering, children props, explicit fragments and child values. Mapping and flattening preserve composed identity; shape and validity checks match native React. |
 | R-27-02b ref cases | Seven pairs: callback refs with keys, callbacks, layout effects and Strict Mode; imperative handles with keys, changed props and ref props. Reordering retains real nodes and handles; removal clears refs; dependency and ref changes update ownership without replacing the input. |
+| R-27-02c portal case | Six pairs: portal with context, capture phases, event payloads, default/propagation controls, element refs and layout effects. Context follows React ancestry while DOM stays under `document.body`; close clears refs and disconnects the node, and reopen focuses a fresh input. |
 
 The combined scenarios run their assertions in client, hydrate and lazy modes.
 Static mode renders the combined scenarios and compares HTML, but does not execute their
-interactive assertion blocks and therefore earns no pair credit. None of the 32
+interactive assertion blocks and therefore earns no pair credit. None of the 38
 current witnesses claims static interaction coverage.
 
 The register explicitly limits lazy/Suspense and portal/events to client/lazy.
@@ -103,6 +108,50 @@ remain recorded in [`modes.tsv`](../tests/conformance/modes.tsv).
 The streaming witness checks shell/fallback/delayed-content ordering in the
 collected HTML. It does not measure early network delivery; that requires a
 separate controlled streaming assertion in R-27-04.
+
+## R-27-02c: portal lifecycle, context and events
+
+`combined-portal-lifecycle` adds six explicit pair witnesses in client, hydrate
+and lazy modes. The portal is **initially closed**, so SSR and static rendering
+produce an ordinary host tree without a portal. Opening after hydration exercises
+the browser portal; this is not evidence of server rendering an open portal.
+
+| Witness | Observable behavior |
+| --- | --- |
+| `portal-context` | The panel's actual parent is `document.body`, outside its React owner's DOM subtree. A provider update reaches it while its input retains the same Playwright ElementHandle and draft. |
+| `portal-capture` | Capture runs through logical owner and panel, then the target and both bubble handlers run in the expected order. |
+| `portal-payload` | The nested `SPAN` remains the target; each handler sees its own currentTarget. Bubble handlers observe the target's updated `defaultPrevented` flag. |
+| `portal-propagation` | Preventing default keeps the URL unchanged; stopping propagation retains capture and target events while excluding both ancestor bubble handlers. |
+| `portal-dom-ref` | Closing clears the actual DOM ref and disconnects the retained input handle. Reopening creates a different input with its initial value. |
+| `portal-layout` | Committed layout setup focuses the attached input; closing runs cleanup, including after a reopen. |
+
+The focused run passes **8 checks**. The complete local bench passes **779 checks,
+with 133 skipped, across 114 case IDs**:
+
+| Mode | React reference | JX |
+| --- | --- | --- |
+| Client, including Node API cases | 112 / 112 | 111 / 111 |
+| Hydration | 87 / 87 | 87 / 87 |
+| Static HTML | 93 / 93 | 93 / 93 |
+| Lazy route | 98 / 98 | 98 / 98 |
+
+All six new witnesses pass in their three declared interactive modes, raising
+complete evidence to **38 / 5,356**, with **5,318** active pairs open. Static HTML
+equality gives no interactive pair credit. These are Chrome automated checks;
+human and cross-browser qualification remain open.
+
+The unmutated scratch baseline passed, then `combined-portal-lifecycle` killed
+`portal-context-stale`: **1 killed, 0 survived, 0 unusable**. The mutation freezes
+the provider at its initial theme, so the context-update assertion fails. Repeat
+the check exclusively, without another build or browser suite:
+
+```sh
+java tools/MutateBench.java --only portal-context-stale
+```
+
+Verify is pending. The catalog has **107 entries**. The historical complete
+mutation campaign still covers 100, and no fresh complete 107-mutant result is
+claimed.
 
 ## R-27-02b: keyed refs and imperative handles
 
@@ -118,8 +167,11 @@ remember actual imperative-handle objects and compare Java identity (`==`) with
 the reference's JavaScript identity (`===`); `fill`, `read` and focus operate on
 the real input. Layout assertion refinement additionally reads the row-specific
 input value, so two different `INPUT` elements cannot satisfy it merely by sharing
-a tag name. All eight focused rendering projects pass after this refinement;
-Verify is pending.
+a tag name. All eight focused rendering projects pass after this refinement.
+The slice merged in [PR #40](https://github.com/lmrrcc/jx/pull/40) as
+`15c0c6eee36f506910e854c568547ebc6d3758ea`, with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45452120669) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45452801956).
 
 The recorded complete local bench passes **771 checks, with 133 skipped, across
 113 case IDs**:
@@ -145,9 +197,8 @@ props. Run it exclusively, without another build or browser suite:
 java tools/MutateBench.java --only imperative-stale-props
 ```
 
-The catalog now has **106 entries**. The historical full campaign still covers
+That slice's catalog had **106 entries**. The historical full campaign still covers
 100; the scoped R-26/R-27 runs do not establish a fresh complete 106-mutant result.
-R-27-02b remains under review until Verify passes.
 
 ## R-27-02a: children contracts
 

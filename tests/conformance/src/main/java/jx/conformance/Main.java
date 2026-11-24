@@ -15,6 +15,7 @@ import jx.conformance.cases.CombinedChildrenList;
 import jx.conformance.cases.CombinedChildrenContract;
 import jx.conformance.cases.CombinedKeyedRefs;
 import jx.conformance.cases.CombinedImperativeHandles;
+import jx.conformance.cases.CombinedPortalLifecycle;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
 import jx.conformance.cases.DomRefFocus;
@@ -108,6 +109,7 @@ public final class Main {
      * their own are handled in {@link #main}. */
     static jx.ComponentType<?> component(String id) {
         return switch (id) {
+            case "combined-portal-lifecycle" -> CombinedPortalLifecycle.JX;
             case "state-counter" -> StateCounter.JX;
             case "state-lazy-init" -> StateLazyInit.JX;
             case "callable-state" -> CallableState.JX;

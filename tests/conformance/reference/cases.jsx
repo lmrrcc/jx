@@ -1,6 +1,7 @@
 // Framework-owned reference fixture: every bench case by id, for the browser entry and the
 // Node server alike.
 import { StateCounter } from './cases/state-counter.jsx';
+import { CombinedPortalLifecycle } from './cases/combined-portal-lifecycle.jsx';
 import { StateLazyInit } from './cases/state-lazy-init.jsx';
 import { CallableState } from './cases/callable-state.jsx';
 import { ReducerBatch } from './cases/reducer-batch.jsx';
@@ -97,6 +98,7 @@ import { CombinedKeyedRefs } from './cases/combined-keyed-refs.jsx';
 import { CombinedImperativeHandles } from './cases/combined-imperative-handles.jsx';
 
 export const cases = {
+  'combined-portal-lifecycle': CombinedPortalLifecycle,
   'combined-keyed-context': CombinedKeyedContext,
   'combined-activity-store': CombinedActivityStore,
   'combined-children-map': CombinedChildrenMap,

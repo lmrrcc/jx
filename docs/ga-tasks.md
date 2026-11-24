@@ -1,6 +1,6 @@
 # GA implementation sequence
 
-Revision 9, 24 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
+Revision 10, 24 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
 the [work package register](ga-execution.md) into an ordered list of tasks, grouped
 by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
@@ -24,11 +24,11 @@ modules across a serialized boundary. R-26 (every case in every applicable
 rendering mode) is complete: Luca's try-it run matched all recorded results on
 24 November, and code revision `eb5a18a` passed
 [Verify](https://github.com/lmrrcc/jx/actions/runs/45372691183).
-That makes 27 complete React tasks. R-27-01 and R-27-02a merged with green Verify,
-establishing 25 executed pair witnesses. R-27-02b's complete local bench passes
-771 checks with 32 witnessed pairs, while 5,324 current pairs remain without
-complete evidence. Its scoped `imperative-stale-props` mutant was killed; Verify
-for R-27-02b is pending. R-27 remains partial; its slice status and the
+That makes 27 complete React tasks. R-27-01, R-27-02a and R-27-02b merged with green
+Verify, establishing 32 executed pair witnesses. R-27-02c's complete local bench
+passes 779 checks with 38 witnessed pairs, while 5,318 current pairs remain without
+complete evidence. Its scoped `portal-context-stale` mutant was killed; Verify
+is pending. R-27 remains partial; its slice status and the
 [interaction evidence record](ga-react-interactions.md) distinguish local results
 from outstanding acceptance.
 M1-26 (protected data route) is the
@@ -141,7 +141,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-24 | M6 | Resume: `resume`, `resumeToPipeableStream`, `resumeAndPrerender`, `resumeAndPrerenderToNodeStream` | 4 | ✅ done |
 | R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ✅ done |
 | R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | ✅ done: Luca's try-it confirms 715 passes and 133 inapplicable cells; Verify green at eb5a18a, 24 November |
-| R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-27-02b has local evidence for 32 / 5,356 active pairs; 5,324 remain open, plus deferred-feature pairs |
+| R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-27-02c has local evidence for 38 / 5,356 active pairs; 5,318 remain open, plus deferred-feature pairs |
 | R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | ⬜ planned |
 | R-29 | M7 | Remaining small surface: `act` for JX tests, `captureOwnerStack`, version constants, `unstable_batchedUpdates`, `unstable_useCacheRefresh` | 9 | ⬜ planned |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | ⬜ planned |
@@ -225,10 +225,10 @@ No broad area-level exclusion or reduction to feature families closes this task.
 | Task | Deliverable | Status |
 | --- | --- | --- |
 | R-27-01 | Pair register and gate; real keyed/memo/context and Activity/store lifecycle scenarios; explicit assertion evidence and scoped mutation checks | ✅ merged PR #38: 19 pair witnesses, 731 bench passes, both scoped mutants killed and green Verify; no additional human qualification claimed |
-| R-27-02 | Extend identity, refs, composition, DOM and event interactions from the remaining pair inventory; delivery slices below | 🟡 in progress: R-27-02a merged; R-27-02b under review |
+| R-27-02 | Extend identity, refs, composition, DOM and event interactions from the remaining pair inventory; delivery slices below | 🟡 in progress: R-27-02a and R-27-02b merged; R-27-02c under review |
 | R-27-02a | Children mapping and flattening preserve keyed identity; explicit fragments stay opaque; single-child validation matches React | ✅ merged PR #39 at 413558b: 755 full bench and 12 runtime checks; six new pairs; three scoped mutants killed; green Verify |
-| R-27-02b | Keyed callback refs and imperative handles: replacement, fresh props, cleanup, Strict Mode and layout ordering | 🟡 review: 771 full bench passes; seven new pairs in two scenarios; scoped mutant killed; Verify pending |
-| R-27-02c | Initially closed portal: context, capture/bubble, propagation, payloads and focus after hydration | ⬜ planned |
+| R-27-02b | Keyed callback refs and imperative handles: replacement, fresh props, cleanup, Strict Mode and layout ordering | ✅ merged PR #40 at 15c0c6e: 771 full bench passes; seven new pairs in two scenarios; scoped mutant killed; green Verify |
+| R-27-02c | Initially closed portal: context, capture/bubble, propagation, payloads and focus after hydration | 🟡 review: 779 full bench and 8 focused checks pass; six new pairs; scoped mutant killed; Verify pending |
 | R-27-03 | Extend async, form action, optimistic, transition and external-store interactions, including controlled failure/recovery; delivery slices below | ⬜ planned |
 | R-27-03a | Combined form actions with submission state, reset and controlled failure/recovery | ⬜ planned |
 | R-27-03b | Optimistic state over immutable external snapshots: remote rebase, rejected-request rollback and retry without duplicate commits | ⬜ planned |
@@ -273,9 +273,25 @@ R-27-02b local evidence: 771 passed, 133 skipped across 113 case IDs. Client pas
 97 per side. The seven ref pairs have complete client/hydrate/lazy witnesses,
 raising evidence to 32 / 5,356, with 5,324 active pairs open. The unmutated scratch
 baseline passed; `imperative-stale-props` was killed by `combined-imperative-handles`
-(1 killed, 0 survived, 0 unusable). The catalog has 106 entries, not a fresh full
-106-mutant campaign. Verify remains pending. These Chrome automated checks do
+(1 killed, 0 survived, 0 unusable). That slice's catalog had 106 entries, not a fresh
+full 106-mutant campaign. [PR #40](https://github.com/lmrrcc/jx/pull/40) merged as
+`15c0c6eee36f506910e854c568547ebc6d3758ea`, with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45452120669) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45452801956). These Chrome automated checks do
 not establish additional human or cross-browser qualification.
+
+R-27-02c local evidence: 779 passed, 133 skipped across 114 case IDs; client 112
+reference / 111 JX, hydration 87 per side, static HTML 93 per side and lazy 98 per
+side. All eight focused checks pass. Six new portal pairs raise complete evidence
+to 38 / 5,356, with 5,318 active pairs open. Real ElementHandles, focus, ref cleanup
+and ordered event payloads establish behavior across the logical React ancestry.
+The portal begins closed for SSR; it opens only in the browser after hydration,
+so this is not qualification of server-rendered portals. The unmutated scratch
+baseline passed, then `combined-portal-lifecycle` killed `portal-context-stale`
+(1 killed, 0 survived, 0 unusable). The catalog now has 107 entries; Verify remains
+pending. No fresh full mutation
+campaign, human qualification or cross-browser qualification is implied. Details
+are in the [portal evidence record](ga-react-interactions.md#r-27-02c-portal-lifecycle-context-and-events).
 
 R-27-03 is split into 03a actions, 03b optimistic/store behavior and 03c transition
 interactions before implementation. Each slice must select explicit remaining

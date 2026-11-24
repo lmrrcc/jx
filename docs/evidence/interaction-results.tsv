@@ -25,7 +25,13 @@ lazy-suspense	pass	pass	n/a	n/a	n/a	n/a	pass	pass
 memo-context	pass	pass	pass	pass	n/a	n/a	pass	pass
 memo-props	pass	pass	pass	pass	n/a	n/a	pass	pass
 memo-store	pass	pass	pass	pass	n/a	n/a	pass	pass
+portal-capture	pass	pass	pass	pass	n/a	n/a	pass	pass
+portal-context	pass	pass	pass	pass	n/a	n/a	pass	pass
+portal-dom-ref	pass	pass	pass	pass	n/a	n/a	pass	pass
 portal-events	pass	pass	n/a	n/a	n/a	n/a	pass	pass
+portal-layout	pass	pass	pass	pass	n/a	n/a	pass	pass
+portal-payload	pass	pass	pass	pass	n/a	n/a	pass	pass
+portal-propagation	pass	pass	pass	pass	n/a	n/a	pass	pass
 props-imperative-handle	pass	pass	pass	pass	n/a	n/a	pass	pass
 refprop-imperative-handle	pass	pass	pass	pass	n/a	n/a	pass	pass
 stream-suspense	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
