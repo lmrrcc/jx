@@ -1,4 +1,4 @@
-import {test, expect, log, serverOf} from './bench.js';
+import {test, expect, log, serverOf, sideOf} from './bench.js';
 
 test('choice-inputs: controlled radio group, select and textarea', async ({page, open}) => {
   await open('choice-inputs');
@@ -194,7 +194,7 @@ test('hydrate-server: the browser hydrates HTML rendered in Node, keeping nodes 
 // reference side and the two DOM trees must serialize to the same HTML.
 async function sameAsReference(page, id, info) {
   const html = await page.locator('#app').innerHTML();
-  if (info.project.name !== 'jx') return html;
+  if (sideOf(info) !== 'jx') return html;
   const reference = await page.context().newPage();
   await reference.goto('../reference/?case=' + id);
   await expect(reference.locator('#app > *').first()).toBeAttached();
@@ -240,7 +240,7 @@ test('dom-events: every event handler name React knows is called as in React', a
   expect(calls.length).toBeGreaterThan(150);
   for (const call of ['Click', 'Click capture', 'DoubleClick', 'Play', 'Play capture', 'PointerDown', 'Wheel', 'Submit', 'Focus', 'Blur'])
     expect(calls).toContain(call);
-  if (info.project.name === 'jx') {
+  if (sideOf(info) === 'jx') {
     const reference = await page.context().newPage();
     await reference.goto('../reference/?case=dom-events');
     await expect(reference.locator('#app > *').first()).toBeAttached();

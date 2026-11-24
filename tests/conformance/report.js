@@ -5,6 +5,7 @@
 import {readFileSync, writeFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 
+const PROJECTS = ['reference', 'jx', 'reference-hydrate', 'jx-hydrate'];
 const RECORD = fileURLToPath(new URL('../../docs/evidence/conformance-results.tsv', import.meta.url));
 
 export default class ConformanceReport {
@@ -23,7 +24,8 @@ export default class ConformanceReport {
     const rows = [...this.rows.entries()].sort((a, b) => a[0].localeCompare(b[0]));
     const width = Math.max(...rows.map(([id]) => id.length), 4);
     const count = name => rows.filter(([, row]) => row[name] === 'pass').length
-      + '/' + rows.filter(([, row]) => row[name] !== 'n/a').length;
+      + '/' + rows.filter(([, row]) => row[name] !== undefined && row[name] !== 'n/a').length;
+    const line = (id, row) => [id, ...PROJECTS.map(name => row[name] || '-')].join('\t');
     console.log('\nConformance bench: ' + rows.length + ' cases');
     console.log('case'.padEnd(width) + '  reference  jx           behavior');
     for (const [id, row] of rows) {
@@ -31,9 +33,9 @@ export default class ConformanceReport {
     }
     console.log('reference: ' + count('reference') + ' pass; jx: ' + count('jx') + ' pass, '
       + rows.filter(([, row]) => row.jx === 'unsupported').length + ' unsupported');
+    console.log('hydrate mode: reference ' + count('reference-hydrate') + ' pass; jx ' + count('jx-hydrate') + ' pass');
 
-    const table = 'case\treference\tjx\n'
-      + rows.map(([id, row]) => [id, row.reference || '-', row.jx || '-'].join('\t')).join('\n') + '\n';
+    const table = ['case', ...PROJECTS].join('\t') + '\n' + rows.map(([id, row]) => line(id, row)).join('\n') + '\n';
     if (process.env.BENCH_NO_COMPARE === '1') return;
     if (process.env.BENCH_UPDATE === '1') {
       writeFileSync(RECORD, table);
@@ -43,14 +45,14 @@ export default class ConformanceReport {
     let recorded = '';
     try { recorded = readFileSync(RECORD, 'utf8'); } catch { /* reported below */ }
     const before = new Map(recorded.split('\n').slice(1).filter(Boolean).map(line => [line.split('\t')[0], line]));
-    if (rows.length < before.size) {
+    if (rows.length < before.size || rows.some(([, row]) => PROJECTS.some(name => row[name] === undefined))) {
       console.log('Partial run: recorded results were not compared.');
       return;
     }
     const changes = [];
     for (const [id, row] of rows) {
-      const line = [id, row.reference || '-', row.jx || '-'].join('\t');
-      if (before.get(id) !== line) changes.push((before.get(id) || id + '\t(new)').replaceAll('\t', ' ') + '  ->  ' + line.replaceAll('\t', ' '));
+      const now = line(id, row);
+      if (before.get(id) !== now) changes.push((before.get(id) || id + '\t(new)').replaceAll('\t', ' ') + '  ->  ' + now.replaceAll('\t', ' '));
     }
     if (changes.length) {
       console.log('\nResults differ from docs/evidence/conformance-results.tsv:');

@@ -17,6 +17,14 @@ public final class Bench {
     @JSBody(params = "entry", script = "(globalThis.__benchLog = globalThis.__benchLog || []).push(entry);")
     public static native void log(String entry);
 
+    /** The rendering mode of the page: {@code client} (the default) or {@code hydrate}. */
+    @JSBody(script = "return new URLSearchParams(location.search).get('mode') || 'client';")
+    public static native String mode();
+
+    /** Puts server markup into the root element. */
+    @JSBody(params = "html", script = "document.getElementById('app').innerHTML = html;")
+    public static native void seedMarkup(String html);
+
     /** The markup a test rendered in Node and handed to the page, or an empty string. */
     @JSBody(script = "return typeof globalThis.__benchServerHtml === 'string' ? globalThis.__benchServerHtml : '';")
     public static native String serverMarkup();

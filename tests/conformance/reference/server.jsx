@@ -1,6 +1,7 @@
 // Framework-owned reference fixture: React's server and static rendering APIs, run in Node.
 import { StrictMode, Suspense, use } from 'react';
 import { HydratedPage } from './cases/hydrate-server.jsx';
+import { cases } from './cases.jsx';
 import { Writable } from 'node:stream';
 import {
   renderToPipeableStream, renderToReadableStream, renderToStaticMarkup, renderToString,
@@ -65,6 +66,11 @@ function Streaming() {
 }
 
 export const server = {
+  // Any client case as server HTML, for the hydrate mode of the bench.
+  renderCase: async id => {
+    const Case = cases[id];
+    return renderToString(<StrictMode><Case /></StrictMode>);
+  },
   streamSuspense: () => new Promise((resolve, reject) => {
     let release = () => {};
     late = new Promise(done => { release = done; });

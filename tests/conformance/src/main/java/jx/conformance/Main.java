@@ -97,95 +97,116 @@ import jx.react.React;
 public final class Main {
     private Main() {}
 
+    /** The component of a case that mounts in the ordinary way, or null. Cases with a root of
+     * their own are handled in {@link #main}. */
+    static jx.ComponentType<?> component(String id) {
+        return switch (id) {
+            case "state-counter" -> StateCounter.JX;
+            case "state-lazy-init" -> StateLazyInit.JX;
+            case "callable-state" -> CallableState.JX;
+            case "reducer-batch" -> ReducerBatch.JX;
+            case "effect-cleanup" -> EffectCleanup.JX;
+            case "effect-dependencies" -> EffectDependencies.JX;
+            case "layout-effect-order" -> LayoutEffectOrder.JX;
+            case "batched-updates" -> BatchedUpdates.JX;
+            case "ref-persist" -> RefPersist.JX;
+            case "dom-ref-focus" -> DomRefFocus.JX;
+            case "context-nested" -> ContextNested.JX;
+            case "memo-recompute" -> MemoRecompute.JX;
+            case "callback-identity" -> CallbackIdentity.JX;
+            case "use-id" -> UseId.JX;
+            case "external-store" -> ExternalStoreCase.JX;
+            case "error-boundary" -> ErrorBoundaryCase.JX;
+            case "controlled-input" -> ControlledInput.JX;
+            case "checkbox" -> CheckboxCase.JX;
+            case "key-event" -> KeyEvent.JX;
+            case "prevent-default" -> PreventDefault.JX;
+            case "stop-propagation" -> StopPropagation.JX;
+            case "keyed-list" -> KeyedList.JX;
+            case "remount-by-key" -> RemountByKey.JX;
+            case "props-update" -> PropsUpdate.JX;
+            case "conditional" -> Conditional.JX;
+            case "fragment" -> FragmentCase.JX;
+            case "children-prop" -> ChildrenProp.JX;
+            case "text-escaping" -> TextEscaping.JX;
+            case "child-values" -> ChildValues.JX;
+            case "attributes" -> AttributesCase.JX;
+            case "svg" -> SvgCase.JX;
+            case "custom-hook" -> CustomHook.JX;
+            case "function-props" -> FunctionProps.JX;
+            case "dynamic-component" -> DynamicComponent.JX;
+            case "namespace-components" -> NamespaceComponents.JX;
+            case "choice-inputs" -> ChoiceInputs.JX;
+            case "uncontrolled-inputs" -> UncontrolledInputs.JX;
+            case "capture-phase" -> CapturePhase.JX;
+            case "custom-elements" -> CustomElements.JX;
+            case "document-metadata" -> DocumentMetadata.JX;
+            case "resource-elements" -> ResourceElements.JX;
+            case "error-reporting" -> ErrorReporting.JX;
+            case "pointer-events" -> PointerEvents.JX;
+            case "transfer-events" -> TransferEvents.JX;
+            case "media-events" -> MediaEvents.JX;
+            case "event-payload" -> EventPayload.JX;
+            case "layout-effect-dependencies" -> LayoutEffectDependencies.JX;
+            case "memo-skip" -> MemoSkip.JX;
+            case "imperative-handle" -> ImperativeHandle.JX;
+            case "forward-ref" -> ForwardRef.JX;
+            case "ref-as-prop" -> RefAsProp.JX;
+            case "ref-callback" -> RefCallbackCase.JX;
+            case "create-ref" -> CreateRef.JX;
+            case "insertion-effect" -> InsertionEffect.JX;
+            case "effect-event" -> EffectEvent.JX;
+            case "debug-value" -> DebugValue.JX;
+            case "profiler" -> ProfilerCase.JX;
+            case "reducer-lazy-init" -> ReducerLazyInit.JX;
+            case "spread-props" -> SpreadProps.JX;
+            case "default-props" -> DefaultProps.JX;
+            case "generic-list" -> GenericList.JX;
+            case "portal" -> Portal.JX;
+            case "flush-sync" -> FlushSync.JX;
+            case "children-utilities" -> ChildrenUtilities.JX;
+            case "clone-element" -> CloneElement.JX;
+            case "is-valid-element" -> IsValidElement.JX;
+            case "child-slots" -> ChildSlots.JX;
+            case "transition-pending" -> TransitionPending.JX;
+            case "start-transition" -> StartTransition.JX;
+            case "deferred-value" -> DeferredValue.JX;
+            case "use-promise" -> UsePromise.JX;
+            case "async-function" -> AsyncFunction.JX;
+            case "transition-promise" -> TransitionPromise.JX;
+            case "lazy-component" -> LazyComponent.JX;
+            case "activity" -> ActivityCase.JX;
+            case "view-transition" -> ViewTransitionCase.JX;
+            case "optimistic" -> Optimistic.JX;
+            case "action-state" -> ActionStateCase.JX;
+            case "form-status" -> FormStatusCase.JX;
+            case "form-actions" -> FormActions.JX;
+            case "form-reset" -> FormReset.JX;
+            case "raw-html" -> RawHtmlCase.JX;
+            case "resource-hints" -> ResourceHints.JX;
+            case "form-state" -> FormStateCase.JX;
+            case "dom-elements" -> DomElements.JX;
+            case "dom-attributes" -> DomAttributes.JX;
+            case "dom-events" -> DomEvents.JX;
+            default -> null;
+        };
+    }
+
+    private static <P> void start(jx.ComponentType<P> component, boolean hydrate) {
+        if (hydrate) {
+            // Hydrate mode: over the markup the test rendered in Node for this case.
+            Bench.seedMarkup(Bench.serverMarkup());
+            React.hydrateStrict("app", component, null);
+        } else {
+            React.mountStrict("app", component, null);
+        }
+    }
+
     public static void main(String[] arguments) {
         if (Server.active()) { Server.install(); return; }
         String id = Bench.caseId();
         switch (id) {
-            case "state-counter" -> React.mountStrict("app", StateCounter.JX, null);
-            case "state-lazy-init" -> React.mountStrict("app", StateLazyInit.JX, null);
-            case "callable-state" -> React.mountStrict("app", CallableState.JX, null);
-            case "reducer-batch" -> React.mountStrict("app", ReducerBatch.JX, null);
-            case "effect-cleanup" -> React.mountStrict("app", EffectCleanup.JX, null);
-            case "effect-dependencies" -> React.mountStrict("app", EffectDependencies.JX, null);
-            case "layout-effect-order" -> React.mountStrict("app", LayoutEffectOrder.JX, null);
-            case "batched-updates" -> React.mountStrict("app", BatchedUpdates.JX, null);
-            case "ref-persist" -> React.mountStrict("app", RefPersist.JX, null);
-            case "dom-ref-focus" -> React.mountStrict("app", DomRefFocus.JX, null);
-            case "context-nested" -> React.mountStrict("app", ContextNested.JX, null);
-            case "memo-recompute" -> React.mountStrict("app", MemoRecompute.JX, null);
-            case "callback-identity" -> React.mountStrict("app", CallbackIdentity.JX, null);
-            case "use-id" -> React.mountStrict("app", UseId.JX, null);
-            case "external-store" -> React.mountStrict("app", ExternalStoreCase.JX, null);
-            case "error-boundary" -> React.mountStrict("app", ErrorBoundaryCase.JX, null);
-            case "controlled-input" -> React.mountStrict("app", ControlledInput.JX, null);
-            case "checkbox" -> React.mountStrict("app", CheckboxCase.JX, null);
-            case "key-event" -> React.mountStrict("app", KeyEvent.JX, null);
-            case "prevent-default" -> React.mountStrict("app", PreventDefault.JX, null);
-            case "stop-propagation" -> React.mountStrict("app", StopPropagation.JX, null);
-            case "keyed-list" -> React.mountStrict("app", KeyedList.JX, null);
-            case "remount-by-key" -> React.mountStrict("app", RemountByKey.JX, null);
-            case "props-update" -> React.mountStrict("app", PropsUpdate.JX, null);
-            case "conditional" -> React.mountStrict("app", Conditional.JX, null);
-            case "fragment" -> React.mountStrict("app", FragmentCase.JX, null);
-            case "children-prop" -> React.mountStrict("app", ChildrenProp.JX, null);
-            case "text-escaping" -> React.mountStrict("app", TextEscaping.JX, null);
-            case "child-values" -> React.mountStrict("app", ChildValues.JX, null);
-            case "attributes" -> React.mountStrict("app", AttributesCase.JX, null);
-            case "svg" -> React.mountStrict("app", SvgCase.JX, null);
-            case "custom-hook" -> React.mountStrict("app", CustomHook.JX, null);
-            case "function-props" -> React.mountStrict("app", FunctionProps.JX, null);
-            case "dynamic-component" -> React.mountStrict("app", DynamicComponent.JX, null);
-            case "namespace-components" -> React.mountStrict("app", NamespaceComponents.JX, null);
-            case "choice-inputs" -> React.mountStrict("app", ChoiceInputs.JX, null);
-            case "uncontrolled-inputs" -> React.mountStrict("app", UncontrolledInputs.JX, null);
-            case "capture-phase" -> React.mountStrict("app", CapturePhase.JX, null);
-            case "custom-elements" -> React.mountStrict("app", CustomElements.JX, null);
-            case "document-metadata" -> React.mountStrict("app", DocumentMetadata.JX, null);
-            case "resource-elements" -> React.mountStrict("app", ResourceElements.JX, null);
-            case "error-reporting" -> React.mountStrict("app", ErrorReporting.JX, null);
-            case "pointer-events" -> React.mountStrict("app", PointerEvents.JX, null);
-            case "transfer-events" -> React.mountStrict("app", TransferEvents.JX, null);
-            case "media-events" -> React.mountStrict("app", MediaEvents.JX, null);
-            case "event-payload" -> React.mountStrict("app", EventPayload.JX, null);
-            case "layout-effect-dependencies" -> React.mountStrict("app", LayoutEffectDependencies.JX, null);
-            case "memo-skip" -> React.mountStrict("app", MemoSkip.JX, null);
-            case "imperative-handle" -> React.mountStrict("app", ImperativeHandle.JX, null);
-            case "forward-ref" -> React.mountStrict("app", ForwardRef.JX, null);
-            case "ref-as-prop" -> React.mountStrict("app", RefAsProp.JX, null);
-            case "ref-callback" -> React.mountStrict("app", RefCallbackCase.JX, null);
-            case "create-ref" -> React.mountStrict("app", CreateRef.JX, null);
             case "strict-nested" -> React.mount("app", StrictNested.JX, null);
-            case "insertion-effect" -> React.mountStrict("app", InsertionEffect.JX, null);
-            case "effect-event" -> React.mountStrict("app", EffectEvent.JX, null);
-            case "debug-value" -> React.mountStrict("app", DebugValue.JX, null);
-            case "profiler" -> React.mountStrict("app", ProfilerCase.JX, null);
-            case "reducer-lazy-init" -> React.mountStrict("app", ReducerLazyInit.JX, null);
-            case "spread-props" -> React.mountStrict("app", SpreadProps.JX, null);
-            case "default-props" -> React.mountStrict("app", DefaultProps.JX, null);
-            case "generic-list" -> React.mountStrict("app", GenericList.JX, null);
-            case "portal" -> React.mountStrict("app", Portal.JX, null);
-            case "flush-sync" -> React.mountStrict("app", FlushSync.JX, null);
-            case "children-utilities" -> React.mountStrict("app", ChildrenUtilities.JX, null);
-            case "clone-element" -> React.mountStrict("app", CloneElement.JX, null);
-            case "is-valid-element" -> React.mountStrict("app", IsValidElement.JX, null);
-            case "child-slots" -> React.mountStrict("app", ChildSlots.JX, null);
-            case "transition-pending" -> React.mountStrict("app", TransitionPending.JX, null);
-            case "start-transition" -> React.mountStrict("app", StartTransition.JX, null);
-            case "deferred-value" -> React.mountStrict("app", DeferredValue.JX, null);
-            case "use-promise" -> React.mountStrict("app", UsePromise.JX, null);
-            case "async-function" -> React.mountStrict("app", AsyncFunction.JX, null);
-            case "transition-promise" -> React.mountStrict("app", TransitionPromise.JX, null);
-            case "lazy-component" -> React.mountStrict("app", LazyComponent.JX, null);
-            case "activity" -> React.mountStrict("app", ActivityCase.JX, null);
-            case "view-transition" -> React.mountStrict("app", ViewTransitionCase.JX, null);
-            case "optimistic" -> React.mountStrict("app", Optimistic.JX, null);
-            case "action-state" -> React.mountStrict("app", ActionStateCase.JX, null);
-            case "form-status" -> React.mountStrict("app", FormStatusCase.JX, null);
-            case "form-actions" -> React.mountStrict("app", FormActions.JX, null);
-            case "form-reset" -> React.mountStrict("app", FormReset.JX, null);
-            case "raw-html" -> React.mountStrict("app", RawHtmlCase.JX, null);
-            case "resource-hints" -> React.mountStrict("app", ResourceHints.JX, null);
-            case "form-state" -> React.mountStrict("app", FormStateCase.JX, null);
             case "root-options" -> React.mountStrict("app", RootOptionsCase.JX, null, RootOptionsCase.OPTIONS);
             case "hydrate-root" -> {
                 // Server markup first, then hydration over the same nodes.
@@ -197,10 +218,11 @@ public final class Main {
                 Bench.seed(Bench.serverMarkup());
                 React.hydrateStrict("app", HydratedPage.JX, null);
             }
-            case "dom-elements" -> React.mountStrict("app", DomElements.JX, null);
-            case "dom-attributes" -> React.mountStrict("app", DomAttributes.JX, null);
-            case "dom-events" -> React.mountStrict("app", DomEvents.JX, null);
-            default -> Bench.unknown(id);
+            default -> {
+                jx.ComponentType<?> component = component(id);
+                if (component == null) Bench.unknown(id);
+                else start(component, Bench.mode().equals("hydrate"));
+            }
         }
     }
 }

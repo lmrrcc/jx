@@ -39,7 +39,8 @@ test('prevent-default: stops link navigation and form submission', async ({page,
   expect(new URL(page.url()).hash).toEqual('');
   await page.getByRole('button', {name: 'Submit'}).click();
   await expect(page.getByRole('status')).toHaveText('1 submitted');
-  expect(new URL(page.url()).search).toEqual('?case=prevent-default');
+  // The form was not submitted: the page still has its own query.
+  expect(new URL(page.url()).searchParams.get('case')).toEqual('prevent-default');
   await page.getByRole('link', {name: 'Go'}).click();
   await expect.poll(() => new URL(page.url()).hash).toEqual('#moved');
 });

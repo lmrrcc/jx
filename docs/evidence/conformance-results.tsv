@@ -1,105 +1,105 @@
-case	reference	jx
-action-state	pass	pass
-activity	pass	pass
-async-function	pass	pass
-attributes	pass	pass
-batched-updates	pass	pass
-callable-state	pass	pass
-callback-identity	pass	pass
-capture-phase	pass	pass
-checkbox	pass	pass
-child-slots	pass	pass
-child-values	pass	pass
-children-prop	pass	pass
-children-utilities	pass	pass
-choice-inputs	pass	pass
-clone-element	pass	pass
-conditional	pass	pass
-context-nested	pass	pass
-controlled-input	pass	pass
-create-ref	pass	pass
-custom-elements	pass	pass
-custom-hook	pass	pass
-debug-value	pass	pass
-default-props	pass	pass
-deferred-value	pass	pass
-document-metadata	pass	pass
-dom-attributes	pass	pass
-dom-elements	pass	pass
-dom-events	pass	pass
-dom-ref-focus	pass	pass
-dynamic-component	pass	pass
-effect-cleanup	pass	pass
-effect-dependencies	pass	pass
-effect-event	pass	pass
-error-boundary	pass	pass
-error-reporting	pass	pass
-event-payload	pass	pass
-external-store	pass	pass
-flush-sync	pass	pass
-form-actions	pass	pass
-form-reset	pass	pass
-form-state	pass	pass
-form-status	pass	pass
-forward-ref	pass	pass
-fragment	pass	pass
-function-props	pass	pass
-generic-list	pass	pass
-hydrate-root	pass	pass
-hydrate-server	pass	pass
-imperative-handle	pass	pass
-insertion-effect	pass	pass
-is-valid-element	pass	pass
-key-event	pass	pass
-keyed-list	pass	pass
-layout-effect-dependencies	pass	pass
-layout-effect-order	pass	pass
-lazy-component	pass	pass
-media-events	pass	pass
-memo-recompute	pass	pass
-memo-skip	pass	pass
-namespace-components	pass	pass
-optimistic	pass	pass
-pointer-events	pass	pass
-portal	pass	pass
-prevent-default	pass	pass
-profiler	pass	pass
-props-update	pass	pass
-raw-html	pass	pass
-react-exports	pass	n/a
-reducer-batch	pass	pass
-reducer-lazy-init	pass	pass
-ref-as-prop	pass	pass
-ref-callback	pass	pass
-ref-persist	pass	pass
-remount-by-key	pass	pass
-resource-elements	pass	pass
-resource-hints	pass	pass
-root-options	pass	pass
-server-pipeable-stream	pass	pass
-server-readable-stream	pass	pass
-server-render-to-static-markup	pass	pass
-server-render-to-string	pass	pass
-server-resume	pass	pass
-server-resume-pipeable	pass	pass
-server-stream-suspense	pass	pass
-spread-props	pass	pass
-start-transition	pass	pass
-state-counter	pass	pass
-state-lazy-init	pass	pass
-static-prerender	pass	pass
-static-prerender-node	pass	pass
-static-resume-prerender	pass	pass
-static-resume-prerender-node	pass	pass
-stop-propagation	pass	pass
-strict-nested	pass	pass
-svg	pass	pass
-text-escaping	pass	pass
-transfer-events	pass	pass
-transition-pending	pass	pass
-transition-promise	pass	pass
-uncontrolled-inputs	pass	pass
-unknown-case	pass	pass
-use-id	pass	pass
-use-promise	pass	pass
-view-transition	pass	pass
+case	reference	jx	reference-hydrate	jx-hydrate
+action-state	pass	pass	pass	pass
+activity	pass	pass	pass	pass
+async-function	pass	pass	pass	pass
+attributes	pass	pass	pass	pass
+batched-updates	pass	pass	pass	pass
+callable-state	pass	pass	pass	pass
+callback-identity	pass	pass	pass	pass
+capture-phase	pass	pass	pass	pass
+checkbox	pass	pass	pass	pass
+child-slots	pass	pass	pass	pass
+child-values	pass	pass	pass	pass
+children-prop	pass	pass	pass	pass
+children-utilities	pass	pass	pass	pass
+choice-inputs	pass	pass	pass	pass
+clone-element	pass	pass	pass	pass
+conditional	pass	pass	pass	pass
+context-nested	pass	pass	pass	pass
+controlled-input	pass	pass	pass	pass
+create-ref	pass	pass	pass	pass
+custom-elements	pass	pass	pass	pass
+custom-hook	pass	pass	pass	pass
+debug-value	pass	pass	pass	pass
+default-props	pass	pass	pass	pass
+deferred-value	pass	pass	pass	pass
+document-metadata	pass	pass	pass	pass
+dom-attributes	pass	pass	n/a	n/a
+dom-elements	pass	pass	pass	pass
+dom-events	pass	pass	pass	pass
+dom-ref-focus	pass	pass	pass	pass
+dynamic-component	pass	pass	pass	pass
+effect-cleanup	pass	pass	pass	pass
+effect-dependencies	pass	pass	pass	pass
+effect-event	pass	pass	pass	pass
+error-boundary	pass	pass	pass	pass
+error-reporting	pass	pass	pass	pass
+event-payload	pass	pass	pass	pass
+external-store	pass	pass	n/a	n/a
+flush-sync	pass	pass	pass	pass
+form-actions	pass	pass	pass	pass
+form-reset	pass	pass	pass	pass
+form-state	pass	pass	pass	pass
+form-status	pass	pass	pass	pass
+forward-ref	pass	pass	pass	pass
+fragment	pass	pass	pass	pass
+function-props	pass	pass	pass	pass
+generic-list	pass	pass	pass	pass
+hydrate-root	pass	pass	n/a	n/a
+hydrate-server	pass	pass	n/a	n/a
+imperative-handle	pass	pass	pass	pass
+insertion-effect	pass	pass	pass	pass
+is-valid-element	pass	pass	pass	pass
+key-event	pass	pass	pass	pass
+keyed-list	pass	pass	pass	pass
+layout-effect-dependencies	pass	pass	pass	pass
+layout-effect-order	pass	pass	pass	pass
+lazy-component	pass	pass	n/a	n/a
+media-events	pass	pass	n/a	n/a
+memo-recompute	pass	pass	pass	pass
+memo-skip	pass	pass	pass	pass
+namespace-components	pass	pass	pass	pass
+optimistic	pass	pass	pass	pass
+pointer-events	pass	pass	pass	pass
+portal	pass	pass	n/a	n/a
+prevent-default	pass	pass	pass	pass
+profiler	pass	pass	pass	pass
+props-update	pass	pass	pass	pass
+raw-html	pass	pass	pass	pass
+react-exports	pass	n/a	n/a	n/a
+reducer-batch	pass	pass	pass	pass
+reducer-lazy-init	pass	pass	pass	pass
+ref-as-prop	pass	pass	pass	pass
+ref-callback	pass	pass	pass	pass
+ref-persist	pass	pass	pass	pass
+remount-by-key	pass	pass	pass	pass
+resource-elements	pass	pass	n/a	n/a
+resource-hints	pass	pass	n/a	n/a
+root-options	pass	pass	n/a	n/a
+server-pipeable-stream	pass	pass	n/a	n/a
+server-readable-stream	pass	pass	n/a	n/a
+server-render-to-static-markup	pass	pass	n/a	n/a
+server-render-to-string	pass	pass	n/a	n/a
+server-resume	pass	pass	n/a	n/a
+server-resume-pipeable	pass	pass	n/a	n/a
+server-stream-suspense	pass	pass	n/a	n/a
+spread-props	pass	pass	pass	pass
+start-transition	pass	pass	pass	pass
+state-counter	pass	pass	pass	pass
+state-lazy-init	pass	pass	pass	pass
+static-prerender	pass	pass	n/a	n/a
+static-prerender-node	pass	pass	n/a	n/a
+static-resume-prerender	pass	pass	n/a	n/a
+static-resume-prerender-node	pass	pass	n/a	n/a
+stop-propagation	pass	pass	pass	pass
+strict-nested	pass	pass	n/a	n/a
+svg	pass	pass	pass	pass
+text-escaping	pass	pass	pass	pass
+transfer-events	pass	pass	pass	pass
+transition-pending	pass	pass	pass	pass
+transition-promise	pass	pass	pass	pass
+uncontrolled-inputs	pass	pass	pass	pass
+unknown-case	pass	pass	n/a	n/a
+use-id	pass	pass	pass	pass
+use-promise	pass	pass	n/a	n/a
+view-transition	pass	pass	pass	pass

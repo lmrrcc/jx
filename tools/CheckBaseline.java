@@ -443,6 +443,22 @@ public final class CheckBaseline {
             failures.add("missing bench specs directory: " + BENCH_SPECS);
         }
         benchCases = cases.size();
+        // A case left out of a rendering mode names an existing case, a known mode and its reason.
+        Path modes = root.resolve("tests/conformance/modes.tsv");
+        if (Files.exists(modes)) {
+            List<String> rows = Files.readAllLines(modes, StandardCharsets.UTF_8);
+            Set<String> listed = new HashSet<>();
+            for (int index = 1; index < rows.size(); index++) {
+                if (rows.get(index).isEmpty()) continue;
+                String[] row = rows.get(index).split("\t", -1);
+                String at = "tests/conformance/modes.tsv:" + (index + 1);
+                if (row.length != 3) { failures.add(at + " needs 3 columns"); continue; }
+                require(cases.contains(row[0]), at + " names unknown bench case '" + row[0] + "'");
+                require(row[1].equals("hydrate"), at + " has unknown mode '" + row[1] + "'");
+                require(!row[2].isBlank(), at + " needs a reason");
+                require(listed.add(row[0] + " " + row[1]), at + " repeats " + row[0] + " in " + row[1]);
+            }
+        }
         waitingCases = waiting.size();
         Set<String> ids = new HashSet<>();
         Set<String> covered = new HashSet<>();
