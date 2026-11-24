@@ -11,8 +11,8 @@ Progress: **GA-01 and GA-02 are complete**. GA-14, GA-15 and GA-18 have substant
 partial implementations through the React parity tasks; their broader acceptance
 outcomes below are not yet complete. R-26 is accepted and R-27-01 merged with green
 Verify. R-27-02a's complete local bench passes 755 checks and records 25 / 5,356
-active feature pairs, with 5,331 still uncovered; mutation and Verify acceptance
-are pending. See the
+active feature pairs, with 5,331 still uncovered; all three scoped mutants were
+killed and Verify acceptance is pending. See the
 [interaction evidence record](ga-react-interactions.md) for the unchanged eventual
 118-feature / 6,903-pair scope and its limits. G0 remains open: the serialized lazy
 boundary and basic Node rendering/hydration proofs are delivered, while component

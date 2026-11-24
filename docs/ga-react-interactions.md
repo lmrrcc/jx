@@ -7,7 +7,8 @@ reporting and two combined scenarios. Its tested head `56e247d` merged as
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45435501261)
 and [green CI](https://github.com/lmrrcc/jx/actions/runs/45435438849).
 Its complete local bench and scoped mutation run pass. R-27-02a is in progress;
-its complete bench and runtime suite pass, with curated mutants and Verify pending.
+its complete bench and runtime suite pass, with all three scoped mutants killed
+and Verify pending.
 No additional human or cross-browser
 qualification is implied by these automated results.
 
@@ -137,6 +138,11 @@ checkpoint paths following positions instead of composed keys. Its repair passes
 the complete **12 / 12 runtime suite**, including mapped DOM and native-wrapper
 hot replacement.
 
+The native hot-replacement fixture uses `StrictMode`. Opaque foreign bindings and
+error-boundary fallback callbacks outside their original Java render frame still
+need separate ownership/identity qualification; this result does not close those
+remaining combinations.
+
 The complete bench passes **755 checks, with 133 skipped, across 111 case IDs**:
 
 | Mode | React reference | JX |
@@ -147,9 +153,12 @@ The complete bench passes **755 checks, with 133 skipped, across 111 case IDs**:
 | Lazy route | 95 / 95 | 95 / 95 |
 
 All six new pairs have passing assertion witnesses on both sides in every declared
-mode, raising complete pair evidence to **25 / 5,356**. Curated mutation and Verify
-results remain pending; R-27-02a is not yet closed. Three scoped mutants are being
-checked: `children-not-listed`, `children-source-key-lost` and `strict-mode-dropped`.
+mode, raising complete pair evidence to **25 / 5,356**. The unmutated scratch
+baseline passed, then all three scoped mutants were killed, with zero survivors
+or unusable mutants. `strict-mode-dropped` failed `strict-nested`;
+`children-not-listed` failed the existing child utilities and new contract/list
+cases; `children-source-key-lost` also failed the mapped-child case. Verify remains
+pending; R-27-02a is not yet closed.
 The catalog has 105 entries (one added, two adapted for this slice); the historical
 full campaign still covers 100. A scoped result must not be reported as a full
 105-mutant campaign.

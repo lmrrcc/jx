@@ -31,7 +31,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 Execution order confirmed by Luca on 24 November: continue through complete React
 parity and G0, then the JX/Spring starter and faster hot reload. R-27-01 merged with
 green Verify. R-27-02a's complete local bench reports 755 passes and 133 skipped
-cells; its mutation and Verify checks are pending. The [interaction evidence record](ga-react-interactions.md)
+cells; all three scoped mutants were killed and Verify is pending. The [interaction evidence record](ga-react-interactions.md)
 keeps the 25 proven pairs separate from the remaining inventory. The eventual
 118-feature / 6,903-pair universe includes 1,547 additional deferred-feature pairs;
 the scope is not reduced to the initial scenarios. Human qualification and

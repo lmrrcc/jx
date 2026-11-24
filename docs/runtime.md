@@ -92,8 +92,8 @@ their own tests.
 ## Children traversal, composed keys and native nodes
 
 R-27-02a, 24 November 2026, is in progress. The contracts below pass JVM, full
-browser-matrix and runtime hot-replacement checks; curated mutation and Verify
-results are still pending. See the [interaction evidence](ga-react-interactions.md#r-27-02a-children-contracts-in-progress)
+browser-matrix and runtime hot-replacement checks; all three scoped mutants were
+killed and Verify is pending. See the [interaction evidence](ga-react-interactions.md#r-27-02a-children-contracts-in-progress)
 for the reproduction and current limits.
 
 `Views.childrenValue` represents a component's implicit `children` prop. No
@@ -143,8 +143,11 @@ keeping initial server rendering browser-independent. API Javadocs live beside
 A separate regression exposed mapped native wrappers assigning hot-reload
 checkpoint paths by position instead of their composed keys. The repair now uses
 the composed identity in those paths. The runtime suite passes all 12 checks,
-including hot replacement of mapped DOM and native wrappers; this is distinct
-evidence from ordinary state retention during React reconciliation.
+including hot replacement of mapped DOM and `StrictMode` wrappers; this is distinct
+evidence from ordinary state retention during React reconciliation. It does not
+qualify opaque foreign bindings or error-boundary fallback ownership: a fallback
+callback runs outside the original Java render frame, whose owner is not restored
+by this change. Those lifecycle combinations remain open in R-27.
 
 ## Elm Model–View–Update
 
