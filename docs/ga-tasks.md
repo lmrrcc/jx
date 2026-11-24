@@ -230,6 +230,7 @@ No broad area-level exclusion or reduction to feature families closes this task.
 | R-27-02b | Keyed callback refs and imperative handles: replacement, fresh props, cleanup, Strict Mode and layout ordering | ✅ merged PR #40 at 15c0c6e: 771 full bench passes; seven new pairs in two scenarios; scoped mutant killed; green Verify |
 | R-27-02c | Initially closed portal: context, capture/bubble, propagation, payloads and focus after hydration | 🟡 review: 779 full bench and 8 focused checks pass; six new pairs; scoped mutant killed; Verify pending |
 | R-27-03 | Extend async, form action, optimistic, transition and external-store interactions, including controlled failure/recovery; delivery slices below | ⬜ planned |
+| R-27-03-PROMISE | Prerequisite: isolate Promise observer delivery so a throwing observer cannot leave React's native thenable pending | 🟡 review: JVM and Chrome failures reproduced before repair; nine Promise tests, 36 runtime-package JVM tests and 13 Chrome runtime checks pass locally; full local gate and CI Verify pending |
 | R-27-03a | Combined form actions with submission state, reset and controlled failure/recovery | ⬜ planned |
 | R-27-03b | Optimistic state over immutable external snapshots: remote rebase, rejected-request rollback and retry without duplicate commits | ⬜ planned |
 | R-27-03c | Transition interactions with independent updates and controlled asynchronous completion | ⬜ planned |
@@ -297,6 +298,21 @@ R-27-03 is split into 03a actions, 03b optimistic/store behavior and 03c transit
 interactions before implementation. Each slice must select explicit remaining
 pair IDs and demonstrate them on both implementations; staged fixture preparation
 does not close a task or earn interaction credit.
+
+R-27-03-PROMISE repairs a defect found while preparing those scenarios. Previously,
+all waiting observers ran inside one microtask; an earlier observer throwing
+prevented delivery to the native thenable used by React. The JVM regression failed
+on the still-pending bridge observer, and the Chrome regression stayed on the
+Suspense fallback after resolving the Java promise. Separate observer microtasks
+preserve registration order and visible error reporting while allowing subsequent
+observers to run. The browser now resumes without an unrelated parent update.
+
+Local checks on 24 November: `PromiseTest` passes nine tests; the runtime package
+with tests enabled passes 36 JVM tests (29 core, including those nine, and seven
+Elm); the focused Chrome regression passes, and `npm run test:runtime` passes all
+13 checks. See the [runtime contract and commands](runtime.md#promise-observer-isolation).
+This prerequisite is in review with the full local push gate and CI Verify still
+pending. It adds no feature-pair witness; R-27-03a, 03b and 03c remain planned.
 
 R-27-01 local evidence, 24 November 2026: the complete bench reports 731 passed and
 133 skipped cells: client 106 reference / 105 JX, hydrate 81 per side, static 87 per
