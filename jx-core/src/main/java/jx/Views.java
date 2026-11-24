@@ -20,15 +20,57 @@ public final class Views {
      * instead of cloning.
      * @throws IllegalArgumentException when the view is not a DOM element */
     public static View cloneElement(View element, Attributes extra, Object... children) {
-        if (!(element instanceof View.Element original))
+        String replacement = element instanceof View.Keyed keyed ? keyed.key() : null;
+        View underlying = element instanceof View.Keyed keyed ? keyed.element() : element;
+        if (!(underlying instanceof View.Element original))
             throw new IllegalArgumentException("Only a DOM element view can be cloned");
-        return new View.Element(original.tag(), original.attributes().merge(extra),
+        View copy = new View.Element(original.tag(), original.attributes().merge(extra),
                 children.length == 0 ? original.children() : children(children));
+        boolean explicitKey = extra != null && extra.entries().stream().anyMatch(entry -> entry.name().equals("key"));
+        return replacement == null || explicitKey ? copy : new View.Keyed(copy, replacement);
     }
-    /** React's {@code isValidElement}: true for an element, fragment, component or other view;
-     * false for text, numbers, null and everything that is not a view. */
-    public static boolean isValidElement(Object value) { return value instanceof View && !(value instanceof View.Text || value instanceof View.Empty || value instanceof View.Items); }
+    /** React's {@code isValidElement}: true for a DOM element, fragment, component, provider or
+     * element extension; false for text, empty positions, collections, portals and null. */
+    public static boolean isValidElement(Object value) {
+        return value instanceof View.Element || value instanceof View.Fragment || value instanceof View.ComponentView<?>
+                || value instanceof View.Provider<?> || value instanceof View.Keyed || value instanceof View.ElementExtension;
+    }
+    /** A written fragment, which child utilities treat as a single element without visiting its contents. */
     public static View fragment(Object... children) { return new View.Fragment(children(children)); }
+
+    /** The value of a component's children prop: null for no children or a single null, the child
+     * itself for one child, and an array-like {@link View.Items} for several fixed sibling positions.
+     * Multiple arguments retain static-child validation metadata; an iterable or array argument
+     * retains dynamic list-key validation. Collections remain
+     * collections even when they contain one item. A boolean becomes {@link View.Empty}.
+     * Pass a single Java array as {@code (Object) array} so Java varargs does not unpack it.
+     * Written fragments should be constructed with {@link #fragment}, not this method. */
+    public static View childrenValue(Object... values) {
+        if (values == null || values.length == 0 || values.length == 1 && values[0] == null) return null;
+        List<View> normalized = children(values);
+        return values.length == 1 ? normalized.getFirst() : new View.Items(normalized, true);
+    }
+
+    /** The element or native node's effective key, or null when no explicit key was supplied.
+     * DOM keys use JavaScript scalar spelling, including {@code key=null} as the string
+     * {@code "null"}; this differs from an absent key. Numeric keys follow the browser scalar
+     * boundary, so a long outside JavaScript's exact integer range is rejected.
+     * Keys are identity metadata and are not component props or rendered DOM attributes. */
+    public static String key(View view) {
+        return switch (view) {
+            case null -> null;
+            case View.Keyed keyed -> keyed.key();
+            case View.ComponentView<?> component -> component.key();
+            case View.Element element -> {
+                String key = null;
+                for (Attributes.Entry entry : element.attributes().entries())
+                    if (entry.name().equals("key")) { key = ChildKeys.scalar(entry.value()); break; }
+                yield key;
+            }
+            case View.Extension extension -> extension.key();
+            default -> null;
+        };
+    }
     static List<View> children(Object[] children) {
         var result = new ArrayList<View>();
         for (Object child : children) append(result, child);

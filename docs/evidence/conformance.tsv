@@ -1,5 +1,5 @@
 feature	area	jx	cases	jx-api	task	note
-react:useState	hook	supported	state-counter,state-lazy-init,callable-state,batched-updates,combined-keyed-context,combined-activity-store	Hooks.useState, Hooks.useStateLazy		Also exercised with keyed identity, context updates and Activity
+react:useState	hook	supported	state-counter,state-lazy-init,callable-state,batched-updates,combined-keyed-context,combined-activity-store,combined-children-map	Hooks.useState, Hooks.useStateLazy		Also exercised with keyed identity, context updates, mapped children and Activity
 react:useReducer	hook	supported	reducer-batch,reducer-lazy-init	Hooks.useReducer, Hooks.useReducerLazy		
 react:useEffect	hook	supported	effect-cleanup,effect-dependencies,combined-keyed-context,combined-activity-store,layout-effect-order	Hooks.useEffect		Also exercised with keyed removal, context changes and Activity cleanup
 react:useLayoutEffect	hook	supported	layout-effect-order,layout-effect-dependencies,dom-ref-focus	Hooks.useLayoutEffect		
@@ -20,7 +20,7 @@ react:useOptimistic	hook	supported	optimistic	Hooks.useOptimistic		Returns a Sta
 react:useActionState	hook	supported	action-state	Hooks.useActionState, Hooks.useActionStateAsync, ActionState		The permalink argument is not offered
 react:use	hook	supported	use-promise	Hooks.use		Takes a jx.Promise or a Context
 react:useDebugValue	hook	supported	debug-value	Hooks.useDebugValue		The DevTools label itself is not asserted
-react:Fragment	component	supported	fragment	<>...</>, Views.fragment		
+react:Fragment	component	supported	fragment,combined-children-contract	<>...</>, Views.fragment		Explicit fragments are opaque to Children traversal
 react:StrictMode	component	supported	effect-cleanup,state-lazy-init,memo-recompute,strict-nested	React.mountStrict, React.strictMode		Nested use is a view factory, not a markup tag
 react:Suspense	component	supported	use-promise,lazy-component,server-stream-suspense	React.suspense		
 react:Activity	component	supported	activity,combined-activity-store	React.activity		A view factory with a visible flag
@@ -32,7 +32,7 @@ react:memo	api	supported	memo-skip,combined-keyed-context,combined-activity-stor
 react:forwardRef	api	equivalent	forward-ref	ref as a Props field		Deprecated in React 19; a JX component receives ref as an ordinary prop
 react:createElement	api	equivalent	attributes,children-prop	Markup, Views.element, Views.component		
 react:cloneElement	legacy	equivalent	clone-element	Views.cloneElement		DOM element views only; a component view is rebuilt from a new Props record
-react:Children	legacy	equivalent	children-utilities	jx.Children		count, toList, map, forEach and only over a View children prop
+react:Children	legacy	equivalent	children-utilities,combined-children-map,combined-children-list,combined-children-contract	jx.Children		count, toList, map, forEach and only over a View children prop
 react:isValidElement	legacy	equivalent	is-valid-element	Views.isValidElement		Also expressible as instanceof View
 react:createRef	legacy	equivalent	create-ref	new DomRef(), new Ref<>(initial)		Ref objects are plain Java objects and may be created outside a component
 react:Component	legacy	equivalent	error-boundary	React.boundary	R-28	Only the error-boundary use is offered; class components are not authored in JX
@@ -75,11 +75,11 @@ react-dom/static:prerenderToNodeStream	server	supported	static-prerender-node	Re
 react-dom/static:resumeAndPrerender	server	supported	static-resume-prerender	ReactStatic.resumeAndPrerender		
 react-dom/static:resumeAndPrerenderToNodeStream	server	supported	static-resume-prerender-node	ReactStatic.resumeAndPrerenderToNodeStream		
 react-dom/static:version	constant	excluded			R-29	Constant
-jsx:key	markup	supported	keyed-list,remount-by-key,combined-keyed-context	key attribute		Combined scenarios retain local state and drafts while reordering
-jsx:children	markup	supported	children-prop	children property of type View		
+jsx:key	markup	supported	keyed-list,remount-by-key,combined-keyed-context,combined-children-map	key attribute		Combined scenarios retain local state and drafts while reordering
+jsx:children	markup	supported	children-prop,combined-children-contract	children property of type View		Scalar children and arrays remain distinct from explicit fragments
 jsx:conditional-rendering	markup	supported	conditional	Java ternary and null		
-jsx:list-rendering	markup	supported	keyed-list,child-values	Iterable and array children		
-jsx:child-values	markup	supported	child-values	Views child normalization		
+jsx:list-rendering	markup	supported	keyed-list,child-values,combined-children-list	Iterable and array children		Flattened nested collections retain independent key namespaces
+jsx:child-values	markup	supported	child-values,combined-children-contract	Views child normalization		Children traversal preserves empty positions and rejects non-elements in only
 jsx:child-slot-identity	markup	supported	child-slots	View.Empty, View.Items		A null or boolean child and a collection child each keep one position
 jsx:text-and-entities	markup	supported	text-escaping			
 jsx:props-update	markup	supported	props-update,combined-keyed-context	Typed record props		Changed props reach memoized rows without resetting state

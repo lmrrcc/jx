@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01 locally evidences 19 / 5,356 active pairs, with 5,337 open. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01 is merged, and R-27-02a locally evidences 25 / 5,356 active pairs, with 5,331 open. Complete remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -29,10 +29,10 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Production pilots and GA release | ⬜ To do | Complete platform gates, qualify pilots, then pass RC/release evidence gates. |
 
 Execution order confirmed by Luca on 24 November: continue through complete React
-parity and G0, then the JX/Spring starter and faster hot reload. R-27-01's complete
-local bench reports 731 passes and 133 skipped cells; both scoped mutants were
-killed and Verify acceptance is pending. The [interaction evidence record](ga-react-interactions.md)
-keeps the 19 proven pairs separate from the remaining inventory. The eventual
+parity and G0, then the JX/Spring starter and faster hot reload. R-27-01 merged with
+green Verify. R-27-02a's complete local bench reports 755 passes and 133 skipped
+cells; its mutation and Verify checks are pending. The [interaction evidence record](ga-react-interactions.md)
+keeps the 25 proven pairs separate from the remaining inventory. The eventual
 118-feature / 6,903-pair universe includes 1,547 additional deferred-feature pairs;
 the scope is not reduced to the initial scenarios. Human qualification and
 explicit applicability decisions remain recorded requirements.

@@ -23,14 +23,23 @@ public final class React {
     @JSFunctor interface Attach extends JSObject { Detach attach(JSObject node); }
     @JSFunctor interface Compare extends JSObject { boolean same(Object previous, Object next); }
     static { Async.installRuntime(AsyncBridge.INSTANCE); }
-    private record NativeView(JSObject element) implements View.Extension {}
+    /** Framework wrappers keep Java children until their final reconciliation key is known. */
+    private record NativeDescription(Function<String, JSObject> build) implements View.ElementExtension {}
+    private record NativeElement(JSObject element) implements View.ElementExtension {
+        @Override public String key() { return nativeKey(element); }
+    }
+    private record NativePortal(JSObject element) implements View.Extension {
+        @Override public String key() { return nativeKey(element); }
+    }
     /** Error boundary for descendant rendering/lifecycle errors, including Java exceptions.
      * Like React itself, this does not catch event callbacks or asynchronous work. */
     public static View boundary(View child, Function<Throwable, View> fallback) {
         Objects.requireNonNull(fallback);
-        return new NativeView(boundary(ERROR_BOUNDARY, element(child), error -> {
+        return new NativeDescription(path -> boundary(ERROR_BOUNDARY,
+                element(child, path + "/content", path + "/content"), error -> {
             Throwable javaError = JSExceptions.getJavaException(error);
-            return element(fallback.apply(javaError == null ? new IllegalStateException(errorMessage(error)) : javaError));
+            return element(fallback.apply(javaError == null ? new IllegalStateException(errorMessage(error)) : javaError),
+                    path + "/fallback", path + "/fallback");
         }));
     }
     /** One commit measured by {@link #profiler}: React's {@code onRender} arguments. {@code phase}
@@ -41,19 +50,25 @@ public final class React {
      * commit, outside rendering. Timings are zero in a production React build. */
     public static View profiler(String id, Consumer<Profile> onRender, Object... children) {
         Objects.requireNonNull(id); Objects.requireNonNull(onRender);
-        return new NativeView(profiler(id, (name, phase, actual, base, start, commit) ->
-                onRender.accept(new Profile(name, phase, actual, base, start, commit)), element(Views.fragment(children))));
+        View child = Views.fragment(children);
+        return new NativeDescription(path -> profiler(id, (name, phase, actual, base, start, commit) ->
+                onRender.accept(new Profile(name, phase, actual, base, start, commit)),
+                element(child, path + "/profiler", path + "/profiler")));
     }
     /** React's {@code StrictMode} around part of a tree: development checks, including repeated
      * effect setup and cleanup, apply to the children only. */
     public static View strictMode(Object... children) {
-        return new NativeView(strict(element(Views.fragment(children))));
+        View child = Views.fragment(children);
+        return new NativeDescription(path -> strict(element(child, path + "/strict", path + "/strict")));
     }
     /** React's {@code Suspense}: shows {@code fallback} while a descendant is suspended, for
      * example in {@link Hooks#use(Promise)}, and the children once they can render. {@code fallback}
      * may be null to show nothing. */
     public static View suspense(View fallback, Object... children) {
-        return new NativeView(suspenseNative(fallback == null ? null : element(fallback), element(Views.fragment(children))));
+        View child = Views.fragment(children);
+        return new NativeDescription(path -> suspenseNative(
+                element(fallback, path + "/fallback", path + "/fallback"),
+                element(child, path + "/content", path + "/content")));
     }
     /** The JX promise that settles like a JavaScript promise or thenable, for browser APIs such as
      * {@code fetch}. A rejection that is not a Java exception becomes an {@link IllegalStateException}
@@ -66,7 +81,9 @@ public final class React {
      * and their effects are cleaned up, but their state and DOM are kept; showing them again runs
      * the effects again. */
     public static View activity(boolean visible, Object... children) {
-        return new NativeView(activityNative(visible ? "visible" : "hidden", element(Views.fragment(children))));
+        View child = Views.fragment(children);
+        return new NativeDescription(path -> activityNative(visible ? "visible" : "hidden",
+                element(child, path + "/activity", path + "/activity")));
     }
     /** Names and CSS classes of a {@link #viewTransition(ViewTransitionOptions, Object...)}; React's
      * {@code name}, {@code default}, {@code enter}, {@code exit}, {@code update} and {@code share}
@@ -83,14 +100,17 @@ public final class React {
      * callbacks of React's component are not offered. */
     public static View viewTransition(ViewTransitionOptions options, Object... children) {
         Objects.requireNonNull(options);
-        JSObject props = object();
-        if (options.name() != null) set(props, "name", Interop.text(options.name()));
-        if (options.defaultClass() != null) set(props, "default", Interop.text(options.defaultClass()));
-        if (options.enter() != null) set(props, "enter", Interop.text(options.enter()));
-        if (options.exit() != null) set(props, "exit", Interop.text(options.exit()));
-        if (options.update() != null) set(props, "update", Interop.text(options.update()));
-        if (options.share() != null) set(props, "share", Interop.text(options.share()));
-        return new NativeView(viewTransitionNative(props, element(Views.fragment(children))));
+        View child = Views.fragment(children);
+        return new NativeDescription(path -> {
+            JSObject props = object();
+            if (options.name() != null) set(props, "name", Interop.text(options.name()));
+            if (options.defaultClass() != null) set(props, "default", Interop.text(options.defaultClass()));
+            if (options.enter() != null) set(props, "enter", Interop.text(options.enter()));
+            if (options.exit() != null) set(props, "exit", Interop.text(options.exit()));
+            if (options.update() != null) set(props, "update", Interop.text(options.update()));
+            if (options.share() != null) set(props, "share", Interop.text(options.share()));
+            return viewTransitionNative(props, element(child, path + "/transition", path + "/transition"));
+        });
     }
     /** React's {@code addTransitionType}: labels the running transition, so that CSS and view
      * transition classes can tell for example forward from backward navigation. Call it inside a
@@ -114,7 +134,7 @@ public final class React {
     public static View portal(DomElement target, Object... children) {
         if (!(Objects.requireNonNull(target) instanceof BrowserElement browser))
             throw new IllegalArgumentException("A portal target must be a DOM element of this renderer");
-        return new NativeView(portal(element(Views.fragment(children)), browser.element));
+        return new NativePortal(portal(element(Views.fragment(children)), browser.element));
     }
     /** The document's body element, the usual target of a portal. */
     public static DomElement documentBody() { return new BrowserElement(body()); }
@@ -148,7 +168,7 @@ public final class React {
     /** Typed external React binding. The binding owns deliberate conversion of its known props schema. */
     public static <P> ComponentType<P> binding(String name, JSObject nativeComponent, Function<P, JSObject> props) {
         Objects.requireNonNull(nativeComponent); Objects.requireNonNull(props);
-        return new ComponentType<>(name, value -> new NativeView(external(nativeComponent, Objects.requireNonNull(props.apply(value)))));
+        return new ComponentType<>(name, value -> new NativeElement(external(nativeComponent, Objects.requireNonNull(props.apply(value)))));
     }
     /** Export once for use in an ordinary React tree. The decoder validates the foreign props schema. */
     public static <P> JSObject exportComponent(ComponentType<P> component, Function<JSObject, P> decode) {
@@ -250,17 +270,28 @@ public final class React {
         return element(view, path, path);
     }
     private static JSObject element(View view, String position, String container) {
+        return element(view, position, container, null);
+    }
+    private static JSObject element(View view, String position, String container, String replacementKey) {
+        if (view == null) return null;
+        String key = replacementKey == null ? Views.key(view) : replacementKey;
+        // A keyed wrapper owns the same descendant checkpoint paths after reordering.
+        // This is metadata only: never introduce an extra native Fragment boundary.
+        String keyedPosition = key == null ? position : HotReload.keyedPosition(container, key);
         return switch (view) {
-            case View.Element element -> nativeElement(element.tag(), attributes(element.attributes()), children(element.children(), position + "/element"));
+            case View.Keyed keyed -> element(keyed.element(), position, container, replacementKey == null ? keyed.key() : replacementKey);
+            case View.Element element -> withKey(nativeElement(element.tag(), attributes(element.attributes()), children(element.children(), keyedPosition + "/element")), replacementKey);
             case View.Text text -> nativeText(text.value());
-            case View.Fragment fragment -> fragment(children(fragment.children(), position + "/fragment"));
-            case View.ComponentView<?> component -> component(component, HotReload.childPath(component.component().name(), component.key(), position, container), false);
-            case View.Provider<?> provider -> provider(provider, position);
+            case View.Fragment fragment -> withKey(fragment(children(fragment.children(), keyedPosition + "/fragment")), replacementKey);
+            case View.ComponentView<?> component -> component(component, HotReload.childPath(component.component().name(), key, position, container), false, key);
+            case View.Provider<?> provider -> withKey(provider(provider, keyedPosition), replacementKey);
             case View.Empty empty -> null;
             // A real array, so React gives the collection one position and matches its items by key.
-            case View.Items items -> array(children(items.children(), position + "/items"));
+            case View.Items items -> array(children(items.children(), position + "/items"), items.staticChildren());
             case View.Extension extension -> {
-                if (extension instanceof NativeView nativeView) yield nativeView.element();
+                if (extension instanceof NativeDescription description) yield withKey(description.build().apply(keyedPosition), replacementKey);
+                if (extension instanceof NativeElement nativeElement) yield withKey(nativeElement.element(), replacementKey);
+                if (extension instanceof NativePortal nativePortal) yield nativePortal.element();
                 throw new IllegalArgumentException("Unsupported React view extension: " + extension.getClass().getName());
             }
         };
@@ -298,6 +329,9 @@ public final class React {
         return result;
     }
     private static <P> JSObject component(View.ComponentView<P> view, String path, boolean root) {
+        return component(view, path, root, view.key());
+    }
+    private static <P> JSObject component(View.ComponentView<P> view, String path, boolean root, String key) {
         ComponentType<P> descriptor = view.component();
         Render render = props -> {
             JSObject frame = HotReload.begin(readPath(props), descriptor.stateSignature(), readRoot(props));
@@ -309,7 +343,7 @@ public final class React {
         };
         var propsEqual = descriptor.propsEqual();
         Compare compare = propsEqual == null ? null : (previous, next) -> propsEqual.test(Interop.value(previous), Interop.value(next));
-        return nativeComponent(function(COMPONENTS, descriptor, render, compare, descriptor.name()), view.props(), view.key(), path, root);
+        return nativeComponent(function(COMPONENTS, descriptor, render, compare, descriptor.name()), view.props(), key, path, root);
     }
     private static <T> JSObject provider(View.Provider<T> provider, String path) { return provider(context(provider.context()), provider.value(), Interop.scalar(provider.value()), children(provider.children(), path + "/provider")); }
     static JSObject context(Context<?> context) { return cachedContext(CONTEXTS, context, context.defaultValue()); }
@@ -422,7 +456,10 @@ public final class React {
     @JSBody(params = "error", script = "return String(error && error.message || error);") private static native String errorMessage(JSObject error);
     @JSBody(params = {"type", "props"}, script = "return React.createElement(type, props);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject external(JSObject type, JSObject props);
     @JSBody(script = "return {};") private static native JSObject object();
-    @JSBody(params = "items", script = "return Array.prototype.slice.call(items);") private static native JSObject array(Object[] items);
+    // Authored fixed siblings use React's ordinary variadic element API for key validation.
+    // Only its children array is returned; the temporary description is never rendered.
+    // A dynamic collection does not take this path and retains React's missing-key checks.
+    @JSBody(params = {"items", "fixed"}, script = "var values = Array.prototype.slice.call(items); return fixed && values.length > 1 ? React.createElement.apply(null, [React.Fragment, null].concat(values)).props.children : values;", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject array(Object[] items, boolean fixed);
     @JSBody(params = {"object", "name", "value"}, script = "object[name] = value;") private static native void set(JSObject object, String name, Object value);
     @JSBody(params = {"object", "name", "value"}, script = "object[name] = value;") private static native void setNative(JSObject object, String name, JSObject value);
     @JSBody(params = {"object", "name", "handler"}, script = "object[name] = handler;") private static native void setHandler(JSObject object, String name, Handler handler);
@@ -437,6 +474,8 @@ public final class React {
     @JSBody(params = {"tag", "props", "children"}, script = "return React.createElement.apply(null, [tag, props].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject nativeElement(String tag, JSObject props, Object[] children);
     @JSBody(params = "text", script = "return React.createElement(React.Fragment, null, text);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject nativeText(String text);
     @JSBody(params = "children", script = "return React.createElement.apply(null, [React.Fragment, null].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject fragment(Object[] children);
+    @JSBody(params = {"element", "key"}, script = "return key === null ? element : React.cloneElement(element, {key: key});", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject withKey(JSObject element, String key);
+    @JSBody(params = "element", script = "return element.key == null ? null : String(element.key);") private static native String nativeKey(JSObject element);
     @JSBody(params = {"context", "value", "identity", "children"}, script = "return React.createElement.apply(null, [context.jxProvider, {value: value, identity: identity}].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject provider(JSObject context, Object value, Object identity, Object[] children);
     @JSBody(params = "error", script = "var cause = error && error.cause; return cause && typeof cause === 'object' ? cause : null;") private static native JSObject errorCause(JSObject error);
     @JSBody(params = {"elementId", "tree", "prefix", "caught", "uncaught", "recoverable"}, script = "var element = document.getElementById(elementId); if (!element) throw new Error('Missing React root: ' + elementId);"

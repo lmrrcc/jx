@@ -91,10 +91,15 @@ import { MediaEvents } from './cases/media-events.jsx';
 import { LayoutEffectDependencies } from './cases/layout-effect-dependencies.jsx';
 import { CombinedKeyedContext } from './cases/combined-keyed-context.jsx';
 import { CombinedActivityStore } from './cases/combined-activity-store.jsx';
+import { CombinedChildrenMap, CombinedChildrenList } from './cases/combined-children-map.jsx';
+import { CombinedChildrenContract } from './cases/combined-children-contract.jsx';
 
 export const cases = {
   'combined-keyed-context': CombinedKeyedContext,
   'combined-activity-store': CombinedActivityStore,
+  'combined-children-map': CombinedChildrenMap,
+  'combined-children-list': CombinedChildrenList,
+  'combined-children-contract': CombinedChildrenContract,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,
   'callable-state': CallableState,

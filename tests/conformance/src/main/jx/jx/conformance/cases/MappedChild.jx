@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Stateful child used to observe reconciliation through Children transformations. */
+@Component
+public final class MappedChild {
+    public record Props(String id) {}
+    public static View render(Props props) {
+        State<Integer> count = Hooks.useState(0);
+        State<String> draft = Hooks.useState("");
+        return (
+            <section data-child={props.id()}>
+                <button onClick={event -> count.update(value -> value + 1)}>Increment {props.id()}</button>
+                <output>{count.value()}</output>
+                <input aria-label={"Draft " + props.id()} value={draft.value()} onChange={event -> draft.set(event.targetValue())} />
+            </section>
+        );
+    }
+}

@@ -1,4 +1,10 @@
 id	feature-a	feature-b	case	modes	behavior
+children-key	jsx:key	react:Children	combined-children-map	client,hydrate,lazy	Source and mapped keys compose so wrappers preserve keyed child identity while a changed wrapper key resets it
+children-state	react:Children	react:useState	combined-children-map	client,hydrate,lazy	Mapped and duplicated children retain independent state across source reordering and reset after removal
+children-list	jsx:list-rendering	react:Children	combined-children-list	client,hydrate,lazy	Flattening nested arrays preserves distinct local key namespaces and each child's state
+children-fragment	react:Children	react:Fragment	combined-children-contract	client,hydrate,lazy	Explicit fragments are opaque single elements even when empty
+children-prop	jsx:children	react:Children	combined-children-contract	client,hydrate,lazy	Typed children props preserve the distinction between one element and an implicit collection
+children-values	jsx:child-values	react:Children	combined-children-contract	client,hydrate,lazy	Traversal counts empty nested slots while toList omits them and only rejects non-elements
 key-state	jsx:key	react:useState	combined-keyed-context	client,hydrate,lazy	Local count follows reordered keys and resets after removal and reinsertion
 key-input	dom:controlled-input	jsx:key	combined-keyed-context	client,hydrate,lazy	Controlled draft and input node stay with their keyed row on reorder
 key-effect	jsx:key	react:useEffect	combined-keyed-context	client,hydrate,lazy	Reordering retains mounted effects while removing a key cleans up its effect

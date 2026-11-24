@@ -137,7 +137,7 @@ class EditorProjectionTest {
         assertTrue(projection.javaSource().contains("new Pair.Props(local + \"first\", null, null)"), projection.javaSource());
         GeneratedSource executable = new JxCompiler().compile(List.of(authored, pair)).generatedSources().stream()
                 .filter(value -> value.source().equals(authored)).findFirst().orElseThrow();
-        assertTrue(executable.javaSource().contains("new Pair.Props(local + \"first\", local + \"second\", jx.Views.fragment("), executable.javaSource());
+        assertTrue(executable.javaSource().contains("new Pair.Props(local + \"first\", local + \"second\", jx.Views.childrenValue("), executable.javaSource());
     }
 
     @Test void boundsConstructorExpansionWithoutDiscardingOtherProjectSources() {

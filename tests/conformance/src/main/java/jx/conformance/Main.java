@@ -10,6 +10,9 @@ import jx.conformance.cases.ChildrenProp;
 import jx.conformance.cases.Conditional;
 import jx.conformance.cases.CombinedKeyedContext;
 import jx.conformance.cases.CombinedActivityStore;
+import jx.conformance.cases.CombinedChildrenMap;
+import jx.conformance.cases.CombinedChildrenList;
+import jx.conformance.cases.CombinedChildrenContract;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
 import jx.conformance.cases.DomRefFocus;
@@ -193,6 +196,9 @@ public final class Main {
             case "dom-events" -> DomEvents.JX;
             case "combined-keyed-context" -> CombinedKeyedContext.JX;
             case "combined-activity-store" -> CombinedActivityStore.JX;
+            case "combined-children-map" -> CombinedChildrenMap.JX;
+            case "combined-children-list" -> CombinedChildrenList.JX;
+            case "combined-children-contract" -> CombinedChildrenContract.JX;
             default -> null;
         };
     }

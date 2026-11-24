@@ -9,9 +9,10 @@ No GitHub issues, scheduled jobs, deployments or releases were created by this p
 
 Progress: **GA-01 and GA-02 are complete**. GA-14, GA-15 and GA-18 have substantial
 partial implementations through the React parity tasks; their broader acceptance
-outcomes below are not yet complete. R-26 is accepted. R-27-01's complete local
-bench passes 731 checks and records 19 / 5,356 active feature pairs, with 5,337
-still uncovered; both scoped mutants were killed and Verify acceptance is pending. See the
+outcomes below are not yet complete. R-26 is accepted and R-27-01 merged with green
+Verify. R-27-02a's complete local bench passes 755 checks and records 25 / 5,356
+active feature pairs, with 5,331 still uncovered; mutation and Verify acceptance
+are pending. See the
 [interaction evidence record](ga-react-interactions.md) for the unchanged eventual
 118-feature / 6,903-pair scope and its limits. G0 remains open: the serialized lazy
 boundary and basic Node rendering/hydration proofs are delivered, while component
@@ -56,7 +57,7 @@ exists, not when its document or skeleton module lands.
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
 | GA-17 | Forms, validation, i18n and accessible primitives / A | GA-10, GA-15 | M3–M5 / L | Complex form, arrays/errors, locale/RTL, keyboard/reader, shared pure rules and server errors | ⬜ planned |
-| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-01 locally evidences 19 active pairs; 5,337 active pairs plus deferred-feature interactions remain | 🟡 partial |
+| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02a locally evidences 25 active pairs; 5,331 active pairs plus deferred-feature interactions remain | 🟡 partial |
 | GA-19 | HTTP headers/binary/upload/stream capabilities / C | GA-03, GA-10, GA-13 | M3–M5 / L | Auth/CSRF headers, upload progress, download, SSE/WS lifecycle, bounds/reconnect tested | ⬜ planned |
 | GA-20 | Real ecosystem binding SDK and catalog / R | GA-15, GA-18 | M4–M7 / L | Selected grid/editor/chart/headless/media bindings with refs/assets/cleanup; Java consumer examples | ⬜ planned |
 | GA-21 | Complex authenticated reference product / A | GA-12, GA-13, GA-16, GA-17, GA-19 | M4–M6 / L | Workspace/project workflow with roles, search/table/detail, forms/files/activity and two-tenant tests | ⬜ planned |

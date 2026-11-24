@@ -189,7 +189,7 @@ final class Lowerer {
                 Attribute attribute = attributes.get(prop.name());
                 if (attribute != null) value(attribute);
                 else if (prop.name().equals("children") && !children.isEmpty()) {
-                    out.synthetic("jx.Views.fragment(", anchor); children(children); out.synthetic(")", anchor);
+                    componentChildren(children, anchor);
                 } else if (prop.optional()) {
                     // An omitted optional prop is Java's default; a compact constructor may replace it.
                     out.synthetic(editorDefault(prop.javaType()), anchor);
@@ -268,7 +268,7 @@ final class Lowerer {
                 if (!copied && active != null && !active.name().equals("key") && prop.name().equals(active.name())) {
                     value(active); copied = true;
                 } else if (!copied && active == null && prop.name().equals("children") && !children.isEmpty()) {
-                    out.synthetic("jx.Views.fragment(", anchor); children(children); out.synthetic(")", anchor);
+                    componentChildren(children, anchor);
                     copied = true;
                 } else out.synthetic(editorDefault(prop.javaType()), anchor);
             }
@@ -277,6 +277,20 @@ final class Lowerer {
         if (active != null && active.name().equals("key")) {
             out.synthetic(", ", active.nameSpan().start()); value(active);
         }
+        out.synthetic(")", anchor);
+    }
+
+    /** Implicit children are a value or collection, not an authored Fragment element. */
+    private void componentChildren(List<Node> children, int anchor) {
+        out.synthetic("jx.Views.childrenValue(", anchor);
+        if (children.size() == 1) {
+            // Java would expand a sole Object[] expression into the varargs array. Preserve it
+            // as one child value, including an empty or singleton array and an explicit null.
+            Node child = children.getFirst();
+            out.synthetic("(Object)(", child.span().start());
+            nodes(children);
+            out.synthetic(")", child.span().end());
+        } else children(children);
         out.synthetic(")", anchor);
     }
 

@@ -3,6 +3,12 @@ activity-effects	pass	pass	pass	pass	n/a	n/a	pass	pass
 activity-state	pass	pass	pass	pass	n/a	n/a	pass	pass
 activity-store	pass	pass	pass	pass	n/a	n/a	pass	pass
 async-transition	pass	pass	pass	pass	n/a	n/a	pass	pass
+children-fragment	pass	pass	pass	pass	n/a	n/a	pass	pass
+children-key	pass	pass	pass	pass	n/a	n/a	pass	pass
+children-list	pass	pass	pass	pass	n/a	n/a	pass	pass
+children-prop	pass	pass	pass	pass	n/a	n/a	pass	pass
+children-state	pass	pass	pass	pass	n/a	n/a	pass	pass
+children-values	pass	pass	pass	pass	n/a	n/a	pass	pass
 context-effect	pass	pass	pass	pass	n/a	n/a	pass	pass
 context-state	pass	pass	pass	pass	n/a	n/a	pass	pass
 hydrate-id	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a

@@ -2,18 +2,27 @@
 
 24 November 2026. Parent: [implementation sequence](ga-tasks.md#r-27-implementation-slices).
 R-27 is **partial**. R-27-01 implements the interaction register, executed assertion
-reporting and two combined scenarios. Its complete local bench and scoped
-mutation run pass; this change's Verify acceptance is pending. No human or
-cross-browser qualification is implied by these local results.
+reporting and two combined scenarios. Its tested head `56e247d` merged as
+`f6018a4` in [PR #38](https://github.com/lmrrcc/jx/pull/38), with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45435501261)
+and [green CI](https://github.com/lmrrcc/jx/actions/runs/45435438849).
+Its complete local bench and scoped mutation run pass. R-27-02a is in progress;
+its complete bench and runtime suite pass, with curated mutants and Verify pending.
+No additional human or cross-browser
+qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
+
+The passing counts below include the complete R-27-02a local run. Its six new
+pairs increase the merged R-27-01 baseline of 19 to **25 / 5,356**, with **5,331**
+remaining. This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
 | --- | --- |
 | Currently supported/equivalent feature IDs | 104 |
 | Candidate unordered pairs among those IDs | 5,356 |
-| Pairs with a passing witness in every declared mode, on both React and JX | 19 |
-| Current candidate pairs without complete evidence | 5,337 |
+| Pairs with a passing witness in every declared mode, on both React and JX | 25 |
+| Current candidate pairs without complete evidence | 5,331 |
 | Eventual application-feature IDs | 118 |
 | Eventual candidate pairs | 6,903 |
 | Additional pairs involving the 14 deferred feature IDs | 1,547 |
@@ -72,10 +81,11 @@ golden-file comparison but retain checks on the assertions they execute.
 | `combined-keyed-context` | Seven pairs: keys with state, controlled inputs and effects; memo with context and prop updates; context with state and effects. Reordering preserves row identity and drafts; removing/reinserting resets only that row; context changes reach memoized readers and clean up old effects. |
 | `combined-activity-store` | Four pairs: memo with an external store; Activity with store subscriptions, state and effects. Hiding releases subscriptions/effects while retaining DOM and state; revealing reads the latest snapshot; unmounting resets local state. |
 | Existing focused cases | Eight pairs: Strict Mode/effects, layout/passive effect order, lazy/Suspense, async/transition, hydration/store, hydration/IDs, portal/events and streaming/Suspense. Named assertion blocks now record the existing behavioral evidence. |
+| R-27-02a children cases | Six pairs: Children with keys, state, list rendering, children props, explicit fragments and child values. Mapping and flattening preserve composed identity; shape and validity checks match native React. |
 
 The combined scenarios run their assertions in client, hydrate and lazy modes.
 Static mode renders both scenarios and compares HTML, but does not execute their
-interactive assertion blocks and therefore earns no pair credit. None of the 19
+interactive assertion blocks and therefore earns no pair credit. None of the 25
 current witnesses claims static interaction coverage.
 
 The register explicitly limits lazy/Suspense and portal/events to client/lazy.
@@ -89,9 +99,74 @@ The streaming witness checks shell/fallback/delayed-content ordering in the
 collected HTML. It does not measure early network delivery; that requires a
 separate controlled streaming assertion in R-27-04.
 
-## Local results and repeatable checks
+## R-27-02a: children contracts in progress
 
-The complete local run on 24 November reports **731 passed, 133 skipped**, across
+Three differential reproduction cases passed on React and failed on JX before
+the fixes. They exposed lost mapped keys and the conflation of component children
+collections with explicitly authored fragments. The six selected pairs combine
+`react:Children` with `jsx:key`, `react:useState`, `jsx:list-rendering`,
+`jsx:children`, `react:Fragment` and `jsx:child-values`.
+
+| Case | Observable contract |
+| --- | --- |
+| `combined-children-map` | Composed source/wrapper keys preserve independent child state across reordering; changing a wrapper key resets its subtree; removing and reinserting resets the removed child. |
+| `combined-children-list` | Flattened nested arrays retain local key namespaces and child state, including repeated keys in different nested collections. |
+| `combined-children-contract` | Explicit fragments are opaque single elements; nested arrays are traversed; `only` rejects singleton arrays, text and null; implicit children and explicit `children` props agree. Native element/portal checks run after a browser event without mounting the portal. Numeric key strings are produced by the compiled Java consumer and compared with native React. |
+
+The compiler now emits `Views.childrenValue` in build and editor projections,
+preserving null, singleton and collection shapes independently of explicit
+fragments. `Children.map` and `toList` compose keys through `View.Keyed`, without
+adding a React reconciliation boundary. `View.Items.staticChildren` preserves
+React's fixed-sibling validation metadata while dynamic collections still undergo
+list-key checks. `View.ElementExtension` identifies native elements as distinct
+from portal nodes. See [runtime contracts and compiling consumers](runtime.md#children-traversal-composed-keys-and-native-nodes)
+and the linked API Javadocs.
+
+JVM and TeaVM numeric vectors cover `1.0`, negative zero, `1e-6`, `1e-7`, `1e20`,
+`1e21`, `1e23`, the smallest subnormal and largest finite double, widened `1.1f`,
+`NaN`, both infinities and `9007199254740991L`. The browser assertion compares
+effective keys with native JavaScript number spelling and React key escaping;
+initial HTML comparison also observes those generated strings. This tests the
+Java numeric conversion after TeaVM compilation, rather than inferring browser
+behavior from JVM tests.
+
+The final Maven build passes **28 core, 41 compiler and 15 Maven-plugin tests**.
+After the fixed-sibling validation repair, four focused cases passed in all eight
+projects (32 passes). A separate native-wrapper hot-reload reproduction then found
+checkpoint paths following positions instead of composed keys. Its repair passes
+the complete **12 / 12 runtime suite**, including mapped DOM and native-wrapper
+hot replacement.
+
+The complete bench passes **755 checks, with 133 skipped, across 111 case IDs**:
+
+| Mode | React reference | JX |
+| --- | --- | --- |
+| Client, including Node API cases | 109 / 109 | 108 / 108 |
+| Hydration | 84 / 84 | 84 / 84 |
+| Static HTML | 90 / 90 | 90 / 90 |
+| Lazy route | 95 / 95 | 95 / 95 |
+
+All six new pairs have passing assertion witnesses on both sides in every declared
+mode, raising complete pair evidence to **25 / 5,356**. Curated mutation and Verify
+results remain pending; R-27-02a is not yet closed. Three scoped mutants are being
+checked: `children-not-listed`, `children-source-key-lost` and `strict-mode-dropped`.
+The catalog has 105 entries (one added, two adapted for this slice); the historical
+full campaign still covers 100. A scoped result must not be reported as a full
+105-mutant campaign.
+
+Run the scoped campaign exclusively, without concurrent builds or browser suites:
+
+```sh
+java tools/MutateBench.java --only children-not-listed,children-source-key-lost,strict-mode-dropped
+```
+
+The new witnesses declare client, hydrate and lazy modes. Static HTML comparison
+checks initial rendering, including numeric key output, but supplies no interactive
+pair credit. Existing per-case exclusions remain in effect.
+
+## R-27-01 results and repeatable checks
+
+The R-27-01 local run on 24 November reported **731 passed, 133 skipped**, across
 108 case IDs. Its interaction summary is **19 / 5,356**, with **5,337** remaining.
 
 | Mode | React reference | JX |
@@ -123,7 +198,7 @@ java tools/MutateBench.java --only combined-unstable-key,combined-store-leak
 The unmutated scratch baseline passed. The scoped run killed **both mutants**,
 with zero survivors and zero unusable mutants: `combined-unstable-key` was detected
 by `combined-keyed-context`, and `combined-store-leak` by `combined-activity-store`.
-The catalog now has 104 mutants; the recorded historical full campaign covers
+The R-27-01 catalog had 104 mutants; the recorded historical full campaign covers
 100. R-26 separately killed its two new mutants. Neither scoped run establishes a
 fresh full 104-mutant campaign.
 
