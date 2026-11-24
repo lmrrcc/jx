@@ -1,4 +1,10 @@
 id	feature-a	feature-b	case	modes	behavior
+portal-context	react-dom:createPortal	react:useContext	combined-portal-lifecycle	client,hydrate,lazy	Context updates cross the portal's logical ancestry without replacing its input node or draft
+portal-capture	dom:capture-phase-events	react-dom:createPortal	combined-portal-lifecycle	client,hydrate,lazy	Capture and bubble handlers follow the React ancestry across the separate portal DOM container
+portal-payload	dom:event-payload	react-dom:createPortal	combined-portal-lifecycle	client,hydrate,lazy	Portal handlers receive the original nested target and each logical currentTarget with updated defaultPrevented state
+portal-propagation	dom:event-default-and-propagation	react-dom:createPortal	combined-portal-lifecycle	client,hydrate,lazy	A portal target prevents navigation and stops bubbling to its panel and logical owner after capture
+portal-dom-ref	dom:ref-on-element	react-dom:createPortal	combined-portal-lifecycle	client,hydrate,lazy	Closing a portal clears its DOM ref and disconnects the old node while reopening attaches a fresh input
+portal-layout	react-dom:createPortal	react:useLayoutEffect	combined-portal-lifecycle	client,hydrate,lazy	Portal layout setup observes and focuses the attached input and closing runs cleanup
 key-callback-ref	jsx:key	jsx:ref-callback	combined-keyed-refs	client,hydrate,lazy	Reordering retains callback refs and real DOM nodes while removing and restoring a key disposes and creates attachments
 callback-ref-identity	jsx:ref-callback	react:useCallback	combined-keyed-refs	client,hydrate,lazy	Stable callback dependencies avoid detachment while changed dependencies replace the callback on the same DOM node
 layout-callback-ref	jsx:ref-callback	react:useLayoutEffect	combined-keyed-refs	client,hydrate,lazy	Layout setup observes the node attached by the current callback ref

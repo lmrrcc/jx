@@ -1,0 +1,65 @@
+package jx.conformance.cases;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+import jx.Component;
+import jx.Context;
+import jx.DomRef;
+import jx.Event;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.react.React;
+
+/** A portal opens after an event, keeping the initial server and browser trees identical. */
+@Component
+public final class CombinedPortalLifecycle {
+    public static final Context<String> THEME = Hooks.createContext("outside");
+
+    public static View render() {
+        State<Boolean> opened = Hooks.useState(false);
+        State<Boolean> stopped = Hooks.useState(false);
+        State<String> theme = Hooks.useState("light");
+        State<List<String>> events = Hooks.useState(List.of());
+        State<String> layout = Hooks.useState("not mounted");
+        State<String> reference = Hooks.useState("uninspected");
+        DomRef input = Hooks.useDomRef();
+        Consumer<String> append = line -> events.update(previous -> {
+            List<String> next = new ArrayList<>(previous);
+            next.add(line);
+            return List.copyOf(next);
+        });
+        return (
+            <main>
+                <button onClick={event -> opened.set(true)}>Open portal</button>
+                <button onClick={event -> opened.set(false)}>Close portal</button>
+                <button onClick={event -> theme.set("dark")}>Change portal theme</button>
+                <button onClick={event -> stopped.update(value -> !value)}>Toggle portal propagation</button>
+                <button onClick={event -> events.set(List.of())}>Clear portal events</button>
+                <button onClick={event -> reference.set(input.current() == null
+                    ? "cleared" : "attached " + input.current().tagName())}>Inspect portal ref</button>
+                <p data-testid="portal-propagation-mode">{stopped.value() ? "stopped" : "bubbling"}</p>
+                <p data-testid="portal-layout">{layout.value()}</p>
+                <p data-testid="portal-ref">{reference.value()}</p>
+                <pre data-testid="portal-events">{String.join("\n", events.value())}</pre>
+                <div id="portal-owner" data-testid="portal-owner"
+                     onClickCapture={event -> append.accept(eventLine("owner-capture", event))}
+                     onClick={event -> append.accept(eventLine("owner-bubble", event))}>
+                    {THEME.provide(theme.value(), opened.value()
+                        ? React.portal(React.documentBody(),
+                            <PortalLifecyclePanel input={input} stopped={stopped.value()}
+                                onEvent={append} onLayout={value -> layout.set(value)} />)
+                        : null)}
+                </div>
+            </main>
+        );
+    }
+
+    /** Copy borrowed event values synchronously, before queuing any state update. */
+    static String eventLine(String phase, Event event) {
+        return phase + "|" + event.type() + "|" + event.target().id() + "|" + event.target().tagName()
+                + "|" + event.currentTarget().id() + "|" + event.currentTarget().tagName()
+                + "|" + event.defaultPrevented();
+    }
+}
