@@ -8,6 +8,44 @@ browser, or editor distribution.
 The [GA roadmap](ga-roadmap.md) defines the next year of work, measurable release
 gates and portfolio migrations. Its planned capabilities are not delivered status.
 
+## R-26 update — 24 November 2026
+
+The conformance bench now runs client, hydration, static HTML and lazy-route
+modes. A complete local run passes **715 checks**, with 133 inapplicable cells
+across 106 case IDs:
+
+| Mode | React reference | JX |
+| --- | --- | --- |
+| Client (including Node API cases) | 104 / 104 | 103 / 103 |
+| Hydration | 79 / 79 | 79 / 79 |
+| Static HTML | 85 / 85 | 85 / 85 |
+| Lazy route | 90 / 90 | 90 / 90 |
+
+The lazy checks verify a real deferred download, absence of case code from the
+initial TeaVM program, loading UI, download failure and explicit retry. Generated
+DOM/event comparisons use the same mode on both sides. The inventory also handles
+Node's synthetic CommonJS export marker without adding it to the React API list.
+
+The scoped mutation run killed both new defects (`lazy-route-eager` and
+`lazy-host-includes-cases`), with zero survivors or unusable mutants. The latter
+is caught specifically by `lazy-route-loading`'s TeaVM source-map check. This
+extends the curated catalog to 102 entries; the previous 100-entry full result
+was not regenerated and must not be described as a fresh 102/102 campaign.
+
+The first complete rerun hit an existing hydration test's 20-second timeout with
+five workers; the bench now caps concurrency at two workers and retains the same
+timeouts and assertions. The final complete run passed. This is Chrome evidence,
+not a performance or cross-browser qualification.
+
+R-26 is **complete**: Luca's try-it run on 24 November reports the same 715 passes,
+133 skipped cells and an exact match with the recorded results. Code revision
+`eb5a18a` passed [Verify](https://github.com/lmrrcc/jx/actions/runs/45372691183).
+R-27 is the next React parity task. `npm run test:bench` runs the full matrix after the Maven build.
+M1-22/M1-23 already proved the serialized module boundary; automatic Maven chunk
+packaging remains open. G0 remains open. The dated review below retains its
+earlier evidence baseline; this update supersedes its rendering-mode counts and
+its statement that the lazy boundary is still unimplemented.
+
 ## Progress review — 23 November 2026
 
 The client React runtime has advanced substantially. The full-stack GA foundation
@@ -38,7 +76,7 @@ the others remain assigned work under the all-React-features goal.
 | Editors | IntelliJ and VS Code packages with native Java integration, mixed highlighting and dev launch | Scale/latency and native-action qualification, broader version matrix, closed-file edits and composed `.jx` browser debugging. TurboJ integration remains planned. |
 | Qualification | Verify, Chrome bench, curated mutations; Cherry Test unit coverage/CRAP baseline | Browser/integration orchestration, screenshot baselines, manual gallery, PIT setup, root-wrapper discovery and agreed quality thresholds; broader browsers, security, performance and release evidence. |
 
-The immediate scheduled feature is **R-26**; R-19 to R-24 were added on 23 and 24 November. Of the five G0 proofs,
+At this review, the scheduled feature was **R-26**; R-19 to R-24 were added on 23 and 24 November. Of the five G0 proofs,
 React SSR→hydration has its first two tasks done (M1-24, M1-25; M1-26 is open). Four remain
 open: external component JAR, exact shared contract, authenticated packaged
 Spring/dev-origin prototype and safe lazy-runtime boundary.

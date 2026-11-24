@@ -1,4 +1,4 @@
-import {test, expect, log, serverOf, sideOf} from './bench.js';
+import {test, expect, log, serverOf, sideOf, modeOf} from './bench.js';
 
 test('choice-inputs: controlled radio group, select and textarea', async ({page, open}) => {
   await open('choice-inputs');
@@ -190,16 +190,33 @@ test('hydrate-server: the browser hydrates HTML rendered in Node, keeping nodes 
   expect(await button.evaluate(node => node.benchServerNode)).toBe(true);
 });
 
-// The generated table cases compare JX with React directly: the same case is opened on the
-// reference side and the two DOM trees must serialize to the same HTML.
+// Open the same case and mode for generated DOM/event comparisons.
+async function referencePage(page, id, info) {
+  const reference = await page.context().newPage();
+  const mode = modeOf(info);
+  if (mode === 'hydrate') {
+    const server = await serverOf({project: {name: 'reference'}});
+    await reference.addInitScript(markup => { globalThis.__benchServerHtml = markup; }, await server.renderCase(id));
+  }
+  await reference.goto('../reference' + (mode === 'lazy' ? '-lazy' : '') + '/?case=' + id + '&mode=' + mode);
+  if (mode === 'lazy') {
+    await reference.getByTestId('bench-open-route').click();
+    await expect.poll(() => reference.evaluate(() => globalThis.__benchLazyReady === true)).toBe(true);
+  }
+  await expect(reference.locator('#app > *').first()).toBeAttached();
+  return reference;
+}
+
+// The generated table cases require the two DOM trees to serialize to the same HTML.
 async function sameAsReference(page, id, info) {
   const html = await page.locator('#app').innerHTML();
   if (sideOf(info) !== 'jx') return html;
-  const reference = await page.context().newPage();
-  await reference.goto('../reference/?case=' + id);
-  await expect(reference.locator('#app > *').first()).toBeAttached();
-  expect(html).toEqual(await reference.locator('#app').innerHTML());
-  await reference.close();
+  const reference = await referencePage(page, id, info);
+  try {
+    expect(html).toEqual(await reference.locator('#app').innerHTML());
+  } finally {
+    await reference.close();
+  }
   return html;
 }
 
@@ -241,10 +258,11 @@ test('dom-events: every event handler name React knows is called as in React', a
   for (const call of ['Click', 'Click capture', 'DoubleClick', 'Play', 'Play capture', 'PointerDown', 'Wheel', 'Submit', 'Focus', 'Blur'])
     expect(calls).toContain(call);
   if (sideOf(info) === 'jx') {
-    const reference = await page.context().newPage();
-    await reference.goto('../reference/?case=dom-events');
-    await expect(reference.locator('#app > *').first()).toBeAttached();
-    expect(calls).toEqual(await fireAll(reference));
-    await reference.close();
+    const reference = await referencePage(page, 'dom-events', info);
+    try {
+      expect(calls).toEqual(await fireAll(reference));
+    } finally {
+      await reference.close();
+    }
   }
 });

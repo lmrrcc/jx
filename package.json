@@ -14,10 +14,11 @@
     "test:hot": "playwright test -c tests/hot-reload/playwright.config.js",
     "build:bench": "esbuild tests/conformance/reference/entry.jsx --bundle --format=esm --jsx=automatic --sourcemap --outfile=tests/conformance/target/reference-site/application.js && esbuild tests/conformance/reference/server.jsx --bundle --platform=node --format=cjs --jsx=automatic --outfile=tests/conformance/target/reference-site/server.cjs",
     "build:bench-server": "esbuild tests/conformance/server-entry.js --bundle --platform=node --format=cjs --outfile=tests/conformance/target/jx-server/server.cjs",
+    "build:bench-lazy": "esbuild host=tests/conformance/reference/lazy-host.jsx route=tests/conformance/reference/lazy-route.jsx --external:./route.js --bundle --splitting --format=esm --jsx=automatic --sourcemap --chunk-names=shared-[hash] --outdir=tests/conformance/target/reference-lazy/site --metafile=tests/conformance/target/reference-lazy/metafile.json && esbuild host=tests/conformance/lazy-host-entry.js route=tests/conformance/target/lazy-route/application.js --bundle --splitting --format=esm --sourcemap --chunk-names=shared-[hash] --outdir=tests/conformance/target/jx-lazy/site --metafile=tests/conformance/target/jx-lazy/metafile.json",
     "build:lazy": "esbuild host=tests/lazy-boundary/host-entry.js late=tests/lazy-boundary/module/target/browser/application.js --bundle --splitting --format=esm --sourcemap --outdir=tests/lazy-boundary/target/site",
     "test:lazy": "npm run build:lazy && playwright test -c tests/lazy-boundary/playwright.config.js",
     "test:ssr": "npm run build:bench && npm run build:bench-server && playwright test -c tests/conformance/playwright.config.js -g server-render",
-    "test:bench": "npm run build:bench && npm run build:bench-server && playwright test -c tests/conformance/playwright.config.js"
+    "test:bench": "node --test tests/conformance/report.test.js && npm run build:bench && npm run build:bench-server && npm run build:bench-lazy && BENCH_REQUIRE_COMPLETE=1 playwright test -c tests/conformance/playwright.config.js"
   },
   "dependencies": { "react": "19.3.1", "react-dom": "19.3.1" },
   "devDependencies": { "@playwright/test": "1.65.1", "esbuild": "0.28.2" }

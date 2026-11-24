@@ -2,10 +2,12 @@
 // and compares the table with the recorded docs/evidence/conformance-results.tsv.
 // Set BENCH_UPDATE=1 to record a deliberate change. The mutation runner sets
 // BENCH_NO_COMPARE=1 because it runs the JX side only.
+// The full npm command sets BENCH_REQUIRE_COMPLETE=1; focused Playwright runs do not.
 import {readFileSync, writeFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 
-const PROJECTS = ['reference', 'jx', 'reference-hydrate', 'jx-hydrate', 'reference-static', 'jx-static'];
+const PROJECTS = ['reference', 'jx', 'reference-hydrate', 'jx-hydrate', 'reference-static', 'jx-static',
+  'reference-lazy', 'jx-lazy'];
 const RECORD = fileURLToPath(new URL('../../docs/evidence/conformance-results.tsv', import.meta.url));
 
 export default class ConformanceReport {
@@ -35,19 +37,27 @@ export default class ConformanceReport {
       + rows.filter(([, row]) => row.jx === 'unsupported').length + ' unsupported');
     console.log('hydrate mode: reference ' + count('reference-hydrate') + ' pass; jx ' + count('jx-hydrate') + ' pass');
     console.log('static mode: reference ' + count('reference-static') + ' pass; jx ' + count('jx-static') + ' pass');
+    console.log('lazy mode: reference ' + count('reference-lazy') + ' pass; jx ' + count('jx-lazy') + ' pass');
 
     const table = ['case', ...PROJECTS].join('\t') + '\n' + rows.map(([id, row]) => line(id, row)).join('\n') + '\n';
     if (process.env.BENCH_NO_COMPARE === '1') return;
-    if (process.env.BENCH_UPDATE === '1') {
-      writeFileSync(RECORD, table);
-      console.log('Recorded results in docs/evidence/conformance-results.tsv');
-      return;
-    }
     let recorded = '';
     try { recorded = readFileSync(RECORD, 'utf8'); } catch { /* reported below */ }
     const before = new Map(recorded.split('\n').slice(1).filter(Boolean).map(line => [line.split('\t')[0], line]));
-    if (rows.length < before.size || rows.some(([, row]) => PROJECTS.some(name => row[name] === undefined))) {
+    const missingCases = [...before.keys()].filter(id => !this.rows.has(id));
+    if (!rows.length || rows.length < before.size || missingCases.length
+        || rows.some(([, row]) => PROJECTS.some(name => row[name] === undefined))) {
+      if (process.env.BENCH_UPDATE === '1' || process.env.BENCH_REQUIRE_COMPLETE === '1') {
+        console.log('Incomplete run: every recorded case must run in every project. Recorded results were not changed.');
+        if (missingCases.length) console.log('Missing recorded cases: ' + missingCases.join(', '));
+        return {status: 'failed'};
+      }
       console.log('Partial run: recorded results were not compared.');
+      return;
+    }
+    if (process.env.BENCH_UPDATE === '1') {
+      writeFileSync(RECORD, table);
+      console.log('Recorded results in docs/evidence/conformance-results.tsv');
       return;
     }
     const changes = [];

@@ -15,14 +15,14 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 26 tasks done, R-26 next, 5 planned; complete remaining APIs, options, rendering modes and combinations. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27 next. Complete remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
 | R-21 hydration | ✅ Done | `React.hydrate` over Node-rendered HTML (M1-25), store server snapshots and matching `useId`, added on 24 November 2026. |
-| G0 foundation proofs | ⬜ To do | Component JAR, exact shared contract, authenticated packaged Spring, safe lazy chunks and SSR→hydration. |
+| G0 foundation proofs | 🟡 Partial | Lazy-module boundary and basic SSR→hydration proofs delivered; component JAR, exact shared contract, authenticated packaged Spring and protected SSR data route remain. |
 | Shared contracts and complete Spring integration | ⬜ To do | Generated clients/codecs, starter/BOM, one packaged UI/API and authenticated development. The existing todo API is the baseline. |
-| JX server rendering and hydration | ⬜ To do | SSR/SSG, hydration, streaming/resume and the RSC protocol track. |
+| JX server rendering and hydration | 🟡 Partial | Node rendering, hydration, streaming/resume have bench evidence; request isolation, protected data and the RSC protocol track remain. |
 | IntelliJ and VS Code experience | 🟡 Partial | Existing packages work within documented limits; GA qualification, scale, remaining editing actions and browser debugging are open. |
 | TT-01 Cherry Test orchestration | 🟡 Partial | Unit coverage/CRAP delivered; integration and browser kinds still open. |
 | TT-04 PIT through Cherry Test | ⛔ Blocked | Installed Cherry Test update and first verified PIT run. |
@@ -47,11 +47,16 @@ The React track has 19 complete tasks; the R-16 gap that review found (the
 `useFormState` alias) was closed the same day. There are 93 supported/equivalent feature
 rows out of 120; the bench records 86 JX passes, 11 unsupported cases and one
 not-applicable case. These are coverage counts, not a GA completion percentage.
-Update, 24 November 2026: R-19 to R-24 are done. The feature register has 104 supported/equivalent
-rows out of 120 and none unsupported; the bench records 100 JX passes and no reference-only case.
-R-25 is the next scheduled feature. G0 remains open: component JARs, exact shared
-contracts, authenticated packaged Spring and lazy chunks still need their proof tasks, and the
-SSR→hydration proof still lacks its protected data route (M1-26). Milestone dates have not been advanced or declared complete
+Update, 24 November 2026: R-19 to R-25 are done. The feature register has 104 supported/equivalent
+rows out of 120 and none unsupported. R-26 adds the lazy-route axis to the existing
+client, hydration and static HTML modes. Luca's try-it run confirmed 715 passes
+and 133 inapplicable cells; revision `eb5a18a` passed
+[Verify](https://github.com/lmrrcc/jx/actions/runs/45372691183), completing R-26.
+See the [task and try-it command](ga-tasks.md#react-parity-track).
+M1-22/M1-23 proved the serialized lazy-module boundary; automatic chunk packaging
+in the Maven plugin is still open. G0 also needs component JARs, exact shared
+contracts, authenticated packaged Spring and the protected SSR data route (M1-26).
+Milestone dates have not been advanced or declared complete
 because client React work reached features originally assigned to M2/M3.
 
 Revision, 21 November 2026: implementation now follows the

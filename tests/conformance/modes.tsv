@@ -19,3 +19,7 @@ strict-nested	static	the case mounts its own root without Strict Mode
 unknown-case	static	there is no component to render
 portal	static	a portal needs a DOM element as target, and the server has no document
 external-store	static	the store of the case has no server snapshot, which React requires for server rendering
+hydrate-root	lazy	the case owns root hydration rather than rendering a route component under an existing root
+hydrate-server	lazy	the case owns root hydration rather than rendering a route component under an existing root
+root-options	lazy	the case constructs its own root and options rather than rendering a route component
+unknown-case	lazy	there is no component to load for an unknown route

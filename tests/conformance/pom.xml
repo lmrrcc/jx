@@ -16,7 +16,15 @@
       </executions>
     </plugin>
     <plugin><groupId>org.teavm</groupId><artifactId>teavm-maven-plugin</artifactId><version>${teavm.version}</version>
-      <executions><execution><goals><goal>compile</goal></goals><phase>process-classes</phase></execution></executions>
+      <executions>
+        <execution><goals><goal>compile</goal></goals><phase>process-classes</phase></execution>
+        <execution><id>lazy-host</id><goals><goal>compile</goal></goals><phase>process-classes</phase>
+          <configuration><mainClass>jx.conformance.LazyHost</mainClass><targetDirectory>${project.build.directory}/lazy-host</targetDirectory></configuration>
+        </execution>
+        <execution><id>lazy-route</id><goals><goal>compile</goal></goals><phase>process-classes</phase>
+          <configuration><mainClass>jx.conformance.LazyRoute</mainClass><targetDirectory>${project.build.directory}/lazy-route</targetDirectory></configuration>
+        </execution>
+      </executions>
       <configuration>
         <mainClass>jx.conformance.Main</mainClass><targetType>JAVASCRIPT</targetType><jsModuleType>ES2015</jsModuleType>
         <targetDirectory>${project.build.directory}/browser</targetDirectory><targetFileName>application.js</targetFileName>

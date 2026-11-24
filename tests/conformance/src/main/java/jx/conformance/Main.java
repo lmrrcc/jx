@@ -154,6 +154,7 @@ public final class Main {
             case "ref-as-prop" -> RefAsProp.JX;
             case "ref-callback" -> RefCallbackCase.JX;
             case "create-ref" -> CreateRef.JX;
+            case "strict-nested" -> StrictNested.JX;
             case "insertion-effect" -> InsertionEffect.JX;
             case "effect-event" -> EffectEvent.JX;
             case "debug-value" -> DebugValue.JX;

@@ -22,15 +22,15 @@ import java.util.regex.Pattern;
  * the bench: a failing bench kills the mutant, a passing bench means a case is missing.
  *
  * <p>The working tree and its Maven repository are never modified. The run takes
- * roughly half a minute per mutant and serves its scratch copy on its own local
- * port, so a normal bench run can proceed beside it.
+ * a build and all applicable JX rendering modes per mutant. Run it without
+ * concurrent builds or browser suites to avoid resource contention and timeouts.
  */
 public final class MutateBench {
     private static final String MUTANTS = "tests/conformance/mutants.tsv";
     private static final String RESULTS = "docs/evidence/mutation-results.tsv";
     private static final List<String> MODULES = List.of("jx-core", "jx-react", "jx-compiler", "jx-maven-plugin",
             "tests/conformance");
-    private static final Pattern FAILED_CASE = Pattern.compile("(?m)^\\s+\\d+\\) \\[jx(?:-hydrate|-static)?\\] › \\S+ › ([a-z0-9-]+): ");
+    private static final Pattern FAILED_CASE = Pattern.compile("(?m)^\\s+\\d+\\) \\[jx(?:-hydrate|-static|-lazy)?\\] › \\S+ › ([a-z0-9-]+): ");
     private static final long STEP_TIMEOUT_MINUTES = 6;
 
     private record Mutant(String id, String file, String find, String replace, String change) {}
@@ -166,6 +166,8 @@ public final class MutateBench {
         if (!Files.isDirectory(repository) || !Files.isDirectory(root.resolve("node_modules"))) {
             throw new IOException("run npm ci and the Maven install once before mutation testing");
         }
+        // A worktree may borrow the clone's cache; still copy it, never mutate it in place.
+        repository = repository.toRealPath();
         Path copy = work.resolve(".cache/maven-repository");
         try (var files = Files.walk(repository)) {
             for (Path source : files.toList()) {
@@ -183,12 +185,14 @@ public final class MutateBench {
     private boolean build() throws Exception {
         return step("build", "./mvnw", "-o", "-B", "-ntp", "-q", "-Dmaven.repo.local=.cache/maven-repository",
                 "-DskipTests", "-pl", String.join(",", MODULES), "install")
-                // The Node host bundle wraps the compiled application, so it follows every build.
-                && step("server bundle", "npm", "run", "build:bench-server");
+                // Both bundles wrap compiled applications, so they follow every mutated build.
+                && step("server bundle", "npm", "run", "build:bench-server")
+                && step("lazy bundle", "npm", "run", "build:bench-lazy");
     }
 
     private boolean bench() throws Exception {
-        return step("bench", "npx", "playwright", "test", "-c", "tests/conformance/playwright.config.js", "--project=jx", "--project=jx-hydrate", "--project=jx-static");
+        return step("bench", "npx", "playwright", "test", "-c", "tests/conformance/playwright.config.js",
+                "--project=jx", "--project=jx-hydrate", "--project=jx-static", "--project=jx-lazy");
     }
 
     /** Runs one bounded step in the scratch copy; its output replaces the step log. */
