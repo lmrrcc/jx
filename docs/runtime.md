@@ -89,6 +89,66 @@ the bridge shape, not compatibility with every third-party component library.
 Bindings for refs, complex values, and individual library contracts still require
 their own tests.
 
+## Children traversal, composed keys and native nodes
+
+R-27-02a, 24 November 2026, is in progress. The contracts below pass JVM, full
+browser-matrix and runtime hot-replacement checks; all three scoped mutants were
+killed and Verify is pending. See the [interaction evidence](ga-react-interactions.md#r-27-02a-children-contracts-in-progress)
+for the reproduction and current limits.
+
+`Views.childrenValue` represents a component's implicit `children` prop. No
+children or a single null produces null; one child stays that child; multiple
+authored siblings become `View.Items`. A supplied array or iterable stays a
+collection even if it contains one item. The compiler uses this contract in both
+generated Java and editor projections. An authored `<>...</>` remains an explicit
+`View.Fragment`: `Children` treats it as one opaque element, including an empty
+fragment, and never traverses its contents.
+
+`Children.count`, `forEach`, `map` and `toList` traverse nested collections.
+Null/boolean positions inside a collection count as empty positions; flattened
+output omits empty entries. `Children.only` accepts one valid element, returning
+that element unchanged. A singleton collection, text, null or a portal is not an
+element and is rejected. `View.ElementExtension` distinguishes native React
+elements from opaque nodes: a `React.strictMode` element passes `isValidElement`
+and `only`, while a `React.portal` node fails both element checks but counts as
+one traversed child.
+
+Mapping composes source keys, nesting paths and returned-element keys, preserving
+local key namespaces when arrays are flattened. `View.Keyed` carries replacement
+identity metadata without adding a React wrapper or fragment; the renderer must
+keep the underlying type, props, refs and children. `Views.key` exposes that
+effective key. Mapping does not mutate the source views. Fixed authored siblings
+retain `View.Items.staticChildren` validation metadata, avoiding false missing-key
+warnings for fixed positions. Dynamic collections and mapped output retain normal
+React list-key validation; the flag does not change reconciliation identity.
+
+Numeric keys use native JavaScript scalar spelling, not Java's default number
+formatting. The JVM and TeaVM consumer vectors cover signed zero, the plain and
+exponential notation boundaries, subnormal/minimum and maximum doubles, a widened
+float, `NaN`, infinities and the largest exact JavaScript integer. Explicit strings
+also exercise React's `:`/`=` key escaping. A long outside the exact integer range
+is rejected; use a string for such an identifier. Keys remain metadata, never
+component props or DOM attributes.
+
+The compiling Java consumers are
+[`CombinedChildrenContract.jx`](../tests/conformance/src/main/jx/jx/conformance/cases/CombinedChildrenContract.jx),
+[`CombinedChildrenMap.jx`](../tests/conformance/src/main/jx/jx/conformance/cases/CombinedChildrenMap.jx)
+and [`CombinedChildrenList.jx`](../tests/conformance/src/main/jx/jx/conformance/cases/CombinedChildrenList.jx).
+The contract fixture creates its unmounted portal only after a button event,
+keeping initial server rendering browser-independent. API Javadocs live beside
+[`Children`](../jx-core/src/main/java/jx/Children.java),
+[`Views`](../jx-core/src/main/java/jx/Views.java) and
+[`View`](../jx-core/src/main/java/jx/View.java).
+
+A separate regression exposed mapped native wrappers assigning hot-reload
+checkpoint paths by position instead of their composed keys. The repair now uses
+the composed identity in those paths. The runtime suite passes all 12 checks,
+including hot replacement of mapped DOM and `StrictMode` wrappers; this is distinct
+evidence from ordinary state retention during React reconciliation. It does not
+qualify opaque foreign bindings or error-boundary fallback ownership: a fallback
+callback runs outside the original Java render frame, whose owner is not restored
+by this change. Those lifecycle combinations remain open in R-27.
+
 ## Elm Model–View–Update
 
 `Program<Model, Message>` supplies pure `init`, `update`, `view`, and subscription

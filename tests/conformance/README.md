@@ -117,13 +117,14 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The complete local run on 24 November passes 731 checks, with 133 skipped cells:
-client 106 reference / 105 JX, hydrate 81 per side, static 87 per side, lazy 92 per
-side. Nineteen pairs have complete evidence in their declared modes; 5,337 of the
+The complete R-27-02a local run on 24 November passes 755 checks, with 133 skipped
+cells: client 109 reference / 108 JX, hydrate 84 per side, static 90 per side, lazy
+95 per side. Twenty-five pairs have complete evidence in their declared modes; 5,331 of the
 5,356 current candidates remain open. The eventual universe includes 118 features
 and 6,903 candidate pairs. **R-27 remains partial.** See the
 [interaction evidence record](../../docs/ga-react-interactions.md) for the two
-combined scenarios, eight existing assertion witnesses and acceptance status.
+initial combined scenarios, children-composition regressions, existing assertion
+witnesses and acceptance status.
 
 Static HTML equality does not execute interactive assertion blocks, so it does
 not credit those witnesses. Hydration-owned and Node-only scenarios can carry

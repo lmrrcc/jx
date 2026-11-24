@@ -1,0 +1,17 @@
+package jx.conformance.cases;
+
+import java.util.List;
+import jx.Children;
+import jx.Component;
+import jx.View;
+
+/** Wrapping children must combine source and wrapper keys, including returned arrays. */
+@Component
+public final class MapChildren {
+    public record Props(String shell, boolean copies, View children) {}
+    public static View render(Props props) {
+        return <div data-testid="mapped">{Children.map(props.children(), child -> props.copies()
+            ? new View.Items(List.of(<article key="left" data-copy="left">{child}</article>, <article key="right" data-copy="right">{child}</article>))
+            : <article key={props.shell()}>{child}</article>)}</div>;
+    }
+}

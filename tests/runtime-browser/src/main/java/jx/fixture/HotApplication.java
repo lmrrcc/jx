@@ -35,11 +35,14 @@ public final class HotApplication {
         if (!(record.value() instanceof Model) || !(model instanceof Model)) throw new IllegalStateException("Old Java instance crossed the runtime boundary");
         View a = Views.component(COUNTER, "A", "A");
         View b = Views.component(COUNTER, "B", "B");
+        View counters = Views.childrenValue(reverse.value() ? List.of(b, a) : List.of(a, b));
+        if (mappedChildren()) counters = Children.map(counters, child -> nativeWrappers()
+                ? React.strictMode(child) : Views.element("article", Attributes.create(), child));
         return Views.element("main", Attributes.create(),
             Views.element("h1", Attributes.create().attr("id", "hot-label"), label()),
             Views.element("input", Attributes.create().attr("id", "hot-draft").attr("value", draft.value()).on("onChange", event -> draft.set(event.targetValue()))),
             button("hot-reverse", "Reverse", event -> reverse.update(old -> !old)),
-            Views.element("section", Attributes.create().attr("id", "hot-counters"), reverse.value() ? List.of(b, a) : List.of(a, b)),
+            Views.element("section", Attributes.create().attr("id", "hot-counters"), counters),
             button("hot-reducer", "Reducer " + reducer.value(), event -> reducer.dispatch().accept(3)),
             button("hot-record", "Record " + record.value().count() + " " + record.value().labels().getFirst(), event -> record.update(old -> new Model(old.count() + 1, old.labels()))),
             button("hot-model", "Model " + model.count() + " " + model.labels().getFirst(), event -> store.dispatch(1)),
@@ -61,5 +64,7 @@ public final class HotApplication {
     @JSBody(script = "return globalThis.hotFixtureSignature || 'counter:state,effect:1';") private static native String signature();
     @JSBody(script = "return globalThis.hotFixtureCodecVersion || '1';") private static native String codecVersion();
     @JSBody(script = "return !!globalThis.hotFixtureFailStartup;") private static native boolean failStartup();
+    @JSBody(script = "return !!globalThis.hotFixtureMappedChildren;") private static native boolean mappedChildren();
+    @JSBody(script = "return !!globalThis.hotFixtureNativeWrappers;") private static native boolean nativeWrappers();
     @JSBody(params = {"kind", "name"}, script = "if (!globalThis.hotFixtureEvents) globalThis.hotFixtureEvents = []; globalThis.hotFixtureEvents.push({kind: kind, name: name});") private static native void report(String kind, String name);
 }

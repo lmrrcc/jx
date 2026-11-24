@@ -1,0 +1,24 @@
+package jx.conformance.cases;
+
+import java.util.List;
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Two nested arrays may reuse local keys without merging their child identities. */
+@Component
+public final class CombinedChildrenList {
+    public static View render() {
+        State<Boolean> reversed = Hooks.useState(false);
+        List<String> ids = reversed.value() ? List.of("b", "a") : List.of("a", "b");
+        return (
+            <main>
+                <button onClick={event -> reversed.update(value -> !value)}>Reverse first group</button>
+                <ListChildren>{List.of(
+                    ids.stream().map(id -> <MappedChild key={id} id={"first-" + id} />).toList(),
+                    List.of(<MappedChild key="a" id="second-a" />))}</ListChildren>
+            </main>
+        );
+    }
+}

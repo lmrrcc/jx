@@ -293,6 +293,68 @@ class JxCompilerTest {
         assertEquals(List.of(), check(compilation));
     }
 
+    @Test void preservesImplicitChildrenShapeAndExplicitFragmentsInBuildAndEditorProjections() throws Exception {
+        SourceFile panel = source("Panel.jx", """
+                package demo;
+                import jx.*;
+                @Component public final class Panel {
+                    public record Props(@OptionalProp View children) {}
+                    public static View render(Props props) { return <section>{props.children()}</section>; }
+                }
+                """);
+        record Case(String markup, String argument, String copiedExpression) {}
+        List<Case> cases = List.of(
+                new Case("<Panel>{label.toUpperCase()}</Panel>",
+                        "jx.Views.childrenValue((Object)(label.toUpperCase()))", "label.toUpperCase()"),
+                new Case("<Panel>{label.toUpperCase()}{nested}</Panel>",
+                        "jx.Views.childrenValue(label.toUpperCase(), nested)", "label.toUpperCase()"),
+                new Case("<Panel><>{label.toUpperCase()}{nested}</></Panel>",
+                        "jx.Views.childrenValue((Object)(jx.Views.fragment(label.toUpperCase(), nested)))", "label.toUpperCase()"),
+                new Case("<Panel>{new Object[] {label.toUpperCase()}}</Panel>",
+                        "jx.Views.childrenValue((Object)(new Object[] {label.toUpperCase()}))", "new Object[] {label.toUpperCase()}"),
+                new Case("<Panel>{new Object[0]}</Panel>",
+                        "jx.Views.childrenValue((Object)(new Object[0]))", "new Object[0]"),
+                new Case("<Panel>{nested}</Panel>",
+                        "jx.Views.childrenValue((Object)(nested))", "nested"),
+                new Case("<Panel>{null}</Panel>", "jx.Views.childrenValue((Object)(null))", "null"),
+                new Case("<Panel />", "null", null));
+        for (Case fixture : cases) {
+            SourceFile app = source("App.jx", """
+                    package demo;
+                    import jx.*;
+                    @Component public final class App {
+                        public static View render() {
+                            String label = "one";
+                            Object[] nested = {label, new Object[] {"two"}};
+                            return %s;
+                        }
+                    }
+                    """.formatted(fixture.markup()));
+            List<SourceFile> sources = List.of(panel, app);
+            Compilation executable = compiler.compile(sources);
+            assertTrue(executable.successful(), executable.diagnostics().toString());
+            Compilation editor = new Compilation(EditorProjection.project(sources), List.of(), List.of());
+            for (Compilation compilation : List.of(executable, editor)) {
+                GeneratedSource generated = compilation.generatedSources().stream()
+                        .filter(value -> value.source().equals(app)).findFirst().orElseThrow();
+                assertTrue(generated.javaSource().contains("new Panel.Props(" + fixture.argument() + ")"),
+                        fixture.markup() + "\n" + generated.javaSource());
+                assertEquals(List.of(), check(compilation), fixture.markup());
+                if (fixture.copiedExpression() != null) {
+                    String expression = fixture.copiedExpression();
+                    int sourceStart = app.content().lastIndexOf(expression);
+                    int generatedStart = generated.sourceMap().generatedOffset(sourceStart).orElseThrow();
+                    assertEquals(expression, generated.javaSource().substring(generatedStart, generatedStart + expression.length()));
+                    assertEquals(new SourceSpan(sourceStart, sourceStart + expression.length()), generated.sourceMap()
+                            .editableSourceSpan(new SourceSpan(generatedStart, generatedStart + expression.length())).orElseThrow());
+                }
+                int cast = generated.javaSource().indexOf("(Object)(");
+                if (cast >= 0) assertTrue(generated.sourceMap().editableSourceSpan(new SourceSpan(cast, cast + 8)).isEmpty(),
+                        "The varargs-preserving cast is synthetic, not an editable authored expression");
+            }
+        }
+    }
+
     @Test void malformedAndIncompleteMarkupProducesBoundedOriginalDiagnostics() {
         for (String markup : List.of("<div></span>", "<Counter initial={0 />", "<div>", "<div title=\"oops>",
                 "<div>&invalid;</div>", "<div>{}</div>")) {
@@ -406,7 +468,7 @@ class JxCompilerTest {
                 "JxComponent", "@Deprecated public @interface JxComponent {}",
                 "ComponentType", "public record ComponentType<P>(String name, String stateSignature, java.util.function.Function<P,View> render) { public ComponentType<P> memo(java.util.function.BiPredicate<P,P> propsEqual) { return this; } public static boolean sameValue(Object first, Object second) { return first == second; } }",
                 "Memo", "public @interface Memo {}",
-                "Views", "public final class Views { public static View element(String tag, Attributes attrs, Object... children) { return null; } public static View fragment(Object... children) { return null; } public static <P> View component(ComponentType<P> type, P props) { return null; } public static <P> View component(ComponentType<P> type, P props, String key) { return null; } }",
+                "Views", "public final class Views { public static View element(String tag, Attributes attrs, Object... children) { return null; } public static View fragment(Object... children) { return null; } public static View childrenValue(Object... children) { return null; } public static <P> View component(ComponentType<P> type, P props) { return null; } public static <P> View component(ComponentType<P> type, P props, String key) { return null; } }",
                 "Attributes", "public final class Attributes { public static Attributes create() { return new Attributes(); } public Attributes attr(String name, Object value) { return this; } public Attributes merge(Attributes other) { return this; } public Attributes on(String name, java.util.function.Consumer<Event> handler) { return this; } }",
                 "Event", "public interface Event { void preventDefault(); }",
                 "Hooks", "public final class Hooks { public static <T> State<T> useState(T value) { return null; } }",

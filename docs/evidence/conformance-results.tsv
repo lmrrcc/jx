@@ -15,6 +15,9 @@ children-utilities	pass	pass	pass	pass	pass	pass	pass	pass
 choice-inputs	pass	pass	pass	pass	pass	pass	pass	pass
 clone-element	pass	pass	pass	pass	pass	pass	pass	pass
 combined-activity-store	pass	pass	pass	pass	pass	pass	pass	pass
+combined-children-contract	pass	pass	pass	pass	pass	pass	pass	pass
+combined-children-list	pass	pass	pass	pass	pass	pass	pass	pass
+combined-children-map	pass	pass	pass	pass	pass	pass	pass	pass
 combined-keyed-context	pass	pass	pass	pass	pass	pass	pass	pass
 conditional	pass	pass	pass	pass	pass	pass	pass	pass
 context-nested	pass	pass	pass	pass	pass	pass	pass	pass

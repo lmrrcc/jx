@@ -39,6 +39,7 @@ public final class HotReload {
     static JSObject slot(String kind) { return ENABLED ? slotNative(kind) : null; }
     static String viewPath() { return ENABLED ? viewPathNative() : "v0"; }
     static String childPath(String name, String key, String position, String container) { return ENABLED ? childPathNative(name, key, position, container) : ""; }
+    static String keyedPosition(String container, String key) { return ENABLED ? keyedPositionNative(container, key) : ""; }
     static String rootPath(String root, String name) { return ENABLED ? rootPathNative(root, name) : ""; }
     static void root(String id, React.Root root) { if (ENABLED) rootNative(id, root::close); }
     static void forgetRoot(String id) { if (ENABLED) forgetRootNative(id); }
@@ -156,6 +157,7 @@ public final class HotReload {
     @JSBody(params = {"slot", "schema", "encode"}, script = "slot.schema = schema; slot.encode = encode;") private static native void recordNative(JSObject slot, String schema, Encoder encode);
     @JSBody(script = "var frame = globalThis.__JX_HOT__.current; return 'v' + (frame ? frame.views++ : 0);") private static native String viewPathNative();
     @JSBody(params = {"name", "key", "position", "container"}, script = "var frame = globalThis.__JX_HOT__.current; return (frame ? frame.path : 'external') + '/' + (key === null ? position : container + '/key:' + encodeURIComponent(key)) + '/component:' + encodeURIComponent(name);") private static native String childPathNative(String name, String key, String position, String container);
+    @JSBody(params = {"container", "key"}, script = "return container + '/key:' + encodeURIComponent(key);") private static native String keyedPositionNative(String container, String key);
     @JSBody(params = {"root", "name"}, script = "return 'root:' + encodeURIComponent(root) + '/component:' + encodeURIComponent(name);") private static native String rootPathNative(String root, String name);
     @JSBody(params = {"id", "stop"}, script = "var hot = globalThis.__JX_HOT__; if (hot.roots.has(id)) throw new Error('Duplicate JX hot root: ' + id); hot.roots.set(id, stop);") private static native void rootNative(String id, Stop stop);
     @JSBody(params = "id", script = "globalThis.__JX_HOT__.roots.delete(id);") private static native void forgetRootNative(String id);

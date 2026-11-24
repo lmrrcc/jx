@@ -1,0 +1,78 @@
+package jx.conformance.cases;
+
+import java.util.ArrayList;
+import java.util.List;
+import jx.Attributes;
+import jx.Children;
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.Views;
+import jx.react.React;
+
+/** Distinguishes an explicit fragment element from a traversable collection of children. */
+@Component
+public final class CombinedChildrenContract {
+    public static View render() {
+        State<String> nativeNodes = Hooks.useState("uninspected");
+        View fragment = (<><b>left</b><i>right</i></>);
+        Object[] nested = {<b key="a">A</b>, new Object[]{null, false, new Object[]{"text", <i key="b">B</i>}}};
+        return (
+            <main>
+                {inspect("direct-fragment", fragment)}
+                {inspect("empty-fragment", <></>)}
+                <ChildrenContractProbe name="prop-fragment">{fragment}</ChildrenContractProbe>
+                <ChildrenContractProbe name="attribute-fragment" children={fragment} />
+                <ChildrenContractProbe name="element"><em>one</em></ChildrenContractProbe>
+                <ChildrenContractProbe name="nested">{nested}</ChildrenContractProbe>
+                <ChildrenContractProbe name="singleton-array">{List.of(<em key="one">array</em>)}</ChildrenContractProbe>
+                <ChildrenContractProbe name="text">text</ChildrenContractProbe>
+                <ChildrenContractProbe name="null">{null}</ChildrenContractProbe>
+                <p data-testid="numeric-keys">{composedKeys(new Number[]{
+                    1.0, -0.0, 1e-6, 1e-7, 1e20, 1e21, 1e23, Double.MIN_VALUE, Double.MAX_VALUE,
+                    1.1f, Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, 9_007_199_254_740_991L
+                })}</p>
+                <p data-testid="escaped-keys">{composedKeys(new String[]{"a:b=c", "=:", "slash/key"})}</p>
+                <p data-testid="native-nodes">{nativeNodes.value()}</p>
+                <button onClick={event -> {
+                    View strict = React.strictMode(<b data-testid="native-strict-content">strict</b>);
+                    View portal = React.portal(React.documentBody(), <b data-testid="native-portal-content">portal</b>);
+                    nativeNodes.set("strict " + Views.isValidElement(strict) + " " + onlyOutcome(strict) + " " + Children.count(strict)
+                        + "; portal " + Views.isValidElement(portal) + " " + onlyOutcome(portal) + " " + Children.count(portal));
+                }}>Inspect native nodes</button>
+            </main>
+        );
+    }
+
+    /** The elements are never mounted: key conversion must happen inside Children on the TeaVM side. */
+    private static String composedKeys(Object[] values) {
+        List<View> elements = new ArrayList<>();
+        for (Object value : values) elements.add(Views.element("span", Attributes.create().attr("key", value)));
+        return String.join("|", Children.toList(Views.childrenValue(elements)).stream().map(Views::key).toList());
+    }
+
+    /** Called directly and through the typed children prop, so lowering cannot mask traversal. */
+    public static View inspect(String name, View children) {
+        List<View> visited = new ArrayList<>();
+        Children.forEach(children, visited::add);
+        return (
+            <section aria-label={name}>
+                <p data-testid={name + "-count"}>{Children.count(children)}</p>
+                <p data-testid={name + "-listed"}>{Children.toList(children).size()}</p>
+                <p data-testid={name + "-visited"}>{visited.size()}</p>
+                <p data-testid={name + "-only"}>{onlyOutcome(children)}</p>
+                <ul data-testid={name + "-mapped"}>{Children.map(children, child -> <li>{child}</li>)}</ul>
+            </section>
+        );
+    }
+
+    private static String onlyOutcome(View children) {
+        try {
+            Children.only(children);
+            return "accepted";
+        } catch (IllegalArgumentException expectedInvalidChild) {
+            return "rejected";
+        }
+    }
+}

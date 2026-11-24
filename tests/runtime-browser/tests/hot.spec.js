@@ -53,6 +53,31 @@ test('independent TeaVM generations preserve committed scalar, keyed, reducer, r
   expect(errors).toEqual([]);
 });
 
+for (const wrapper of ['DOM', 'native']) test(`mapped keyed ${wrapper} wrappers retain descendant checkpoint identity through reorder and a new TeaVM generation`, async ({page}) => {
+  await page.addInitScript(native => {
+    globalThis.hotFixtureMappedChildren = true;
+    globalThis.hotFixtureNativeWrappers = native;
+  }, wrapper === 'native');
+  await page.goto('/hot');
+  await page.locator('#hot-counter-A').click();
+  await page.locator('#hot-counter-A').click();
+  await page.locator('#hot-counter-B').click();
+  const paths = () => page.evaluate(() => globalThis.__JX_HOT__.capture().components.map(entry => entry.path).sort());
+  const before = await paths();
+  await page.locator('#hot-reverse').click();
+  await expect(page.locator('#hot-counters button').first()).toHaveText('B: 1');
+  expect(await paths()).toEqual(before);
+  const result = await replace(page, {hotFixtureLabel: 'Mapped update'});
+  expect(result.independent).toBe(true);
+  expect(result.snapshot.components).toHaveLength(3);
+  await expect(page.locator('#hot-label')).toHaveText('Mapped update');
+  await expect(page.locator('#hot-counter-A')).toHaveText('A: 2');
+  await expect(page.locator('#hot-counter-B')).toHaveText('B: 1');
+  await page.locator('#hot-reverse').click();
+  await expect(page.locator('#hot-counters button').first()).toHaveText('A: 2');
+  expect(await paths()).toEqual(before);
+});
+
 test('incompatible component signatures and codec schemas safely reset without reusing Java objects', async ({page}) => {
   await page.goto('/hot');
   await page.locator('#hot-counter-A').click();

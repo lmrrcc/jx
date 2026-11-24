@@ -1,0 +1,31 @@
+package jx.conformance.cases;
+
+import java.util.List;
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Reorders source children without changing their mapped wrapper identity. */
+@Component
+public final class CombinedChildrenMap {
+    public static View render() {
+        State<Boolean> reversed = Hooks.useState(false);
+        State<Boolean> removed = Hooks.useState(false);
+        State<Boolean> copies = Hooks.useState(false);
+        State<String> shell = Hooks.useState((String) null);
+        List<String> ids = reversed.value() ? List.of("b", "a") : List.of("a", "b");
+        return (
+            <main>
+                <button onClick={event -> reversed.update(value -> !value)}>Reverse</button>
+                <button onClick={event -> removed.update(value -> !value)}>Toggle a</button>
+                <button onClick={event -> shell.set("shell/changed")}>Change wrapper key</button>
+                <button onClick={event -> copies.update(value -> !value)}>Toggle copies</button>
+                <MapChildren shell={shell.value()} copies={copies.value()}>
+                    {ids.stream().filter(id -> !removed.value() || !id.equals("a"))
+                        .map(id -> <MappedChild key={id + "/=:"} id={id} />).toList()}
+                </MapChildren>
+            </main>
+        );
+    }
+}

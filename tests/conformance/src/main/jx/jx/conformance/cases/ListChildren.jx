@@ -1,0 +1,14 @@
+package jx.conformance.cases;
+
+import jx.Children;
+import jx.Component;
+import jx.View;
+
+/** Flattens nested collections while retaining their independent key namespaces. */
+@Component
+public final class ListChildren {
+    public record Props(View children) {}
+    public static View render(Props props) {
+        return <div data-testid="listed">{Children.toList(props.children())}</div>;
+    }
+}
