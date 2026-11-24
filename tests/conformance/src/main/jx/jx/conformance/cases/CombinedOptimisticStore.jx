@@ -1,0 +1,30 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.OptimisticPageStore;
+
+/** Owns a store per mounted page; a remote publication is independent of the editor's transition.
+ * The Close editor event disposes requests explicitly. Automatic disposal on arbitrary route/page
+ * unmount is outside this fixture's contract and remains a separate framework capability. */
+@Component
+public final class CombinedOptimisticStore {
+    public static View render() {
+        OptimisticPageStore store = Hooks.useMemo(OptimisticPageStore::new, Dependencies.none());
+        State<Boolean> mounted = Hooks.useState(true);
+        State<String> ownership = Hooks.useState("uninspected");
+        return (
+            <main>
+                <button disabled={!mounted.value()} onClick={event -> store.publishRemote()}>Publish remote item</button>
+                <button onClick={event -> ownership.set("subscribers=" + store.subscribers()
+                        + ";requests=" + store.requests() + ";closed=" + store.closed())}>Inspect ownership</button>
+                <button disabled={!mounted.value()} onClick={event -> { store.close(); mounted.set(false); }}>Close editor</button>
+                <p data-testid="ownership">{ownership.value()}</p>
+                {mounted.value() ? <OptimisticStoreEditor store={store} /> : null}
+            </main>
+        );
+    }
+}
