@@ -270,9 +270,9 @@ lets that source run script in the page; pass only markup the application wrote 
 a sanitizer cleaned. A plain string is a compile error there. Children need finite, bounded collections; streaming an unbounded
 Iterable is not a rendering contract.
 
-HTML attributes otherwise use React DOM spelling. Every attribute name in React DOM's
-own table and every HTML and SVG element is rendered by a generated bench case and
-compared with React's DOM output. `class` aliases `className`
+HTML attributes otherwise use React DOM spelling. Every attribute name and event handler name in React DOM's
+own tables and every HTML and SVG element is exercised by a generated bench case and
+compared with React. `class` aliases `className`
 and `for` aliases `htmlFor`; specifying both aliases is a duplicate error.
 Use names such as `tabIndex`, `readOnly`, `viewBox`, and `strokeWidth`.
 `data-*` and `aria-*` names retain their spelling. Boolean attributes use Java

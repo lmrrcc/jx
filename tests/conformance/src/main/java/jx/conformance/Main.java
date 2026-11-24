@@ -90,6 +90,7 @@ import jx.conformance.cases.HydrateRoot;
 import jx.conformance.cases.HydratedPage;
 import jx.conformance.cases.DomElements;
 import jx.conformance.cases.DomAttributes;
+import jx.conformance.cases.DomEvents;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -198,6 +199,7 @@ public final class Main {
             }
             case "dom-elements" -> React.mountStrict("app", DomElements.JX, null);
             case "dom-attributes" -> React.mountStrict("app", DomAttributes.JX, null);
+            case "dom-events" -> React.mountStrict("app", DomEvents.JX, null);
             default -> Bench.unknown(id);
         }
     }
