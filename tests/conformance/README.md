@@ -117,23 +117,33 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The complete R-27-02b local run on 24 November passes 771 checks, with 133 skipped
-cells across 113 case IDs: client 111 reference / 110 JX, hydrate 86 per side,
-static 92 per side and lazy 97 per side. Thirty-two pairs have complete evidence
-in their declared modes; 5,324 of the
+The complete R-27-02c local run on 24 November passes 779 checks, with 133 skipped
+cells across 114 case IDs: client 112 reference / 111 JX, hydrate 87 per side,
+static 93 per side and lazy 98 per side. Thirty-eight pairs have complete evidence
+in their declared modes; 5,318 of the
 5,356 current candidates remain open. The eventual universe includes 118 features
 and 6,903 candidate pairs. **R-27 remains partial.** See the
 [interaction evidence record](../../docs/ga-react-interactions.md) for the two
-initial combined scenarios, children-composition regressions, seven new ref
-witnesses and acceptance status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
+initial combined scenarios, children-composition regressions, seven ref pairs,
+six portal pairs and acceptance status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
 at `413558b636679dd5926f4d7bf1c987ea707ed95c`, after its 755-check bench and green
-Verify. R-27-02b's Verify remains pending. Browser evidence is Chrome-only and
+Verify. R-27-02b merged in [PR #40](https://github.com/lmrrcc/jx/pull/40) at
+`15c0c6eee36f506910e854c568547ebc6d3758ea`, with green
+[CI](https://github.com/lmrrcc/jx/actions/runs/45452120669) and
+[CI](https://github.com/lmrrcc/jx/actions/runs/45452801956).
+R-27-02c's scoped mutant was killed; Verify remains pending. Browser evidence is Chrome-only and
 does not establish additional human or cross-browser qualification.
 
 The ref scenarios use actual Playwright element handles to compare DOM identity,
 real imperative-handle identity, and input value/focus operations. They cover
 callback stability, layout attachment, Strict Mode cleanup, keyed removal,
-current captured props and switching ref ownership. Future R-27-03a actions,
+current captured props and switching ref ownership. The portal scenario passes
+all eight focused checks; its actual ElementHandles prove draft/node retention
+across context updates and a fresh node after closing and reopening. It checks
+capture/bubble order, target/currentTarget and default/propagation semantics,
+focus and ref cleanup. The portal begins closed in the server HTML and opens only
+after browser hydration; this does not prove server rendering of an open portal.
+Future R-27-03a actions,
 R-27-03b optimistic/store and R-27-03c transition slices remain planned.
 
 Static HTML equality does not execute interactive assertion blocks, so it does
@@ -188,8 +198,16 @@ Repeat its check exclusively:
 java tools/MutateBench.java --only imperative-stale-props
 ```
 
-The current catalog has **106 entries**; the historical full result still covers
-100. These scoped campaigns do not establish a fresh full 106-mutant result.
+R-27-02c adds `portal-context-stale`; its unmutated scratch baseline passed, then
+`combined-portal-lifecycle` killed it: **1 killed, 0 survived, 0 unusable**. Repeat
+the scoped check exclusively:
+
+```sh
+java tools/MutateBench.java --only portal-context-stale
+```
+
+The current catalog has **107 entries**; the historical full result still covers 100. These
+scoped campaigns do not establish a fresh full 107-mutant result.
 
 ## Feature list
 
