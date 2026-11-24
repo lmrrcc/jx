@@ -1,0 +1,44 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.conformance.ActionQueueControl;
+import jx.react.React;
+
+/** Queued form actions preserve submitted payloads and recover from rejection by remounting. */
+@Component
+public final class CombinedActionQueue {
+    private record Session(int generation, ActionQueueControl control) {}
+
+    public static View render() {
+        State<Session> session = Hooks.useStateLazy(() -> new Session(0, new ActionQueueControl(0)));
+        State<Boolean> mounted = Hooks.useState(true);
+        Session current = session.value();
+        return (
+            <main>
+                <h1>Combined action queue</h1>
+                <p data-testid="queue-generation">{current.generation()}</p>
+                <button disabled={!mounted.value()} onClick={event -> {
+                    current.control().dispose();
+                    int next = current.generation() + 1;
+                    session.set(new Session(next, new ActionQueueControl(next)));
+                }}>Retry form</button>
+                <button disabled={!mounted.value()} onClick={event -> current.control().release()}>Release action</button>
+                <button disabled={!mounted.value()} onClick={event -> current.control().fail()}>Fail action</button>
+                <button disabled={!mounted.value()} onClick={event -> mounted.set(false)}>Unmount form</button>
+                <button disabled={mounted.value()} onClick={event -> {
+                    int next = current.generation() + 1;
+                    session.set(new Session(next, new ActionQueueControl(next)));
+                    mounted.set(true);
+                }}>Mount form</button>
+                <p data-testid="queue-sibling">sibling survives</p>
+                {mounted.value() ? <section key={Integer.toString(current.generation())} data-testid="queue-owner">
+                    {React.boundary(<QueuedActionForm control={current.control()} />,
+                        error -> <p role="alert">{"failed: " + error.getMessage()}</p>)}
+                </section> : null}
+            </main>
+        );
+    }
+}

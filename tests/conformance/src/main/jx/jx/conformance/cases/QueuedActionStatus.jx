@@ -1,0 +1,18 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.FormStatus;
+import jx.Hooks;
+import jx.View;
+
+/** Reads the enclosing form's real pending submission, not its action-state hook. */
+@Component
+public final class QueuedActionStatus {
+    public static View render() {
+        FormStatus status = Hooks.useFormStatus();
+        String text = status.pending()
+                ? "pending " + status.method() + " " + status.data().get("step")
+                : "idle";
+        return <p data-testid="queue-form-status">{text}</p>;
+    }
+}

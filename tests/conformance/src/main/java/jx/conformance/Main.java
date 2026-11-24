@@ -16,6 +16,7 @@ import jx.conformance.cases.CombinedChildrenContract;
 import jx.conformance.cases.CombinedKeyedRefs;
 import jx.conformance.cases.CombinedImperativeHandles;
 import jx.conformance.cases.CombinedPortalLifecycle;
+import jx.conformance.cases.CombinedActionQueue;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
 import jx.conformance.cases.DomRefFocus;
@@ -205,6 +206,7 @@ public final class Main {
             case "combined-children-contract" -> CombinedChildrenContract.JX;
             case "combined-keyed-refs" -> CombinedKeyedRefs.JX;
             case "combined-imperative-handles" -> CombinedImperativeHandles.JX;
+            case "combined-action-queue" -> CombinedActionQueue.JX;
             default -> null;
         };
     }
