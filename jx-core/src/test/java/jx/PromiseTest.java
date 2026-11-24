@@ -49,6 +49,48 @@ class PromiseTest {
         assertEquals(List.of("first a", "second a"), seen);
     }
 
+    @Test void throwingObserverStillReportsOnceAndDoesNotStarveTheThenableObserver() {
+        List<Promise.Resolver<String>> sourceResolver = new ArrayList<>();
+        Promise<String> source = Promise.create(sourceResolver::add);
+        List<Promise.Resolver<String>> bridgeResolver = new ArrayList<>();
+        Promise<String> bridgeResult = Promise.create(bridgeResolver::add);
+        IllegalStateException observerFailure = new IllegalStateException("observer failed");
+        List<String> calls = new ArrayList<>();
+        List<Throwable> reported = new ArrayList<>();
+
+        source.whenSettled(value -> {
+            calls.add("throwing " + value);
+            throw observerFailure;
+        }, failure -> { throw new AssertionError("The source should resolve", failure); });
+        // Same shape as AsyncBridge.thenable: an independent observer forwards settlement.
+        source.whenSettled(value -> {
+            calls.add("bridge " + value);
+            bridgeResolver.getFirst().resolve(value);
+        }, bridgeResolver.getFirst()::reject);
+        bridgeResult.whenSettled(value -> calls.add("native consumer " + value),
+                failure -> { throw new AssertionError("An observer cannot reject the source", failure); });
+
+        sourceResolver.getFirst().resolve("kept");
+        assertFalse(source.pending());
+        assertTrue(bridgeResult.pending());
+        assertEquals(List.of(), calls, "resolve must not invoke an observer synchronously");
+        RUNTIME.defer(() -> calls.add("after settlement"));
+
+        // Model the browser host reporting uncaught microtask errors and continuing other jobs.
+        for (Runnable job = RUNTIME.queue.poll(); job != null; job = RUNTIME.queue.poll()) {
+            try { job.run(); }
+            catch (RuntimeException | Error failure) { reported.add(failure); }
+        }
+
+        assertEquals(1, reported.size(), "The observer error must remain visible exactly once");
+        assertSame(observerFailure, reported.getFirst(), "Do not wrap, replace or swallow the error");
+        assertFalse(bridgeResult.pending(), "An earlier observer must not leave React's thenable pending");
+        assertEquals(List.of("throwing kept", "bridge kept", "after settlement", "native consumer kept"), calls,
+                "Observers retain registration order and downstream delivery remains asynchronous");
+        assertEquals("kept", Async.await(source));
+        assertEquals("kept", Async.await(bridgeResult));
+    }
+
     @Test void theFirstSettlementWins() {
         Promise<String> promise = Promise.create(resolver -> {
             resolver.resolve("kept");
