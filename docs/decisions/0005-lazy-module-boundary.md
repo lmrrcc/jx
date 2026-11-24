@@ -2,8 +2,9 @@
 
 Status: accepted, 2026-11-24. Tasks M1-22 and M1-23.
 
-R-26 conformance-bench extension: implemented, in review; Luca's try-it check and
-a green Verify workflow are still required for acceptance.
+R-26 conformance-bench extension: accepted, 2026-11-24. Luca's try-it run confirmed
+715 passes and 133 inapplicable cells; revision `eb5a18a` passed
+[Verify](https://github.com/lmrrcc/jx/actions/runs/45372691183).
 
 An application may keep part of its code out of the first download. In JX that part
 is a second Maven module compiled by TeaVM into its own JavaScript module, loaded
@@ -98,6 +99,6 @@ Their scoped result must not be represented as a fresh full mutation campaign.
   no size budget is claimed.
 - The build wiring (two entry points, one esbuild run) is in the fixture's npm
   script. The Maven plugin does not produce lazy chunks yet.
-- The lazy-route conformance mode (R-26) now builds on this boundary and awaits
-  acceptance as described above. Automatic bundle splitting for
+- The accepted lazy-route conformance mode (R-26) builds on this boundary.
+  Automatic bundle splitting for
   `ComponentType.lazy` and production chunk-size budgets remain separate work.

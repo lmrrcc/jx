@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 26 tasks done; R-26 implemented in review, R-27 next. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27 next. Complete remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -49,8 +49,10 @@ rows out of 120; the bench records 86 JX passes, 11 unsupported cases and one
 not-applicable case. These are coverage counts, not a GA completion percentage.
 Update, 24 November 2026: R-19 to R-25 are done. The feature register has 104 supported/equivalent
 rows out of 120 and none unsupported. R-26 adds the lazy-route axis to the existing
-client, hydration and static HTML modes; it is in review pending Luca's check and
-Verify. See the [task and try-it command](ga-tasks.md#react-parity-track).
+client, hydration and static HTML modes. Luca's try-it run confirmed 715 passes
+and 133 inapplicable cells; revision `eb5a18a` passed
+[Verify](https://github.com/lmrrcc/jx/actions/runs/45372691183), completing R-26.
+See the [task and try-it command](ga-tasks.md#react-parity-track).
 M1-22/M1-23 proved the serialized lazy-module boundary; automatic chunk packaging
 in the Maven plugin is still open. G0 also needs component JARs, exact shared
 contracts, authenticated packaged Spring and the protected SSR data route (M1-26).

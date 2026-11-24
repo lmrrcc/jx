@@ -37,8 +37,10 @@ five workers; the bench now caps concurrency at two workers and retains the same
 timeouts and assertions. The final complete run passed. This is Chrome evidence,
 not a performance or cross-browser qualification.
 
-R-26 is **in review**, pending Luca's try-it check and green Verify; R-27 is the
-next React parity task. `npm run test:bench` runs the full matrix after the Maven build.
+R-26 is **complete**: Luca's try-it run on 24 November reports the same 715 passes,
+133 skipped cells and an exact match with the recorded results. Code revision
+`eb5a18a` passed [Verify](https://github.com/lmrrcc/jx/actions/runs/45372691183).
+R-27 is the next React parity task. `npm run test:bench` runs the full matrix after the Maven build.
 M1-22/M1-23 already proved the serialized module boundary; automatic Maven chunk
 packaging remains open. G0 remains open. The dated review below retains its
 earlier evidence baseline; this update supersedes its rendering-mode counts and

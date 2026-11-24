@@ -100,9 +100,9 @@ combining a partial run with `BENCH_UPDATE=1` fails. `npm run test:bench` also s
 `BENCH_REQUIRE_COMPLETE=1`: losing a project or a recorded case fails Verify.
 For focused development checks use `npx playwright test -c
 tests/conformance/playwright.config.js --project=jx-lazy -g state-counter` after
-building the bench; this does not replace full-matrix evidence. Consult the recorded table for
-counts; implementation and local results do not replace Luca's try-it review and
-the green Verify workflow required to accept R-26.
+building the bench; this does not replace full-matrix evidence. Consult the recorded
+table for counts and the [task record](../../docs/ga-tasks.md#react-parity-track)
+for R-26's accepted try-it and Verify results.
 The bench caps concurrency at two workers because each may run both Chrome and
 a Node-hosted TeaVM application. This avoids tying memory pressure to CPU count;
 test timeouts and assertions remain unchanged.
