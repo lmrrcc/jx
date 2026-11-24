@@ -18,23 +18,28 @@ R-27-02c merged as `a0f5460980c6b288f3ac2fa2c4c73c0b774f0563` in
 [PR #41](https://github.com/lmrrcc/jx/pull/41), with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45461059543) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45460586560).
-The Promise observer prerequisite is in review; its full local gate and CI Verify
-are pending. It adds no feature-pair evidence.
+The Promise prerequisite merged as `f2b64cbb92d2c77476840c77958a0eefdc87af8a` in
+[PR #42](https://github.com/lmrrcc/jx/pull/42), with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45467245368) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45466911060).
+R-27-03a passes its focused and complete local bench, and its scoped mutant was
+killed after the unmutated baseline passed. This action slice's Verify is pending.
 No additional human or cross-browser
 qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
 
-The passing counts below include the accepted R-27-02c complete run. Its six new
-portal pairs increase the merged R-27-02b baseline of 32 to **38 / 5,356**, with **5,318**
-remaining. This is assertion evidence, not credit earned by registration alone.
+The passing counts below include the complete R-27-03a local run. Its four action
+pairs increase the merged R-27-02c baseline of 38 to **42 / 5,356**, with **5,314**
+remaining. The action slice remains under review.
+This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
 | --- | --- |
 | Currently supported/equivalent feature IDs | 104 |
 | Candidate unordered pairs among those IDs | 5,356 |
-| Pairs with a passing witness in every declared mode, on both React and JX | 38 |
-| Current candidate pairs without complete evidence | 5,318 |
+| Pairs with a passing witness in every declared mode, on both React and JX | 42 |
+| Current candidate pairs without complete evidence | 5,314 |
 | Eventual application-feature IDs | 118 |
 | Eventual candidate pairs | 6,903 |
 | Additional pairs involving the 14 deferred feature IDs | 1,547 |
@@ -96,10 +101,11 @@ golden-file comparison but retain checks on the assertions they execute.
 | R-27-02a children cases | Six pairs: Children with keys, state, list rendering, children props, explicit fragments and child values. Mapping and flattening preserve composed identity; shape and validity checks match native React. |
 | R-27-02b ref cases | Seven pairs: callback refs with keys, callbacks, layout effects and Strict Mode; imperative handles with keys, changed props and ref props. Reordering retains real nodes and handles; removal clears refs; dependency and ref changes update ownership without replacing the input. |
 | R-27-02c portal case | Six pairs: portal with context, capture phases, event payloads, default/propagation controls, element refs and layout effects. Context follows React ancestry while DOM stays under `document.body`; close clears refs and disconnects the node, and reopen focuses a fresh input. |
+| R-27-03a action case | Four pairs: action state with form actions, form status, Java async functions and the existing error-boundary equivalent. Queued submissions retain their payloads and compose previous results; rejection cancels successors, while retry and unmount dispose fixture-owned waits before a fresh form is mounted. |
 
 The combined scenarios run their assertions in client, hydrate and lazy modes.
 Static mode renders the combined scenarios and compares HTML, but does not execute their
-interactive assertion blocks and therefore earns no pair credit. None of the 38
+interactive assertion blocks and therefore earns no pair credit. None of the 42
 current witnesses claims static interaction coverage.
 
 The register explicitly limits lazy/Suspense and portal/events to client/lazy.
@@ -123,11 +129,61 @@ unrelated parent update. Both JVM and Chrome regressions failed before repair.
 
 Local evidence is **9 Promise JVM tests**, included within **36 runtime-package
 JVM tests**, and **13 Chrome runtime checks**. The full local push gate and CI
-Verify remain pending. See the [runtime contract](runtime.md#promise-observer-isolation).
-This prerequisite adds no conformance case or pair witness: the accepted bench
-remains **779 passes, 133 skipped, 114 case IDs and 38 / 5,356 pairs**. R-27-03a,
-03b and 03c remain planned; these runtime checks do not qualify all asynchronous
-ownership, cancellation or cross-browser behavior.
+Verify passed before PR #42 merged as `f2b64cb`. See the [runtime contract](runtime.md#promise-observer-isolation).
+This prerequisite added no conformance case or pair witness to the portal
+baseline of **779 passes, 133 skipped, 114 case IDs and 38 / 5,356 pairs**.
+The action slice below extends that baseline. These runtime checks do not qualify
+all asynchronous ownership, cancellation or cross-browser behavior.
+
+## R-27-03a: queued form actions and recovery
+
+`combined-action-queue` adds four explicit witnesses in client, hydrate and lazy
+modes. It uses native React `useActionState` and `useFormStatus`, with Java
+`Async.run`/`Async.await` on the JX side and native async functions in the reference.
+
+| Witness | Observable behavior |
+| --- | --- |
+| `action-queue-form` | Two submissions capture distinct FormData values, execute serially and compose previous state into the final total. Later input edits do not alter queued payloads; successful completion resets the uncontrolled field. |
+| `action-queue-status` | The descendant form status reports the latest submitted payload while the queue remains pending, then returns to idle with action state. |
+| `action-queue-async` | Explicit gates suspend the real async actions; releasing the first starts the second with the first result, and the queue remains pending until both finish. |
+| `action-queue-error` | Rejection reaches the boundary, prevents the queued successor from starting and preserves the surrounding sibling. Remounting creates a fresh form that accepts a successful submission. |
+
+The final witness exercises the existing `react:Component` error-boundary
+equivalent; it does not implement Java-authored class components from R-28.
+The same spec also retries while two actions are pending and unmounts a pending
+form. Each old owner settles its waiter, ignores queued domain work and releases
+the replacement form to start from its own state. This ownership/cancellation
+logic is fixture-local; it is not the G0 request-cancellation API.
+
+The focused run passes **8 checks**. The full local bench passes **787 checks,
+with 133 skipped, across 115 case IDs**:
+
+| Mode | React | JX |
+| --- | ---: | ---: |
+| Client | 113 | 112 |
+| Hydrate | 88 | 88 |
+| Static HTML | 94 | 94 |
+| Lazy route | 99 | 99 |
+
+All four pair witnesses pass in every declared mode, bringing local evidence to
+**42 / 5,356**, with **5,314** active pairs open. Static rendering compares initial
+HTML and earns no interactive witness. The portal baseline merged in PR #41.
+This action slice's Verify is pending.
+
+`action-queue-previous-lost` changes the fixture's accumulated total to discard
+the previous action state. The unmutated scratch baseline passed, then
+`combined-action-queue` killed it: **1 killed, 0 survived, 0 unusable**.
+The catalog now contains **108 entries**; the historical full campaign still
+covers 100. Run the scoped check exclusively:
+
+```sh
+java tools/MutateBench.java --only action-queue-previous-lost
+```
+
+The separate R-27-03-PROMISE prerequisite has local red/green JVM and Chrome
+evidence: nine Promise tests, 36 runtime-package JVM tests and 13 runtime browser
+checks pass. Its full local gate and CI Verify passed before PR #42 merged; it
+adds no pair credit.
 
 ## R-27-02c: portal lifecycle, context and events
 
@@ -169,11 +225,7 @@ the check exclusively, without another build or browser suite:
 java tools/MutateBench.java --only portal-context-stale
 ```
 
-The slice merged in [PR #41](https://github.com/lmrrcc/jx/pull/41) as
-`a0f5460980c6b288f3ac2fa2c4c73c0b774f0563`, with
-[green CI](https://github.com/lmrrcc/jx/actions/runs/45461059543) and
-[green CI](https://github.com/lmrrcc/jx/actions/runs/45460586560).
-The catalog has **107 entries**. The historical complete
+PR #41 merged with green Verify. This slice brought the catalog to **107 entries**. The historical complete
 mutation campaign still covers 100, and no fresh complete 107-mutant result is
 claimed.
 
@@ -340,11 +392,10 @@ fresh full 104-mutant campaign.
 
 ## Follow-up and acceptance
 
-R-27-02 extends identity/composition/DOM interactions. R-27-03 is split before
-implementation into planned R-27-03a (form actions and failure/recovery), R-27-03b
-(optimistic updates over external-store snapshots) and R-27-03c (transition
-interactions). The separate Promise observer prerequisite is in review and adds
-no pair witness. Staged fixtures are preparation, not completed evidence.
+R-27-02 extends identity/composition/DOM interactions. R-27-03a has local evidence
+for form actions and recovery and remains in review. R-27-03b (optimistic updates
+over external-store snapshots) and R-27-03c (transition interactions) remain
+planned in this evidence baseline. Staged fixtures are preparation, not completed evidence.
 R-27-04 extends server/resource interactions. Each selects explicit
 remaining pair IDs. R-27-05 follows R-28–R-30, exercises the deferred features and
 reviews the remaining applicability decisions. The parent R-27 stays open until

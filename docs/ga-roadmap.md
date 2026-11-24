@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01 and R-27-02a–02c merged with green Verify, establishing 38 / 5,356 active pairs with 5,318 open. Promise observer prerequisite in review; full local gate and CI Verify pending, no new pairs. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01 and R-27-02a–02c merged with green Verify, as did the Promise prerequisite. R-27-03a locally evidences 42 / 5,356 active pairs, with 5,314 open; its scoped mutant was killed and Verify is pending. Complete remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -39,20 +39,29 @@ The ref slice landed in [PR #40](https://github.com/lmrrcc/jx/pull/40) at
 R-27-02c's complete local bench reports 779 passes and 133 skipped cells across
 114 case IDs. Its six portal pairs prove context, real DOM identity, event phases,
 payloads, focus and cleanup. Its unmutated baseline passed and its scoped mutant
-was killed (1 killed, 0 survived, 0 unusable). It merged in
-[PR #41](https://github.com/lmrrcc/jx/pull/41) as
-`a0f5460980c6b288f3ac2fa2c4c73c0b774f0563`, with green
-[CI](https://github.com/lmrrcc/jx/actions/runs/45461059543) and
-[CI](https://github.com/lmrrcc/jx/actions/runs/45460586560).
+was killed (1 killed, 0 survived, 0 unusable); Verify passed.
 The portal begins closed during SSR and opens in the browser after hydration;
 this does not prove server rendering of an open portal.
+Portal [PR #41](https://github.com/lmrrcc/jx/pull/41) merged as `a0f5460`, with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45461059543) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45460586560).
+R-27-03a adds four action-state pairs with 787 full-bench passes, 133 skipped cells
+and 115 case IDs: client 113 reference / 112 JX, hydrate 88, static 94 and lazy 99
+per side. Its eight focused checks pass, including queued payloads and previous
+state, form status/reset, rejected successors and fresh ownership after retry or
+unmount. The cancellation logic is local to the fixture, not the G0 API.
+Its unmutated scratch baseline passed, then `combined-action-queue` killed
+`action-queue-previous-lost` (1 killed, 0 survived, 0 unusable). Verify is pending;
+the catalog has 108 entries, with no new full mutation campaign claimed.
 The [interaction evidence record](ga-react-interactions.md)
-keeps the 38 proven pairs separate from the remaining inventory. R-27-03 is split
-into planned actions, optimistic/store and transition slices. Its separate
-Promise observer prerequisite (`7ed3f2c`) is in review: nine Promise JVM tests,
-36 runtime-package JVM tests and 13 Chrome runtime checks pass locally, with the
-full local gate and CI Verify pending. This adds no pair witness or bench case.
-The eventual
+keeps the 42 locally witnessed pairs separate from the 5,314 remaining active
+pairs. R-27-03a is in review; optimistic/store and transition slices remain
+planned in this baseline. The Promise prerequisite merged as `f2b64cb` in
+[PR #42](https://github.com/lmrrcc/jx/pull/42), with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45467245368) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45466911060):
+nine Promise tests, 36 runtime-package JVM tests and 13 runtime browser checks
+pass, together with its full local gate and CI. The eventual
 118-feature / 6,903-pair universe includes 1,547 additional deferred-feature pairs;
 the scope is not reduced to the initial scenarios. Cross-browser and human
 qualification, and explicit applicability decisions, remain recorded requirements
