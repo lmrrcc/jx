@@ -12,3 +12,10 @@ resource-elements	hydrate	on the server React writes hoisted styles into the HTM
 dom-attributes	hydrate	the sample values are not valid for many attributes; React's server and client normalize them differently and React reports the difference
 external-store	hydrate	the store of the case has no server snapshot, which React requires for server rendering
 media-events	hydrate	the image in the server markup finishes loading before hydration attaches the load handler, so the handler is not called
+hydrate-root	static	the case is itself a hydration scenario with its own root
+hydrate-server	static	the case is itself a hydration scenario with its own root
+root-options	static	the case mounts its own root with options
+strict-nested	static	the case mounts its own root without Strict Mode
+unknown-case	static	there is no component to render
+portal	static	a portal needs a DOM element as target, and the server has no document
+external-store	static	the store of the case has no server snapshot, which React requires for server rendering

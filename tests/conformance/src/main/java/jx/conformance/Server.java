@@ -29,6 +29,7 @@ final class Server {
     static native boolean active();
 
     static void install() {
+        registerCase("renderStatic", id -> ReactServer.renderToStaticMarkup(React.strictMode(caseView(Main.component(id)))));
         registerCase("renderCase", id -> ReactServer.renderToString(React.strictMode(caseView(Main.component(id)))));
         register("renderToString", () -> ReactServer.renderToString(page()));
         register("renderHydratable", () -> ReactServer.renderToString(React.strictMode(Views.component(HydratedPage.JX, null))));

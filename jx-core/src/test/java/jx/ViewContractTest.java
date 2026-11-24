@@ -47,4 +47,11 @@ class ViewContractTest {
         assertFalse(Views.isValidElement(View.Empty.INSTANCE));
         assertThrows(IllegalArgumentException.class, () -> Views.fragment(new Object()));
     }
+
+    @Test void stylePropertiesKeepTheOrderInWhichTheyWereAdded() {
+        Style style = Style.create().property("margin", "0").property("zIndex", 2).property("color", "red").property("marginTop", "4px");
+        assertEquals(List.of("margin", "zIndex", "color", "marginTop"), List.copyOf(style.properties().keySet()));
+        assertThrows(UnsupportedOperationException.class, () -> style.properties().put("color", "blue"));
+        assertEquals(List.of(), List.copyOf(Style.create().properties().keySet()));
+    }
 }
