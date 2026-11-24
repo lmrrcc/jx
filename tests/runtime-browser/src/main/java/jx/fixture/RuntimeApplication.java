@@ -156,11 +156,14 @@ public final class RuntimeApplication {
     private static View elm() { return Programs.useProgram(PROGRAM); }
     public static void main(String[] args) {
         if (hotFixture()) { HotApplication.main(); return; }
-        React.mountStrict("root", APP, null);
+        if (promiseObserverFixture()) React.mountStrict("root", PromiseObserverFixture.COMPONENT, null);
+        else React.mountStrict("root", APP, null);
         exported(React.exportComponent(COUNTER, props -> new CounterProps("Export", initial(props))));
     }
     @JSFunctor interface Task extends JSObject { void run(); }
     @JSBody(script = "return !!globalThis.hotFixture;") private static native boolean hotFixture();
+    @JSBody(script = "return new URLSearchParams(location.search).get('fixture') === 'promise-observer';")
+    private static native boolean promiseObserverFixture();
     @JSBody(params = {"task", "delay"}, script = "setTimeout(task, delay);") private static native void delayed(Task task, int delay);
     @JSBody(params = {"kind", "label", "value"}, script = "if (!globalThis.runtimeEvents) globalThis.runtimeEvents = []; globalThis.runtimeEvents.push({kind: kind, label: label, value: value});") private static native void report(String kind, String label, int value);
     @JSBody(script = "return globalThis.ForeignBadge;") private static native JSObject foreign();

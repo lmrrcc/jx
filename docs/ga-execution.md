@@ -9,8 +9,8 @@ No GitHub issues, scheduled jobs, deployments or releases were created by this p
 
 Progress: **GA-01 and GA-02 are complete**. GA-14, GA-15 and GA-18 have substantial
 partial implementations through the React parity tasks; their broader acceptance
-outcomes below are not yet complete. R-26 is accepted; R-27-01, R-27-02a and
-R-27-02b merged with green Verify. R-27-02a landed in [PR #39](https://github.com/lmrrcc/jx/pull/39)
+outcomes below are not yet complete. R-26 is accepted; R-27-01 and R-27-02a–02c
+merged with green Verify. R-27-02a landed in [PR #39](https://github.com/lmrrcc/jx/pull/39)
 at `413558b636679dd5926f4d7bf1c987ea707ed95c`.
 R-27-02b landed in [PR #40](https://github.com/lmrrcc/jx/pull/40) at
 `15c0c6eee36f506910e854c568547ebc6d3758ea`, with its scoped mutant killed and green
@@ -21,9 +21,16 @@ case IDs, and records 38 / 5,356 active feature pairs, with 5,318 still uncovere
 Its six new portal witnesses cover context, actual DOM identity, event phases and
 payloads, focus and cleanup. The portal starts closed for SSR and opens after
 hydration; open-portal server rendering is not qualified. Its unmutated baseline
-passed and its scoped mutant was killed (1 killed, 0 survived, 0 unusable);
-Verify is pending. R-27-03 now has planned actions, optimistic/store and transition
-delivery slices. See the
+passed and its scoped mutant was killed (1 killed, 0 survived, 0 unusable).
+It merged in [PR #41](https://github.com/lmrrcc/jx/pull/41) as
+`a0f5460980c6b288f3ac2fa2c4c73c0b774f0563`, with green
+[CI](https://github.com/lmrrcc/jx/actions/runs/45461059543) and
+[CI](https://github.com/lmrrcc/jx/actions/runs/45460586560).
+R-27-03 still has planned actions, optimistic/store and transition delivery
+slices. Its separate Promise observer prerequisite (`7ed3f2c`) is in review:
+nine Promise JVM tests, 36 runtime-package JVM tests and 13 Chrome runtime checks
+pass locally, while its full local gate and CI Verify remain pending. It adds
+no feature-pair or conformance-case credit. See the
 [interaction evidence record](ga-react-interactions.md) for the unchanged eventual
 118-feature / 6,903-pair scope and its limits. G0 remains open: the serialized lazy
 boundary and basic Node rendering/hydration proofs are delivered, while component
@@ -69,7 +76,7 @@ exists, not when its document or skeleton module lands.
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
 | GA-17 | Forms, validation, i18n and accessible primitives / A | GA-10, GA-15 | M3–M5 / L | Complex form, arrays/errors, locale/RTL, keyboard/reader, shared pure rules and server errors | ⬜ planned |
-| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02b merged; R-27-02c locally evidences 38 active pairs; 5,318 active pairs plus deferred-feature interactions remain; scoped mutant killed, Verify pending for that slice | 🟡 partial |
+| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02c merged with 38 active pairs; 5,318 active pairs plus deferred-feature interactions remain. Promise prerequisite in review; full local gate and CI Verify pending, no new pair credit | 🟡 partial |
 | GA-19 | HTTP headers/binary/upload/stream capabilities / C | GA-03, GA-10, GA-13 | M3–M5 / L | Auth/CSRF headers, upload progress, download, SSE/WS lifecycle, bounds/reconnect tested | ⬜ planned |
 | GA-20 | Real ecosystem binding SDK and catalog / R | GA-15, GA-18 | M4–M7 / L | Selected grid/editor/chart/headless/media bindings with refs/assets/cleanup; Java consumer examples | ⬜ planned |
 | GA-21 | Complex authenticated reference product / A | GA-12, GA-13, GA-16, GA-17, GA-19 | M4–M6 / L | Workspace/project workflow with roles, search/table/detail, forms/files/activity and two-tenant tests | ⬜ planned |

@@ -62,7 +62,8 @@ public final class Promise<T> {
 
     /** Calls exactly one of the callbacks once the promise is settled, also when it already is.
      * The call happens after the current browser job. Exceptions thrown by a callback are not
-     * caught here; use {@link #map} or {@link #recover} to carry a failure forward. */
+     * caught here; they do not prevent other observers from receiving settlement. Use
+     * {@link #map} or {@link #recover} to carry a failure forward. */
     public void whenSettled(Consumer<? super T> onValue, Consumer<? super Throwable> onError) {
         Reaction<T> reaction = new Reaction<>(Objects.requireNonNull(onValue), Objects.requireNonNull(onError));
         if (settled) Async.runtime().defer(() -> deliver(reaction));
@@ -125,7 +126,7 @@ public final class Promise<T> {
         error = failure;
         List<Reaction<T>> waiting = reactions;
         reactions = null;
-        if (!waiting.isEmpty()) Async.runtime().defer(() -> { for (Reaction<T> reaction : waiting) deliver(reaction); });
+        for (Reaction<T> reaction : waiting) Async.runtime().defer(() -> deliver(reaction));
     }
 
     private void deliver(Reaction<T> reaction) {

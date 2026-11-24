@@ -47,6 +47,43 @@ Dependencies are explicit: `Dependencies.always()` omits the array,
 `Dependencies.none()` supplies an empty array, and `Dependencies.of(...)` supplies
 values. Use the same dependency-list length and order between renders.
 
+## Promise observer isolation
+
+`Promise.whenSettled` observers run asynchronously in registration order on the
+browser thread. Each observer has its own microtask. If an observer throws, its
+exception remains visible to the browser host; it neither changes the promise's
+settled value nor prevents later observers from receiving settlement. Use `map`,
+`flatMap` or `recover` when a callback's result or failure belongs to a derived
+promise. Repeated settlement remains a no-op.
+
+This matters when an application observer precedes the React bridge's subscriber.
+The bridge caches one native thenable per Java `Promise`, so skipping its observer
+can leave a `Hooks.use` reader permanently suspended even after the Java promise
+has resolved. The compiling
+[`PromiseObserverFixture`](../tests/runtime-browser/src/main/java/jx/fixture/PromiseObserverFixture.java)
+owns the promise above Suspense and is mounted only at
+`/?fixture=promise-observer`. Its first observer intentionally throws. The browser
+test requires exactly one reported error, automatic removal of the fallback
+before any parent update, and successful reuse of the same promise after rerender
+and repeated settlement. It does not suppress browser or console errors.
+
+R-27-03-PROMISE local evidence, 24 November 2026: before the repair, one of the
+nine Promise JVM tests failed because the bridge observer remained pending; the
+Chrome regression also failed because the reader remained on its fallback.
+After the repair, all nine Promise tests pass. The runtime package passes 36 JVM
+tests (29 core, including those nine, and seven Elm tests), the focused browser
+regression passes, and the complete runtime suite passes 13 Chrome checks.
+The task is in review: the full local push gate and CI Verify are pending.
+These checks add no differential feature-pair credit and do not qualify all
+asynchronous ownership, cancellation or cross-browser behavior.
+
+Reproduce the focused checks after building the runtime as described below:
+
+```sh
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -pl jx-core -Dtest=PromiseTest test
+npx playwright test -c tests/runtime-browser/playwright.config.js -g 'throwing Java Promise observer'
+```
+
 ## Representation rules
 
 | Java value/boundary | Representation |
