@@ -131,7 +131,10 @@ Verify. R-27-02b merged in [PR #40](https://github.com/lmrrcc/jx/pull/40) at
 `15c0c6eee36f506910e854c568547ebc6d3758ea`, with green
 [CI](https://github.com/lmrrcc/jx/actions/runs/45452120669) and
 [CI](https://github.com/lmrrcc/jx/actions/runs/45452801956).
-R-27-02c's scoped mutant was killed; Verify remains pending. Browser evidence is Chrome-only and
+R-27-02c merged in [PR #41](https://github.com/lmrrcc/jx/pull/41) as
+`a0f5460980c6b288f3ac2fa2c4c73c0b774f0563`, with its scoped mutant killed and green
+[CI](https://github.com/lmrrcc/jx/actions/runs/45461059543) and
+[CI](https://github.com/lmrrcc/jx/actions/runs/45460586560). Browser evidence is Chrome-only and
 does not establish additional human or cross-browser qualification.
 
 The ref scenarios use actual Playwright element handles to compare DOM identity,
@@ -145,6 +148,15 @@ focus and ref cleanup. The portal begins closed in the server HTML and opens onl
 after browser hydration; this does not prove server rendering of an open portal.
 Future R-27-03a actions,
 R-27-03b optimistic/store and R-27-03c transition slices remain planned.
+
+The separate R-27-03-PROMISE prerequisite (`7ed3f2c`) is in review. A throwing
+Promise observer previously prevented React's later bridge observer from receiving
+settlement, leaving its reader suspended. JVM and Chrome regressions reproduced
+the defect; nine Promise JVM tests (included in 36 runtime-package JVM tests) and
+13 Chrome runtime checks now pass locally. The full local gate and CI Verify are
+pending. These [runtime checks](../../docs/runtime.md#promise-observer-isolation)
+add no case or feature-pair credit to this bench: its accepted totals remain 779
+passes and 38 pairs.
 
 Static HTML equality does not execute interactive assertion blocks, so it does
 not credit those witnesses. Hydration-owned and Node-only scenarios can carry

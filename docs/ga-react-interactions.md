@@ -14,14 +14,18 @@ R-27-02b merged as `15c0c6eee36f506910e854c568547ebc6d3758ea` in
 [PR #40](https://github.com/lmrrcc/jx/pull/40), with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45452120669) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45452801956).
-R-27-02c has a passing complete local bench and its scoped mutant was killed;
-Verify is pending.
+R-27-02c merged as `a0f5460980c6b288f3ac2fa2c4c73c0b774f0563` in
+[PR #41](https://github.com/lmrrcc/jx/pull/41), with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45461059543) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45460586560).
+The Promise observer prerequisite is in review; its full local gate and CI Verify
+are pending. It adds no feature-pair evidence.
 No additional human or cross-browser
 qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
 
-The passing counts below include the complete R-27-02c local run. Its six new
+The passing counts below include the accepted R-27-02c complete run. Its six new
 portal pairs increase the merged R-27-02b baseline of 32 to **38 / 5,356**, with **5,318**
 remaining. This is assertion evidence, not credit earned by registration alone.
 
@@ -109,6 +113,22 @@ The streaming witness checks shell/fallback/delayed-content ordering in the
 collected HTML. It does not measure early network delivery; that requires a
 separate controlled streaming assertion in R-27-04.
 
+## R-27-03-PROMISE: observer isolation prerequisite
+
+Code revision `7ed3f2c` repairs a reproduced Promise delivery defect: one throwing
+observer could prevent the bridge's later observer from settling React's cached
+native thenable. Separate observer microtasks retain registration order and
+visible error reporting while allowing the suspended reader to resume without an
+unrelated parent update. Both JVM and Chrome regressions failed before repair.
+
+Local evidence is **9 Promise JVM tests**, included within **36 runtime-package
+JVM tests**, and **13 Chrome runtime checks**. The full local push gate and CI
+Verify remain pending. See the [runtime contract](runtime.md#promise-observer-isolation).
+This prerequisite adds no conformance case or pair witness: the accepted bench
+remains **779 passes, 133 skipped, 114 case IDs and 38 / 5,356 pairs**. R-27-03a,
+03b and 03c remain planned; these runtime checks do not qualify all asynchronous
+ownership, cancellation or cross-browser behavior.
+
 ## R-27-02c: portal lifecycle, context and events
 
 `combined-portal-lifecycle` adds six explicit pair witnesses in client, hydrate
@@ -149,7 +169,11 @@ the check exclusively, without another build or browser suite:
 java tools/MutateBench.java --only portal-context-stale
 ```
 
-Verify is pending. The catalog has **107 entries**. The historical complete
+The slice merged in [PR #41](https://github.com/lmrrcc/jx/pull/41) as
+`a0f5460980c6b288f3ac2fa2c4c73c0b774f0563`, with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45461059543) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45460586560).
+The catalog has **107 entries**. The historical complete
 mutation campaign still covers 100, and no fresh complete 107-mutant result is
 claimed.
 
@@ -319,7 +343,8 @@ fresh full 104-mutant campaign.
 R-27-02 extends identity/composition/DOM interactions. R-27-03 is split before
 implementation into planned R-27-03a (form actions and failure/recovery), R-27-03b
 (optimistic updates over external-store snapshots) and R-27-03c (transition
-interactions). Staged fixtures are preparation, not completed evidence.
+interactions). The separate Promise observer prerequisite is in review and adds
+no pair witness. Staged fixtures are preparation, not completed evidence.
 R-27-04 extends server/resource interactions. Each selects explicit
 remaining pair IDs. R-27-05 follows R-28–R-30, exercises the deferred features and
 reviews the remaining applicability decisions. The parent R-27 stays open until

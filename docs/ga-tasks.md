@@ -1,6 +1,6 @@
 # GA implementation sequence
 
-Revision 10, 24 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
+Revision 11, 24 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
 the [work package register](ga-execution.md) into an ordered list of tasks, grouped
 by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
@@ -24,11 +24,13 @@ modules across a serialized boundary. R-26 (every case in every applicable
 rendering mode) is complete: Luca's try-it run matched all recorded results on
 24 November, and code revision `eb5a18a` passed
 [Verify](https://github.com/lmrrcc/jx/actions/runs/45372691183).
-That makes 27 complete React tasks. R-27-01, R-27-02a and R-27-02b merged with green
-Verify, establishing 32 executed pair witnesses. R-27-02c's complete local bench
-passes 779 checks with 38 witnessed pairs, while 5,318 current pairs remain without
-complete evidence. Its scoped `portal-context-stale` mutant was killed; Verify
-is pending. R-27 remains partial; its slice status and the
+That makes 27 complete React tasks. R-27-01 and R-27-02a–02c merged with green
+Verify, establishing 38 executed pair witnesses. The accepted portal bench passes
+779 checks, while 5,318 current pairs remain without complete evidence. Its scoped
+`portal-context-stale` mutant was killed. The Promise observer prerequisite is in
+review, with nine Promise tests, 36 runtime-package JVM tests and 13 Chrome runtime
+checks passing locally; its full local gate and CI Verify remain pending. It adds
+no pair witness. R-27 remains partial; its slice status and the
 [interaction evidence record](ga-react-interactions.md) distinguish local results
 from outstanding acceptance.
 M1-26 (protected data route) is the
@@ -141,7 +143,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-24 | M6 | Resume: `resume`, `resumeToPipeableStream`, `resumeAndPrerender`, `resumeAndPrerenderToNodeStream` | 4 | ✅ done |
 | R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ✅ done |
 | R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | ✅ done: Luca's try-it confirms 715 passes and 133 inapplicable cells; Verify green at eb5a18a, 24 November |
-| R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-27-02c has local evidence for 38 / 5,356 active pairs; 5,318 remain open, plus deferred-feature pairs |
+| R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-27-02c merged with evidence for 38 / 5,356 active pairs; 5,318 remain open, plus deferred-feature pairs; Promise prerequisite in review adds no pairs |
 | R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | ⬜ planned |
 | R-29 | M7 | Remaining small surface: `act` for JX tests, `captureOwnerStack`, version constants, `unstable_batchedUpdates`, `unstable_useCacheRefresh` | 9 | ⬜ planned |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | ⬜ planned |
@@ -225,10 +227,10 @@ No broad area-level exclusion or reduction to feature families closes this task.
 | Task | Deliverable | Status |
 | --- | --- | --- |
 | R-27-01 | Pair register and gate; real keyed/memo/context and Activity/store lifecycle scenarios; explicit assertion evidence and scoped mutation checks | ✅ merged PR #38: 19 pair witnesses, 731 bench passes, both scoped mutants killed and green Verify; no additional human qualification claimed |
-| R-27-02 | Extend identity, refs, composition, DOM and event interactions from the remaining pair inventory; delivery slices below | 🟡 in progress: R-27-02a and R-27-02b merged; R-27-02c under review |
+| R-27-02 | Extend identity, refs, composition, DOM and event interactions from the remaining pair inventory; delivery slices below | 🟡 partial: R-27-02a, R-27-02b and R-27-02c merged; remaining pair inventory stays open |
 | R-27-02a | Children mapping and flattening preserve keyed identity; explicit fragments stay opaque; single-child validation matches React | ✅ merged PR #39 at 413558b: 755 full bench and 12 runtime checks; six new pairs; three scoped mutants killed; green Verify |
 | R-27-02b | Keyed callback refs and imperative handles: replacement, fresh props, cleanup, Strict Mode and layout ordering | ✅ merged PR #40 at 15c0c6e: 771 full bench passes; seven new pairs in two scenarios; scoped mutant killed; green Verify |
-| R-27-02c | Initially closed portal: context, capture/bubble, propagation, payloads and focus after hydration | 🟡 review: 779 full bench and 8 focused checks pass; six new pairs; scoped mutant killed; Verify pending |
+| R-27-02c | Initially closed portal: context, capture/bubble, propagation, payloads and focus after hydration | ✅ merged PR #41 at a0f5460: 779 full bench and 8 focused checks pass; six new pairs; scoped mutant killed; green Verify |
 | R-27-03 | Extend async, form action, optimistic, transition and external-store interactions, including controlled failure/recovery; delivery slices below | ⬜ planned |
 | R-27-03-PROMISE | Prerequisite: isolate Promise observer delivery so a throwing observer cannot leave React's native thenable pending | 🟡 review: JVM and Chrome failures reproduced before repair; nine Promise tests, 36 runtime-package JVM tests and 13 Chrome runtime checks pass locally; full local gate and CI Verify pending |
 | R-27-03a | Combined form actions with submission state, reset and controlled failure/recovery | ⬜ planned |
@@ -289,8 +291,11 @@ and ordered event payloads establish behavior across the logical React ancestry.
 The portal begins closed for SSR; it opens only in the browser after hydration,
 so this is not qualification of server-rendered portals. The unmutated scratch
 baseline passed, then `combined-portal-lifecycle` killed `portal-context-stale`
-(1 killed, 0 survived, 0 unusable). The catalog now has 107 entries; Verify remains
-pending. No fresh full mutation
+(1 killed, 0 survived, 0 unusable). [PR #41](https://github.com/lmrrcc/jx/pull/41)
+merged as `a0f5460980c6b288f3ac2fa2c4c73c0b774f0563`, with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45461059543) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45460586560).
+The catalog now has 107 entries. No fresh full mutation
 campaign, human qualification or cross-browser qualification is implied. Details
 are in the [portal evidence record](ga-react-interactions.md#r-27-02c-portal-lifecycle-context-and-events).
 
@@ -299,7 +304,8 @@ interactions before implementation. Each slice must select explicit remaining
 pair IDs and demonstrate them on both implementations; staged fixture preparation
 does not close a task or earn interaction credit.
 
-R-27-03-PROMISE repairs a defect found while preparing those scenarios. Previously,
+R-27-03-PROMISE, code revision `7ed3f2c`, repairs a defect found while preparing
+those scenarios. Previously,
 all waiting observers ran inside one microtask; an earlier observer throwing
 prevented delivery to the native thenable used by React. The JVM regression failed
 on the still-pending bridge observer, and the Chrome regression stayed on the

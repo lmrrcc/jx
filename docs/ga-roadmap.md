@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01, R-27-02a and R-27-02b merged with green Verify. R-27-02c locally evidences 38 / 5,356 active pairs, with 5,318 open; scoped mutant killed, Verify pending. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01 and R-27-02a–02c merged with green Verify, establishing 38 / 5,356 active pairs with 5,318 open. Promise observer prerequisite in review; full local gate and CI Verify pending, no new pairs. Complete remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -29,8 +29,8 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Production pilots and GA release | ⬜ To do | Complete platform gates, qualify pilots, then pass RC/release evidence gates. |
 
 Execution order confirmed by Luca on 24 November: continue through complete React
-parity and G0, then the JX/Spring starter and faster hot reload. R-27-01, R-27-02a
-and R-27-02b merged with green Verify; Children landed in [PR #39](https://github.com/lmrrcc/jx/pull/39)
+parity and G0, then the JX/Spring starter and faster hot reload. R-27-01 and
+R-27-02a–02c merged with green Verify; Children landed in [PR #39](https://github.com/lmrrcc/jx/pull/39)
 at `413558b636679dd5926f4d7bf1c987ea707ed95c`.
 The ref slice landed in [PR #40](https://github.com/lmrrcc/jx/pull/40) at
 `15c0c6eee36f506910e854c568547ebc6d3758ea`, with its scoped mutant killed and green
@@ -39,12 +39,20 @@ The ref slice landed in [PR #40](https://github.com/lmrrcc/jx/pull/40) at
 R-27-02c's complete local bench reports 779 passes and 133 skipped cells across
 114 case IDs. Its six portal pairs prove context, real DOM identity, event phases,
 payloads, focus and cleanup. Its unmutated baseline passed and its scoped mutant
-was killed (1 killed, 0 survived, 0 unusable); Verify is pending.
+was killed (1 killed, 0 survived, 0 unusable). It merged in
+[PR #41](https://github.com/lmrrcc/jx/pull/41) as
+`a0f5460980c6b288f3ac2fa2c4c73c0b774f0563`, with green
+[CI](https://github.com/lmrrcc/jx/actions/runs/45461059543) and
+[CI](https://github.com/lmrrcc/jx/actions/runs/45460586560).
 The portal begins closed during SSR and opens in the browser after hydration;
 this does not prove server rendering of an open portal.
 The [interaction evidence record](ga-react-interactions.md)
 keeps the 38 proven pairs separate from the remaining inventory. R-27-03 is split
-into planned actions, optimistic/store and transition slices. The eventual
+into planned actions, optimistic/store and transition slices. Its separate
+Promise observer prerequisite (`7ed3f2c`) is in review: nine Promise JVM tests,
+36 runtime-package JVM tests and 13 Chrome runtime checks pass locally, with the
+full local gate and CI Verify pending. This adds no pair witness or bench case.
+The eventual
 118-feature / 6,903-pair universe includes 1,547 additional deferred-feature pairs;
 the scope is not reduced to the initial scenarios. Cross-browser and human
 qualification, and explicit applicability decisions, remain recorded requirements
