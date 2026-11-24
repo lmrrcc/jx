@@ -226,7 +226,7 @@ No broad area-level exclusion or reduction to feature families closes this task.
 | R-27-01 | Pair register and gate; real keyed/memo/context and Activity/store lifecycle scenarios; explicit assertion evidence and scoped mutation checks | ✅ merged PR #38: 19 pair witnesses, 731 bench passes, both scoped mutants killed and green Verify; no additional human qualification claimed |
 | R-27-02 | Extend identity, refs, composition, DOM and event interactions from the remaining pair inventory; delivery slices below | 🟡 in progress: R-27-02a |
 | R-27-02a | Children mapping and flattening preserve keyed identity; explicit fragments stay opaque; single-child validation matches React | 🟡 review: 755 full bench and 12 runtime checks pass; six new pairs; all three scoped mutants killed; Verify pending |
-| R-27-02b | Keyed callback refs and imperative handles: replacement, fresh props, cleanup, Strict Mode and layout ordering | ⬜ planned |
+| R-27-02b | Keyed callback refs and imperative handles: replacement, fresh props, cleanup, Strict Mode and layout ordering | ➡️ in progress: seven explicit interaction witnesses in two differential scenarios |
 | R-27-02c | Initially closed portal: context, capture/bubble, propagation, payloads and focus after hydration | ⬜ planned |
 | R-27-03 | Extend async, form action, optimistic, transition and external-store interactions, including controlled failure/recovery | ⬜ planned |
 | R-27-04 | Extend SSR, hydration, streaming and resource interactions with mode-specific assertions | ⬜ planned |

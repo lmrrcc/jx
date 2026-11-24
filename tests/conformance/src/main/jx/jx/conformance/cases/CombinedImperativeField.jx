@@ -1,0 +1,27 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.DomRef;
+import jx.Hooks;
+import jx.Ref;
+import jx.View;
+
+/** A normal ref prop receives a handle that captures the current id and prefix. */
+@Component
+public final class CombinedImperativeField {
+    public record Props(String id, String prefix, Ref<CombinedImperativeHandles.Handle> ref) {}
+
+    public static View render(Props props) {
+        DomRef input = Hooks.useDomRef();
+        Hooks.useImperativeHandle(props.ref(), () -> new CombinedImperativeHandles.Handle(props.id(), props.prefix(), value -> {
+            input.current().setValue(props.prefix() + ":" + value);
+            input.current().focus();
+        }, () -> input.current().value()), Dependencies.of(props.id(), props.prefix()));
+        return (
+            <li data-row={props.id()}>
+                <input ref={input} aria-label={"Handle " + props.id()} defaultValue={props.id() + "-initial"} />
+            </li>
+        );
+    }
+}

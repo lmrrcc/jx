@@ -1,4 +1,11 @@
 id	feature-a	feature-b	case	modes	behavior
+key-callback-ref	jsx:key	jsx:ref-callback	combined-keyed-refs	client,hydrate,lazy	Reordering retains callback refs and real DOM nodes while removing and restoring a key disposes and creates attachments
+callback-ref-identity	jsx:ref-callback	react:useCallback	combined-keyed-refs	client,hydrate,lazy	Stable callback dependencies avoid detachment while changed dependencies replace the callback on the same DOM node
+layout-callback-ref	jsx:ref-callback	react:useLayoutEffect	combined-keyed-refs	client,hydrate,lazy	Layout setup observes the node attached by the current callback ref
+strict-callback-ref	jsx:ref-callback	react:StrictMode	combined-keyed-refs	client,hydrate,lazy	Strict Mode repeats callback setup and cleanup and final removal balances all attachments
+key-imperative-handle	jsx:key	react:useImperativeHandle	combined-imperative-handles	client,hydrate,lazy	Handles follow keyed rows through reordering and clear on removal while restored rows receive fresh handles
+props-imperative-handle	jsx:props-update	react:useImperativeHandle	combined-imperative-handles	client,hydrate,lazy	Changed props publish a fresh handle with current captured values without replacing its DOM input
+refprop-imperative-handle	jsx:ref-as-prop	react:useImperativeHandle	combined-imperative-handles	client,hydrate,lazy	Switching the supplied ref clears its previous owner and populates the new owner on the same input
 children-key	jsx:key	react:Children	combined-children-map	client,hydrate,lazy	Source and mapped keys compose so wrappers preserve keyed child identity while a changed wrapper key resets it
 children-state	react:Children	react:useState	combined-children-map	client,hydrate,lazy	Mapped and duplicated children retain independent state across source reordering and reset after removal
 children-list	jsx:list-rendering	react:Children	combined-children-list	client,hydrate,lazy	Flattening nested arrays preserves distinct local key namespaces and each child's state
