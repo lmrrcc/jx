@@ -97,14 +97,14 @@ dom:ref-on-element	dom	supported	dom-ref-focus	ref with Hooks.useDomRef		DomElem
 dom:attributes	dom	supported	attributes,dom-attributes	Markup attributes		Every name in React DOM table rendered on an HTML and an SVG element and compared with React; 16 names are covered by dedicated cases
 dom:style	dom	supported	attributes	Style		
 dom:svg	dom	supported	svg,dom-elements	svg		Every SVG element compared with React
-dom:mouse-events	dom	supported	state-counter,stop-propagation	onClick		Only click is covered
+dom:mouse-events	dom	supported	state-counter,stop-propagation,dom-events	onClick and every other handler name		Every handler name is called as in React for a plain synthetic event; payloads are covered by the event cases
 dom:keyboard-events	dom	supported	key-event,event-payload	Event.key, code, repeat and modifier keys		
 dom:event-default-and-propagation	dom	supported	prevent-default,stop-propagation	Event.preventDefault, Event.stopPropagation		
 dom:event-payload	dom	supported	event-payload	Event and EventTarget accessors		One Event interface for all families; inapplicable accessors return empty values
-dom:capture-phase-events	dom	supported	capture-phase	onClickCapture and other Capture handler names		Only click is covered
+dom:capture-phase-events	dom	supported	capture-phase,dom-events	onClickCapture and every other Capture handler name		
 dom:focus-pointer-touch-wheel-events	dom	supported	pointer-events	Event.relatedTarget, pointerType, deltaY, touches		
 dom:composition-clipboard-drag-events	dom	supported	transfer-events	Event.data, transferData, setTransferData		Files and drag effects are not exposed
-dom:media-and-animation-events	dom	supported	media-events	Event.animationName, propertyName, EventTarget.paused		A sample of media events
+dom:media-and-animation-events	dom	supported	media-events,dom-events	Event.animationName, propertyName, EventTarget.paused		Every media handler name is called as in React
 dom:controlled-input	dom	supported	controlled-input,key-event			
 dom:controlled-checkbox	dom	supported	checkbox			
 dom:radio-select-textarea	dom	supported	choice-inputs	checked, value and onChange on radio, select and textarea		

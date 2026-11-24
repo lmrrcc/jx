@@ -66,7 +66,7 @@ import { FormStatus } from './cases/form-status.jsx';
 import { FormActions } from './cases/form-actions.jsx';
 import { FormReset } from './cases/form-reset.jsx';
 import { UsePromise } from './cases/use-promise.jsx';
-import { DomAttributes, DomElements } from './cases/dom-tables.jsx';
+import { DomAttributes, DomElements, DomEvents } from './cases/dom-tables.jsx';
 import { HydratedPage } from './cases/hydrate-server.jsx';
 import { RootOptions, rootOptions } from './cases/root-options.jsx';
 import { FormState } from './cases/form-state.jsx';
@@ -159,6 +159,7 @@ const cases = {
   'use-promise': UsePromise,
   'dom-elements': DomElements,
   'dom-attributes': DomAttributes,
+  'dom-events': DomEvents,
   'hydrate-server': HydratedPage,
   'root-options': RootOptions,
   'form-state': FormState,

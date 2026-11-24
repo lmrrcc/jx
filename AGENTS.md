@@ -142,7 +142,7 @@ compatibility links. The second checks the [version manifest](docs/evidence/vers
 against the build files, the curated mutants, the [capability ledger](docs/evidence/capabilities.tsv)
 and the portfolio registers' structure; after changing a pinned version, regenerate the manifest with
 `java tools/CheckBaseline.java --write-versions`. Maven runs compiler, plugin, language-server, Elm/model, and
-backend checks; `GenerateDomTables --check` fails when the generated element and attribute bench cases differ from what React DOM's own table produces (regenerate without `--check`); npm runs real browser checks and the complete examples. Editor
+backend checks; `GenerateDomTables --check` fails when the generated element, attribute and event bench cases differ from what React DOM's own table produces (regenerate without `--check`); npm runs real browser checks and the complete examples. Editor
 package verification commands and supported targets live in
 [the tooling guide](docs/tooling.md). Follow the documented compatibility limits;
 these tests do not establish blanket React or IDE parity.

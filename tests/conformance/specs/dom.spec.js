@@ -221,3 +221,30 @@ test('dom-attributes: every attribute name React knows renders as in React', asy
   for (const attribute of ['class="2"', 'for="2"', 'accept-charset="2"', 'http-equiv="2"', 'xlink:href="2"', 'viewBox="2"', 'stroke-width="2"'])
     expect(html).toContain(attribute);
 });
+
+// Dispatches one native event per handler element and returns what the handlers logged.
+const fireAll = page => page.evaluate(() => {
+  globalThis.__benchLog = [];
+  const native = {doubleclick: 'dblclick', focus: 'focusin', blur: 'focusout'};
+  for (const node of document.querySelectorAll('[data-event]')) {
+    const name = node.dataset.event.toLowerCase();
+    node.dispatchEvent(new Event(native[name] || name, {bubbles: true}));
+  }
+  return globalThis.__benchLog;
+});
+
+test('dom-events: every event handler name React knows is called as in React', async ({page, open}, info) => {
+  await open('dom-events');
+  const calls = await fireAll(page);
+  // Most handlers answer a plain synthetic event; the exact set is whatever React does.
+  expect(calls.length).toBeGreaterThan(150);
+  for (const call of ['Click', 'Click capture', 'DoubleClick', 'Play', 'Play capture', 'PointerDown', 'Wheel', 'Submit', 'Focus', 'Blur'])
+    expect(calls).toContain(call);
+  if (info.project.name === 'jx') {
+    const reference = await page.context().newPage();
+    await reference.goto('../reference/?case=dom-events');
+    await expect(reference.locator('#app > *').first()).toBeAttached();
+    expect(calls).toEqual(await fireAll(reference));
+    await reference.close();
+  }
+});

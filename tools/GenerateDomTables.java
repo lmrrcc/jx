@@ -12,11 +12,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Generates the bench cases that render every HTML and SVG element and every attribute
- * name React DOM knows, once for the React reference and once for JX, from the same markup.
+ * Generates the bench cases that render every HTML and SVG element, every attribute name
+ * and every event handler name React DOM knows, once for the React reference and once for
+ * JX, from the same markup.
  *
- * <p>Attribute names are read from the table inside the installed React DOM development
- * build, so the cases follow the React version in use. Element names are the lists below.
+ * <p>Attribute and event names are read from the tables inside the installed React DOM
+ * development build, so the cases follow the React version in use. Element names are the lists below.
  * Run {@code java tools/GenerateDomTables.java} after changing React or this file;
  * {@code --check} fails when the generated files on disk differ.
  */
@@ -100,6 +101,7 @@ public final class GenerateDomTables {
         }
         Path root = Path.of("").toAbsolutePath();
         Set<String> names = attributeNames(Files.readString(root.resolve(REACT_DOM), StandardCharsets.UTF_8));
+        List<Event> events = events(Files.readString(root.resolve(REACT_DOM), StandardCharsets.UTF_8));
         List<String> attributes = names.stream().filter(name -> !SKIPPED.containsKey(name)).toList();
         for (String name : SKIPPED.keySet()) {
             if (!names.contains(name)) throw new IOException("Skipped name is not in React's table any more: " + name);
@@ -123,13 +125,41 @@ public final class GenerateDomTables {
             attributeParts.add(svg.append("</svg>").toString());
         }
 
-        StringBuilder reference = new StringBuilder("// " + NOTICE + "\n// Every HTML and SVG element, and every attribute name in React DOM's table ("
-                + attributes.size() + " rendered, " + SKIPPED.size() + " covered elsewhere).\n\n");
+        // Each handler name sits on a plain element and on a media element, because React
+        // listens for media events only on media elements.
+        List<String> referenceEvents = new ArrayList<>();
+        List<String> jxEvents = new ArrayList<>();
+        for (int start = 0; start < events.size(); start += PART_SIZE / 2) {
+            List<Event> slice = events.subList(start, Math.min(start + PART_SIZE / 2, events.size()));
+            StringBuilder referenceMarkup = new StringBuilder("<section data-group=\"events\">");
+            StringBuilder jxMarkup = new StringBuilder("<section data-group=\"events\">");
+            for (Event event : slice) {
+                for (String tag : List.of("div", "video")) {
+                    String open = "<" + tag + " data-event=\"" + event.name() + "\" on" + event.name() + "={";
+                    referenceMarkup.append(open).append("() => log('").append(event.name()).append("')}");
+                    jxMarkup.append(open).append("event -> Bench.log(\"").append(event.name()).append("\")}");
+                    if (event.capture()) {
+                        referenceMarkup.append(" on").append(event.name()).append("Capture={() => log('").append(event.name()).append(" capture')}");
+                        jxMarkup.append(" on").append(event.name()).append("Capture={event -> Bench.log(\"").append(event.name()).append(" capture\")}");
+                    }
+                    referenceMarkup.append(" />");
+                    jxMarkup.append(" />");
+                }
+            }
+            referenceEvents.add(referenceMarkup.append("</section>").toString());
+            jxEvents.add(jxMarkup.append("</section>").toString());
+        }
+
+        StringBuilder reference = new StringBuilder("// " + NOTICE + "\n// Every HTML and SVG element, every attribute name in React DOM's table ("
+                + attributes.size() + " rendered, " + SKIPPED.size() + " covered elsewhere)\n// and every event handler name ("
+                + events.size() + ").\nimport { log } from '../bench.js';\n\n");
         reference.append(referenceComponent("DomElements", elementParts));
         reference.append(referenceComponent("DomAttributes", attributeParts));
+        reference.append(referenceComponent("DomEvents", referenceEvents));
         files.put(REFERENCE, reference.toString());
         jx(files, "DomElements", "dom-elements: every HTML and SVG element renders as in React", elementParts);
         jx(files, "DomAttributes", "dom-attributes: every attribute name React knows renders as in React", attributeParts);
+        jx(files, "DomEvents", "dom-events: every event handler name React knows is called as in React", jxEvents);
 
         boolean stale = false;
         for (Map.Entry<String, String> file : files.entrySet()) {
@@ -146,8 +176,8 @@ public final class GenerateDomTables {
             }
         }
         if (stale) System.exit(1);
-        System.out.printf("PASS: %d HTML and %d SVG elements, %d attribute names (%d covered elsewhere), %d files.%n",
-                HTML_FLOW.size() + count(HTML_STRUCTURES), SVG.size(), attributes.size(), SKIPPED.size(), files.size());
+        System.out.printf("PASS: %d HTML and %d SVG elements, %d attribute names (%d covered elsewhere), %d event names, %d files.%n",
+                HTML_FLOW.size() + count(HTML_STRUCTURES), SVG.size(), attributes.size(), SKIPPED.size(), events.size(), files.size());
     }
 
     /** The React property names of React DOM's own table of known attributes. */
@@ -160,6 +190,25 @@ public final class GenerateDomTables {
         while (entry.find()) names.add(entry.group(1));
         if (names.size() < 300) throw new IOException("React DOM's attribute table looks incomplete: " + names.size() + " names");
         return names;
+    }
+
+    /** An event as React names it without the "on" prefix; enter and leave events have no capture form. */
+    record Event(String name, boolean capture) {}
+
+    /** The event handler names React DOM registers, read from its registration calls. */
+    static List<Event> events(String source) throws IOException {
+        Map<String, Boolean> found = new java.util.TreeMap<>();
+        Matcher simple = Pattern.compile("simpleEventPluginEvents =\\s*\"([^\"]+)\"").matcher(source);
+        if (!simple.find()) throw new IOException("React DOM's event list was not found in " + REACT_DOM);
+        for (String name : simple.group(1).split(" ")) found.put(Character.toUpperCase(name.charAt(0)) + name.substring(1), true);
+        Matcher twoPhase = Pattern.compile("register(?:TwoPhaseEvent\\(\\s*|SimpleEvent\\(\\s*[^,]+,\\s*)\"on([A-Za-z]+)\"").matcher(source);
+        while (twoPhase.find()) found.put(twoPhase.group(1), true);
+        Matcher direct = Pattern.compile("registerDirectEvent\\(\\s*\"on([A-Za-z]+)\"").matcher(source);
+        while (direct.find()) found.put(direct.group(1), false);
+        if (found.size() < 80) throw new IOException("React DOM's event list looks incomplete: " + found.size() + " names");
+        List<Event> events = new ArrayList<>();
+        found.forEach((name, capture) -> events.add(new Event(name, capture)));
+        return events;
     }
 
     private static String selfClosing(List<String> tags) {
@@ -197,7 +246,8 @@ public final class GenerateDomTables {
     }
 
     private static String header(String name, String description) {
-        return "// " + NOTICE + "\npackage jx.conformance.cases;\n\nimport jx.Component;\nimport jx.View;\n\n/** " + description
+        return "// " + NOTICE + "\npackage jx.conformance.cases;\n\nimport jx.Component;\nimport jx.View;\n"
+                + (name.startsWith("DomEventsPart") ? "import jx.conformance.Bench;\n" : "") + "\n/** " + description
                 + " */\n@Component\npublic final class " + name + " {\n    public static View render() {\n";
     }
 }
