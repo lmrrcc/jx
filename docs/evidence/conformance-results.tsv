@@ -22,6 +22,7 @@ combined-children-map	pass	pass	pass	pass	pass	pass	pass	pass
 combined-imperative-handles	pass	pass	pass	pass	pass	pass	pass	pass
 combined-keyed-context	pass	pass	pass	pass	pass	pass	pass	pass
 combined-keyed-refs	pass	pass	pass	pass	pass	pass	pass	pass
+combined-optimistic-store	pass	pass	pass	pass	pass	pass	pass	pass
 combined-portal-lifecycle	pass	pass	pass	pass	pass	pass	pass	pass
 conditional	pass	pass	pass	pass	pass	pass	pass	pass
 context-nested	pass	pass	pass	pass	pass	pass	pass	pass

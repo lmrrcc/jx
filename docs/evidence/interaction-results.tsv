@@ -29,6 +29,9 @@ lazy-suspense	pass	pass	n/a	n/a	n/a	n/a	pass	pass
 memo-context	pass	pass	pass	pass	n/a	n/a	pass	pass
 memo-props	pass	pass	pass	pass	n/a	n/a	pass	pass
 memo-store	pass	pass	pass	pass	n/a	n/a	pass	pass
+optimistic-async	pass	pass	pass	pass	n/a	n/a	pass	pass
+optimistic-store	pass	pass	pass	pass	n/a	n/a	pass	pass
+optimistic-transition	pass	pass	pass	pass	n/a	n/a	pass	pass
 portal-capture	pass	pass	pass	pass	n/a	n/a	pass	pass
 portal-context	pass	pass	pass	pass	n/a	n/a	pass	pass
 portal-dom-ref	pass	pass	pass	pass	n/a	n/a	pass	pass
