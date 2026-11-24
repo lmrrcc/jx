@@ -9,7 +9,7 @@ import {readFileSync} from 'node:fs';
  */
 /** 'reference' or 'jx': the implementation a test runs against. */
 export const sideOf = info => info.project.name.split('-')[0];
-/** 'client' or 'hydrate': the rendering mode a test runs in. */
+/** 'client', 'hydrate' or 'static': the rendering mode a test runs in. */
 export const modeOf = info => info.project.name.includes('-') ? info.project.name.split('-')[1] : 'client';
 
 // Cases that do not apply to a mode, with the reason: tests/conformance/modes.tsv.
@@ -44,6 +44,15 @@ export function test(title, body) {
   extended(title, async ({page, open}, info) => {
     const reason = notApplicable.get(title.split(':')[0] + ' ' + modeOf(info));
     extended.skip(reason !== undefined, reason);
+    if (modeOf(info) === 'static') {
+      // Static mode has no script, so the spec cannot run. The case is rendered to static
+      // HTML in Node, and JX must produce exactly the markup React produces.
+      const id = title.split(':')[0];
+      const html = await (await serverOf(info)).renderStatic(id);
+      expect(html.length).toBeGreaterThan(0);
+      if (sideOf(info) === 'jx') expect(html).toEqual(await (await serverOf({project: {name: 'reference'}})).renderStatic(id));
+      return;
+    }
     await body({page, open}, info);
   });
 }

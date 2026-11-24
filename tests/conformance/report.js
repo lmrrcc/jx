@@ -5,7 +5,7 @@
 import {readFileSync, writeFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 
-const PROJECTS = ['reference', 'jx', 'reference-hydrate', 'jx-hydrate'];
+const PROJECTS = ['reference', 'jx', 'reference-hydrate', 'jx-hydrate', 'reference-static', 'jx-static'];
 const RECORD = fileURLToPath(new URL('../../docs/evidence/conformance-results.tsv', import.meta.url));
 
 export default class ConformanceReport {
@@ -34,6 +34,7 @@ export default class ConformanceReport {
     console.log('reference: ' + count('reference') + ' pass; jx: ' + count('jx') + ' pass, '
       + rows.filter(([, row]) => row.jx === 'unsupported').length + ' unsupported');
     console.log('hydrate mode: reference ' + count('reference-hydrate') + ' pass; jx ' + count('jx-hydrate') + ' pass');
+    console.log('static mode: reference ' + count('reference-static') + ' pass; jx ' + count('jx-static') + ' pass');
 
     const table = ['case', ...PROJECTS].join('\t') + '\n' + rows.map(([id, row]) => line(id, row)).join('\n') + '\n';
     if (process.env.BENCH_NO_COMPARE === '1') return;

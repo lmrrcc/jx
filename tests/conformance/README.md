@@ -38,6 +38,10 @@ is a console error and fails the test. A case that does not apply to a mode is
 listed in `modes.tsv` with the reason, decided by what React itself does there;
 server cases have no page and run in client mode only.
 
+In **static mode** (projects `reference-static` and `jx-static`) there is no script,
+so the spec cannot run. Each case is rendered to static HTML in Node, and the JX
+markup must equal React's character for character.
+
 ## Features JX does not have yet
 
 A case for an unsupported feature is declared with `referenceOnly(...)`, or with

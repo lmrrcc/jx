@@ -454,7 +454,7 @@ public final class CheckBaseline {
                 String at = "tests/conformance/modes.tsv:" + (index + 1);
                 if (row.length != 3) { failures.add(at + " needs 3 columns"); continue; }
                 require(cases.contains(row[0]), at + " names unknown bench case '" + row[0] + "'");
-                require(row[1].equals("hydrate"), at + " has unknown mode '" + row[1] + "'");
+                require(row[1].equals("hydrate") || row[1].equals("static"), at + " has unknown mode '" + row[1] + "'");
                 require(!row[2].isBlank(), at + " needs a reason");
                 require(listed.add(row[0] + " " + row[1]), at + " repeats " + row[0] + " in " + row[1]);
             }

@@ -66,6 +66,11 @@ function Streaming() {
 }
 
 export const server = {
+  // Any client case as static HTML, for the static mode of the bench.
+  renderStatic: async id => {
+    const Case = cases[id];
+    return renderToStaticMarkup(<StrictMode><Case /></StrictMode>);
+  },
   // Any client case as server HTML, for the hydrate mode of the bench.
   renderCase: async id => {
     const Case = cases[id];
