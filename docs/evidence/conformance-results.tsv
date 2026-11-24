@@ -24,6 +24,8 @@ debug-value	pass	pass
 default-props	pass	pass
 deferred-value	pass	pass
 document-metadata	pass	pass
+dom-attributes	pass	pass
+dom-elements	pass	pass
 dom-ref-focus	pass	pass
 dynamic-component	pass	pass
 effect-cleanup	pass	pass

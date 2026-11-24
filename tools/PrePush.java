@@ -34,6 +34,7 @@ public final class PrePush {
             "java tools/CheckAgentSetup.java",
             "java tools/CheckBaseline.java",
             "java tools/PrePush.java --check",
+            "java tools/GenerateDomTables.java --check",
             "./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository install",
             "npm run build:proof",
             "npm run test:proof",

@@ -189,3 +189,35 @@ test('hydrate-server: the browser hydrates HTML rendered in Node, keeping nodes 
   await expect(page.getByRole('status')).toHaveText('1');
   expect(await button.evaluate(node => node.benchServerNode)).toBe(true);
 });
+
+// The generated table cases compare JX with React directly: the same case is opened on the
+// reference side and the two DOM trees must serialize to the same HTML.
+async function sameAsReference(page, id, info) {
+  const html = await page.locator('#app').innerHTML();
+  if (info.project.name !== 'jx') return html;
+  const reference = await page.context().newPage();
+  await reference.goto('../reference/?case=' + id);
+  await expect(reference.locator('#app > *').first()).toBeAttached();
+  expect(html).toEqual(await reference.locator('#app').innerHTML());
+  await reference.close();
+  return html;
+}
+
+test('dom-elements: every HTML and SVG element renders as in React', async ({page, open}, info) => {
+  await open('dom-elements');
+  await sameAsReference(page, 'dom-elements', info);
+  // Elements are created in the right namespace.
+  expect(await page.locator('section[data-group="html"] *').count()).toBeGreaterThan(90);
+  const svg = await page.locator('svg[data-group="svg"] > *').evaluateAll(nodes => nodes.map(node => node.namespaceURI));
+  expect(svg.length).toBeGreaterThan(55);
+  expect(new Set(svg)).toEqual(new Set(['http://www.w3.org/2000/svg']));
+});
+
+test('dom-attributes: every attribute name React knows renders as in React', async ({page, open}, info) => {
+  await open('dom-attributes');
+  const html = await sameAsReference(page, 'dom-attributes', info);
+  expect(await page.locator('[data-group="html-attributes"] > div').count()).toBeGreaterThan(380);
+  // A few names whose DOM spelling differs from the React one.
+  for (const attribute of ['class="2"', 'for="2"', 'accept-charset="2"', 'http-equiv="2"', 'xlink:href="2"', 'viewBox="2"', 'stroke-width="2"'])
+    expect(html).toContain(attribute);
+});

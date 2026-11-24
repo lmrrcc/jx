@@ -88,6 +88,8 @@ import jx.conformance.cases.FormStateCase;
 import jx.conformance.cases.RootOptionsCase;
 import jx.conformance.cases.HydrateRoot;
 import jx.conformance.cases.HydratedPage;
+import jx.conformance.cases.DomElements;
+import jx.conformance.cases.DomAttributes;
 import jx.react.React;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
@@ -194,6 +196,8 @@ public final class Main {
                 Bench.seed(Bench.serverMarkup());
                 React.hydrateStrict("app", HydratedPage.JX, null);
             }
+            case "dom-elements" -> React.mountStrict("app", DomElements.JX, null);
+            case "dom-attributes" -> React.mountStrict("app", DomAttributes.JX, null);
             default -> Bench.unknown(id);
         }
     }
