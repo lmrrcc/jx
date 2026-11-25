@@ -208,7 +208,7 @@ Both scoped mutants are killed after the unmutated baseline passes:
 publication completed in PR #54, as recorded below. No interaction-
 pair credit or general R-31 completion is claimed.
 
-R-31-SERVER-SINK, 25 November 2026: 🟡 implemented locally. The synchronous
+R-31-SERVER-SINK, 25 November 2026: ✅ done in PR #64. The synchronous
 Java `HtmlSink` overload of `PipeableStream.pipe` now returns a delivery promise.
 Previously a thrown write left the consumer pending: the new differential case
 passed on native React/Node and failed on JX before the fix. Delivery now rejects
@@ -224,8 +224,12 @@ The sink-failure mutant was killed by this case after a passing baseline, within
 the five-mutant `e63ea76` candidate campaign (5 killed, zero survived/unusable).
 That integrated candidate passes 905 checks /175 skipped across 135 cases; all
 five sink implementation/consumer files match this slice byte for byte. Scratch:
-`jx-mutation-7730846870036546774`. The push gate and Verify remain pending; no new feature-pair credit or general stream-option parity
-is claimed. The lifecycle follows the public
+`jx-mutation-7730846870036546774`. PR [#64](https://github.com/lmrrcc/jx/pull/64)
+merged as `ce25b13` after the 15-step local gate passed in 304 seconds and both
+Verify checks passed on `8d491d4`. The final integrated bench passes **929 checks
+/175 skipped across 138 cases**: client 136 reference /135 JX, hydrate 104, static
+110 and lazy 115 per side. All 54/6328 registered pairs remain unchanged. No new
+feature-pair credit or general stream-option parity is claimed. The lifecycle follows the public
 [React stream contract](https://react.dev/reference/react-dom/server/renderToPipeableStream)
 and [Node Writable lifecycle](https://nodejs.org/api/stream.html#class-streamwritable).
 
@@ -235,8 +239,8 @@ passes in 35.321 seconds. The complete bench passes **905 checks /175 skipped
 across 135 cases** in 3.4 minutes: client 133 reference /132 JX, hydrate 101,
 static 107 and lazy 112 per side. Its five sink implementation/consumer files
 remain byte-identical to the successful mutation candidate `e63ea76`.
-All 54/6328 registered interaction pairs remain unchanged. Final publication
-onto merged main, the push gate and Verify remain pending.
+All 54/6328 registered interaction pairs remain unchanged. This is the earlier
+integration candidate; the final merged qualification is recorded above.
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven
