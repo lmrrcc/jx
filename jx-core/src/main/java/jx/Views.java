@@ -19,6 +19,40 @@ public final class Views {
     }
     public static <P,S,C extends ClassComponent<P,S,?>> View component(ClassComponentType<P,S,C> component,
             P props, String key, ClassRef<C> ref) { return new View.ClassComponentView<>(component, props, key, ref); }
+    /** Describes a class element with raw input properties. Missing/undefined fields remain
+     * raw in this Java description; React applies native defaults before the class's strict
+     * props schema is decoded. Invalid unresolved props fail before Java peer construction.
+     * This method does not call the component or construct its resolved record. */
+    public static <P,S,C extends ClassComponent<P,S,?>> View.ClassPropsView<P,S,C> classPropsView(
+            ClassComponentType<P,S,C> component, ClassProps<P> props) {
+        return classPropsView(component, props, null, null);
+    }
+    /** Raw class input with nullable key/ref metadata; React owns reconciliation and refs. */
+    public static <P,S,C extends ClassComponent<P,S,?>> View.ClassPropsView<P,S,C> classPropsView(
+            ClassComponentType<P,S,C> component, ClassProps<P> props, String key, ClassRef<C> ref) {
+        return new View.ClassPropsView<>(component, props, key, ref);
+    }
+    /** Copies raw class input, retaining descriptor, key and ref. A null override retains
+     * all input properties. Explicit undefined overrides remain own-undefined on the native
+     * cloned element, then receive native defaults when the class actually renders.
+     * This is distinct from replacing a field with null. Neither input is modified. */
+    public static <P,S,C extends ClassComponent<P,S,?>> View.ClassPropsView<P,S,C> cloneClassProps(
+            View.ClassPropsView<P,S,C> element, ClassProps<P> overrides) {
+        Objects.requireNonNull(element, "element");
+        return cloneClassProps(element, overrides, null, element.ref());
+    }
+    /** Copies raw class input with explicit ref replacement: null removes the ref.
+     * Null replacementKey retains the original; a non-null key changes native identity.
+     * Input omissions retain the original fields; use an undefined override to request
+     * native defaults. No lifecycle or ref callbacks run during this operation. */
+    public static <P,S,C extends ClassComponent<P,S,?>> View.ClassPropsView<P,S,C> cloneClassProps(
+            View.ClassPropsView<P,S,C> element, ClassProps<P> overrides, String replacementKey, ClassRef<C> ref) {
+        Objects.requireNonNull(element, "element");
+        ClassProps<P> combined = element.overrides() == null ? ClassProps.empty(element.component().propsSchema()) : element.overrides();
+        if (overrides != null) combined = combined.overlay(overrides);
+        return new View.ClassPropsView<>(element.component(), element.input(),
+                replacementKey == null ? element.key() : replacementKey, ref, combined);
+    }
     /** Typed counterpart of React's {@code cloneElement} for a DOM element: a copy with
      * {@code extra} merged over its attributes, including key and ref, and with its children
      * replaced when any are given. Component views carry a typed Props record; build a new one
@@ -38,7 +72,7 @@ public final class Views {
      * element extension; false for text, empty positions, collections, portals and null. */
     public static boolean isValidElement(Object value) {
         return value instanceof View.Element || value instanceof View.Fragment || value instanceof View.ComponentView<?>
-                || value instanceof View.ClassComponentView<?,?,?>
+                || value instanceof View.ClassComponentView<?,?,?> || value instanceof View.ClassPropsView<?,?,?>
                 || value instanceof View.Provider<?> || value instanceof View.Keyed || value instanceof View.ElementExtension;
     }
     /** A written fragment, which child utilities treat as a single element without visiting its contents. */
@@ -68,6 +102,7 @@ public final class Views {
             case View.Keyed keyed -> keyed.key();
             case View.ComponentView<?> component -> component.key();
             case View.ClassComponentView<?,?,?> component -> component.key();
+            case View.ClassPropsView<?,?,?> component -> component.key();
             case View.Element element -> {
                 String key = null;
                 for (Attributes.Entry entry : element.attributes().entries())

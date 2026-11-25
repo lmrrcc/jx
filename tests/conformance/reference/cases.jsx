@@ -114,6 +114,7 @@ import { ClassLifecycleAuthoring } from './cases/class-lifecycle-authoring.jsx';
 import { ClassNextContext } from './cases/class-next-context.jsx';
 import { ClassNullPatch } from './cases/class-null-patch.jsx';
 import { ClassNullableState, ClassNullableDerived } from './cases/class-nullable-state.jsx';
+import { ClassDefaults, ClassDefaultsAuthoring } from './cases/class-defaults.jsx';
 import { ClassPurePolicy } from './cases/class-pure-policy.jsx';
 
 export const cases = {
@@ -140,6 +141,8 @@ export const cases = {
   'class-null-patch': ClassNullPatch,
   'class-nullable-state': ClassNullableState,
   'class-nullable-derived': ClassNullableDerived,
+  'class-defaults': ClassDefaults,
+  'class-defaults-authoring': ClassDefaultsAuthoring,
   'class-pure-policy': ClassPurePolicy,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,

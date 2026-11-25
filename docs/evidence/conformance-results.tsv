@@ -16,6 +16,8 @@ children-utilities	pass	pass	pass	pass	pass	pass	pass	pass
 choice-inputs	pass	pass	pass	pass	pass	pass	pass	pass
 class-authoring	pass	pass	pass	pass	pass	pass	pass	pass
 class-context	pass	pass	pass	pass	pass	pass	pass	pass
+class-defaults	pass	pass	pass	pass	pass	pass	pass	pass
+class-defaults-authoring	pass	pass	pass	pass	pass	pass	pass	pass
 class-derived-props	pass	pass	pass	pass	pass	pass	pass	pass
 class-error-lifecycle	pass	pass	pass	pass	pass	pass	pass	pass
 class-keyed	pass	pass	pass	pass	pass	pass	pass	pass

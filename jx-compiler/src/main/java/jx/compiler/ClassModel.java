@@ -14,13 +14,14 @@ import jx.compiler.Syntax.ParsedSource;
  * checks assignability, constructor bodies and the concrete override types after lowering. */
 final class ClassModel {
     private static final Set<String> GENERATED = Set.of("JX", "StateUpdate", "statePatch", "__JxMetadata");
+    private static final Set<String> DEFAULTS_GENERATED = Set.of("PropsInput", "propsInput", "__jxDefaults");
     private static final Set<String> RESERVED_FIELDS = Set.of(
             "key", "ref", "__self", "__source", "__proto__", "prototype", "constructor");
     private static final Set<String> JAVA_LANG_FIELDS = Set.of("String", "Integer", "Long", "Float", "Double",
             "Boolean", "Byte", "Short", "Character", "Object", "Void");
     private static final Set<String> UNSUPPORTED_LIFECYCLES = Set.of("context", "contextTypes",
             "childContextTypes", "getChildContext", "componentWillMount", "componentWillReceiveProps",
-            "componentWillUpdate", "defaultProps");
+            "componentWillUpdate");
 
     private final ParsedSource parsed;
     private final ClassTree owner;
@@ -75,9 +76,11 @@ final class ClassModel {
         List<? extends Tree> arguments = parameterized.getTypeArguments();
         ClassTree props = nestedRecord(arguments.get(0), "Props", "props");
         ClassTree state = nestedRecord(arguments.get(1), null, "state");
+        boolean defaultDeclaration = owner.getMembers().stream().anyMatch(member -> memberName(member).equals("defaultProps"));
         for (Tree member : owner.getMembers()) {
             String name = memberName(member);
-            if (GENERATED.contains(name)) error("JX110", "'" + name + "' is reserved for generated class component members", member);
+            if (GENERATED.contains(name) || defaultDeclaration && DEFAULTS_GENERATED.contains(name))
+                error("JX110", "'" + name + "' is reserved for generated class component members", member);
             if (UNSUPPORTED_LIFECYCLES.contains(name) || name.startsWith("UNSAFE_"))
                 error("JX111", "Native class authoring does not yet support React lifecycle member '" + name + "'", member);
         }
@@ -86,6 +89,7 @@ final class ClassModel {
                 || renders.getFirst().getBody() == null)
             error("JX110", "A native class component requires exactly one public instance render() method without type parameters", owner);
         Tree contextValue = contextValue();
+        boolean defaults = defaultProps(arguments.getFirst());
         boolean constructor = owner.getMembers().stream().filter(MethodTree.class::isInstance).map(MethodTree.class::cast)
                 .anyMatch(method -> method.getReturnType() == null && method.getModifiers().getFlags().contains(Modifier.PUBLIC)
                         && method.getTypeParameters().isEmpty() && method.getParameters().size() == (contextValue == null ? 1 : 2)
@@ -108,7 +112,21 @@ final class ClassModel {
         return new ComponentMetadata(qualified(name), name, packageName, imports, true, properties,
                 parsed.source().path(), declaration, descriptorOffset, ComponentMetadata.Memo.NONE, 0,
                 new ComponentMetadata.ClassSpec(kind, state.getSimpleName().toString(), stateFields, lifecycles,
-                        contextValue == null ? null : spelling(contextValue), derivedProps, derivedError, contextShouldUpdate));
+                        contextValue == null ? null : spelling(contextValue), derivedProps, derivedError, contextShouldUpdate, defaults));
+    }
+
+    private boolean defaultProps(Tree propsType) {
+        List<? extends Tree> members = owner.getMembers().stream()
+                .filter(member -> memberName(member).equals("defaultProps")).toList();
+        if (members.isEmpty()) return false;
+        Tree member = members.getFirst();
+        if (members.size() != 1 || !(member instanceof VariableTree field)
+                || !field.getModifiers().getFlags().containsAll(Set.of(Modifier.PUBLIC,Modifier.STATIC,Modifier.FINAL))
+                || field.getInitializer() == null || !genericType(field.getType(),"jx.ClassProps",propsType)) {
+            error("JX111", "defaultProps must be one public static final ClassProps<Props> field with an initializer", member);
+            return false;
+        }
+        return true;
     }
 
     private ClassTree nestedRecord(Tree argument, String requiredName, String role) {
@@ -138,10 +156,11 @@ final class ClassModel {
             String name = variable.getName().toString();
             if (!name.matches("[A-Za-z_$][A-Za-z0-9_$]*") || RESERVED_FIELDS.contains(name) || name.startsWith("__jx"))
                 error("JX110", "Record field '" + name + "' must be an ASCII Java identifier not reserved for native class identity or renderer metadata", variable);
-            if (!props && !name.isEmpty()) {
+            boolean generatesInput = owner.getMembers().stream().anyMatch(candidate -> memberName(candidate).equals("defaultProps"));
+            if ((!props || generatesInput) && !name.isEmpty()) {
                 String setter = "with" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
-                if (!updateMethods.add(setter)) error("JX110", "State field '" + name
-                        + "' collides with another field's generated update method '" + setter + "'", variable);
+                if (!updateMethods.add(setter)) error("JX110", (props ? "Props field '" : "State field '") + name
+                        + "' collides with another field's generated builder method '" + setter + "'", variable);
             }
             String javaType = spelling(variable.getType());
             if (!fieldType(variable.getType())) error("JX110", "Class field '" + name + "' uses unsupported type " + javaType

@@ -12,7 +12,15 @@ import java.lang.annotation.Target;
  *     public Props { if (label == null) label = "default label"; }
  * }
  * }</pre>
- * Like a default parameter value in JavaScript, such a default also replaces an explicit null. */
+ * This Java constructor convention also replaces an explicit null; it is distinct from
+ * JavaScript's defaulting of undefined values.
+ *
+ * <p>For an authored class component declaring {@code public static final ClassProps<Props>
+ * defaultProps}, this annotation instead permits the input field to be absent. The native
+ * React default must supply a defined value for every such field (null is defined for a
+ * nullable value type). Markup omits the field instead of constructing a Java default value;
+ * explicit null/zero/false values remain inputs. Classes without native defaultProps retain
+ * the ordinary Java constructor convention above. */
 @Target(ElementType.RECORD_COMPONENT)
 @Retention(RetentionPolicy.SOURCE)
 public @interface OptionalProp {}
