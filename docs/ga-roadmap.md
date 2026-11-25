@@ -69,10 +69,12 @@ after the 15-step gate passed in 352 seconds and both Verify checks passed on `0
 This does not qualify the native IDE distributions or add pair witnesses.
 
 Typed next-context policies (R-28-03e), including the generated `.jx` overload,
-pass **903 integrated checks, 169 skipped, 134 cases** on authoring head
-`0011c1d`. Package tests pass 51 core / 53 compiler / 15 Maven / 10 LSP checks;
-all 64 class cells pass. Pair evidence remains 54/6328. Its two scoped mutants,
-final gate and Verify remain pending.
+pass **911 integrated checks, 169 skipped, 135 cases** on responsive-preload
+candidate `4af20f2`. Package tests pass 51 core / 2 React / 53 compiler /
+15 Maven / 10 LSP checks;
+all 64 class cells pass. Pair evidence remains 54/6328. Both scoped mutants were
+killed after a passing baseline in the seven-mutant `f49b48f` campaign, with
+zero survived/unusable. The final gate and Verify remain pending.
 
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |

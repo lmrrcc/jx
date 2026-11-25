@@ -527,15 +527,27 @@ bypass the policy. Actual DOM handles remain stable, and the unused legacy
 override is never invoked. Real-core javac consumers prove either overload form
 and their coexistence, source-mapped editing and invalid signature diagnostics.
 
-Integration on the final lifecycle-authoring head `0011c1d` passes 51 core,
-53 compiler, 15 Maven-plugin and 10 LSP tests. The complete bench passes
-**903 checks, 169 skipped, across 134 cases**: client 132 React / 131 JX,
-hydrate 101, static 107 and lazy 112 per side. All 64 class cells pass; the
+Integration on responsive-preload candidate `4af20f2`, over merged lifecycle
+authoring `338872c`, passes 51 core, 2 React-option, 53 compiler, 15 Maven-plugin
+and 10 LSP tests. The complete bench passes
+**911 checks, 169 skipped, across 135 cases**: client 133 React / 132 JX,
+hydrate 102, static 108 and lazy 113 per side. All 64 class cells pass; the
 recorded table adds `class-next-context` and pair evidence remains 54/6328.
 Runtime/compiler consumers and the shared spec are unchanged from the focused
 proof. `CheckBaseline` and `git diff --check` pass. The wrong-context and
-omitted-authored-policy mutants remain unrun. Static projects compare initial
-HTML only. Final gate, Verify and native IDE qualification remain pending.
+omitted-authored-policy mutants were both killed after an independent unmutated
+baseline passed: **2 killed, 0 survived, 0 unusable**. They ran within the seven
+mutants on combined candidate `f49b48f` (source `193181f`), whose complete bench
+passed 931 checks/181 skipped/139 cases. Both failures include
+`class-next-context`; the later Pure-policy consumer also detects them. The
+mutated runtime/compiler files and this slice's consumer/spec files are
+byte-identical on the candidate and the rebased publication branch. The other
+five mutations belong to their own slices; the historical complete campaign
+remains 100. Scratch evidence is `jx-mutation-2296619748002841958`.
+Repeat just this slice exclusively with
+`java tools/MutateBench.java --only class-next-context-current,class-authored-context-policy-lost --keep`.
+Static projects compare initial HTML only. Final gate, Verify and native IDE
+qualification remain pending.
 
 Remaining options are explicit, not accepted scope reductions: custom policies
 on PureComponent are currently rejected, although React can call such a method

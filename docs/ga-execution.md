@@ -192,11 +192,14 @@ credit (54 / 6,328 unchanged). The local push gate, Verify and publication remai
 pending; no cross-browser or full parity qualification is implied.
 
 R-28-03e adds typed pending context to explicit and authored class update
-policies. Integration over `0011c1d` passes 51 core, 53 compiler, 15 Maven and
-10 LSP tests, plus **903 bench checks, 169 skipped, across 134 cases**:
-132 reference / 131 JX client, 101 hydrate, 107 static and 112 lazy per side.
-All 64 class cells pass; pair evidence stays 54/6328. Its two mutants remain
-unrun, and final gate/Verify are pending. The catalog contains 130 entries;
+policies. Integration over preload candidate `4af20f2` passes 51 core, 2 React,
+53 compiler, 15 Maven and 10 LSP tests, plus **911 bench checks, 169 skipped,
+across 135 cases**: 133 reference / 132 JX client, 102 hydrate, 108 static and
+113 lazy per side.
+All 64 class cells pass; pair evidence stays 54/6328. Its two mutants were
+killed after a passing baseline in the scoped seven-mutant `f49b48f` campaign;
+zero survived/unusable. Final gate/Verify are pending. The integrated catalog
+contains 132 entries;
 the historical full campaign remains 100.
 
 R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
