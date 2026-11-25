@@ -107,6 +107,7 @@ resource-hints	pass	pass	n/a	n/a	pass	pass	pass	pass
 root-options	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 runtime-utilities	pass	pass	pass	pass	pass	pass	pass	pass
 runtime-utilities-production	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+server-bootstrap	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-fatal-readiness	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-pipeable-stream	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-readable-stream	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a

@@ -43,8 +43,14 @@ remains Java; this is an explicit bootstrap/interop boundary.
   retain the response's script nonce.
 - Related SSR regression run: **36 passed, 108 skipped**, including terminal sink
   failure, streaming Suspense, fatal readiness, prerender and resume.
-- Three scoped mutants are registered but **not yet run**. Full bench, local
-  publication gate and Verify remain pending. No interaction-pair credit is added.
+- Integrated source `0da2b25`, including class lifecycle authoring, responsive
+  preloads, sink delivery and synchronous `act`: package **47 core, 4 React,
+  52 compiler and 15 Maven-plugin tests** passes in 45.033 seconds. Full bench:
+  **907 passed /181 skipped /136 cases** in 4.4 minutes; client 134 reference /133
+  JX, hydrate 101, static 107 and lazy 112 per side. The 54/6328 pair register is
+  unchanged. The bootstrap implementation and consumer files match `8682f3d`.
+- Three scoped mutants are registered but **not yet run**. Final publication
+  onto merged main, local gate and Verify remain pending.
 
 Logs: `/private/tmp/jx-server-bootstrap-build.log`,
 `/private/tmp/jx-server-bootstrap-focused.log`, and
@@ -52,6 +58,10 @@ Logs: `/private/tmp/jx-server-bootstrap-build.log`,
 by sandbox socket permissions; the successful run used the permitted local-server
 environment. Initial focused runs exposed a wrapper representation error and
 the upstream behavior below before the final passing run.
+Integrated logs are `/private/tmp/jx-bootstrap-integrated-build.log` and
+`/private/tmp/jx-bootstrap-integrated-bench.log`. Independent source review found
+no blocking contract/security defect; the record-shape and unqualified resume
+limits above remain explicit.
 
 ## Observed upstream limitation
 
