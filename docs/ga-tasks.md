@@ -242,7 +242,8 @@ remain byte-identical to the successful mutation candidate `e63ea76`.
 All 54/6328 registered interaction pairs remain unchanged. This is the earlier
 integration candidate; the final merged qualification is recorded above.
 
-R-31-SERVER-BOOTSTRAP, 25 November 2026: 🟡 implemented locally at `8682f3d`.
+R-31-SERVER-BOOTSTRAP, 25 November 2026: ✅ merged in
+PR [#66](https://github.com/lmrrcc/jx/pull/66) as `d683c4d`.
 Typed string/separate CSP nonces and trusted inline bootstrap source work through
 the native pipeable/readable renderers; both static prerender variants emit
 bootstrap source and all four static entry points reject request-specific nonces.
@@ -256,8 +257,12 @@ passes 47 core/4 React/52 compiler/15 Maven-plugin checks and the complete bench
 scoped bootstrap mutants are now killed by `server-bootstrap` after a passing
 baseline in joint candidate `f49b48f`/source `193181f`: seven total mutants killed,
 zero survived/unusable, with 931 passed/181 skipped/139 cases and the same pair
-evidence. This branch's bootstrap source is byte-identical. Final publication onto
-merged main, the gate and Verify remain pending; no pair credit is added.
+evidence. This branch's bootstrap source is byte-identical. The final 15-step
+local gate passed in 335 seconds; both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45696891784) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45696708415) passed on
+`224f6a1`. Final integrated results are 931 passed/181 skipped/139 cases,
+unchanged 54/6328 pairs. No new pair credit or general CSP/SSR qualification is added.
 See the [bootstrap contract and evidence](evidence/server-bootstrap.md).
 
 R-31-SERVER-RESUME-NONCE, 25 November 2026: 🟡 focused qualification at
@@ -267,8 +272,11 @@ JSON round trip, exact output, two-request isolation, bootstrap preservation and
 real Chrome CSP allow/deny behavior. Two focused checks pass with six inapplicable
 mode cells; package passes 47 core/4 React/52 compiler/15 plugin. Static fixture
 scripts receive only pre-asserted hashes; no general CSP host policy is claimed.
-Full 137-case integration, publication gate and Verify remain pending; no added
-pair or mutant credit. Details are in the bootstrap evidence record above.
+The shared server-option candidate `eb536cd` passes 943 checks/217 skipped/145
+cases, including this case, with byte-identical consumer/reference/spec files.
+That recorded row is retained; the final main publication gate and Verify remain
+pending. No added pair or mutant credit. Details are in the bootstrap evidence
+record above.
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven

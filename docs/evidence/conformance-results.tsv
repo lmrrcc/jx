@@ -114,6 +114,7 @@ server-readable-stream	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-render-to-static-markup	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-render-to-string	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-resume	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+server-resume-nonce	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-resume-pipeable	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-runtime-versions	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-sink-completion	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a

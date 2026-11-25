@@ -1,6 +1,6 @@
 # Request-time bootstrap and CSP options
 
-Status: **implemented locally; publication and complete option qualification pending**.
+Status: **bootstrap slice merged in PR #66; resume publication and complete option qualification pending**.
 Source `8682f3d`, based on the synchronous sink-delivery slice `7636fae`.
 
 `ReactServer.StreamOptions` accepts trusted inline bootstrap source and a typed
@@ -56,7 +56,15 @@ remains Java; this is an explicit bootstrap/interop boundary.
   10 language-server checks; the full bench passes **931/181/139 cases** with
   unchanged 54/6328 pair evidence. Bootstrap source and consumer files are
   byte-identical to this branch. This is a scoped campaign, not a new full-catalog
-  result. Final publication onto merged main, local gate and Verify remain pending.
+  result.
+- Bootstrap PR [#66](https://github.com/lmrrcc/jx/pull/66) merged as `d683c4d`
+  after the 15-step local push gate passed in 335 seconds and both
+  [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45696891784) and
+  [push Verify](https://github.com/lmrrcc/jx/actions/runs/45696708415) passed on
+  `224f6a1`. The final integrated bench passes **931/181/139 cases**:
+  client 137 reference /136 JX, hydrate 104, static 110 and lazy 115 per side.
+  Pair evidence remains 54/6328. The separate resume addition below still
+  requires its own publication gate and Verify.
 
 Logs: `/private/tmp/jx-server-bootstrap-build.log`,
 `/private/tmp/jx-server-bootstrap-focused.log`, and
@@ -66,8 +74,8 @@ environment. Initial focused runs exposed a wrapper representation error and
 the upstream behavior below before the final passing run.
 Integrated logs are `/private/tmp/jx-bootstrap-integrated-build.log` and
 `/private/tmp/jx-bootstrap-integrated-bench.log`. Independent source review found
-no blocking contract/security defect; the record-shape and unqualified resume
-limits above remain explicit.
+no blocking contract/security defect; the record-shape compatibility change and
+bounded resume qualification below remain explicit.
 
 The completed mutation log is `/private/tmp/jx-class-bootstrap-mutations.log`;
 scratch `jx-mutation-2296619748002841958` is retained under the macOS temporary
@@ -126,6 +134,12 @@ The object nonce variant is evidenced against pinned React 19.3.1; the resume
 reference pages describe the string variant. See [resume](https://react.dev/reference/react-dom/server/resume)
 and [resumeToPipeableStream](https://react.dev/reference/react-dom/server/resumeToPipeableStream).
 Logs: `/private/tmp/jx-resume-nonce-build.log` and
-`/private/tmp/jx-resume-nonce-focused.log`. Full 137-case integration, publication
-gate and Verify remain pending; no new pair coverage or mutation qualification
-is attributed to this focused run.
+`/private/tmp/jx-resume-nonce-focused.log`.
+
+The later shared server-option integration `eb536cd` passes **943 checks /217
+inapplicable cells /145 cases**, including this case's two passing client cells
+and six mode exclusions. The Java consumer, native reference and shared spec
+are byte-identical to the current resume slice. Its recorded row is retained
+from that actual run; the final publication gate will verify the narrower slice
+on merged main. No new pair coverage or mutation qualification is attributed
+to the resume case. Final publication gate and Verify remain pending.
