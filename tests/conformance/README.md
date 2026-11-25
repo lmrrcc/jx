@@ -281,8 +281,10 @@ java tools/MutateBench.java --only transition-owner-guard-lost
 ```
 
 R-27-04 adds `stream-writable-waits-for-all` and `stream-fatal-all-pending`, and
-reuses `hint-preload-dropped` against the new resource-hydration case. Their scoped
-run is in progress. The full bench has already passed with the new cases;
+reuses `hint-preload-dropped` against the new resource-hydration case. All three
+were killed after the unmutated baseline passed. The same exclusive run at
+`abfb24a` included the transition mutant: **4 killed, 0 survived, 0 unusable**.
+The full bench has passed with the new cases;
 `test:ssr` now includes all streaming, prerender, resume and hydration checks.
 See the [server interaction evidence](../../docs/ga-react-interactions.md#r-27-04-streaming-resource-hydration-and-fatal-readiness)
 for exact assertions and remaining destination-failure limits.

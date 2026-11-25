@@ -86,7 +86,8 @@ reference / 117 JX, hydrate 90, static 96 and lazy 101 per side. Its four new
 witnesses prove early bytes in actual Node Writables, isolation while one request
 aborts, deduplicated preload hints and retained server nodes after hydration.
 A reproduced fatal-shell defect now rejects both readiness consumers instead of
-leaving `allReady()` pending. Scoped mutations and Verify remain pending. These
+leaving `allReady()` pending. The three scoped SSR mutants were killed after a
+passing baseline; Verify remains pending. These
 proofs do not complete authenticated SSR G0 M1-26 or arbitrary loader cancellation.
 The Promise prerequisite merged as `f2b64cb` in
 [PR #42](https://github.com/lmrrcc/jx/pull/42), with

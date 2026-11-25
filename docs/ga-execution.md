@@ -74,7 +74,8 @@ Four server/resource pairs bring complete local evidence to 52 / 5,356, leaving
 5,304 active pairs open. Real Writable bytes precede gated data; aborting one
 request preserves the other provider; resource hints and actual server nodes
 survive hydration and updates. A fatal shell now rejects both readiness consumers.
-Mutation checks and Verify are pending. These proofs do not complete protected
+All three scoped SSR mutants were killed after a passing baseline; Verify is pending.
+These proofs do not complete protected
 SSR G0 M1-26, general destination-failure handling or cancellation of application I/O.
 R-27-03b and R-27-03c are merged; R-27-04 remains in review. See the
 [interaction evidence record](ga-react-interactions.md) for the unchanged eventual

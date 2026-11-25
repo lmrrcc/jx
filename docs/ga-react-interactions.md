@@ -305,7 +305,7 @@ The combined local bench passes **809 checks, 151 skipped, across 120 case IDs**
 Client/API results are **118/118 reference and 117/117 JX**; hydrate **90/90 each**,
 static **96/96 each** and lazy **101/101 each**. Four new executed witnesses bring
 the combined interaction evidence to **52 / 5,356**, with **5,304** pairs open.
-The mutation checks and Verify for this slice are still pending.
+Its three scoped mutation checks passed; Verify is pending.
 
 `combined-server-stream` uses actual Node `Writable` instances. Two request-owned
 data promises remain gated while the spec observes the first shell and fallback
@@ -356,10 +356,24 @@ npm run test:ssr
 BENCH_UPDATE=1 npm run test:bench
 ```
 
-The planned scoped mutation checks are `stream-writable-waits-for-all`,
-`stream-fatal-all-pending` and the existing `hint-preload-dropped`. Their outcomes
-must be recorded after execution; registration alone supplies no mutation result.
-The historical full mutation campaign remains separate.
+The unmutated scratch baseline passed. An exclusive run at code revision
+`abfb24a` tested these three SSR mutants together with
+`transition-owner-guard-lost`: **4 killed, 0 survived, 0 unusable**. SSR accounts for
+three of those results; the transition result is recorded in R-27-03c.
+
+| Mutant | Detecting case |
+| --- | --- |
+| `hint-preload-dropped` | `combined-resource-hydration`, `resource-hints` |
+| `stream-writable-waits-for-all` | `combined-server-stream` |
+| `stream-fatal-all-pending` | `server-fatal-readiness` |
+
+The last mutant restores the observed pending-readiness defect. The catalog has
+112 entries; this scoped run is not a new full campaign. The historical full
+campaign remains 100. Repeat the SSR subset exclusively:
+
+```sh
+java tools/MutateBench.java --only stream-writable-waits-for-all,stream-fatal-all-pending,hint-preload-dropped
+```
 
 Known unqualified failure path: a destination failure after the shell is emitted
 does not necessarily trigger React's `onShellError`; the Java `HtmlSink` adapter
@@ -583,7 +597,7 @@ mutant, and remains in review pending Verify.
 Staged fixtures are preparation, not completed evidence.
 R-27-04 has local evidence for early streaming, request-context isolation,
 resource deduplication and retained hydration nodes; fatal shell errors reject both
-readiness consumers. Its mutation checks and Verify remain pending. Each slice selects explicit
+readiness consumers. Its three scoped mutants were killed; Verify remains pending. Each slice selects explicit
 remaining pair IDs. R-27-05 follows R-28–R-30, exercises the deferred features and
 reviews the remaining applicability decisions. The parent R-27 stays open until
 every eventual application-feature pair has evidence or an explicitly accepted
