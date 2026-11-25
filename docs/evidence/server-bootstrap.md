@@ -147,7 +147,8 @@ tables match and the 54/6328 existing pair witnesses remain unchanged.
 A final assertion review found that an empty second continuation could satisfy
 the original negative isolation check. The shared spec now also requires the
 second response's script/style nonces and resolved content and compares both
-responses against native React. This assertion-only change requires a new focused
-run and exact-head publication gate; the earlier shared qualification does not
-claim to have executed it. No new pair coverage or mutation qualification is
+responses against native React. Both strengthened client checks pass in 6.6 seconds
+on source `ac0a577`; the exact-head publication gate still needs to run. The earlier
+shared qualification does not claim to have executed these additional assertions.
+No new pair coverage or mutation qualification is
 attributed to the resume case. Publication and Verify remain pending.

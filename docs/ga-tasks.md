@@ -277,7 +277,8 @@ cases, including this case, with byte-identical consumer/reference files. Its ro
 is retained; the later main integration passes 933 checks/187 skipped/140 cases
 and the 15-step gate in 353 seconds on `df76df8`. The spec has since been strengthened
 to reject an empty second continuation and compare both responses against React;
-that assertion-only change awaits a focused run and new exact-head gate.
+both focused client checks pass in 6.6 seconds on `ac0a577`, with a new exact-head
+gate still pending.
 Publication and Verify remain pending, with no added pair or mutant credit.
 Details are in the bootstrap evidence record above.
 
