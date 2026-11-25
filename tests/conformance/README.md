@@ -230,10 +230,16 @@ state while replacing the failed rendered subtree and recreating its child;
 Playwright DOM handles distinguish those operations. Static compares initial
 HTML only. Real-core javac and LSP tests cover signatures, typed source projection
 and original-source error mapping, without claiming native IDE qualification.
-The compiler mutant `class-authoring-error-derive-lost` is registered but unrun.
+The compiler mutant `class-authoring-error-derive-lost` was killed by this case
+after the unmutated baseline passed, in the five-mutant campaign on `e63ea76`
+(five killed, zero survived/unusable). This slice's compiler, LSP, authored
+consumers and shared spec are byte-identical to that candidate; the other four
+mutations qualify separate preload/sink/act work. Run just the compiler mutation
+in an exclusive build/browser window with
+`java tools/MutateBench.java --only class-authoring-error-derive-lost --keep`.
 Case evidence adds only this case; pair evidence stays 54/6328. The catalog has
 128 mutants after the source-preserving rebase onto the Forms-integrated error
-lifecycle head, with no new full-catalog run beyond the historical 100. Mutation,
+lifecycle head, with no new full-catalog run beyond the historical 100. The
 final combined gate and Verify remain pending.
 
 

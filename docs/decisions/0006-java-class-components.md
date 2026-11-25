@@ -459,5 +459,13 @@ class-error branch. Recorded case evidence adds only `class-lifecycle-authoring`
 all 54 pair witnesses remain green among 6,328 active candidates, with no new pair
 credit. After the source-preserving rebase onto PR #57's Forms-integrated head,
 the catalog has 128 mutants; the historical full campaign remains 100.
-The compiler mutant `class-authoring-error-derive-lost` is registered but unrun.
-Mutation, final push gate and Verify remain pending.
+The compiler mutant `class-authoring-error-derive-lost` was killed by
+`class-lifecycle-authoring` after the unmutated baseline passed. It ran in the
+five-mutant campaign on combined candidate `e63ea76`: five killed, zero survived
+or unusable, with compiler, LSP, authored consumers and shared spec byte-identical
+to this slice. The other four mutations qualify their own preload/sink/act work;
+they add no class evidence. Scratch evidence is
+`jx-mutation-7730846870036546774`. Repeat only this mutation in an exclusive
+build/browser window with
+`java tools/MutateBench.java --only class-authoring-error-derive-lost --keep`.
+The final push gate and Verify remain pending.
