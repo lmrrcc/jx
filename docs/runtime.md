@@ -139,8 +139,33 @@ No new pair witness is claimed. The captured-context mutant was killed by
 baseline: 1 killed, 0 survived, 0 unusable. [PR #53](https://github.com/lmrrcc/jx/pull/53)
 merged as `198c0b8` after the 15-step local gate and both Verify checks passed on
 `30a8911`. Direct `.jx` context declarations are supported by the
-[class authoring contract](language.md#native-class-components). The third
-next-context should-update argument and preserved class hot state remain separate tasks.
+[class authoring contract](language.md#native-class-components). Preserved class
+hot state remains separate work.
+
+### Next context in class update policies
+
+`descriptor.withContextShouldUpdate(context, policy)` supplies React's pending
+props, state and third `nextContext` argument to a typed callback. The callback
+also receives the current Java peer, whose `props()`, `state()` and constructor
+context reader still expose the current instance values during this decision.
+Declare the returned immutable descriptor once to preserve component identity.
+The context must be the same `Context<T>` instance declared by that descriptor;
+the pending value may be null.
+
+This policy takes precedence over the peer's two-argument
+`shouldComponentUpdate` override. It is pure, may be repeated or discarded, and
+must not schedule updates or perform effects. Initial mounting and `forceUpdate`
+bypass the policy; native provider changes can still cause rendering after a
+false result. The current slice supports ordinary class descriptors; custom
+PureComponent policies remain separate work.
+
+The compiling
+[`ClassNextContext`](../tests/conformance/src/main/java/jx/conformance/cases/ClassNextContext.java)
+consumer exercises both descriptor and authored forms, current/pending value
+separation, nullable context, legacy-override precedence and retained DOM identity.
+Its focused evidence is recorded in the
+[class decision](decisions/0006-java-class-components.md#r-28-03e-typed-next-context-update-policy--25-november-2026);
+the integrated gate and native IDE qualification remain separate checks.
 
 ### State derived from class props
 

@@ -139,9 +139,9 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The integrated responsive-preload run passes 903 checks, with 169 skipped cells
-across 134 case IDs: client 132 reference / 131 JX, hydrate 101 per side, static
-107 per side and lazy 112 per side. Fifty-four pairs have complete local
+The integrated next-context run over responsive preload passes 911 checks, with
+169 skipped cells across 135 case IDs: client 133 reference / 132 JX, hydrate 102
+per side, static 108 per side and lazy 113 per side. Fifty-four pairs have complete local
 evidence in their declared modes; 6,274 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate
@@ -243,6 +243,32 @@ lifecycle head, with no new full-catalog run beyond the historical 100. The
 15-step gate passed in 352 seconds; PR #58 merged as `338872c` after both
 Verify checks passed on `0011c1d`.
 
+`class-next-context` compares a native React three-argument should-update method
+with both an explicit Java descriptor policy and a generated `.jx` overload.
+The runtime consumer passed eight projects before compiler implementation; the
+final 64-project class regression also passes. Integration over preload
+candidate `4af20f2` passes 51 core, 2 React-option, 53 compiler, 15 Maven and
+10 LSP tests; the complete bench passes 911 checks/169 skipped/135 cases
+(133/132 client, 102 hydrate, 108 static and 113 lazy per side).
+All 64 class cells pass; pair evidence stays 54/6328.
+Both Java forms preserve current
+values while receiving pending props/state/context, including provider identity
+and null, with no eager state change. Provider updates can commit despite false;
+initial rendering and forceUpdate bypass the policy. The authored three-argument
+overload takes precedence over its two-argument override, while the legacy Java
+contract remains available. Real DOM identity is retained. Core and real-javac
+tests cover checked schemas, context identity, immutable descriptor composition,
+failure propagation and editor projections. Both scoped mutants were killed
+after a passing baseline on `f49b48f`: `class-next-context-current` and
+`class-authored-context-policy-lost` fail `class-next-context` and the later
+`class-pure-policy` case. This slice owns two of the seven killed mutations,
+with zero survived/unusable; the historical full campaign remains 100. Scratch
+evidence is `jx-mutation-2296619748002841958`. Run this slice exclusively with
+`java tools/MutateBench.java --only class-next-context-current,class-authored-context-policy-lost --keep`.
+Static checks only initial HTML. Custom policies on PureComponent,
+null initial props/state, direct null patches, legacy/UNSAFE options, native IDE
+qualification and class checkpoints remain open. No aggregate table or pair
+witness is credited.
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
 combine optimistic state with external-store snapshots, transitions and Java async

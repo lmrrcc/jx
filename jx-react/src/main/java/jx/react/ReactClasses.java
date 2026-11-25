@@ -29,7 +29,7 @@ final class ReactClasses {
     @JSFunctor interface Caught extends JSObject { void caught(JSObject error, String componentStack); }
     @JSFunctor interface Updated extends JSObject { void update(JSObject props, JSObject state); }
     @JSFunctor interface Snapshot extends JSObject { Done capture(JSObject props, JSObject state); }
-    @JSFunctor interface ShouldUpdate extends JSObject { boolean update(JSObject props, JSObject state); }
+    @JSFunctor interface ShouldUpdate extends JSObject { boolean update(JSObject props, JSObject state, Object context); }
     @JSFunctor interface Attach extends JSObject { void attach(JSObject instance); }
 
     /** One current decoded value per native instance and schema, never a history of snapshots. */
@@ -72,6 +72,14 @@ final class ReactClasses {
         @Override public <T> Supplier<T> current(Context<T> requested) {
             if (requested == null || requested != context) throw new IllegalArgumentException("Class context does not belong to this descriptor");
             return () -> Interop.value(contextOf(instance));
+        }
+    }
+
+    /** Callback-local pending context; never replaces the current native instance value. */
+    private record PendingContext(Context<?> descriptor, Object value) implements ClassComponentType.ContextAccess {
+        @Override public <T> Supplier<T> current(Context<T> requested) {
+            if (requested == null || requested != descriptor) throw new IllegalArgumentException("Pending class context does not belong to this descriptor");
+            return () -> Interop.value(value);
         }
     }
 
@@ -123,10 +131,11 @@ final class ReactClasses {
             Runnable committed = peer.snapshot(decode(type.propsSchema(), props), decode(type.stateSchema(), previousState));
             return committed::run;
         };
-        ShouldUpdate should = (props, nextState) -> {
+        ShouldUpdate should = (props, nextState, nextContext) -> {
             P nextProps = propsValue.pending(props);
             S next = stateValue.pending(nextState);
-            boolean renderNext = peer.shouldUpdate(nextProps, next);
+            boolean renderNext = type.shouldUpdate(peer, nextProps, next,
+                    type.hasContextShouldUpdate() ? new PendingContext(type.contextType(), nextContext) : null);
             if (!renderNext) {
                 // React advances instance props/state even when it skips render. Release the
                 // preceding graph rather than retaining it until an imperative accessor runs.
@@ -225,7 +234,7 @@ final class ReactClasses {
             if (snapshotValue) snapshotValue(); else this.__jx.update(props, state);
         };
         if (snapshot) Type.prototype.getSnapshotBeforeUpdate = function(props, state) { return this.__jx.snapshot(props, state); };
-        if (should) Type.prototype.shouldComponentUpdate = function(props, state) { return this.__jx.should(props, state); };
+        if (should) Type.prototype.shouldComponentUpdate = function(props, state, context) { return this.__jx.should(props, state, context); };
         cache.set(descriptor, Type);
         return Type;
         """, imports = @JSBodyImport(alias = "React", fromModule = "react"))

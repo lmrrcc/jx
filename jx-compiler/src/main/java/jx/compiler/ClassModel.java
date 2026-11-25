@@ -96,7 +96,8 @@ final class ClassModel {
                 + (contextValue == null ? "" : " and Supplier<" + spelling(contextValue) + "> for contextType"), owner);
         List<ComponentMetadata.Prop> properties = fields(props, true);
         List<ComponentMetadata.Prop> stateFields = fields(state, false);
-        Set<ComponentMetadata.Lifecycle> lifecycles = lifecycles(arguments);
+        boolean contextShouldUpdate = contextShouldUpdate(arguments, contextValue);
+        Set<ComponentMetadata.Lifecycle> lifecycles = lifecycles(arguments, contextShouldUpdate);
         boolean derivedProps = derivation("getDerivedStateFromProps", arguments.subList(0, 2), arguments.get(1), false);
         boolean derivedError = derivation("getDerivedStateFromError", List.of(), arguments.get(1), true);
         if (diagnostics.size() != before) return null;
@@ -107,7 +108,7 @@ final class ClassModel {
         return new ComponentMetadata(qualified(name), name, packageName, imports, true, properties,
                 parsed.source().path(), declaration, descriptorOffset, ComponentMetadata.Memo.NONE, 0,
                 new ComponentMetadata.ClassSpec(kind, state.getSimpleName().toString(), stateFields, lifecycles,
-                        contextValue == null ? null : spelling(contextValue), derivedProps, derivedError));
+                        contextValue == null ? null : spelling(contextValue), derivedProps, derivedError, contextShouldUpdate));
     }
 
     private ClassTree nestedRecord(Tree argument, String requiredName, String role) {
@@ -172,7 +173,7 @@ final class ClassModel {
         };
     }
 
-    private Set<ComponentMetadata.Lifecycle> lifecycles(List<? extends Tree> arguments) {
+    private Set<ComponentMetadata.Lifecycle> lifecycles(List<? extends Tree> arguments, boolean contextShouldUpdate) {
         Set<ComponentMetadata.Lifecycle> result = EnumSet.noneOf(ComponentMetadata.Lifecycle.class);
         lifecycle("componentDidMount", ComponentMetadata.Lifecycle.MOUNT, List.of(), "void", result);
         lifecycle("componentWillUnmount", ComponentMetadata.Lifecycle.UNMOUNT, List.of(), "void", result);
@@ -181,6 +182,7 @@ final class ClassModel {
                 arguments.subList(0, 2), canonical(arguments.get(2)), result);
         lifecycle("shouldComponentUpdate", ComponentMetadata.Lifecycle.SHOULD_UPDATE,
                 arguments.subList(0, 2), "boolean", result);
+        if (contextShouldUpdate) result.add(ComponentMetadata.Lifecycle.SHOULD_UPDATE);
         List<MethodTree> catches = methods("componentDidCatch");
         if (!catches.isEmpty()) {
             MethodTree method = catches.getFirst();
@@ -253,7 +255,8 @@ final class ClassModel {
 
     private void lifecycle(String name, ComponentMetadata.Lifecycle capability, List<? extends Tree> parameters,
                            String returnType, Set<ComponentMetadata.Lifecycle> result) {
-        List<MethodTree> methods = methods(name);
+        List<MethodTree> methods = methods(name).stream()
+                .filter(method -> capability != ComponentMetadata.Lifecycle.SHOULD_UPDATE || method.getParameters().size() != 3).toList();
         if (methods.isEmpty()) return;
         MethodTree method = methods.getFirst();
         boolean valid = methods.size() == 1 && instanceMethod(method, parameters.size(), false)
@@ -266,6 +269,20 @@ final class ClassModel {
             valid &= sameType(method.getParameters().get(index).getType(), parameters.get(index));
         if (!valid) error("JX111", "'" + name + "' must be one public or protected instance override with the declared Props, state and snapshot types", method);
         else result.add(capability);
+    }
+
+    private boolean contextShouldUpdate(List<? extends Tree> arguments, Tree contextValue) {
+        List<MethodTree> methods = methods("shouldComponentUpdate").stream()
+                .filter(method -> method.getParameters().size() == 3).toList();
+        if (methods.isEmpty()) return false;
+        MethodTree method = methods.getFirst();
+        boolean valid = contextValue != null && methods.size() == 1 && instanceMethod(method, 3, false)
+                && method.getBody() != null && canonical(method.getReturnType()).equals("boolean")
+                && sameType(method.getParameters().get(0).getType(), arguments.get(0))
+                && sameType(method.getParameters().get(1).getType(), arguments.get(1))
+                && sameType(method.getParameters().get(2).getType(), contextValue);
+        if (!valid) error("JX111", "Three-argument shouldComponentUpdate requires contextType and one public or protected boolean instance method taking Props, state and that context value type", method);
+        return valid;
     }
 
     private static boolean instanceMethod(MethodTree method, int arity, boolean publicOnly) {
