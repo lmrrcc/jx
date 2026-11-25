@@ -670,6 +670,13 @@ only. Integration over final authoring head `0011c1d` then passes 56 core,
 **919 checks, 169 skipped, across 136 cases**: client 134 React / 133 JX,
 hydrate 103, static 109 and lazy 114 per side. All 80 class cells pass; the
 recorded case table includes `class-pure-policy` and pair evidence stays 54/6328.
-The policy-omission mutant remains unrun. Mutation, final push gate, Verify and
-native IDE qualification remain pending. The catalog has 132 entries, without
-a new full-catalog run beyond the historical 100.
+The policy-omission mutant was killed by `class-pure-policy` after an independent
+unmutated baseline passed: **1 killed, 0 survived, 0 unusable**. It is one of
+the seven scoped mutations on `f49b48f` (source `193181f`), whose complete bench
+passed 931 checks/181 skipped. The class runtime/compiler and Pure-policy
+fixture/spec files are byte-identical to this publication branch. Scratch
+evidence is `jx-mutation-2296619748002841958`; reproduce this slice exclusively
+with `java tools/MutateBench.java --only class-pure-policy-suppressed --keep`.
+Final push gate, Verify and native IDE qualification remain pending. This slice's
+original catalog had 132 entries, without a new full-catalog run beyond the
+historical 100.

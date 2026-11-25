@@ -410,7 +410,12 @@ passed after removing those guards. Integration passes 56 core, 54 compiler,
 including all 80 class cells. Equal-props rendering, false-policy skips with fresh
 instance state, callback timing, force/context bypass, DOM identity and the native
 development warning are asserted. Static compares initial HTML only. Pair evidence
-remains 54/6328; the policy-omission mutant and final gate/Verify remain pending.
+remains 54/6328. The policy-omission mutant was killed by `class-pure-policy`
+after a passing baseline on `f49b48f`, one of the seven scoped mutations with
+zero survived/unusable; the historical full campaign remains 100. Scratch
+evidence is `jx-mutation-2296619748002841958`. Reproduce this slice exclusively
+with `java tools/MutateBench.java --only class-pure-policy-suppressed --keep`.
+Final gate/Verify remain pending.
 
 ## Mutation check
 
