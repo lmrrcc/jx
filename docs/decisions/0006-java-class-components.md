@@ -593,8 +593,23 @@ regressions. Integration over the final authoring head `0011c1d` then passes
 **911 checks, 169 skipped, across 135 cases**: client 133 React / 132 JX,
 hydrate 102, static 108 and lazy 113 per side. All 72 class cells pass; the case
 table includes `class-null-patch` and pair evidence remains 54/6328. The
-callback-dropping mutant, final push gate and Verify remain pending. The
-historical full mutation campaign remains 100; the current catalog has 131 entries.
+callback-dropping mutant was killed by `class-null-patch` after an independent
+unmutated baseline passed: **1 killed, 0 survived, 0 unusable**. This is one of
+the seven scoped mutations on candidate `f49b48f` (source `193181f`), not a new
+full-catalog run. The runtime and nullable-patch fixture/spec files are
+byte-identical to this publication branch. Scratch evidence is
+`jx-mutation-2296619748002841958`. Run this slice exclusively with
+`java tools/MutateBench.java --only class-null-patch-callback-lost --keep`.
+Final push gate and Verify remain pending. The historical full mutation
+campaign remains 100; this slice's original catalog had 131 entries.
+
+The later source-preserving rebase onto next-context candidate `cc2776e`, which
+includes responsive preload, passes 54 core, 2 React-option, 53 compiler,
+15 Maven-plugin and 10 LSP tests. A focused comparison of `class-null-patch` and
+`image-preload` passes all 16 projects. It does not rewrite complete evidence or
+claim a new full-run count: the final publication gate will run the complete
+integrated suite. The runtime and nullable-patch fixtures also remain identical
+to the seven-mutant candidate whose full bench passed 931 checks/181 skipped.
 
 ### Remaining option inventory
 

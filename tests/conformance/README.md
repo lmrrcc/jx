@@ -388,7 +388,16 @@ and constructor guards. Its integrated package passes 54 core, 53 compiler,
 including all 72 class cells. Native queue ordering, no-op state/DOM identity and
 after-commit callbacks match in client, hydration and lazy modes; static compares
 initial HTML only. Pair evidence remains 54/6328. The callback-dropping mutant
-is registered but unrun; final gate and Verify remain pending.
+was killed by `class-null-patch` after a passing baseline on `f49b48f`, one of
+the seven scoped mutations with zero survived/unusable. The historical full
+campaign remains 100. Scratch evidence is `jx-mutation-2296619748002841958`;
+reproduce this slice exclusively with
+`java tools/MutateBench.java --only class-null-patch-callback-lost --keep`.
+Final gate and Verify remain pending.
+After rebasing onto preload plus next-context candidate `cc2776e`, package
+checks pass 54 core/2 React/53 compiler/15 Maven/10 LSP and the null-patch/preload
+focused comparison passes 16 projects. This partial run leaves the complete
+tables unchanged; the final publication gate supplies full integrated evidence.
 
 ## Mutation check
 
