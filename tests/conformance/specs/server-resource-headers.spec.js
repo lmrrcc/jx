@@ -12,8 +12,14 @@ test('server-resource-headers: bounded request-owned hints and callback failures
         server.resourceHeaders(kind, 'https://first.test', limit, hints, fail),
         server.resourceHeaders(kind, 'https://other.test', limit, hints, fail)
       ]);
-      if (sideOf(info) === 'jx') expect(first).toEqual(
-        await reference.resourceHeaders(kind, 'https://first.test', limit, hints, fail));
+      if (sideOf(info) === 'jx') {
+        const [expectedFirst, expectedSecond] = await Promise.all([
+          reference.resourceHeaders(kind, 'https://first.test', limit, hints, fail),
+          reference.resourceHeaders(kind, 'https://other.test', limit, hints, fail)
+        ]);
+        expect(first).toEqual(expectedFirst);
+        expect(second).toEqual(expectedSecond);
+      }
       expect(first.events).toEqual(fail ? ['headers', 'original-error', 'ready', 'end'] : ['headers', 'ready', 'end']);
       expect(first.links).toHaveLength(1);
       expect(JSON.stringify(first)).not.toContain('other.test');
@@ -33,6 +39,9 @@ test('server-resource-headers: bounded request-owned hints and callback failures
         expect(first.html).toContain('href="https://first.test/hero.png"');
       }
       expect(first.html).toContain('<h1>headers</h1>');
+      expect(second.events).toEqual(first.events);
+      expect(second.links).toEqual(first.links.map(link => link?.replaceAll('first.test', 'other.test') ?? null));
+      expect(second.html).toBe(first.html.replaceAll('first.test', 'other.test'));
     }
   }
 });
