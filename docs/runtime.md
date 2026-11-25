@@ -134,8 +134,9 @@ Package tests pass 36 core, 48 compiler and 15 Maven-plugin checks. The complete
 integrated bench over authoring merge `3e1db97` passes 841 checks, with 151 skipped
 across 124 cases: client 122 reference / 121 JX, hydrate 94, static 100 and lazy
 105 per side. The context and three existing class cases pass all eight projects.
-No new pair witness is claimed. The captured-context mutant, gate and Verify are
-pending. Compiler context syntax,
+No new pair witness is claimed. The captured-context mutant was killed by
+`class-context` in client, hydration and lazy modes after a passing scratch
+baseline: 1 killed, 0 survived, 0 unusable. Gate and Verify remain pending. Compiler context syntax,
 the third next-context should-update argument and preserved class hot state remain
 separate tasks.
 
