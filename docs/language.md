@@ -115,6 +115,18 @@ See the compiling
 [AuthoredLifecycle.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredLifecycle.jx)
 consumer for context, partial derivation and error recovery together.
 
+A context-aware class can declare a public/protected three-argument
+`boolean shouldComponentUpdate(Props nextProps, Model nextState, T nextContext)`.
+The third type must match `Context<T> contextType`. This is a generated descriptor
+policy, not an override of a three-argument method on `ClassComponent`; omit
+`@Override` on this overload. If the ordinary two-argument override is also
+declared, the typed three-argument policy takes precedence. Keep the decision
+pure and use its arguments for pending values; instance accessors still expose
+the current values. See
+[AuthoredContextPolicy.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredContextPolicy.jx)
+for a compiling consumer. Custom policies on PureComponent remain a separate
+slice.
+
 [AuthoredCounter.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredCounter.jx),
 [AuthoredPure.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredPure.jx)
 and their [parent](../tests/conformance/src/main/jx/jx/conformance/cases/ClassAuthoring.jx)
