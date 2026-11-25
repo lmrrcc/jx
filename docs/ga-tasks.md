@@ -337,8 +337,8 @@ another response completes. The host explicitly observes terminal delivery and
 owns disconnect cancellation; no hard buffering limit is inferred from a
 high-water mark. Integrated source `5643be9` passes the full bench: 943 checks,
 217 skipped, 145 cases; client 143/142, hydrate 104, static 110 and lazy 115 per
-side. All 62/6328 registered pairs stay green. One new mutant and publication
-gates remain pending.
+side. All 62/6328 registered pairs stay green. The native-destination mutant is
+killed by four cases after an unmodified full baseline; publication gates remain pending.
 No pair credit or production HTTP qualification is added. See the
 [native destination evidence](evidence/server-native-writable.md).
 

@@ -11,8 +11,8 @@ passes **6 checks, 18 inapplicable cells**, covering three cases on React and JX
 Integrated source `5643be9` also passes the full bench: **943 checks, 217 skipped,
 145 cases** (client 143 reference/142 JX; hydration 104, static HTML 110 and lazy
 115 per side). Only the three new case rows change; all prior results and all
-62/6328 interaction witnesses remain green. The scoped mutant and publication
-gates remain pending. No new feature-pair credit or production HTTP qualification
+62/6328 interaction witnesses remain green. The scoped mutant is killed;
+publication gates remain pending. No new feature-pair credit or production HTTP qualification
 is claimed.
 
 The [Java host consumer](../../tests/conformance/src/main/java/jx/conformance/CombinedServerExports.java)
@@ -48,3 +48,21 @@ These are distinct responsibilities in the
 and [HTTP response lifecycle](https://nodejs.org/api/http.html#class-httpserverresponse).
 The synchronous Java `HtmlSink` overload has separate terminal-delivery evidence;
 its promise does not describe this borrowed native destination.
+
+## Scoped mutation evidence
+
+The isolated campaign on source `5643be9` (evidence commit `eb536cd`) first
+passed the unmodified complete bench, then killed all five selected server-option
+mutants, with zero survivors or unusable mutations. Replacing the native
+`stream.pipe(writable)` operation with `writable.end()` fails the existing
+`combined-server-stream` case and all three new native-destination cases.
+The other four mutants exercise resource headers and import maps, documented in
+their own evidence pages. This is a five-mutant campaign, not a rerun of the
+entire historical catalog. The command exited successfully:
+
+```sh
+java tools/MutateBench.java --only server-hint-header-empty,server-hint-budget-ignored,server-import-scopes-dropped,server-import-integrity-dropped,server-native-destination-ended --keep
+```
+
+Log: `/private/tmp/jx-server-options-mutations.log`. Retained scratch:
+`jx-mutation-11888686568552705847` under the system temporary directory.

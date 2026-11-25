@@ -84,3 +84,11 @@ scope and integrity keys on both native React and JX; the Java schema and fixtur
 were corrected rather than suppressing the unexpected warning. Primary references:
 [React streaming options](https://react.dev/reference/react-dom/server/renderToPipeableStream)
 and the [HTML import-map processing model](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps).
+
+The isolated five-mutant server-option campaign on source `5643be9` first passes
+the unmodified full bench. Dropping scopes and dropping integrity metadata each
+fail `server-import-map`: **2 killed, 0 survived, 0 unusable** for this boundary.
+The tested import-map implementation and consumer are unchanged from source
+`8c5c337`. The other three campaign mutants concern headers and native Writable
+delivery; this is not full-catalog qualification. Command and retained log are
+recorded in [native destination evidence](server-native-writable.md#scoped-mutation-evidence).
