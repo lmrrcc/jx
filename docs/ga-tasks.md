@@ -202,6 +202,9 @@ not null. The adapter preserves that raw result, and an explicit interoperabilit
 fixture checks a real named React owner of a Java component. This does not qualify
 full Java owner-chain diagnostics; R-29-04/R-31 remains open. No private React
 stack field, fabricated frame or global Error hook is used to hide this limit.
+The [owner-stack investigation](evidence/owner-stack-investigation.md) records the
+installed-source evidence, why source maps cannot restore discarded frames and
+the public-API renderer boundary that a future correction must qualify.
 
 R-29 focused evidence, 25 November 2026: Maven package with compiling consumers
 passes (21.129 seconds), then the four new case IDs pass 14 checks with 18
