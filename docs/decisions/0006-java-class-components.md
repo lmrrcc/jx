@@ -275,3 +275,65 @@ runtime and fixture source is byte-identical after integration onto PR #54.
 Scratch evidence is `jx-mutation-2026455379713343602`. The catalog now has 124
 entries, including the two functional-contract mutants, while the historical
 full campaign still covers 100. Final push gate and Verify remain pending.
+
+## R-28-03c native error lifecycle — 25 November 2026
+
+`descriptor.withDerivedStateFromError(error -> patch)` adds React's static native
+`getDerivedStateFromError`, preserving the descriptor's existing context, prop
+derivation, factory and lifecycle settings. It returns a new descriptor identity
+which applications declare once. The callback is pure render-phase work and may
+be repeated or discarded. Its schema-owned partial patch is merged by React;
+null means no derived change. Foreign-schema patches fail explicitly. Logging
+and other reporting effects belong in the committed callback instead.
+
+Declaring `Lifecycle.CATCH` enables the Java peer's protected
+`componentDidCatch(Throwable, ComponentErrorInfo)`. React invokes the native
+prototype method at its own commit boundary. `ComponentErrorInfo.componentStack`
+is React's original string, including an empty string when React supplies one;
+null is not accepted. This is not the Java exception stack or a mapped Java
+source trace, and no complete Java owner-chain guarantee is made.
+
+Compiled Java exceptions retain their original Throwable identity through both
+error derivation and reporting. Foreign JavaScript throws become a `ReactError`
+with an explicit kind and the original borrowed `JSObject` value. In particular,
+null and undefined remain different kinds. Foreign wrapper identity is not
+promised across callbacks: compare the native value with JavaScript semantics
+when identity matters. No global cache of primitive throws or instance registry
+is introduced. Retaining the exception can retain the original native graph.
+
+Foreign message/stack diagnostics read only own string-valued data descriptors.
+They do not invoke arbitrary accessors or stringify foreign objects. Proxies may
+intercept descriptor inspection; inaccessible descriptors are ignored. A stack
+implemented by an accessor can therefore produce a null `nativeStack()` even
+when direct JavaScript property access would return text. The original value
+remains available. This bounded projection is explicit; it is not a promise of
+native Error stack equivalence or source-map reconstruction.
+
+The [Java consumer](../../tests/conformance/src/main/java/jx/conformance/cases/ClassErrorLifecycle.java)
+uses actual nested React class boundaries. It checks descendant render,
+derived-props and commit failures, committed fallback DOM, original Java failure
+identity, foreign Error/object/null/undefined identity and kind, and nonempty
+React component-stack information. Foreign failures originate in a real bound
+JavaScript React child, so this evidence does not qualify throwing arbitrary
+JavaScript primitives through a compiled Java exception frame. A Java-only check
+compares the foreign stack projection with the actual native data descriptor,
+including an object with a real captured stack string; no synthetic React wrapper
+API is claimed by the reference fixture.
+
+Reset preserves the boundary's local state while recreating the failed child;
+key remount resets the boundary too. Real DOM handles establish those differences
+and preserve an unaffected sibling. A boundary's own render failure reaches its
+parent, and event-handler errors remain uncaught by the boundaries. Recovery
+uses a separate failed flag, because null is itself a valid native thrown value.
+
+The JVM contracts validate both orders of descriptor composition, schema and
+nullable-patch rules, original Throwable/reporting identity, callback failure
+propagation and verbatim/empty component-stack strings. The package passes 43
+core, 48 compiler and 15 Maven-plugin tests. All 48 focused class checks pass:
+eight new error-lifecycle projects plus 40 existing class checks. Client,
+hydration and lazy execute the interactions; static compares initial HTML only.
+This is Chrome-only local evidence on the preserved prerequisite branch, not a
+full integrated bench or gate. Compiler error
+lifecycle declarations, server-render error handling, production diagnostics and
+additional foreign kinds remain unqualified. A dropped committed-report mutant
+is registered but unrun; no pair or aggregate result table is updated.

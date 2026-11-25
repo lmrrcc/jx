@@ -188,6 +188,22 @@ The cancellation behavior is fixture-local, not the G0 API; this action fixture
 does not qualify R-28 class behavior. R-27-03a, R-27-03b optimistic/store and
 R-27-03c transition are merged.
 
+`class-error-lifecycle` adds nested native class boundaries. Eight focused
+projects prove recovery from Java child render, derived-props and commit errors,
+original failure identity, fallback DOM already committed when reporting runs,
+and React's component-stack string. Native React interop children throw a real
+Error, an object, null and undefined; the Java projection preserves their values
+and distinguishes their kinds. Its bounded diagnostic contract reads own string
+data properties and may omit accessor-backed Error stacks. This is tested within
+the Java consumer against actual native descriptors, not represented as a new
+React wrapper API. Reset retains boundary state while remounting the failed
+child; keyed remount resets the boundary. Actual DOM handles and an unaffected
+sibling establish identity. Own-boundary render and event errors follow React's
+exclusions. All 40 existing class checks also pass. The reporting mutant is
+registered but unrun; production diagnostics, server error recovery and compiler
+error lifecycle syntax remain unqualified. Static checks initial HTML only; no
+aggregate result table or interaction witness is changed.
+
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
 combine optimistic state with external-store snapshots, transitions and Java async
 functions. A remote publication rebases the pending overlay; rejection removes
