@@ -67,14 +67,13 @@ test('server-import-map: Java module scopes, blocked imports, escaping and integ
       const value = JSON.parse(node.textContent);
       return {hasProto: Object.hasOwn(value.imports, '__proto__'), proto: value.imports.__proto__,
         blocked: value.imports.blocked, emptyScope: value.scopes['']['empty-shared'],
-        emptyIntegrity: value.integrity[''], nonce: node.nonce,
+        nonce: node.nonce,
         hasEscaped: Object.hasOwn(value.imports, 'escaped</script><script>globalThis.__injected=1</script>')};
     });
     expect(map.hasProto).toBe(true);
     expect(map.proto).toBe('/maps/proto.mjs');
     expect(map.blocked).toBeNull();
     expect(map.emptyScope).toBe('/maps/empty.mjs');
-    expect(map.emptyIntegrity).toBe(integrity);
     expect(map.hasEscaped).toBe(true);
     expect(map.nonce).toBe(kind.startsWith('prerender') ? '' : 'first');
     expect(errors).toEqual([]);

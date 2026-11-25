@@ -15,7 +15,7 @@ export async function renderImportMap(kind, token, integrity) {
   const options = {importMap: {imports,
     scopes: {'/scope/': {shared: '/maps/' + token + '/scoped.mjs', 'scoped-blocked': null},
       '': {'empty-shared': '/maps/empty.mjs'}},
-    integrity: {['/maps/' + token + '/global.mjs']: integrity, '': integrity}}, bootstrapModules: ['/map-entry.mjs'],
+    integrity: {['/maps/' + token + '/global.mjs']: integrity}}, bootstrapModules: ['/map-entry.mjs'],
     bootstrapScriptContent: "import('empty-shared').then(m => { globalThis.__emptyScope = m.default; });"};
   if (!kind.startsWith('prerender')) options.nonce = token;
   const page = <html><head/><body><h1>import maps</h1></body></html>;

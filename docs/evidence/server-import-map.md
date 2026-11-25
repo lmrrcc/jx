@@ -9,8 +9,11 @@ claimed by this source commit.
 containing imports, scopes and integrity metadata. It preserves null versus
 empty top-level maps, nested insertion order, and explicit null import targets
 that block resolution. Input maps are copied recursively. Null scope bodies or
-integrity values and empty module-specifier keys are rejected. Empty scope or
-integrity keys remain valid relative references to the document base URL.
+integrity values, empty module-specifier keys and empty integrity keys are
+rejected. Empty scope keys remain valid references to the document base URL.
+Integrity uses URL-like module-specifier resolution, which excludes empty or
+bare relative keys; scope keys use ordinary URL parsing. Browser URL validation
+otherwise remains native.
 One map retains at most 4096 entries
 (scope entries included) and 1 Mi UTF-16 code units. The framework creates native
 dictionaries without a prototype: `__proto__` and `constructor` are real own
@@ -51,6 +54,8 @@ interaction pair is credited merely by using these features together.
 The pinned React 19.3.1 implementation serializes the typed object through its
 public `importMap` option. The public documentation marks some nonce behavior
 Canary; support is qualified against the pinned runtime rather than asserted for
-every React release. Primary references:
+every React release. The first focused run exposed the distinction between empty
+scope and integrity keys on both native React and JX; the Java schema and fixture
+were corrected rather than suppressing the unexpected warning. Primary references:
 [React streaming options](https://react.dev/reference/react-dom/server/renderToPipeableStream)
 and the [HTML import-map processing model](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps).

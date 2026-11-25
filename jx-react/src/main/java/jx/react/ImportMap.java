@@ -25,7 +25,7 @@ public record ImportMap(Map<String, String> imports, Map<String, Map<String, Str
             }
             scopes = Collections.unmodifiableMap(result);
         }
-        integrity = copy(integrity, false, false, budget);
+        integrity = copy(integrity, false, true, budget);
     }
 
     /** Imports and scopes without integrity metadata. */
@@ -51,7 +51,7 @@ public record ImportMap(Map<String, String> imports, Map<String, Map<String, Str
         int units;
         String key(String key, boolean specifier) {
             Objects.requireNonNull(key, "Null import-map key");
-            if (specifier && key.isEmpty()) throw new IllegalArgumentException("Empty import-map specifier");
+            if (specifier && key.isEmpty()) throw new IllegalArgumentException("Empty import-map specifier or integrity key");
             if (++entries > 4096) throw new IllegalArgumentException("Import map exceeds 4096 entries");
             text(key);
             return key;

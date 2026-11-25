@@ -38,7 +38,6 @@ final class ImportMapExports {
         scopes.put("", Map.of("empty-shared", "/maps/empty.mjs"));
         var integrities = new LinkedHashMap<String, String>();
         integrities.put("/maps/" + token + "/global.mjs", integrity);
-        integrities.put("", integrity);
         var map = new ImportMap(imports, scopes, integrities);
         var options = ReactServer.StreamOptions.defaults().withImportMap(map).withBootstrapModules(List.of("/map-entry.mjs"))
                 .withBootstrapScriptContent("import('empty-shared').then(m => { globalThis.__emptyScope = m.default; });");
