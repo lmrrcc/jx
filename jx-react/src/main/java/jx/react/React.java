@@ -21,6 +21,28 @@ public final class React {
         private static final JSObject TYPE = boundaryType();
     }
     private React() {}
+    /** The version exported by the loaded {@code react} runtime, not a JX build constant. */
+    @JSBody(script = "return React.version;", imports = @JSBodyImport(alias = "React", fromModule = "react"))
+    public static native String version();
+    /** The version exported by the loaded {@code react-dom} runtime. */
+    @JSBody(script = "return ReactDOM.version;", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom"))
+    public static native String domVersion();
+    /** The version exported by the loaded {@code react-dom/client} runtime. */
+    @JSBody(script = "return ReactDOMClient.version;", imports = @JSBodyImport(alias = "ReactDOMClient", fromModule = "react-dom/client"))
+    public static native String clientVersion();
+
+    /** Invokes React DOM's unstable legacy batching API and returns the callback's Java value,
+     * including null, without changing its identity. Callback failures propagate to the caller.
+     * Modern roots already batch automatically; this does not force a synchronous DOM commit.
+     * Like the native export, this API may change with a future React version. */
+    public static <T> T unstableBatchedUpdates(Supplier<T> action) {
+        Objects.requireNonNull(action);
+        return Interop.value(batchedNative(action::get));
+    }
+    @JSFunctor interface Batch extends JSObject { Object run(); }
+    @JSBody(params = "action", script = "return ReactDOM.unstable_batchedUpdates(action);",
+            imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom"))
+    private static native Object batchedNative(Batch action);
     @JSFunctor interface Render extends JSObject { JSObject render(JSObject props); }
     @JSFunctor interface Handler extends JSObject { void handle(JSObject event); }
     @JSFunctor interface FailureView extends JSObject { JSObject render(JSObject error); }

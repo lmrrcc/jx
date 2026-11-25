@@ -1,5 +1,9 @@
 // Framework-owned reference fixture: React's server and static rendering APIs, run in Node.
-import { StrictMode, Suspense, use } from 'react';
+import { StrictMode, Suspense, use, version as reactVersion } from 'react';
+import {version as domVersion} from 'react-dom';
+import {version as clientVersion} from 'react-dom/client';
+import {version as serverVersion} from 'react-dom/server';
+import {version as staticVersion} from 'react-dom/static';
 import { HydratedPage } from './cases/hydrate-server.jsx';
 import { cases } from './cases.jsx';
 import { combinedServer } from './combined-server.jsx';
@@ -68,6 +72,11 @@ function Streaming() {
 
 export const server = {
   ...combinedServer,
+  reactVersion: () => reactVersion,
+  domVersion: () => domVersion,
+  clientVersion: () => clientVersion,
+  serverVersion: () => serverVersion,
+  staticVersion: () => staticVersion,
   // Any client case as static HTML, for the static mode of the bench.
   renderStatic: async id => {
     const Case = cases[id];

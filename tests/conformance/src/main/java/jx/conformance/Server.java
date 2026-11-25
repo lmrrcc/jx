@@ -30,6 +30,11 @@ final class Server {
 
     static void install() {
         CombinedServerExports.install();
+        register("reactVersion", React::version);
+        register("domVersion", React::domVersion);
+        register("clientVersion", React::clientVersion);
+        register("serverVersion", ReactServer::version);
+        register("staticVersion", ReactStatic::version);
         registerCase("renderStatic", id -> ReactServer.renderToStaticMarkup(React.strictMode(caseView(Main.component(id)))));
         registerCase("renderCase", id -> ReactServer.renderToString(React.strictMode(caseView(Main.component(id)))));
         register("renderToString", () -> ReactServer.renderToString(page()));

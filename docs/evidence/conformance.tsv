@@ -37,12 +37,12 @@ react:isValidElement	legacy	equivalent	is-valid-element	Views.isValidElement		Al
 react:createRef	legacy	equivalent	create-ref,class-keyed,class-authoring	new DomRef(), new Ref<>(initial), new ClassRef<>(decoder)		Ref objects are plain Java objects and may be created outside a component; class refs preserve checked peer identity across keyed reorders and are accepted as special refs on native class tags
 react:Component	legacy	supported	error-boundary,combined-action-queue,class-runtime,class-authoring	ClassComponent, ClassComponentType.normal, ClassSchema, StatePatch, ClassRef, React.boundary	R-28	Native React class runtime with explicit typed schemas and bounded direct .jx class authoring; native IDE qualification, context/derived/error lifecycle, null initial state and committed hot checkpoints remain deferred in R-28-02b through R-28-04
 react:PureComponent	legacy	supported	class-runtime,class-keyed,class-authoring	PureComponent, ClassComponentType.pure	R-28	Native React shallow comparison of projected fields and keyed instance refs; direct .jx class authoring generates typed schema and patch members; native IDE qualification, broader lifecycle/concurrency options and hot-state preservation remain deferred
-react:act	test	excluded			R-29	Test utility, not application behavior
+react:act	test	equivalent	act-utilities,runtime-utilities-production	ReactTesting.act	R-29	Async always-awaited Java contract; flushes effects and nested scopes, preserves typed result, rejects failures and production use; no synchronous overload
 react:cache	server	excluded			R-30	Deferred to the server-component protocol proof; in scope under the 21 November all-features decision
 react:cacheSignal	server	excluded			R-30	Deferred to the server-component protocol proof; in scope under the 21 November all-features decision
-react:captureOwnerStack	debug	excluded			R-29	Development-only debugging aid
-react:unstable_useCacheRefresh	unstable	excluded			R-29	Unstable API
-react:version	constant	excluded			R-29	Constant; pinned in the version manifest
+react:captureOwnerStack	debug	supported	runtime-utilities,act-utilities,runtime-utilities-production	ReactDiagnostics.captureOwnerStack	R-29	Raw development string (possibly empty), null outside owner or in production; real native owner of Java consumer tested; deep Java owner chains remain truncated (R-29-04/R-31)
+react:unstable_useCacheRefresh	unstable	excluded			R-29	R-29-03 depends on R-30 server-cache ownership and invalidation; no client-only substitute
+react:version	constant	supported	runtime-utilities,server-runtime-versions,runtime-utilities-production	React.version		Reads loaded export; checked against pinned React in browser and Node, including production browser bundle
 react/jsx-runtime:jsx	compiler	equivalent	attributes	Markup lowering		JX lowers markup to Views calls, not to the JSX runtime
 react/jsx-runtime:jsxs	compiler	equivalent	children-prop	Markup lowering		
 react/jsx-runtime:Fragment	compiler	equivalent	fragment	<>...</>		
@@ -57,24 +57,24 @@ react-dom:preinitModule	resource	supported	resource-hints	Resources.preinitModul
 react-dom:preload	resource	supported	resource-hints,combined-resource-hydration	Resources.preload		The image settings imageSrcSet and imageSizes are not offered
 react-dom:preloadModule	resource	supported	resource-hints	Resources.preloadModule		
 react-dom:useFormState	hook	equivalent	form-state	Hooks.useFormState, Hooks.useFormStateAsync		Deprecated alias that delegates to useActionState
-react-dom:unstable_batchedUpdates	unstable	excluded			R-29	Unstable legacy API; batching is automatic
+react-dom:unstable_batchedUpdates	unstable	equivalent	runtime-utilities,runtime-utilities-production	React.unstableBatchedUpdates		Supplier callback preserves Java result identity and null, queues updates and propagates failure; modern roots already batch automatically
 react-dom:browser	constant	excluded			none	Build marker, not an API
-react-dom:version	constant	excluded			R-29	Constant; pinned in the version manifest
+react-dom:version	constant	supported	runtime-utilities,server-runtime-versions	React.domVersion		Reads loaded export; browser and Node checks pass
 react-dom/client:createRoot	api	supported	state-counter,unknown-case,root-options	React.mount, React.mountStrict, React.RootOptions		The three error callbacks and identifierPrefix; onDefaultTransitionIndicator is not offered
 react-dom/client:hydrateRoot	api	supported	hydrate-root,hydrate-server,combined-resource-hydration	React.hydrate, React.hydrateStrict		Takes the same RootOptions as mount
-react-dom/client:version	constant	excluded			R-29	Constant
+react-dom/client:version	constant	supported	runtime-utilities,server-runtime-versions	React.clientVersion		Reads loaded export; browser and Node checks pass
 react-dom/server:renderToPipeableStream	server	supported	server-pipeable-stream,server-stream-suspense,combined-server-stream,server-fatal-readiness	ReactServer.renderToPipeableStream		Shell and all-ready are promises; pipes to a Java sink or a Node Writable
 react-dom/server:renderToReadableStream	server	supported	server-readable-stream	ReactServer.renderToReadableStream		Options: identifier prefix, bootstrap scripts and modules, onError
 react-dom/server:renderToStaticMarkup	server	supported	server-render-to-static-markup	ReactServer.renderToStaticMarkup		Runs in a Node host
 react-dom/server:renderToString	server	supported	server-render-to-string,combined-resource-hydration	ReactServer.renderToString		Runs in a Node host; the options other than identifierPrefix are not offered
 react-dom/server:resume	server	supported	server-resume	ReactServer.resume		
 react-dom/server:resumeToPipeableStream	server	supported	server-resume-pipeable	ReactServer.resumeToPipeableStream		
-react-dom/server:version	constant	excluded			R-29	Constant
+react-dom/server:version	constant	supported	server-runtime-versions	ReactServer.version		Reads server export; Node check passes
 react-dom/static:prerender	server	supported	static-prerender,server-resume	ReactStatic.prerender		Abort and the postponed state are exercised by the resume cases
 react-dom/static:prerenderToNodeStream	server	supported	static-prerender-node	ReactStatic.prerenderToNodeStream		
 react-dom/static:resumeAndPrerender	server	supported	static-resume-prerender	ReactStatic.resumeAndPrerender		
 react-dom/static:resumeAndPrerenderToNodeStream	server	supported	static-resume-prerender-node	ReactStatic.resumeAndPrerenderToNodeStream		
-react-dom/static:version	constant	excluded			R-29	Constant
+react-dom/static:version	constant	supported	server-runtime-versions	ReactStatic.version		Reads static-renderer export; Node check passes
 jsx:key	markup	supported	keyed-list,remount-by-key,combined-keyed-context,combined-children-map,combined-keyed-refs,combined-imperative-handles,class-keyed	key attribute, Views.component key		Combined scenarios retain state, drafts, DOM refs, handles and native PureComponent peers while reordering
 jsx:children	markup	supported	children-prop,combined-children-contract	children property of type View		Scalar children and arrays remain distinct from explicit fragments
 jsx:conditional-rendering	markup	supported	conditional	Java ternary and null		

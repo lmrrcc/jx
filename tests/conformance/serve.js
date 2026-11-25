@@ -7,6 +7,8 @@ import {join, normalize, sep} from 'node:path';
 const roots = {
   reference: ['tests/conformance/target/reference-site', 'tests/conformance/reference'],
   jx: ['tests/conformance/target/site'],
+  'reference-production': ['tests/conformance/target/reference-production', 'tests/conformance/reference'],
+  'jx-production': ['tests/conformance/target/jx-production', 'tests/conformance/src/main/web'],
   'reference-lazy': ['tests/conformance/target/reference-lazy/site'],
   'jx-lazy': ['tests/conformance/target/jx-lazy/site']
 };
