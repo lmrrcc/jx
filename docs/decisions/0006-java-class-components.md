@@ -588,9 +588,13 @@ The package passes 50 core, 53 compiler, 15 Maven-plugin and 10 LSP tests, inclu
 three new JVM contracts for deferred evaluation, callback ownership, unchanged
 failure identity and preserved construction/null-updater guards. All nine class
 cases then pass 72/72 focused projects, including the eight pre-existing class
-regressions. Integrated full
-bench, the registered callback-dropping mutant, push gate and Verify remain
-pending. No aggregate table or feature-pair credit is changed by this focused run.
+regressions. Integration over the final authoring head `0011c1d` then passes
+54 core, 53 compiler, 15 Maven-plugin and 10 LSP tests. The complete bench passes
+**911 checks, 169 skipped, across 135 cases**: client 133 React / 132 JX,
+hydrate 102, static 108 and lazy 113 per side. All 72 class cells pass; the case
+table includes `class-null-patch` and pair evidence remains 54/6328. The
+callback-dropping mutant, final push gate and Verify remain pending. The
+historical full mutation campaign remains 100; the current catalog has 131 entries.
 
 ### Remaining option inventory
 

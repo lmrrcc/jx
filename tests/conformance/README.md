@@ -381,6 +381,15 @@ interaction evidence in the client projects without implying other mode coverage
 `npm run test:bench` runs the reporter regression checks and the full matrix.
 Focused runs never replace complete case or interaction tables.
 
+`class-null-patch` reproduces a direct typed-null patch rejected by JX while the
+native React side commits its callback. The repair preserves null updater-function
+and constructor guards. Its integrated package passes 54 core, 53 compiler,
+15 Maven and 10 LSP tests; the full bench passes 911 checks/169 skipped/135 cases,
+including all 72 class cells. Native queue ordering, no-op state/DOM identity and
+after-commit callbacks match in client, hydration and lazy modes; static compares
+initial HTML only. Pair evidence remains 54/6328. The callback-dropping mutant
+is registered but unrun; final gate and Verify remain pending.
+
 ## Mutation check
 
 `tests/conformance/mutants.tsv` lists deliberate defects: a file, the exact text to
