@@ -62,10 +62,15 @@ public final class HotReload {
     @JSBody(script = """
         var hot = globalThis.__JX_HOT__;
         if (!hot || !hot.enabled) return false;
-        if (hot.version && hot.version !== 1) throw new Error('Incompatible JX hot runtime');
-        if (hot.version) return true;
-        hot.version = 1;
+        if (hot.version && hot.version !== 2) throw new Error('Incompatible JX hot runtime; load a fresh development page');
+        if (hot.version) {
+            if (!(hot.classOwners instanceof Map) || !(hot.incomingClasses instanceof Map))
+                throw new Error('Incomplete JX hot runtime; load a fresh development page');
+            return true;
+        }
+        hot.version = 2;
         hot.components = new Map(); hot.stores = new Map(); hot.roots = new Map();
+        hot.classOwners = new Map(); hot.incomingClasses = new Map(); hot.classRestoreClosed = false;
         hot.incomingComponents = new Map(); hot.incomingStores = new Map(); hot.current = null;
         hot.notices = [];
         hot.notice = function(message) { hot.notices.push(message); if (hot.notices.length > 100) hot.notices.shift(); };
@@ -78,7 +83,20 @@ public final class HotReload {
             return value;
         }
         hot.capture = function() {
-            var checkpoint = {version: 1, components: [], stores: []};
+            var checkpoint = {version: 1, components: [], stores: [], classes: []};
+            if (hot.classOwners.size && hot.roots.size !== 1) throw new Error('Class checkpoint capture unqualified: this slice requires one owned root');
+            if (hot.incomingClasses.size) throw new Error('Class checkpoint capture unqualified: incoming class owners have not committed');
+            if (hot.classOwners.size + hot.components.size > 4096) throw new Error('JX checkpoint component capacity exceeded');
+            hot.classOwners.forEach(function(owner) {
+                if (!owner.path || owner.path.length > 8192) throw new Error('Invalid class checkpoint owner path');
+                var journal = owner.journal;
+                if (!journal || journal.failure || journal.pending || journal.candidates.length || journal.payload === null || !journal.connected)
+                    throw new Error('Class checkpoint capture unqualified for ' + owner.path + ': '
+                        + (!journal ? 'no native class commit' : journal.failure || (journal.pending ? 'pending native updates'
+                            : journal.candidates.length ? 'unmatched render candidates' : 'class owner is disconnected')));
+                checkpoint.classes.push({path: owner.path, signature: journal.signature,
+                    schema: journal.schema, payload: journal.payload});
+            });
             hot.components.forEach(function(frame) {
                 if (!frame.signature) { hot.notice('State reset: missing component signature for ' + frame.path); return; }
                 try {
@@ -103,6 +121,7 @@ public final class HotReload {
             Array.from(hot.roots.values()).forEach(function(stop) { stop(); });
             Array.from(hot.stores.values()).forEach(function(store) { store.stop(); });
             hot.components.clear(); hot.stores.clear(); hot.roots.clear(); hot.current = null;
+            hot.classOwners.clear();
             hot.resetReady();
         };
         hot.restore = function(checkpoint) {
@@ -110,9 +129,23 @@ public final class HotReload {
             if (new TextEncoder().encode(text).length > 8388608) throw new Error('JX checkpoint exceeds eight MiB');
             var copy = JSON.parse(text);
             if (copy.version !== 1 || !Array.isArray(copy.components) || !Array.isArray(copy.stores) || copy.components.length > 4096 || copy.stores.length > 128) throw new Error('Invalid JX checkpoint');
+            var classes = copy.classes === undefined ? [] : copy.classes;
+            if (!Array.isArray(classes) || classes.length + copy.components.length > 4096) throw new Error('Invalid JX class checkpoint count');
+            var paths = new Set();
+            classes.forEach(function(value) {
+                if (!value || typeof value.path !== 'string' || !value.path || value.path.length > 8192
+                    || typeof value.signature !== 'string' || !value.signature || value.signature.length > 256
+                    || typeof value.schema !== 'string' || !value.schema || value.schema.length > 256
+                    || typeof value.payload !== 'string' || value.payload.length > 1048576 || paths.has(value.path))
+                    throw new Error('Invalid JX class checkpoint');
+                paths.add(value.path);
+            });
             hot.incomingComponents.clear(); hot.incomingStores.clear();
+            hot.incomingClasses.clear();
+            hot.classRestoreClosed = false;
             copy.components.forEach(function(frame) { hot.incomingComponents.set(frame.path, frame); });
             copy.stores.forEach(function(store) { hot.incomingStores.set(store.id, store); });
+            classes.forEach(function(value) { hot.incomingClasses.set(value.path, value); });
             hot.resetReady();
         };
         return true;
@@ -132,9 +165,11 @@ public final class HotReload {
             if (hot.components.size >= 4096 && !hot.components.has(frame.path)) throw new Error('JX hot component capacity exceeded');
             hot.components.set(frame.path, frame); hot.incomingComponents.delete(frame.path);
             if (frame.root) {
+                hot.classRestoreClosed = true;
                 Array.from(hot.incomingComponents.keys()).forEach(function(path) { if (path.indexOf(frame.path + '/') === 0) hot.incomingComponents.delete(path); });
                 var ready = hot.resolveReady;
-                requestAnimationFrame(function() { requestAnimationFrame(function() { ready(); }); });
+                if (hot.incomingClasses.size) hot.fail(new Error('Class checkpoint restore unqualified: incoming owners did not commit in the initial tree'));
+                else requestAnimationFrame(function() { requestAnimationFrame(function() { ready(); }); });
             }
             return function() { if (hot.components.get(frame.path) === frame) hot.components.delete(frame.path); };
         });

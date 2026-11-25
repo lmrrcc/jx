@@ -9,6 +9,18 @@ import java.util.function.Supplier;
 /** Stable identity and checked schemas of a Java-authored React class. Declare once. This
  * explicit descriptor API also underlies compiler-generated native class markup. */
 public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
+    /** Opt-in portable state for development replacement. The signature identifies compatible
+     * class state semantics; the codec validates and reconstructs fresh-generation values. */
+    public record Checkpoint<S>(String signature, StateCodec<S> codec) {
+        public Checkpoint {
+            Objects.requireNonNull(signature); Objects.requireNonNull(codec);
+            if (signature.isBlank() || signature.length() > 256)
+                throw new IllegalArgumentException("Class checkpoint signature must contain 1 to 256 characters");
+            String schema = Objects.requireNonNull(codec.schema());
+            if (schema.isBlank() || schema.length() > 256)
+                throw new IllegalArgumentException("Class checkpoint schema must contain 1 to 256 characters");
+        }
+    }
     public enum Lifecycle { MOUNT, UPDATE, UNMOUNT, SNAPSHOT, SHOULD_UPDATE, CATCH }
     /** Renderer-owned access to the one native context declared by a descriptor. Applications
      * receive a typed reader through the context-aware factory or a value through the update
@@ -40,15 +52,16 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     private final Function<Throwable,StatePatch<S>> derivedError;
     private final ContextPolicy<P,S,C> contextUpdate;
     private final boolean nullableState;
+    private final Checkpoint<S> checkpoint;
     private final ClassProps<P> defaultProps;
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles) {
-        this(name, props, state, factory, context, pure, lifecycles, null, null, null, false, null);
+        this(name, props, state, factory, context, pure, lifecycles, null, null, null, false, null, null);
     }
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles,
             BiFunction<P,S,StatePatch<S>> derivedState, Function<Throwable,StatePatch<S>> derivedError,
-            ContextPolicy<P,S,C> contextUpdate, boolean nullableState, ClassProps<P> defaultProps) {
+            ContextPolicy<P,S,C> contextUpdate, boolean nullableState, Checkpoint<S> checkpoint, ClassProps<P> defaultProps) {
         if (Objects.requireNonNull(name).isBlank()) throw new IllegalArgumentException("Empty class component name");
         this.name = name; this.props = Objects.requireNonNull(props); this.state = Objects.requireNonNull(state);
         this.factory = Objects.requireNonNull(factory); this.context = context;
@@ -57,6 +70,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         this.derivedError = derivedError;
         this.contextUpdate = contextUpdate;
         this.nullableState = nullableState;
+        this.checkpoint = checkpoint;
         if (defaultProps != null && defaultProps.schema() != props)
             throw new IllegalArgumentException("Default props belong to another class schema");
         this.defaultProps = defaultProps;
@@ -120,7 +134,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDefaultProps(ClassProps<P> defaults) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                derivedState, derivedError, contextUpdate, nullableState, defaults);
+                derivedState, derivedError, contextUpdate, nullableState, checkpoint, defaults);
     }
     /** Native default-property input, or null when no defaults are declared. */
     public ClassProps<P> defaultProps() { return defaultProps; }
@@ -137,7 +151,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      * Existing factory, context, lifecycle and derivation settings are preserved. */
     public ClassComponentType<P,S,C> withNullableState() {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                derivedState, derivedError, contextUpdate, true, defaultProps);
+                derivedState, derivedError, contextUpdate, true, checkpoint, defaultProps);
     }
     /** Whether null aggregate state is accepted; properties have separate presence rules. */
     public boolean nullableState() { return nullableState; }
@@ -146,6 +160,29 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     public void validateState(S value) {
         if (value != null || !nullableState) state.validate(value);
     }
+    /** Returns an immutable descriptor opting into conservative development state checkpoints.
+     * Declare the result once. Production rendering is unchanged. Only an actual native class
+     * commit callback can publish state; pending updates or render candidates without a matching
+     * callback make capture fail before replacement rather than restore possibly stale state.
+     * This first slice requires one owned root and connected class owners. Hidden Activity,
+     * props-only skipped commits and abandoned renders may therefore
+     * prevent replacement until this owner is removed. Restored owners must commit in the initial
+     * tree; missing or delayed owners fail readiness and cannot restore into a later insertion.
+     * This is not complete class hot reload.
+     * Pure classes are not qualified by this first slice and are rejected explicitly.
+     *
+     * <p>Only the codec's string payload crosses generations. Constructors, ordinary instance
+     * fields, refs, effects and pending callbacks restart; resources must not be encoded. A
+     * schema/signature change resets this class deliberately. Use the browser rendering thread.
+     * @throws IllegalArgumentException if this descriptor is Pure, or metadata is invalid
+     */
+    public ClassComponentType<P,S,C> withStateCheckpoint(String signature, StateCodec<S> codec) {
+        if (pure) throw new IllegalArgumentException("Pure class checkpoints are not qualified");
+        return new ClassComponentType<>(name, props, state, factory, context, false, lifecycles,
+                derivedState, derivedError, contextUpdate, nullableState, new Checkpoint<>(signature, codec), defaultProps);
+    }
+    /** Renderer metadata, or null when this descriptor has not opted in. */
+    public Checkpoint<S> checkpoint() { return checkpoint; }
     /** Returns a new descriptor with React's static {@code getDerivedStateFromProps}.
      * Declare the result once: descriptors identify native component types, so creating one
      * during render changes component identity. The original descriptor is unchanged.
@@ -166,7 +203,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDerivedStateFromProps(BiFunction<P,S,StatePatch<S>> callback) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                Objects.requireNonNull(callback, "callback"), derivedError, contextUpdate, nullableState, defaultProps);
+                Objects.requireNonNull(callback, "callback"), derivedError, contextUpdate, nullableState, checkpoint, defaultProps);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasDerivedStateFromProps() { return derivedState != null; }
@@ -196,7 +233,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDerivedStateFromError(Function<Throwable,StatePatch<S>> callback) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                derivedState, Objects.requireNonNull(callback, "callback"), contextUpdate, nullableState, defaultProps);
+                derivedState, Objects.requireNonNull(callback, "callback"), contextUpdate, nullableState, checkpoint, defaultProps);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasDerivedStateFromError() { return derivedError != null; }
@@ -237,7 +274,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
                 derivedState, derivedError, (peer, nextProps, nextState, nextContext) ->
                     policy.shouldUpdate(peer, nextProps, nextState,
-                            Objects.requireNonNull(nextContext.current(requested), "Missing next context reader").get()), nullableState, defaultProps);
+                            Objects.requireNonNull(nextContext.current(requested), "Missing next context reader").get()), nullableState, checkpoint, defaultProps);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasContextShouldUpdate() { return contextUpdate != null; }

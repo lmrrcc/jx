@@ -61,6 +61,7 @@ final class ReactClasses {
         private final Context<?> context;
         private final Current<P> propsValue;
         private Current<S> stateValue;
+        private ClassCheckpoints<S> checkpoint;
 
         InstanceHost(JSObject instance, ClassComponentType<P,S,?> type, JSObject initialProps, P initial) {
             this.instance = instance; this.stateSchema = type.stateSchema(); this.context = type.contextType();
@@ -71,11 +72,22 @@ final class ReactClasses {
         @Override public P props() { return propsValue.read(propsOf(instance)); }
         @Override public S state() { return stateValue.read(stateOf(instance)); }
         @Override public void update(BiFunction<S,P,StatePatch<S>> updater, Runnable committed) {
+            if (checkpoint != null) checkpoint.pending();
             updateNative(instance, (pendingState, props) -> patch(stateSchema,
                     updater.apply(stateValue.pending(pendingState), propsValue.pending(props))),
-                    committed == null ? null : committed::run);
+                    completion(committed));
         }
-        @Override public void force(Runnable committed) { forceNative(instance, committed == null ? null : committed::run); }
+        private Done completion(Runnable committed) {
+            if (checkpoint == null) return committed == null ? null : committed::run;
+            return () -> {
+                checkpoint.completed(); checkpoint.commit();
+                if (committed != null) committed.run();
+            };
+        }
+        @Override public void force(Runnable committed) {
+            if (checkpoint != null) checkpoint.pending();
+            forceNative(instance, completion(committed));
+        }
         @Override public <T> Supplier<T> current(Context<T> requested) {
             if (requested == null || requested != context) throw new IllegalArgumentException("Class context does not belong to this descriptor");
             return () -> Interop.value(contextOf(instance));
@@ -102,6 +114,7 @@ final class ReactClasses {
 
     private static <P,S,C extends ClassComponent<P,S,?>> JSObject element(ClassComponentType<P,S,C> type,
             JSObject encodedProps, ClassRef<C> javaRef, String path, String key, JSObject overrides) {
+        boolean checkpoint = HotReload.enabled() && type.checkpoint() != null;
         Factory create = (instance, props) -> create(type, instance, props);
         DerivedState derive = !type.hasDerivedStateFromProps() ? null : (props, state) -> patch(type.stateSchema(),
                 type.deriveStateFromProps(decode(type.propsSchema(), props), decode(type.stateSchema(), state, type.nullableState())));
@@ -111,12 +124,13 @@ final class ReactClasses {
                 type.contextType() == null ? null : React.context(type.contextType()),
                 type.defaultProps() == null ? null : encode(type.defaultProps()),
                 derive, deriveError, type.lifecycle(ClassComponentType.Lifecycle.CATCH),
-                type.lifecycle(ClassComponentType.Lifecycle.MOUNT), type.lifecycle(ClassComponentType.Lifecycle.UPDATE),
+                checkpoint || type.lifecycle(ClassComponentType.Lifecycle.MOUNT), checkpoint || type.lifecycle(ClassComponentType.Lifecycle.UPDATE),
                 type.lifecycle(ClassComponentType.Lifecycle.SNAPSHOT),
                 type.lifecycle(ClassComponentType.Lifecycle.SHOULD_UPDATE));
         JSObject ref = javaRef == null ? null : ref(REFS, javaRef, instance ->
                 javaRef.attach(instance == null ? null : peer(instance)));
-        return element(constructor, encodedProps, key, path, ref, overrides);
+        return checkpoint ? ClassCheckpoints.element(constructor, encodedProps, key, path, ref, overrides)
+                : element(constructor, encodedProps, key, path, ref, overrides);
     }
 
     private static <P,S,C extends ClassComponent<P,S,?>> JSObject create(ClassComponentType<P,S,C> type,
@@ -125,13 +139,19 @@ final class ReactClasses {
         InstanceHost<P,S> host = new InstanceHost<>(instance, type, initialProps, initial);
         C peer = type.create(initial, host);
         S state = peer.initialState();
+        boolean checkpointEnabled = HotReload.enabled() && type.checkpoint() != null;
+        if (checkpointEnabled) state = ClassCheckpoints.restore(initialProps, type.checkpoint(), type.stateSchema(), state);
         JSObject initialState = state == null && type.nullableState() ? null : encode(type.stateSchema(), state);
         host.initializeState(initialState, state);
         Current<P> propsValue = host.propsValue;
         Current<S> stateValue = host.stateValue;
         peer.bind(host);
-        HotReload.classStateReset(pathOf(initialProps));
+        ClassCheckpoints<S> checkpoint = checkpointEnabled
+                ? new ClassCheckpoints<>(instance, type.checkpoint(), host::state) : null;
+        host.checkpoint = checkpoint;
+        if (!checkpointEnabled) HotReload.classStateReset(pathOf(initialProps));
         Render render = () -> {
+            if (checkpoint != null) checkpoint.candidate(propsOf(instance), stateOf(instance));
             // Keep only the current graph even when the Java render does not read one of
             // its accessors. Pure skips have identical field values; normal SCU skips are
             // advanced in the explicit shouldUpdate callback below.
@@ -141,12 +161,22 @@ final class ReactClasses {
             try { return React.element(peer.render()); }
             finally { HotReload.end(frame); }
         };
-        Updated updated = (props, previousState) -> peer.updated(decode(type.propsSchema(), props), decode(type.stateSchema(), previousState, type.nullableState()));
+        Done mounted = () -> {
+            // Activity/StrictMode may reconnect this lifecycle without a new class render.
+            if (checkpoint != null) checkpoint.mounted();
+            if (type.lifecycle(ClassComponentType.Lifecycle.MOUNT)) peer.mounted();
+        };
+        Updated updated = (props, previousState) -> {
+            if (checkpoint != null) checkpoint.commit();
+            if (type.lifecycle(ClassComponentType.Lifecycle.UPDATE))
+                peer.updated(decode(type.propsSchema(), props), decode(type.stateSchema(), previousState, type.nullableState()));
+        };
         Snapshot snapshot = (props, previousState) -> {
             Runnable committed = peer.snapshot(decode(type.propsSchema(), props), decode(type.stateSchema(), previousState, type.nullableState()));
-            return committed::run;
+            return () -> { if (checkpoint != null) checkpoint.commit(); committed.run(); };
         };
         ShouldUpdate should = (props, nextState, nextContext) -> {
+            if (checkpoint != null) checkpoint.candidate(props, nextState);
             P nextProps = propsValue.pending(props);
             S next = stateValue.pending(nextState);
             boolean renderNext = type.shouldUpdate(peer, nextProps, next,
@@ -160,11 +190,12 @@ final class ReactClasses {
             return renderNext;
         };
         Done unmount = () -> {
+            if (checkpoint != null) checkpoint.disconnected();
             try { if (type.lifecycle(ClassComponentType.Lifecycle.UNMOUNT)) peer.unmounting(); }
             finally { propsValue.clear(); stateValue.clear(); }
         };
         Caught caught = (error, stack) -> peer.caught(ReactError.fromNative(error), new ComponentErrorInfo(stack));
-        return callbacks(peer, initialState, render, peer::mounted,
+        return callbacks(peer, initialState, render, mounted,
                 updated, unmount, snapshot, should, caught);
     }
 

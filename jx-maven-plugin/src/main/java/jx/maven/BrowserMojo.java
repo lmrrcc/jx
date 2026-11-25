@@ -54,8 +54,16 @@ public final class BrowserMojo extends AbstractMojo {
             Path entry = metadata.resolve("entry.mjs");
             String imported = metadata.relativize(compiled).toString().replace('\\', '/');
             if (!imported.startsWith(".")) imported = "./" + imported;
+            if (hotReload) {
+                try (var protocol = BrowserMojo.class.getResourceAsStream("/jx-hot-protocol.js")) {
+                    if (protocol == null) throw new IOException("Missing development runtime protocol bootstrap");
+                    Files.copy(protocol, metadata.resolve("hot-protocol.mjs"), StandardCopyOption.REPLACE_EXISTING);
+                }
+            }
             String bootstrap = hotReload
-                    ? "export { main };\nconst hot = globalThis.__JX_HOT__;\nif (!hot?.defer && !hot?.initialized) { if (hot?.boot) hot.boot(main).catch(console.error); else main(); }\n"
+                    ? "import { assertHotRuntime, hotRuntimeVersion } from './hot-protocol.mjs';\n"
+                      + "export { main, hotRuntimeVersion };\nassertHotRuntime();\nconst hot = globalThis.__JX_HOT__;\n"
+                      + "if (!hot?.defer && !hot?.initialized) { if (hot?.boot) hot.boot(main).catch(console.error); else main(); }\n"
                     : "main();\n";
             Files.writeString(entry, "// Generated framework bootstrap; application behavior is Java.\nimport { main } from "
                     + quote(imported) + ";\n" + bootstrap, StandardCharsets.UTF_8);
