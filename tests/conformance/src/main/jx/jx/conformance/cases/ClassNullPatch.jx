@@ -1,0 +1,8 @@
+package jx.conformance.cases;
+
+import jx.*;
+
+@Component
+public final class ClassNullPatch {
+    public static View render() { return <NullPatchCounter />; }
+}

@@ -559,3 +559,51 @@ APIs removed by the pinned React version. Its inventory includes
 `componentWillMount`, `componentWillReceiveProps`, `componentWillUpdate`, their
 `UNSAFE_` forms, legacy context members and class `defaultProps`; none gains
 support merely because the current parser reports an explicit diagnostic.
+
+## R-28-03f nullable direct state patches — 25 November 2026
+
+`setState(StatePatch<S>, Runnable)` accepts a null patch as a queued no-op. React
+still owns its callback and runs it at commit, including when no render is needed.
+The overload without a callback has the same nullable patch contract. The
+functional overload still requires a non-null updater, whose result may be null.
+An empty patch remains a native object merge; a nullable field explicitly set to
+null remains a field update. Neither is interchangeable with a null patch.
+
+Java cannot resolve a bare `setState(null)` between the existing patch and
+functional overloads. Use a typed `StatePatch<Model>` variable or
+`setState((StatePatch<Model>) null, callback)`. This additive behavior keeps both
+overloads and does not weaken schema checks or permit null initial props/state.
+The ordinary authored [NullPatchCounter.jx](../../tests/conformance/src/main/jx/jx/conformance/cases/NullPatchCounter.jx)
+exercises both spellings, functional null results, empty merges, mixed queues and
+explicit nullable field updates.
+
+Before the runtime change, actual React passed client, hydration and lazy tests,
+while JX failed all three with a Java exception and no committed callback. Both
+static initial HTML checks passed. After removing only the direct-patch guard,
+all eight focused checks pass. Assertions cover unchanged state and real DOM
+identity, no render/should-update invocation for isolated null patches, callbacks
+after handlers, and the ordered callbacks of a mixed null/increment queue.
+
+The package passes 50 core, 53 compiler, 15 Maven-plugin and 10 LSP tests, including
+three new JVM contracts for deferred evaluation, callback ownership, unchanged
+failure identity and preserved construction/null-updater guards. Integrated full
+bench, the registered callback-dropping mutant, push gate and Verify remain
+pending. No aggregate table or feature-pair credit is changed by this focused run.
+
+### Remaining option inventory
+
+| Option | Status and next evidence |
+| --- | --- |
+| Null initial props/state | Open: design explicit nullable schema decoding and merge semantics before removing guards |
+| PureComponent with a custom should-update policy | Open: React can invoke it with a development warning; the current Java rejection is not parity |
+| `componentWillMount`, `componentWillReceiveProps`, `componentWillUpdate`, and their `UNSAFE_` forms | Open: differential proof must cover scheduling and suppression by modern derivation/snapshot APIs |
+| Class `defaultProps` | Open: define absent versus explicit null props before compiler/runtime support |
+| Generic/indirect class authoring and wider field types | Open: preserve checked schemas and original-source diagnostics |
+| Legacy `contextTypes`, `childContextTypes`, `getChildContext` | Removed by React 19; do not introduce obsolete behavior into the pinned React contract |
+| Native editor behavior and committed hot checkpoints | Separate R-28-02b/R-28-04 qualification |
+
+The [current Component reference](https://react.dev/reference/react/Component)
+still lists deprecated lifecycle methods and class defaults. The
+[React 19 upgrade guide](https://react.dev/blog/2024/04/25/react-19-upgrade-guide#removed-legacy-context-using-contexttypes-and-getchildcontext)
+records removal of the old context API. Deprecated supported behavior remains
+work to implement; removed behavior is not a new compatibility target.
