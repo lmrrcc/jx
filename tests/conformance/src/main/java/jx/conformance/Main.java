@@ -28,6 +28,7 @@ import jx.conformance.cases.ClassContextCase;
 import jx.conformance.cases.ClassDerivedProps;
 import jx.conformance.cases.ClassErrorLifecycle;
 import jx.conformance.cases.ClassAuthoring;
+import jx.conformance.cases.ClassLifecycleAuthoring;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
 import jx.conformance.cases.DomRefFocus;
@@ -231,6 +232,7 @@ public final class Main {
             case "class-derived-props" -> ClassDerivedProps.JX;
             case "class-error-lifecycle" -> ClassErrorLifecycle.JX;
             case "class-authoring" -> ClassAuthoring.JX;
+            case "class-lifecycle-authoring" -> ClassLifecycleAuthoring.JX;
             default -> null;
         };
     }

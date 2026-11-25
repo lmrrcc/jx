@@ -1,4 +1,5 @@
 id	file	find	replace	change
+class-authoring-error-derive-lost	jx-compiler/src/main/java/jx/compiler/ClassDescriptorSource.java	if (spec.derivedError()) out.append	if (false) out.append	Authored static error derivation is omitted from the native class descriptor
 effect-swap-layout	jx-react/src/main/java/jx/react/ReactHooks.java	if (layout) React.useLayoutEffect(effect,	if (!layout) React.useLayoutEffect(effect,	Layout and passive effects are swapped
 effect-drop-cleanup	jx-react/src/main/java/jx/react/ReactHooks.java	return cleanup === null ? undefined : cleanup; }; if (layout)	return undefined; }; if (layout)	Effect cleanups are never registered
 effect-always-becomes-once	jx-react/src/main/java/jx/react/ReactHooks.java	else React.useEffect(effect, deps === null ? undefined : deps);	else React.useEffect(effect, deps === null ? [] : deps);	An effect without dependencies runs only once

@@ -113,11 +113,17 @@ class LanguageServerTest {
         String counterText = """
                 package cards;
                 import jx.*;
+                import java.util.function.Supplier;
                 @Component public final class NativeCounter extends ClassComponent<NativeCounter.Props, NativeCounter.Model, Void> {
                     public record Props(int initial) {}
-                    public record Model(int count) {}
-                    public NativeCounter(Props props) { super(props, new Model(props.initial())); }
-                    @Override public View render() { return <button>{state().count()}</button>; }
+                    public record Model(int count, Throwable error) {}
+                    public static final Context<String> contextType = new Context<>("day");
+                    private final Supplier<String> theme;
+                    public NativeCounter(Props props, Supplier<String> theme) { super(props, new Model(props.initial(), null)); this.theme = theme; }
+                    public static StatePatch<Model> getDerivedStateFromProps(Props next, Model pending) { return null; }
+                    public static StatePatch<Model> getDerivedStateFromError(Throwable error) { return statePatch().withError(error).build(); }
+                    @Override protected void componentDidCatch(Throwable error, ComponentErrorInfo info) {}
+                    @Override public View render() { return <button>{theme.get()}: {state().count()}</button>; }
                 }
                 """;
         Files.writeString(counter, counterText);
@@ -157,6 +163,22 @@ class LanguageServerTest {
             var hover = session.remote.getTextDocumentService().hover(new HoverParams(identifier,
                     Positions.position(valid, valid.indexOf("initial=")))).get(5, TimeUnit.SECONDS);
             assertTrue(hover.getContents().getRight().getValue().contains("int initial"));
+
+            String counterUri = counter.toUri().toString();
+            session.remote.getTextDocumentService().didOpen(new DidOpenTextDocumentParams(new TextDocumentItem(counterUri, "jx", 4, counterText)));
+            assertEquals(List.of(), session.client.await(value -> counterUri.equals(value.getUri()) && Integer.valueOf(4).equals(value.getVersion())).getDiagnostics());
+            var projected = session.remote.editorProjection(new EditorProjectionParams(counterUri, 4)).get(5, TimeUnit.SECONDS)
+                    .files().stream().filter(file -> file.sourceUri().equals(counterUri)).findFirst().orElseThrow();
+            assertTrue(projected.javaText().contains("normalWithContext("));
+            assertTrue(projected.javaText().contains(".withDerivedStateFromProps(NativeCounter::getDerivedStateFromProps)"));
+            assertTrue(projected.javaText().contains(".withDerivedStateFromError(NativeCounter::getDerivedStateFromError)"));
+            var sourceMap = new jx.compiler.SourceMap(projected.segments(), projected.sourceLength());
+            String authored = "statePatch().withError(error).build()";
+            int start = counterText.indexOf(authored);
+            int generated = sourceMap.generatedOffset(start).orElseThrow();
+            assertEquals(authored, projected.javaText().substring(generated, generated + authored.length()));
+            assertEquals(new jx.compiler.SourceSpan(start, start + authored.length()),
+                    sourceMap.editableSourceSpan(new jx.compiler.SourceSpan(generated, generated + authored.length())).orElseThrow());
 
             String prefix = valid.substring(0, valid.indexOf("<NativeCounter"));
             String incomplete = prefix + "<NativeCounter ";

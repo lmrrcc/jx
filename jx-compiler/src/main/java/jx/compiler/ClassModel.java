@@ -18,9 +18,9 @@ final class ClassModel {
             "key", "ref", "__self", "__source", "__proto__", "prototype", "constructor");
     private static final Set<String> JAVA_LANG_FIELDS = Set.of("String", "Integer", "Long", "Float", "Double",
             "Boolean", "Byte", "Short", "Character", "Object", "Void");
-    private static final Set<String> UNSUPPORTED_LIFECYCLES = Set.of("context", "contextType", "contextTypes",
-            "childContextTypes", "getChildContext", "getDerivedStateFromProps", "getDerivedStateFromError",
-            "componentDidCatch", "componentWillMount", "componentWillReceiveProps", "componentWillUpdate", "defaultProps");
+    private static final Set<String> UNSUPPORTED_LIFECYCLES = Set.of("context", "contextTypes",
+            "childContextTypes", "getChildContext", "componentWillMount", "componentWillReceiveProps",
+            "componentWillUpdate", "defaultProps");
 
     private final ParsedSource parsed;
     private final ClassTree owner;
@@ -85,14 +85,20 @@ final class ClassModel {
         if (renders.size() != 1 || !instanceMethod(renders.getFirst(), 0, true)
                 || renders.getFirst().getBody() == null)
             error("JX110", "A native class component requires exactly one public instance render() method without type parameters", owner);
+        Tree contextValue = contextValue();
         boolean constructor = owner.getMembers().stream().filter(MethodTree.class::isInstance).map(MethodTree.class::cast)
                 .anyMatch(method -> method.getReturnType() == null && method.getModifiers().getFlags().contains(Modifier.PUBLIC)
-                        && method.getTypeParameters().isEmpty() && method.getParameters().size() == 1
-                        && sameType(method.getParameters().getFirst().getType(), arguments.getFirst()));
-        if (!constructor) error("JX110", "A native class component requires a public constructor taking its Props record", owner);
+                        && method.getTypeParameters().isEmpty() && method.getParameters().size() == (contextValue == null ? 1 : 2)
+                        && sameType(method.getParameters().getFirst().getType(), arguments.getFirst())
+                        && (contextValue == null || genericType(method.getParameters().get(1).getType(),
+                                "java.util.function.Supplier", contextValue)));
+        if (!constructor) error("JX110", "A native class component requires a public constructor taking its Props record"
+                + (contextValue == null ? "" : " and Supplier<" + spelling(contextValue) + "> for contextType"), owner);
         List<ComponentMetadata.Prop> properties = fields(props, true);
         List<ComponentMetadata.Prop> stateFields = fields(state, false);
         Set<ComponentMetadata.Lifecycle> lifecycles = lifecycles(arguments);
+        boolean derivedProps = derivation("getDerivedStateFromProps", arguments.subList(0, 2), arguments.get(1), false);
+        boolean derivedError = derivation("getDerivedStateFromError", List.of(), arguments.get(1), true);
         if (diagnostics.size() != before) return null;
         SourceSpan declaration = span(owner);
         int descriptorOffset = declaration.end() - 1;
@@ -100,7 +106,8 @@ final class ClassModel {
         String name = owner.getSimpleName().toString();
         return new ComponentMetadata(qualified(name), name, packageName, imports, true, properties,
                 parsed.source().path(), declaration, descriptorOffset, ComponentMetadata.Memo.NONE, 0,
-                new ComponentMetadata.ClassSpec(kind, state.getSimpleName().toString(), stateFields, lifecycles));
+                new ComponentMetadata.ClassSpec(kind, state.getSimpleName().toString(), stateFields, lifecycles,
+                        contextValue == null ? null : spelling(contextValue), derivedProps, derivedError));
     }
 
     private ClassTree nestedRecord(Tree argument, String requiredName, String role) {
@@ -174,11 +181,74 @@ final class ClassModel {
                 arguments.subList(0, 2), canonical(arguments.get(2)), result);
         lifecycle("shouldComponentUpdate", ComponentMetadata.Lifecycle.SHOULD_UPDATE,
                 arguments.subList(0, 2), "boolean", result);
+        List<MethodTree> catches = methods("componentDidCatch");
+        if (!catches.isEmpty()) {
+            MethodTree method = catches.getFirst();
+            boolean valid = catches.size() == 1 && instanceMethod(method, 2, false) && method.getBody() != null
+                    && canonical(method.getReturnType()).equals("void")
+                    && namedType(method.getParameters().get(0).getType(), "java.lang.Throwable")
+                    && namedType(method.getParameters().get(1).getType(), "jx.ComponentErrorInfo");
+            if (!valid) error("JX111", "componentDidCatch must be one public or protected instance void method taking Throwable and ComponentErrorInfo", method);
+            else result.add(ComponentMetadata.Lifecycle.CATCH);
+        }
         if (result.contains(ComponentMetadata.Lifecycle.SNAPSHOT) && !result.contains(ComponentMetadata.Lifecycle.UPDATE))
             error("JX111", "getSnapshotBeforeUpdate requires componentDidUpdate to consume its snapshot", owner);
         if (kind == ComponentMetadata.ClassKind.PURE_COMPONENT && result.contains(ComponentMetadata.Lifecycle.SHOULD_UPDATE))
             error("JX111", "PureComponent supplies shallow comparison; do not override shouldComponentUpdate", owner);
         return result;
+    }
+
+    private Tree contextValue() {
+        List<? extends Tree> members = owner.getMembers().stream().filter(member -> memberName(member).equals("contextType")).toList();
+        if (members.isEmpty()) return null;
+        Tree member = members.getFirst();
+        if (members.size() == 1 && member instanceof VariableTree field
+                && field.getModifiers().getFlags().containsAll(Set.of(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL))
+                && field.getInitializer() != null && unannotated(field.getType()) instanceof ParameterizedTypeTree type
+                && namedType(type.getType(), "jx.Context") && type.getTypeArguments().size() == 1
+                && !(unannotated(type.getTypeArguments().getFirst()) instanceof WildcardTree))
+            return type.getTypeArguments().getFirst();
+        error("JX111", "contextType must be one initialized public static final jx.Context<T> field with a concrete value type", member);
+        return null;
+    }
+
+    private boolean derivation(String name, List<? extends Tree> parameters, Tree state, boolean fromError) {
+        List<MethodTree> methods = methods(name);
+        if (methods.isEmpty()) return false;
+        MethodTree method = methods.getFirst();
+        Set<Modifier> flags = method.getModifiers().getFlags();
+        boolean valid = methods.size() == 1 && flags.containsAll(Set.of(Modifier.PUBLIC, Modifier.STATIC))
+                && method.getTypeParameters().isEmpty() && method.getBody() != null
+                && method.getParameters().size() == (fromError ? 1 : parameters.size())
+                && genericType(method.getReturnType(), "jx.StatePatch", state);
+        if (valid && fromError) valid = namedType(method.getParameters().getFirst().getType(), "java.lang.Throwable");
+        else if (valid) for (int index = 0; index < parameters.size(); index++)
+            valid &= sameType(method.getParameters().get(index).getType(), parameters.get(index));
+        if (!valid) error("JX111", name + " must be one public static StatePatch<" + spelling(state) + "> method taking "
+                + (fromError ? "Throwable" : "the declared Props and state types"), method);
+        return valid;
+    }
+
+    private boolean genericType(Tree tree, String name, Tree argument) {
+        return unannotated(tree) instanceof ParameterizedTypeTree type && namedType(type.getType(), name)
+                && type.getTypeArguments().size() == 1 && sameType(type.getTypeArguments().getFirst(), argument);
+    }
+
+    private boolean namedType(Tree tree, String qualifiedName) {
+        if (tree == null) return false;
+        String name = unannotated(tree).toString();
+        if (name.equals(qualifiedName)) return true;
+        int separator = qualifiedName.lastIndexOf('.');
+        String simple = qualifiedName.substring(separator + 1);
+        if (!name.equals(simple)) return false;
+        if (owner.getMembers().stream().anyMatch(member -> member instanceof ClassTree nested
+                && nested.getSimpleName().contentEquals(simple))
+                || unit.getTypeDecls().stream().anyMatch(member -> member instanceof ClassTree type
+                && type.getSimpleName().contentEquals(simple))) return false;
+        List<String> explicit = imports.stream().filter(value -> value.endsWith("." + simple)).toList();
+        if (!explicit.isEmpty()) return explicit.size() == 1 && explicit.getFirst().equals(qualifiedName);
+        String targetPackage = qualifiedName.substring(0, separator);
+        return targetPackage.equals("java.lang") || packageName.equals(targetPackage) || imports.contains(targetPackage + ".*");
     }
 
     private void lifecycle(String name, ComponentMetadata.Lifecycle capability, List<? extends Tree> parameters,

@@ -35,12 +35,17 @@ final class ClassDescriptorSource {
                 .append("    public static final jx.ClassComponentType<Props, ").append(state).append(", ")
                 .append(owner).append("> JX = jx.ClassComponentType.")
                 .append(spec.kind() == ComponentMetadata.ClassKind.PURE_COMPONENT ? "pure" : "normal")
+                .append(spec.contextValueType() == null ? "" : "WithContext")
                 .append('(').append(Lowerer.quote(component.qualifiedName()))
-                .append(", __JxMetadata.PROPS, __JxMetadata.STATE, ").append(owner)
+                .append(", __JxMetadata.PROPS, __JxMetadata.STATE, ")
+                .append(spec.contextValueType() == null ? "" : "contextType, ").append(owner)
                 .append("::new, java.util.Set.of(")
                 .append(spec.lifecycles().stream().sorted().map(value -> "jx.ClassComponentType.Lifecycle." + value.name())
                         .collect(Collectors.joining(", ")))
-                .append("));\n");
+                .append("))");
+        if (spec.derivedProps()) out.append(".withDerivedStateFromProps(").append(owner).append("::getDerivedStateFromProps)");
+        if (spec.derivedError()) out.append(".withDerivedStateFromError(").append(owner).append("::getDerivedStateFromError)");
+        out.append(";\n");
         return out.toString();
     }
 

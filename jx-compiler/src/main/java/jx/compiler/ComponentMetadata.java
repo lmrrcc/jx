@@ -19,15 +19,23 @@ public record ComponentMetadata(String qualifiedName, String simpleName, String 
     /** Native React superclass used by the generated class descriptor. */
     public enum ClassKind { COMPONENT, PURE_COMPONENT }
     /** Authored instance overrides that the renderer must dispatch. */
-    public enum Lifecycle { MOUNT, UPDATE, UNMOUNT, SNAPSHOT, SHOULD_UPDATE }
+    public enum Lifecycle { MOUNT, UPDATE, UNMOUNT, SNAPSHOT, SHOULD_UPDATE, CATCH }
     /** The nested state record's source type and fields in constructor order. State fields
-     * are required. Collections are immutable snapshots, independent of the parser's lists. */
-    public record ClassSpec(ClassKind kind, String stateType, List<Prop> stateFields, Set<Lifecycle> lifecycles) {
+     * are required. A null contextValueType means no declared contextType; otherwise it is
+     * the authored Java value type supplied to the constructor's typed Supplier. The two
+     * derivation flags identify checked static methods, distinct from instance lifecycles.
+     * Collections are immutable snapshots, independent of the parser's lists. */
+    public record ClassSpec(ClassKind kind, String stateType, List<Prop> stateFields, Set<Lifecycle> lifecycles,
+                            String contextValueType, boolean derivedProps, boolean derivedError) {
         public ClassSpec {
             Objects.requireNonNull(kind);
             Objects.requireNonNull(stateType);
             stateFields = List.copyOf(stateFields);
             lifecycles = Set.copyOf(lifecycles);
+        }
+        /** Compatibility constructor for classes without context or static derivation. */
+        public ClassSpec(ClassKind kind, String stateType, List<Prop> stateFields, Set<Lifecycle> lifecycles) {
+            this(kind, stateType, stateFields, lifecycles, null, false, false);
         }
     }
     public ComponentMetadata { imports = List.copyOf(imports); props = List.copyOf(props); }
