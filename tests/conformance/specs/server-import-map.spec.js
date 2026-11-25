@@ -87,8 +87,13 @@ test('server-import-map: Java module scopes, blocked imports, escaping and integ
   const html = await server.renderImportMap('readable', 'first', integrity);
   await page.route('**/maps/first/global.mjs', route => route.fulfill({contentType: 'text/javascript', body: source + '\n// changed bytes'}));
   await page.route(denied, route => route.fulfill({contentType: 'text/html', body: html}));
-  errors.length = 0;
+  errors.length = 0; warnings.length = 0;
   await page.goto(denied);
-  await expect.poll(() => errors.join('\n')).toContain('integrity');
+  await expect.poll(() => errors).toHaveLength(1);
+  expect(errors[0]).toMatch(/Failed to find a valid digest.*'integrity'.*\/maps\/first\/global\.mjs.*blocked/i);
+  expect(warnings).toHaveLength(2);
+  expect(warnings.every(warning => warning.includes('blocked'))).toBe(true);
+  await expect.poll(() => page.evaluate(() => globalThis.__emptyScope)).toBe('empty-scope');
+  expect(blockedRequests).toEqual([]);
   expect(await page.evaluate(() => globalThis.__mapResult)).toBeUndefined();
 });
