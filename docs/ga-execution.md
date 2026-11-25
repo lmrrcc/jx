@@ -144,13 +144,14 @@ at `198c0b8` after the 15-step gate and both Verify checks passed on `30a8911`.
 Compiler context sugar, advanced lifecycle options, native
 IDE qualification and class hot-state preservation are separate tasks.
 
-R-28-03b adds native static derived state from props. Integrated over context
-merge `198c0b8`, package checks pass 39 core, 48 compiler and 15 Maven tests.
-The complete bench passes **863 checks, 169 skipped, across 129 cases**: client
-127 reference / 126 JX, hydrate 96, static 102 and lazy 107 per side. All five
+R-28-03b adds native static derived state from props. Integrated over functional
+merge `adcf22b`, package checks pass 42 core, 48 compiler and 15 Maven tests.
+The complete bench passes **879 checks, 169 skipped, across 131 cases**: client
+129 reference / 128 JX, hydrate 98, static 104 and lazy 109 per side. All five
 class cases pass eight projects each, with unchanged **54 / 6,328** pair evidence.
-The catalog now has 122 mutants; the dropped-derivation mutant is unrun and the
-historical full campaign remains 100. Mutation, final gate and Verify are pending.
+The catalog now has 124 mutants; the scoped dropped-derivation mutant was killed
+after a passing baseline, zero survived/unusable, on byte-identical derived source.
+The historical full campaign remains 100. Final gate and Verify are pending.
 
 R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
 using actual Flight and separate server/client Java programs. Seven Node and four
@@ -222,7 +223,7 @@ exists, not when its document or skeleton module lands.
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
 | GA-17 | Forms, validation, i18n and accessible primitives / A | GA-10, GA-15 | M3–M5 / L | Complex form, arrays/errors, locale/RTL, keyboard/reader, shared pure rules and server errors | ⬜ planned |
-| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger and differential fixtures. Interaction, class, Flight, cache, utility and context slices merged through PR53; derived props passes 863 integrated checks, mutation/gate/Verify pending. Pair evidence remains 54 / 6,328, with 6,274 open plus 575 deferred-feature pairs; remaining APIs/options and combined scenarios open | 🟡 partial |
+| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger and differential fixtures. Interaction, class, Flight, cache, utility and context slices merged through PR54; derived props passes 879 integrated checks, scoped mutant killed after a passing baseline; gate/Verify pending. Pair evidence remains 54 / 6,328, with 6,274 open plus 575 deferred-feature pairs; remaining APIs/options and combined scenarios open | 🟡 partial |
 | GA-19 | HTTP headers/binary/upload/stream capabilities / C | GA-03, GA-10, GA-13 | M3–M5 / L | Auth/CSRF headers, upload progress, download, SSE/WS lifecycle, bounds/reconnect tested | ⬜ planned |
 | GA-20 | Real ecosystem binding SDK and catalog / R | GA-15, GA-18 | M4–M7 / L | Selected grid/editor/chart/headless/media bindings with refs/assets/cleanup; Java consumer examples | ⬜ planned |
 | GA-21 | Complex authenticated reference product / A | GA-12, GA-13, GA-16, GA-17, GA-19 | M4–M6 / L | Workspace/project workflow with roles, search/table/detail, forms/files/activity and two-tenant tests | ⬜ planned |

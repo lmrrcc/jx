@@ -257,10 +257,10 @@ and Pure bailouts for null and empty derivation patches. Real DOM handles surviv
 these updates, and commit snapshots observe the previous DOM. No exact count is
 assumed for repeated render-phase invocations under Strict Mode.
 
-Integrated over context merge `198c0b8`, package verification passes 39 core,
-48 compiler and 15 Maven-plugin tests. The complete bench passes **863 checks,
-169 skipped, across 129 cases**: client 127 React / 126 JX, hydrate 96 per side,
-static 102 and lazy 107. The new case and four prior class cases pass all eight
+Integrated over functional merge `adcf22b`, package verification passes 42 core,
+48 compiler and 15 Maven-plugin tests. The complete bench passes **879 checks,
+169 skipped, across 131 cases**: client 129 React / 128 JX, hydrate 98 per side,
+static 104 and lazy 109. The new case and four prior class cases pass all eight
 projects each. Client, hydration and lazy execute interactions; static compares
 initial HTML only. JVM contracts also check schema rejection and unchanged
 callback failure identity. Browser error-boundary qualification for derivation
@@ -268,6 +268,10 @@ failures remains part of R-28-03c.
 
 Recorded case evidence adds only `class-derived-props`; all 54 existing pair
 witnesses remain green among 6,328 active candidates, with no new pair credit.
-This is Chrome-only evidence. The `class-derived-props-dropped` mutant is
-registered but unrun; the catalog has 122 entries and the historical full campaign
-still covers 100. Mutation, final push gate and Verify remain pending.
+This is Chrome-only evidence. The scoped `class-derived-props-dropped` campaign
+passed its unmutated baseline, then killed the mutation in all four JX projects:
+one killed, zero survived and zero unusable. It ran at `7c78a3d`; the derived
+runtime and fixture source is byte-identical after integration onto PR #54.
+Scratch evidence is `jx-mutation-2026455379713343602`. The catalog now has 124
+entries, including the two functional-contract mutants, while the historical
+full campaign still covers 100. Final push gate and Verify remain pending.
