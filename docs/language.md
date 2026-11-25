@@ -44,6 +44,10 @@ declared field order and references the generated `Counter.JX` descriptor.
 React invokes the render function. A parent does not call a child's render method
 during lowering. `JX` is a reserved static field name.
 
+A functional component may return `null` to produce no DOM output. It remains
+mounted: its hook state and effects survive until its parent removes the component
+or changes its identity. Returning null does not suppress thrown render errors.
+
 ### Native class components
 
 A public, concrete `@Component` class may directly extend
@@ -127,8 +131,12 @@ public final class Row {
 ```
 
 The generated comparison tests each field with `ComponentType.sameValue`, which is
-React's `Object.is` for Java values: strings, characters, booleans and boxed numbers
-compare by value, every other object by identity. A new list, record or lambda on
+the bridge's native scalar comparison: strings/characters, booleans and boxed
+primitive numbers compare by value across compatible boxed types. NaNs match;
+positive and negative zero differ. Long values outside the native exact-integer
+range retain exact Java Long equality; they are not thereby valid native number
+bindings. Other objects, including arbitrary-precision numbers, compare by
+identity. A new list, record or lambda on
 each parent render therefore defeats the memo, as in React; keep such values stable
 with `Hooks.useMemo` or `Hooks.useCallback`. A comparison must be pure. State,
 context and hot updates still render a memoized component. A descriptor written by

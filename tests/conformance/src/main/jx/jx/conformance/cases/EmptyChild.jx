@@ -12,7 +12,7 @@ public final class EmptyChild {
     public record Props(boolean visible) {}
     public static View render(Props props) {
         State<Integer> count = Hooks.useState(0);
-        Hooks.useEffect(() -> { Bench.log("empty mount"); return () -> Bench.log("empty unmount"); }, Dependencies.once());
+        Hooks.useEffect(() -> { Bench.log("empty mount"); return () -> Bench.log("empty unmount"); }, Dependencies.none());
         if (!props.visible()) return null;
         return <button onClick={event -> count.update(value -> value + 1)}>Child {count.value()}</button>;
     }

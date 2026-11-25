@@ -45,16 +45,35 @@ public final class ComponentType<P> {
     }
     /** The memo comparison, or null when every parent render renders this component. */
     public BiPredicate<P, P> propsEqual() { return propsEqual; }
-    /** React's prop comparison ({@code Object.is}) for Java values: strings, characters, booleans
-     * and boxed numbers compare by value, everything else by identity. */
+    /** Default memo comparison for Java props. Strings/characters and boxed primitive
+     * numbers compare as their native React scalars, including cross-boxed numeric
+     * values, equal NaNs and distinct signed zeros. Other values use identity.
+     * Longs outside JavaScript's exact integer range retain exact Java Long equality;
+     * this does not make them valid native number bindings or wire values. */
     public static boolean sameValue(Object first, Object second) {
         if (first == second) return true;
         if (first == null || second == null) return false;
-        boolean scalar = first instanceof String || first instanceof Character || first instanceof Boolean
-                || first instanceof Byte || first instanceof Short || first instanceof Integer
-                || first instanceof Long || first instanceof Float || first instanceof Double;
-        return scalar && first.equals(second);
+        if ((first instanceof String || first instanceof Character)
+                && (second instanceof String || second instanceof Character)) {
+            return first.toString().equals(second.toString());
+        }
+        if (first instanceof Boolean) return first.equals(second);
+        if (primitiveNumber(first) && primitiveNumber(second)) {
+            if (inexactNativeLong(first) || inexactNativeLong(second)) return first.equals(second);
+            return Double.doubleToLongBits(((Number) first).doubleValue())
+                    == Double.doubleToLongBits(((Number) second).doubleValue());
+        }
+        return false;
     }
-    /** Renderer entry point; do not call another component directly from application rendering. */
-    public View render(P props) { return Objects.requireNonNull(render.apply(props), "Component returned null; use Views.fragment()"); }
+    private static boolean primitiveNumber(Object value) {
+        return value instanceof Byte || value instanceof Short || value instanceof Integer
+                || value instanceof Long || value instanceof Float || value instanceof Double;
+    }
+    private static boolean inexactNativeLong(Object value) {
+        return value instanceof Long number && (number < -9_007_199_254_740_991L || number > 9_007_199_254_740_991L);
+    }
+    /** Renderer entry point; do not call another component directly from application rendering.
+     * Null deliberately renders no output while React retains the component's mounted
+     * identity, hooks and effects. A thrown render failure still propagates. */
+    public View render(P props) { return render.apply(props); }
 }
