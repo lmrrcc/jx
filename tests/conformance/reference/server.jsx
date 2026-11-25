@@ -7,6 +7,7 @@ import {version as staticVersion} from 'react-dom/static';
 import { HydratedPage } from './cases/hydrate-server.jsx';
 import { cases } from './cases.jsx';
 import { combinedServer } from './combined-server.jsx';
+import {renderBootstrap} from './bootstrap.jsx';
 import { Writable } from 'node:stream';
 import {
   renderToPipeableStream, renderToReadableStream, renderToStaticMarkup, renderToString,
@@ -71,6 +72,7 @@ function Streaming() {
 }
 
 export const server = {
+  renderBootstrap,
   ...combinedServer,
   reactVersion: () => reactVersion,
   domVersion: () => domVersion,

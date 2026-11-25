@@ -47,16 +47,59 @@ public final class ReactServer {
      * and {@code bootstrapModules} are script URLs React adds to the page to start the browser
      * application. {@code onError} hears of every error thrown while rendering, also the ones a
      * {@code React.suspense} boundary absorbs by sending its fallback; it runs outside rendering. */
-    public record StreamOptions(String identifierPrefix, List<String> bootstrapScripts, List<String> bootstrapModules, Consumer<Throwable> onError) {
+    public record StreamOptions(String identifierPrefix, List<String> bootstrapScripts, List<String> bootstrapModules,
+            Consumer<Throwable> onError, String bootstrapScriptContent, Nonce nonce) {
         public StreamOptions {
             bootstrapScripts = bootstrapScripts == null ? null : List.copyOf(bootstrapScripts);
             bootstrapModules = bootstrapModules == null ? null : List.copyOf(bootstrapModules);
         }
+        /** Retains the original constructor; inline bootstrap and CSP nonces are absent. */
+        public StreamOptions(String identifierPrefix, List<String> bootstrapScripts, List<String> bootstrapModules,
+                Consumer<Throwable> onError) {
+            this(identifierPrefix, bootstrapScripts, bootstrapModules, onError, null, null);
+        }
         public static StreamOptions defaults() { return new StreamOptions(null, null, null, null); }
-        public StreamOptions withIdentifierPrefix(String prefix) { return new StreamOptions(prefix, bootstrapScripts, bootstrapModules, onError); }
-        public StreamOptions withBootstrapScripts(List<String> urls) { return new StreamOptions(identifierPrefix, urls, bootstrapModules, onError); }
-        public StreamOptions withBootstrapModules(List<String> urls) { return new StreamOptions(identifierPrefix, bootstrapScripts, urls, onError); }
-        public StreamOptions withError(Consumer<Throwable> callback) { return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, callback); }
+        public StreamOptions withIdentifierPrefix(String prefix) { return new StreamOptions(prefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, nonce); }
+        public StreamOptions withBootstrapScripts(List<String> urls) { return new StreamOptions(identifierPrefix, urls, bootstrapModules, onError, bootstrapScriptContent, nonce); }
+        public StreamOptions withBootstrapModules(List<String> urls) { return new StreamOptions(identifierPrefix, bootstrapScripts, urls, onError, bootstrapScriptContent, nonce); }
+        public StreamOptions withError(Consumer<Throwable> callback) { return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, callback, bootstrapScriptContent, nonce); }
+        /** Trusted JavaScript source emitted by React in an inline bootstrap script. Null omits it;
+         * an empty string is retained. React escapes HTML script terminators, but does not sanitize
+         * executable code or serialize application data: never concatenate untrusted input here.
+         * Set this on the initial render/prerender; resume uses the postponed bootstrap state. */
+        public StreamOptions withBootstrapScriptContent(String source) {
+            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError, source, nonce);
+        }
+        /** React's string nonce contract: scripts only, without a style nonce. Null clears both.
+         * The host must generate a fresh unpredictable nonce per response and send a matching CSP
+         * header. JX does not generate nonces or configure headers. Not valid for static prerendering. */
+        public StreamOptions withNonce(String value) {
+            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError,
+                    bootstrapScriptContent, value == null ? null : new ScriptNonce(value));
+        }
+        /** Separate script/style nonces for request-time streaming and resume. Null clears both.
+         * These values authorize React-managed resources; they do not change explicit element props. */
+        public StreamOptions withNonces(Nonces value) {
+            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, value);
+        }
+    }
+
+    /** React's documented string or script/style object option. The variants retain their native
+     * representation rather than assuming React treats the two shapes identically. */
+    public sealed interface Nonce permits ScriptNonce, Nonces {}
+
+    /** A string nonce authorizing scripts only. Empty is passed unchanged; null is invalid. */
+    public record ScriptNonce(String value) implements Nonce {
+        public ScriptNonce { Objects.requireNonNull(value); }
+    }
+
+    /** Per-response CSP values. A null field is omitted, an empty string is passed unchanged.
+     * Both-null is an error; use null StreamOptions.nonce to omit the option entirely.
+     * Validation of entropy, lifetime and CSP syntax belongs to the HTTP host. */
+    public record Nonces(String script, String style) implements Nonce {
+        public Nonces {
+            if (script == null && style == null) throw new IllegalArgumentException("At least one CSP nonce is required");
+        }
     }
 
     /** Receives decoded HTML synchronously on the Node event loop. The sink owns any storage it
@@ -182,12 +225,20 @@ public final class ReactServer {
         if (options.identifierPrefix() != null) setText(settings, "identifierPrefix", options.identifierPrefix());
         if (options.bootstrapScripts() != null) setList(settings, "bootstrapScripts", options.bootstrapScripts().toArray(String[]::new));
         if (options.bootstrapModules() != null) setList(settings, "bootstrapModules", options.bootstrapModules().toArray(String[]::new));
+        if (options.bootstrapScriptContent() != null) setText(settings, "bootstrapScriptContent", options.bootstrapScriptContent());
+        switch (options.nonce()) {
+            case null -> { }
+            case ScriptNonce single -> setText(settings, "nonce", single.value());
+            case Nonces separate -> setNonces(settings, separate.script(), separate.style());
+        }
         Consumer<Throwable> onError = options.onError();
         if (onError != null) setError(settings, "onError", error -> onError.accept(React.throwable(error)));
         return settings;
     }
 
     @JSBody(script = "return {};") private static native JSObject object();
+    @JSBody(params = {"settings", "script", "style"}, script = "var nonce = {}; if (script !== null) nonce.script = script; if (style !== null) nonce.style = style; settings.nonce = nonce;")
+    private static native void setNonces(JSObject settings, String script, String style);
     @JSBody(params = {"object", "name", "value"}, script = "object[name] = value;") private static native void setText(JSObject object, String name, String value);
     @JSBody(params = {"object", "name", "values"}, script = "object[name] = Array.prototype.slice.call(values);") private static native void setList(JSObject object, String name, String[] values);
     @JSBody(params = {"object", "name", "call"}, script = "object[name] = function() { call(); };") private static native void setCall(JSObject object, String name, Call call);

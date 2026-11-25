@@ -32,3 +32,6 @@ unknown-case	lazy	there is no component to load for an unknown route
 combined-resource-hydration	hydrate	the case serves its own initial SSR document and hydrates its own root
 combined-resource-hydration	static	the case serves its own initial SSR document and hydrates its own root
 combined-resource-hydration	lazy	the case serves its own initial SSR document and hydrates its own root
+server-bootstrap	hydrate	complete server output with CSP is tested as its own browser document, not a bench root or lazy route
+server-bootstrap	static	complete server output with CSP is tested as its own browser document, not a bench root or lazy route
+server-bootstrap	lazy	complete server output with CSP is tested as its own browser document, not a bench root or lazy route

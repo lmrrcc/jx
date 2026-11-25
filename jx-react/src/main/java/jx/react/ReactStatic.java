@@ -11,7 +11,9 @@ import org.teavm.jso.JSObject;
 /** React's static rendering ({@code react-dom/static}): HTML produced ahead of a request, after
  * all data is there. Unlike the streaming renderers it waits for every {@code React.suspense}
  * boundary before the HTML is complete, so the output has no fallbacks unless the work is aborted.
- * It runs in a Node host, like {@link ReactServer}. */
+ * It runs in a Node host, like {@link ReactServer}. Nonces are rejected: static output can be
+ * reused across requests and must not retain a request's CSP authority. Apply fresh nonces when
+ * continuing postponed output with the request-time {@code ReactServer.resume} APIs. */
 public final class ReactStatic {
     private ReactStatic() {}
     /** The version exported by the loaded {@code react-dom/static} entry point. */
@@ -74,6 +76,7 @@ public final class ReactStatic {
     }
 
     private static Prerendering continued(View view, Postponed postponed, ReactServer.StreamOptions options, boolean node) {
+        validateStaticOptions(options);
         Hooks.installRuntime(ReactHooks.INSTANCE);
         JSObject state = Objects.requireNonNull(postponed).state;
         JSObject settings = ReactServer.settings(Objects.requireNonNull(options));
@@ -83,11 +86,17 @@ public final class ReactStatic {
     }
 
     private static Prerendering start(View view, ReactServer.StreamOptions options, boolean node) {
+        validateStaticOptions(options);
         Hooks.installRuntime(ReactHooks.INSTANCE);
         JSObject settings = ReactServer.settings(Objects.requireNonNull(options));
         JSObject controller = ReactServer.controller(settings);
         JSObject element = React.element(Objects.requireNonNull(view));
         return running(node ? prerenderNodeNative(element, settings) : prerenderNative(element, settings), controller, node);
+    }
+
+    static void validateStaticOptions(ReactServer.StreamOptions options) {
+        if (Objects.requireNonNull(options).nonce() != null)
+            throw new IllegalArgumentException("CSP nonces are request-specific and cannot be used for static prerendering");
     }
 
     /** Wraps React's promise of {@code {prelude, postponed}}. */
