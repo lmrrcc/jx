@@ -45,6 +45,7 @@ final class ClassDescriptorSource {
                 .append("))");
         if (spec.derivedProps()) out.append(".withDerivedStateFromProps(").append(owner).append("::getDerivedStateFromProps)");
         if (spec.derivedError()) out.append(".withDerivedStateFromError(").append(owner).append("::getDerivedStateFromError)");
+        if (spec.contextShouldUpdate()) out.append(".withContextShouldUpdate(contextType, ").append(owner).append("::shouldComponentUpdate)");
         out.append(";\n");
         return out.toString();
     }

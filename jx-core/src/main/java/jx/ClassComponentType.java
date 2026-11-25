@@ -11,10 +11,23 @@ import java.util.function.Supplier;
 public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     public enum Lifecycle { MOUNT, UPDATE, UNMOUNT, SNAPSHOT, SHOULD_UPDATE, CATCH }
     /** Renderer-owned access to the one native context declared by a descriptor. Applications
-     * receive the resulting typed reader through the context-aware factory, not this adapter. */
+     * receive a typed reader through the context-aware factory or a value through the update
+     * policy, not this adapter. */
     public interface ContextAccess {
-        /** A live reader of the declared context, usable during Java peer construction. */
+        /** Reads the renderer's context source. Factory access supplies a live instance reader
+         * usable during construction; should-update access supplies its fixed pending value. */
         <T> Supplier<T> current(Context<T> context);
+    }
+    /** Pure native should-update policy with the descriptor's concrete context value type. */
+    @FunctionalInterface
+    public interface ContextUpdatePolicy<P,S,C extends ClassComponent<P,S,?>,T> {
+        /** Current values remain on peer; the arguments describe React's pending update.
+         * The context value may be null. React may repeat/discard calls or render despite false. */
+        boolean shouldUpdate(C peer, P nextProps, S nextState, T nextContext);
+    }
+    @FunctionalInterface
+    private interface ContextPolicy<P,S,C> {
+        boolean shouldUpdate(C peer, P nextProps, S nextState, ContextAccess nextContext);
     }
     private final String name;
     private final ClassSchema<P> props;
@@ -25,20 +38,24 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     private final Set<Lifecycle> lifecycles;
     private final BiFunction<P,S,StatePatch<S>> derivedState;
     private final Function<Throwable,StatePatch<S>> derivedError;
+    private final ContextPolicy<P,S,C> contextUpdate;
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles) {
-        this(name, props, state, factory, context, pure, lifecycles, null, null);
+        this(name, props, state, factory, context, pure, lifecycles, null, null, null);
     }
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles,
-            BiFunction<P,S,StatePatch<S>> derivedState, Function<Throwable,StatePatch<S>> derivedError) {
+            BiFunction<P,S,StatePatch<S>> derivedState, Function<Throwable,StatePatch<S>> derivedError,
+            ContextPolicy<P,S,C> contextUpdate) {
         if (Objects.requireNonNull(name).isBlank()) throw new IllegalArgumentException("Empty class component name");
         this.name = name; this.props = Objects.requireNonNull(props); this.state = Objects.requireNonNull(state);
         this.factory = Objects.requireNonNull(factory); this.context = context;
         this.pure = pure; this.lifecycles = Set.copyOf(lifecycles);
         this.derivedState = derivedState;
         this.derivedError = derivedError;
-        if (pure && this.lifecycles.contains(Lifecycle.SHOULD_UPDATE)) throw new IllegalArgumentException("PureComponent uses native shallow comparison");
+        this.contextUpdate = contextUpdate;
+        if (pure && (this.lifecycles.contains(Lifecycle.SHOULD_UPDATE) || contextUpdate != null))
+            throw new IllegalArgumentException("PureComponent uses native shallow comparison");
         if (this.lifecycles.contains(Lifecycle.SNAPSHOT) && !this.lifecycles.contains(Lifecycle.UPDATE))
             throw new IllegalArgumentException("Snapshot lifecycle requires update lifecycle");
     }
@@ -101,7 +118,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDerivedStateFromProps(BiFunction<P,S,StatePatch<S>> callback) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                Objects.requireNonNull(callback, "callback"), derivedError);
+                Objects.requireNonNull(callback, "callback"), derivedError, contextUpdate);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasDerivedStateFromProps() { return derivedState != null; }
@@ -131,7 +148,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDerivedStateFromError(Function<Throwable,StatePatch<S>> callback) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                derivedState, Objects.requireNonNull(callback, "callback"));
+                derivedState, Objects.requireNonNull(callback, "callback"), contextUpdate);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasDerivedStateFromError() { return derivedError != null; }
@@ -144,12 +161,55 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         if (patch != null && patch.schema() != state) throw new IllegalArgumentException("Derived error patch belongs to another class schema");
         return patch;
     }
+    /** Returns a new descriptor with a typed native shouldComponentUpdate policy. Declare it
+     * once: descriptor identity is native component identity. The requested context must be
+     * this descriptor's contextType, by identity. PureComponent rejects custom update policies.
+     * Existing factory, context, derivations and lifecycle settings are preserved.
+     *
+     * <p>This policy takes precedence over the peer's two-argument shouldComponentUpdate,
+     * including when SHOULD_UPDATE was registered. The original descriptor still uses its
+     * original policy. Repeating this modifier replaces the policy on the returned descriptor.
+     * The policy automatically enables native should-update dispatch; no capability flag is
+     * required. React does not invoke it on initial render or forceUpdate, and a changed native
+     * provider value can force rendering even when the policy returns false.
+     *
+     * <p>The callback receives the peer with its current props/state/context and separate next
+     * values, including null context. It is pure render-phase work, may repeat or be discarded,
+     * must not schedule updates or effects, and runs only on the rendering thread. No instance
+     * value is eagerly changed by this adapter. Exceptions propagate through React. The next
+     * context is a borrowed value, not a live reader; retaining it retains that value normally.
+     * @throws NullPointerException if requested or policy is null
+     * @throws IllegalArgumentException if context identity differs or this is a Pure descriptor
+     */
+    public <T> ClassComponentType<P,S,C> withContextShouldUpdate(Context<T> requested,
+            ContextUpdatePolicy<P,S,C,T> policy) {
+        Objects.requireNonNull(requested, "requested"); Objects.requireNonNull(policy, "policy");
+        if (requested != context) throw new IllegalArgumentException("Update policy context does not belong to this descriptor");
+        return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
+                derivedState, derivedError, (peer, nextProps, nextState, nextContext) ->
+                    policy.shouldUpdate(peer, nextProps, nextState,
+                            Objects.requireNonNull(nextContext.current(requested), "Missing next context reader").get()));
+    }
+    /** Renderer capability check; no callback is executed. */
+    public boolean hasContextShouldUpdate() { return contextUpdate != null; }
+    /** Renderer dispatch with checked pending props/state. Context access belongs to this
+     * callback's pending native value, not the peer's current reader. Without a configured
+     * context policy, dispatches the original two-argument peer override and ignores access.
+     * @throws NullPointerException for a null peer or missing required context access
+     */
+    public boolean shouldUpdate(C peer, P nextProps, S nextState, ContextAccess nextContext) {
+        Objects.requireNonNull(peer, "peer"); props.validate(nextProps); state.validate(nextState);
+        return contextUpdate == null ? peer.shouldUpdate(nextProps, nextState)
+                : contextUpdate.shouldUpdate(peer, nextProps, nextState, Objects.requireNonNull(nextContext, "Missing next context access"));
+    }
     public ClassSchema<P> propsSchema() { return props; }
     public ClassSchema<S> stateSchema() { return state; }
     public boolean pure() { return pure; }
     /** The declared native context, or null for a descriptor without class context. */
     public Context<?> contextType() { return context; }
-    public boolean lifecycle(Lifecycle lifecycle) { return lifecycles.contains(lifecycle); }
+    public boolean lifecycle(Lifecycle lifecycle) {
+        return lifecycles.contains(lifecycle) || lifecycle == Lifecycle.SHOULD_UPDATE && contextUpdate != null;
+    }
     /** Renderer construction. Initial props/state are checked before mounting. */
     public C create(P value) {
         if (context != null) throw new IllegalStateException("A context-aware class needs its renderer context access");

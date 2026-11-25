@@ -111,6 +111,7 @@ import { ClassDerivedProps } from './cases/class-derived-props.jsx';
 import { ClassErrorLifecycle } from './cases/class-error-lifecycle.jsx';
 import { ClassAuthoring } from './cases/class-authoring.jsx';
 import { ClassLifecycleAuthoring } from './cases/class-lifecycle-authoring.jsx';
+import { ClassNextContext } from './cases/class-next-context.jsx';
 
 export const cases = {
   'runtime-utilities': RuntimeUtilities,
@@ -132,6 +133,7 @@ export const cases = {
   'class-error-lifecycle': ClassErrorLifecycle,
   'class-authoring': ClassAuthoring,
   'class-lifecycle-authoring': ClassLifecycleAuthoring,
+  'class-next-context': ClassNextContext,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,
   'callable-state': CallableState,

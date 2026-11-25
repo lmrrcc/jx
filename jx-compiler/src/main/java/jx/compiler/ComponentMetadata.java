@@ -24,9 +24,10 @@ public record ComponentMetadata(String qualifiedName, String simpleName, String 
      * are required. A null contextValueType means no declared contextType; otherwise it is
      * the authored Java value type supplied to the constructor's typed Supplier. The two
      * derivation flags identify checked static methods, distinct from instance lifecycles.
+     * contextShouldUpdate selects the typed three-argument overload over a two-argument override.
      * Collections are immutable snapshots, independent of the parser's lists. */
     public record ClassSpec(ClassKind kind, String stateType, List<Prop> stateFields, Set<Lifecycle> lifecycles,
-                            String contextValueType, boolean derivedProps, boolean derivedError) {
+                            String contextValueType, boolean derivedProps, boolean derivedError, boolean contextShouldUpdate) {
         public ClassSpec {
             Objects.requireNonNull(kind);
             Objects.requireNonNull(stateType);
@@ -35,7 +36,12 @@ public record ComponentMetadata(String qualifiedName, String simpleName, String 
         }
         /** Compatibility constructor for classes without context or static derivation. */
         public ClassSpec(ClassKind kind, String stateType, List<Prop> stateFields, Set<Lifecycle> lifecycles) {
-            this(kind, stateType, stateFields, lifecycles, null, false, false);
+            this(kind, stateType, stateFields, lifecycles, null, false, false, false);
+        }
+        /** Compatibility constructor for class metadata without a three-argument update policy. */
+        public ClassSpec(ClassKind kind, String stateType, List<Prop> stateFields, Set<Lifecycle> lifecycles,
+                         String contextValueType, boolean derivedProps, boolean derivedError) {
+            this(kind, stateType, stateFields, lifecycles, contextValueType, derivedProps, derivedError, false);
         }
     }
     public ComponentMetadata { imports = List.copyOf(imports); props = List.copyOf(props); }

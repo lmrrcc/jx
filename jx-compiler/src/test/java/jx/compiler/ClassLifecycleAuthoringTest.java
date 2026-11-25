@@ -142,6 +142,63 @@ class ClassLifecycleAuthoringTest {
         }
     }
 
+    @Test void typedThreeArgumentOverloadWinsOverLegacyAndPreservesEditableJava() throws Exception {
+        String legacy = "@Override protected boolean shouldComponentUpdate(Props next, Model pending) { return false; }";
+        String policy = """
+                protected boolean shouldComponentUpdate(Props next, Model pending, String nextContext) {
+                    return next.revision() == 2 && pending.count() == 3 && nextContext.equals("day")
+                        && props().revision() == 1 && state().count() == 1 && theme.get().equals("day");
+                }
+                """;
+        for (boolean includeLegacy : List.of(false, true)) {
+            String text = PANEL.replace("public String theme()", (includeLegacy ? legacy : "") + policy + "public String theme()");
+            SourceFile source = source(text);
+            Compilation compilation = compiler.compile(List.of(source));
+            assertTrue(compilation.successful(), compilation.diagnostics().toString());
+            assertTrue(compilation.components().getFirst().classSpec().contextShouldUpdate());
+            Path probe = directory.resolve("PolicyProbe.java");
+            Files.writeString(probe, """
+                    package demo;
+                    import jx.*;
+                    public final class PolicyProbe {
+                        public static boolean verify() {
+                            ClassComponentType.ContextAccess access = new ClassComponentType.ContextAccess() {
+                                public <T> java.util.function.Supplier<T> current(Context<T> context) { return context::defaultValue; }
+                            };
+                            Panel peer = Panel.JX.create(new Panel.Props(1), access);
+                            return Panel.JX.hasContextShouldUpdate()
+                                && Panel.JX.shouldUpdate(peer, new Panel.Props(2), new Panel.Model(3, null), access)
+                                && Panel.JX.hasDerivedStateFromProps() && Panel.JX.hasDerivedStateFromError();
+                        }
+                    }
+                    """);
+            String output = "policy-" + includeLegacy;
+            assertEquals(List.of(), check(compilation, List.of(probe), output));
+            try (URLClassLoader loader = new URLClassLoader(new java.net.URL[]{directory.resolve(output).toUri().toURL()}, null)) {
+                assertEquals(true, loader.loadClass("demo.PolicyProbe").getMethod("verify").invoke(null));
+            }
+            Compilation projection = new Compilation(EditorProjection.project(List.of(source)), List.of(), List.of());
+            assertEquals(List.of(), check(projection, List.of(), output + "-editor"));
+            GeneratedSource generated = projection.generatedSources().getFirst();
+            String expression = "nextContext.equals(\"day\")";
+            int authored = text.indexOf(expression);
+            int java = generated.sourceMap().generatedOffset(authored).orElseThrow();
+            assertEquals(expression, generated.javaSource().substring(java, java + expression.length()));
+            assertEquals(new SourceSpan(authored, authored + expression.length()),
+                    generated.sourceMap().editableSourceSpan(new SourceSpan(java, java + expression.length())).orElseThrow());
+        }
+        String contextual = PANEL.replace("public String theme()", policy + "public String theme()");
+        for (String text : List.of(
+                contextual.replace("String nextContext", "Integer nextContext"),
+                contextual.replace("protected boolean shouldComponentUpdate", "protected static boolean shouldComponentUpdate"),
+                contextual.replace("protected boolean shouldComponentUpdate", "private boolean shouldComponentUpdate"),
+                contextual.replace("extends ClassComponent", "extends PureComponent"),
+                contextual.replace("public static final Context<String> contextType = new Context<>(\"day\");", ""))) {
+            Compilation invalid = compiler.compile(List.of(source(text)));
+            assertTrue(invalid.diagnostics().stream().anyMatch(value -> value.code().equals("JX111")), invalid.diagnostics().toString());
+        }
+    }
+
     private SourceFile source(String text) { return new SourceFile(directory.resolve("Panel.jx"), text); }
     private List<Diagnostic> check(Compilation compilation, List<Path> extra, String output) throws Exception {
         List<Path> java = new ArrayList<>(extra);

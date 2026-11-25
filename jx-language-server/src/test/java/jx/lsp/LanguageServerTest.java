@@ -122,6 +122,7 @@ class LanguageServerTest {
                     public NativeCounter(Props props, Supplier<String> theme) { super(props, new Model(props.initial(), null)); this.theme = theme; }
                     public static StatePatch<Model> getDerivedStateFromProps(Props next, Model pending) { return null; }
                     public static StatePatch<Model> getDerivedStateFromError(Throwable error) { return statePatch().withError(error).build(); }
+                    protected boolean shouldComponentUpdate(Props next, Model pending, String nextContext) { return nextContext != null; }
                     @Override protected void componentDidCatch(Throwable error, ComponentErrorInfo info) {}
                     @Override public View render() { return <button>{theme.get()}: {state().count()}</button>; }
                 }
@@ -172,6 +173,7 @@ class LanguageServerTest {
             assertTrue(projected.javaText().contains("normalWithContext("));
             assertTrue(projected.javaText().contains(".withDerivedStateFromProps(NativeCounter::getDerivedStateFromProps)"));
             assertTrue(projected.javaText().contains(".withDerivedStateFromError(NativeCounter::getDerivedStateFromError)"));
+            assertTrue(projected.javaText().contains(".withContextShouldUpdate(contextType, NativeCounter::shouldComponentUpdate)"));
             var sourceMap = new jx.compiler.SourceMap(projected.segments(), projected.sourceLength());
             String authored = "statePatch().withError(error).build()";
             int start = counterText.indexOf(authored);

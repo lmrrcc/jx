@@ -1,0 +1,42 @@
+package jx.conformance.cases;
+
+import java.util.function.Supplier;
+import jx.*;
+import jx.conformance.Bench;
+import jx.conformance.cases.ClassNextContext.Theme;
+
+/** Three-argument Java overload; the generated native policy takes precedence. */
+@Component
+public final class AuthoredContextPolicy extends ClassComponent<AuthoredContextPolicy.Props, AuthoredContextPolicy.Model, Void> {
+    public record Props(String id, int revision, boolean allow, Theme expected) {}
+    public record Model(int count) {}
+    public static final Context<Theme> contextType = ClassNextContext.context();
+    private final Supplier<Theme> theme;
+    private final String born;
+    public AuthoredContextPolicy(Props props, Supplier<Theme> theme) {
+        super(props, new Model(0)); this.theme = theme; this.born = name(theme.get());
+    }
+    protected boolean shouldComponentUpdate(Props nextProps, Model nextState, Theme nextContext) {
+        Bench.log("policy:" + props().id() + ":old=" + current() + ":next="
+                + values(nextProps, nextState, nextContext) + ":identity=" + (nextContext == nextProps.expected()));
+        return nextProps.allow();
+    }
+    @Override protected boolean shouldComponentUpdate(Props nextProps, Model nextState) {
+        Bench.log("legacy-policy:" + props().id());
+        return false;
+    }
+    public void add() {
+        setState((pending, next) -> statePatch().withCount(pending.count() + 1).build(),
+                () -> Bench.log("authored-policy:callback:" + current()));
+        Bench.log("authored-policy:handler:" + current());
+    }
+    public void force() { forceUpdate(() -> Bench.log("authored-policy:forced:" + current())); }
+    public String current() { return values(props(), state(), theme.get()); }
+    private static String name(Theme value) { return value == null ? "<null>" : value.name(); }
+    private static String values(Props props, Model state, Theme context) { return props.revision() + "/" + state.count() + "/" + name(context); }
+    @Override protected void componentDidMount() { Bench.log("policy:mount:" + props().id()); }
+    @Override protected void componentDidUpdate(Props oldProps, Model oldState, Void ignored) {
+        Bench.log("policy:commit:" + props().id() + ":previous=" + oldProps.revision() + "/" + oldState.count() + ":current=" + current());
+    }
+    @Override public View render() { return <output data-testid={"policy-" + props().id()}>{current() + ":born=" + born}</output>; }
+}
