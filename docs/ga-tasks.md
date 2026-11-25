@@ -304,6 +304,14 @@ unusable mutants. This is the header quota of two, not a full-catalog run.
 Final gate and Verify remain pending; production HTTP/103 integration is not
 qualified. See the [header contract](evidence/server-resource-headers.md).
 
+R-31-SERVER-IMPORT-MAP, 25 November 2026: 🟡 implementation and differential
+consumer prepared. A copied, bounded schema supplies imports, nested scopes and
+integrity metadata; native dictionaries preserve special keys and blocked
+targets. Four initial renderers accept it, resume rejects it. The browser case
+targets real module resolution, SRI denial, script escaping and nonce propagation.
+Compilation/runtime/full-bench/mutation/publication checks remain pending; no
+pair credit is claimed. See the [import-map contract](evidence/server-import-map.md).
+
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven
 tests. The complete bench passes 871 checks with 169 inapplicable cells across

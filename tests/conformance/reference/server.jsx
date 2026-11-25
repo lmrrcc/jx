@@ -10,6 +10,7 @@ import { combinedServer } from './combined-server.jsx';
 import {renderBootstrap} from './bootstrap.jsx';
 import {resumeBootstrap} from './resume-bootstrap.jsx';
 import {resourceHeaders} from './resource-headers.jsx';
+import {renderImportMap} from './import-map.jsx';
 import { Writable } from 'node:stream';
 import {
   renderToPipeableStream, renderToReadableStream, renderToStaticMarkup, renderToString,
@@ -77,6 +78,7 @@ export const server = {
   renderBootstrap,
   resumeBootstrap,
   resourceHeaders,
+  renderImportMap,
   ...combinedServer,
   reactVersion: () => reactVersion,
   domVersion: () => domVersion,

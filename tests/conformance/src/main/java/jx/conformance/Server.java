@@ -34,6 +34,7 @@ final class Server {
         BootstrapExports.install();
         ResumeNonceExports.install();
         ResourceHeadersExports.install();
+        ImportMapExports.install();
         register("reactVersion", React::version);
         register("domVersion", React::domVersion);
         register("clientVersion", React::clientVersion);
