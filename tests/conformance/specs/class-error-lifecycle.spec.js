@@ -73,6 +73,24 @@ test('class-error-lifecycle: native class boundaries recover child render, deriv
     expect(await boundaryNode.evaluate(node => node.isConnected)).toBe(false);
     await boundaryNode.dispose();
     expect(await sibling.evaluate((node, before) => node === before, siblingNode)).toBe(true);
+    const uncaught = problems.filter(problem => problem.startsWith('pageerror:'));
+    expect(uncaught).toHaveLength(1);
+    expect(uncaught[0]).toContain('class child failed');
+    const reported = problems.filter(problem => problem.startsWith('console:'));
+    expect(reported).toEqual([
+      expect.stringContaining('class child failed'),
+      expect.stringContaining('class child failed'),
+      expect.stringContaining('class child failed'),
+      expect.stringContaining('foreign render'),
+      expect.stringContaining('foreign object'),
+      expect.stringContaining(' null The above error occurred in the <NativeFailure> component.'),
+      expect.stringContaining(' undefined The above error occurred in the <NativeFailure> component.'),
+      expect.stringContaining('class child failed')
+    ]);
+    for (const problem of reported) {
+      expect(problem).toContain('The above error occurred in');
+      expect(problem).toContain('using the error boundary you provided, FailureBoundary.');
+    }
   } finally {
     await siblingNode.dispose();
   }
