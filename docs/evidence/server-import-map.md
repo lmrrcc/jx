@@ -1,9 +1,11 @@
 # Server import maps
 
-R-31 option-level work, 25 November 2026. Source `876c189` passes the package
-checks (47 core, 10 React, 52 compiler and 15 Maven tests) and the focused Chrome
-comparison (2 passed, 6 inapplicable cells). Full bench, mutations and publication
-gates remain pending; this is not a claim of completed parity.
+R-31 option-level work, 25 November 2026. Integrated source `8c5c337` passes the
+package checks (56 core, 10 React, 54 compiler and 15 Maven tests) and the complete
+bench: **937 passed, 199 skipped, 142 cases**. Client mode passes 140 reference /
+139 JX checks; hydration 104, static HTML 110 and lazy mode 115 per side. All
+62/6328 registered interaction pairs remain green; this option adds no pair credit.
+Mutations and publication gates remain pending; this is not completed parity.
 
 `ReactServer.StreamOptions.withImportMap` accepts a typed immutable `ImportMap`
 containing imports, scopes and integrity metadata. It preserves null versus
@@ -50,6 +52,16 @@ keys, script terminator escaping, blocked imports, nonce propagation and a real
 integrity allow/deny check. The case runs in its
 own browser document rather than bench-root hydrate/static/lazy modes; no new
 interaction pair is credited merely by using these features together.
+
+The focused run passes 2 checks with 6 inapplicable cells. After independent
+review, the integrity-denial phase also requires exactly one expected integrity
+error, checks both expected import-map warnings and proves the independent inline
+module still runs. Both focused checks passed again before integration. The
+integrated full run adds only the `server-import-map` row to the recorded case
+table; all previous rows and the interaction table are unchanged. The run also
+qualifies the parent header/resume, bootstrap, synchronous act and sink consumers
+alongside all three pending class-policy slices. Those slices retain their own
+publication and mutation evidence; no full mutation-catalog claim is made.
 
 The pinned React 19.3.1 implementation serializes the typed object through its
 public `importMap` option. The public documentation marks some nonce behavior

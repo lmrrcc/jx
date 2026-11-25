@@ -309,9 +309,12 @@ consumer pass. A copied, bounded schema supplies imports, nested scopes and
 integrity metadata; native dictionaries preserve special keys and blocked
 targets. Four initial renderers accept it, resume rejects it. The browser case
 verifies real module resolution, SRI denial, script escaping and nonce propagation.
-Source `876c189` passes 47 core/10 React/52 compiler/15 Maven package tests and
-2 focused checks (6 inapplicable cells). Full bench, mutation and publication
-checks remain pending; no
+The focused comparison passes 2 checks (6 inapplicable cells), including strict
+integrity-error accounting after independent review. Integrated source `8c5c337`
+passes 56 core/10 React/54 compiler/15 Maven package tests and the complete bench:
+937 passed, 199 skipped, 142 cases; client 140 reference/139 JX, hydrate 104,
+static 110, lazy 115 per side. All 62/6328 existing interaction pairs pass.
+Mutation and publication checks remain pending; no new
 pair credit is claimed. See the [import-map contract](evidence/server-import-map.md).
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source

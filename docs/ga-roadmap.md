@@ -20,6 +20,14 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
+Latest local combined qualification (`8c5c337`): **937 checks pass, 199 skipped,
+142 cases**, with 56 core/10 React/54 compiler/15 Maven package tests passing.
+This integrates the class-policy, sink, act, bootstrap, resume, resource-header
+and import-map slices. All **62/6328** registered interaction pairs pass; **6266**
+remain without complete evidence. The integrated candidate is local: pending
+mutation and per-slice publication gates keep the broader work **🟡 partial**.
+The measurements below describe earlier slices, not additional passing tests.
+
 Responsive image preload options (R-31-01) pass the integrated bench over
 merged lifecycle authoring `338872c`: **903 checks, 169 skipped, 134 cases**,
 plus 15 reporter checks. Package checks pass 47 core / two React option /
@@ -31,7 +39,7 @@ remains available; the expanded record shape is documented. PR #59 merged as
 passed on `4af20f2`. No new pair evidence or cross-browser qualification is
 claimed. The active interaction count remains 54 / 6,328.
 
-Latest local qualification, resource-header slice: **🟡 partial**, with package
+Earlier resource-header qualification: **🟡 partial**, with package
 47 core/7 React/52 compiler/15 plugin and **911 full-bench checks, 193 skipped,
 138 cases** passing. Eight explicitly asserted header/resource pairs bring this
 candidate's evidence to **62/6328**, leaving **6266** active pairs open. This run
