@@ -25,6 +25,7 @@ import jx.conformance.cases.CombinedResourceHydration;
 import jx.conformance.cases.ClassRuntime;
 import jx.conformance.cases.ClassKeyed;
 import jx.conformance.cases.ClassContextCase;
+import jx.conformance.cases.ClassDerivedProps;
 import jx.conformance.cases.ClassAuthoring;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
@@ -226,6 +227,7 @@ public final class Main {
             case "class-runtime" -> ClassRuntime.JX;
             case "class-keyed" -> ClassKeyed.JX;
             case "class-context" -> ClassContextCase.JX;
+            case "class-derived-props" -> ClassDerivedProps.JX;
             case "class-authoring" -> ClassAuthoring.JX;
             default -> null;
         };

@@ -23,6 +23,7 @@ final class ReactClasses {
     @JSFunctor interface Render extends JSObject { JSObject render(); }
     @JSFunctor interface Done extends JSObject { void run(); }
     @JSFunctor interface Update extends JSObject { JSObject update(JSObject state, JSObject props); }
+    @JSFunctor interface DerivedState extends JSObject { JSObject derive(JSObject props, JSObject state); }
     @JSFunctor interface Updated extends JSObject { void update(JSObject props, JSObject state); }
     @JSFunctor interface Snapshot extends JSObject { Done capture(JSObject props, JSObject state); }
     @JSFunctor interface ShouldUpdate extends JSObject { boolean update(JSObject props, JSObject state); }
@@ -75,8 +76,11 @@ final class ReactClasses {
     static <P,S,C extends ClassComponent<P,S,?>> JSObject element(View.ClassComponentView<P,S,C> view, String path, String key) {
         ClassComponentType<P,S,C> type = view.component();
         Factory create = (instance, props) -> create(type, instance, props);
+        DerivedState derive = !type.hasDerivedStateFromProps() ? null : (props, state) -> patch(type.stateSchema(),
+                type.deriveStateFromProps(decode(type.propsSchema(), props), decode(type.stateSchema(), state)));
         JSObject constructor = constructor(TYPES, type, create, type.name(), type.pure(),
                 type.contextType() == null ? null : React.context(type.contextType()),
+                derive,
                 type.lifecycle(ClassComponentType.Lifecycle.MOUNT), type.lifecycle(ClassComponentType.Lifecycle.UPDATE),
                 type.lifecycle(ClassComponentType.Lifecycle.SNAPSHOT),
                 type.lifecycle(ClassComponentType.Lifecycle.SHOULD_UPDATE));
@@ -191,7 +195,7 @@ final class ReactClasses {
     private static native JSObject ref(JSObject cache, Object ref, Attach attach);
     @JSBody(params = {"constructor", "props", "key", "path", "ref"}, script = "props.__jxPath = path; if (key !== null) props.key = key; if (ref !== null) props.ref = ref; return React.createElement(constructor, props);", imports = @JSBodyImport(alias = "React", fromModule = "react"))
     private static native JSObject element(JSObject constructor, JSObject props, String key, String path, JSObject ref);
-    @JSBody(params = {"cache", "descriptor", "create", "name", "pure", "context", "mount", "update", "snapshot", "should"}, script = """
+    @JSBody(params = {"cache", "descriptor", "create", "name", "pure", "context", "derive", "mount", "update", "snapshot", "should"}, script = """
         var Type = cache.get(descriptor);
         if (Type) return Type;
         var Base = pure ? React.PureComponent : React.Component;
@@ -205,6 +209,7 @@ final class ReactClasses {
         Type.prototype.constructor = Type;
         Type.displayName = name;
         if (context !== null) Type.contextType = context;
+        if (derive !== null) Type.getDerivedStateFromProps = function(props, state) { return derive(props, state); };
         Type.prototype.render = function() { return this.__jx.render(); };
         if (mount) Type.prototype.componentDidMount = function() { this.__jx.mount(); };
         Type.prototype.componentWillUnmount = function() { this.__jx.unmount(); };
@@ -217,5 +222,5 @@ final class ReactClasses {
         return Type;
         """, imports = @JSBodyImport(alias = "React", fromModule = "react"))
     private static native JSObject constructor(JSObject cache, Object descriptor, Factory create, String name, boolean pure,
-            JSObject context, boolean mount, boolean update, boolean snapshot, boolean should);
+            JSObject context, DerivedState derive, boolean mount, boolean update, boolean snapshot, boolean should);
 }

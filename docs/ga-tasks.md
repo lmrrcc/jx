@@ -28,8 +28,8 @@ That makes 27 complete React tasks. R-27-01 and R-27-02a–02c merged with green
 Verify, establishing 38 executed pair witnesses. The Promise prerequisite also
 merged in [PR #42](https://github.com/lmrrcc/jx/pull/42) with green Verify.
 R-27-03a merged in [PR #43](https://github.com/lmrrcc/jx/pull/43) as `1ba8c1d`,
-with both Verify checks green. The functional-contract candidate over merged
-R-28-03a passes 871 local bench checks
+with both Verify checks green. The derived-props candidate over merged
+functional PR #54 passes 879 local bench checks
 with 54 witnessed pairs among 6,328 active candidates; 6,274 remain without
 complete evidence. The optimistic/store, transition and SSR scoped mutants were killed
 after their unmutated baselines passed. R-27-03b merged as `3e24edb` in
@@ -192,8 +192,8 @@ recorded results; interaction evidence stays 54/5460.
 Both scoped mutants are killed after the unmutated baseline passes:
 `component-null-rejected` by `empty-render`, and `memo-boxed-type-equality` by
 `memo-scalars`; zero survivors or unusable mutations. The scratch evidence is
-`jx-mutation-14936589724776533921`, with source `bab19c3`. Final integration onto
-the subsequent parity slices, push gate and Verify remain open. No interaction-
+`jx-mutation-14936589724776533921`, with source `bab19c3`. Final integration and
+publication completed in PR #54, as recorded below. No interaction-
 pair credit or general R-31 completion is claimed.
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
@@ -203,7 +203,11 @@ tests. The complete bench passes 871 checks with 169 inapplicable cells across
 per side. Both recorded result tables remain unchanged after the rebase; pair
 evidence stays 54/6328. Source is `49c4725`. The two scoped mutants were qualified
 on the identical prior source; no full-catalog mutation result is implied.
-The final push gate and Verify remain pending.
+PR [#54](https://github.com/lmrrcc/jx/pull/54) merged as `adcf22b` after the
+15-step local gate passed in 383 seconds and both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45605539203) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45605222192) passed on
+`c6a6dba`.
 
 R-28-SCALAR prerequisite, 25 November 2026: ✅ merged in
 [PR #46](https://github.com/lmrrcc/jx/pull/46) as `03d9190`. Class-runtime work
@@ -381,11 +385,11 @@ lifecycle parity or preserved class state across hot replacement.
 | R-28-02 | `.jx` class authoring, generated field projections and patches, diagnostics and native editor projections | 🟡 in progress: split into compiler/consumer slice 02a and editor qualification 02b; no completion credit yet |
 | R-28-02a | Direct native class declarations in `.jx`, generated typed schemas and immutable state-patch builder, class tags/refs, mapped diagnostics and compiling/browser consumers | ✅ merged PR #50 at 3e1db97: 34 core, 48 compiler, 15 Maven and 10 LSP tests pass; generated class consumer passes 8/8 projects; integrated bench 833 checks/151 skipped/123 cases and unchanged 54/5460 pairs; snapshot mutant killed after baseline passed; 15-step local gate and both Verify checks passed |
 | R-28-02b | Qualify class-aware Java completion, navigation, rename and inspections in both native IDE adapters, including incomplete editor source | ⬜ planned |
-| R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options; split below | 🟡 in progress: R-28-03a runtime context focused evidence below; derived/error lifecycle and compiler context sugar remain planned |
-| R-28-03a | Native contextType through additive typed factories; constructor/current context, Pure/SCU bypass, defaults/null, retained state and Activity lifecycle | ✅ merged PR53 as 198c0b8: package 37 core/48 compiler/15 Maven tests, integrated bench 855 passed/169 skipped/128 cases, unchanged 54/6328 pairs; captured-context mutant killed after baseline passed; 15-step gate and both Verify checks green on 30a8911; retained peer owns its native instance, no disposal guarantee |
-| R-28-03b | Pure derived-state-from-props with typed partial patches, null updates and native render timing | ⬜ planned |
+| R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options; split below | 🟡 in progress: native context merged in PR53; derived props in review; error lifecycle and compiler declaration sugar remain separate slices |
+| R-28-03a | Native contextType through additive typed factories; constructor/current context, Pure/SCU bypass, defaults/null, retained state and Activity lifecycle | ✅ done: PR [#53](https://github.com/lmrrcc/jx/pull/53), merged `198c0b8`; package 37 core/48 compiler/15 Maven tests; 855 checks/169 skipped/128 cases, unchanged 54/6328 pairs; captured-context mutant killed after baseline passed, zero survived/unusable; local gate 15/15 in 308 s and both Verify checks passed on `30a8911`; native instance retention preserved, no disposal guarantee |
+| R-28-03b | Pure derived-state-from-props with typed partial patches, null updates and native render timing | 🟡 review: integrated package 42 core/48 compiler/15 Maven tests; full bench over PR54 passes 879 checks/169 skipped/131 cases, all 40 class cells pass, unchanged 54/6328 pairs; constructor/setState/SCU/Pure/partial/null/empty behavior tested; dropped-derivation mutant killed after a passing baseline, zero survived/unusable; final gate/Verify pending |
 | R-28-03c | Derived error state plus committed didCatch, checked Java error/component-stack information and recovery | ⬜ planned |
-| R-28-03d | Compiler context declaration sugar, typed third nextContext argument for should-update, and remaining class option qualification | ⬜ planned |
+| R-28-03d | Compiler context/derived-state declaration sugar, typed third nextContext argument for should-update, and remaining class option qualification | ⬜ planned |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |
 
 R-28-03a publication evidence: [PR #53](https://github.com/lmrrcc/jx/pull/53)

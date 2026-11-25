@@ -106,6 +106,7 @@ import { CombinedTransitionCancel } from './cases/combined-transition-cancel.jsx
 import { ClassRuntime } from './cases/class-runtime.jsx';
 import { ClassKeyed } from './cases/class-keyed.jsx';
 import { ClassContextCase } from './cases/class-context.jsx';
+import { ClassDerivedProps } from './cases/class-derived-props.jsx';
 import { ClassAuthoring } from './cases/class-authoring.jsx';
 
 export const cases = {
@@ -124,6 +125,7 @@ export const cases = {
   'class-runtime': ClassRuntime,
   'class-keyed': ClassKeyed,
   'class-context': ClassContextCase,
+  'class-derived-props': ClassDerivedProps,
   'class-authoring': ClassAuthoring,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,

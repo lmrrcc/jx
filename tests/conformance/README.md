@@ -139,9 +139,9 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The integrated class-context run over PR #52 passes 855 checks, with 169 skipped
-cells across 128 case IDs: client 126 reference / 125 JX, hydrate 95 per side,
-static 101 per side and lazy 106 per side. Fifty-four pairs have complete local
+The integrated derived-props run over PR #54 passes 879 checks, with 169 skipped
+cells across 131 case IDs: client 129 reference / 128 JX, hydrate 98 per side,
+static 104 per side and lazy 109 per side. Fifty-four pairs have complete local
 evidence in their declared modes; 6,274 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate
@@ -269,7 +269,28 @@ historical full campaign remains 100. Run mutation campaigns exclusively:
 java tools/MutateBench.java --only class-context-captured --keep
 ```
 
-The final push gate and Verify are pending; the browser evidence is Chrome-only.
+PR #53 merged as `198c0b8` after the 15-step gate and both Verify checks passed
+on `30a8911`; the browser evidence is Chrome-only.
+
+`class-derived-props` adds a real native static getDerivedStateFromProps consumer.
+Its eight integrated projects prove constructor-to-derived initialization, queued
+updates followed by derivation, partial/null/empty patches, SCU-skipped state and
+forceUpdate, Pure bailouts, previous-DOM snapshots and retained real DOM nodes.
+Static mode checks initial HTML only. The complete run over `adcf22b` passes
+879 checks, 169 skipped, across 131 cases, including all 40 class cells. Recorded
+case evidence adds only `class-derived-props`; interaction evidence stays 54/6328.
+The catalog has 124 mutants, while the historical full campaign remains 100.
+The scoped dropped-derivation mutant was killed after a passing baseline:
+one killed, zero survived and zero unusable; all four JX modes detected it.
+The run at `7c78a3d` used derived runtime/fixture source identical after rebase.
+Scratch evidence is `jx-mutation-2026455379713343602`. Reproduce it exclusively:
+
+```sh
+java tools/MutateBench.java --only class-derived-props-dropped --keep
+```
+
+Final gate and Verify are pending. Compiler-derived lifecycle syntax
+and browser error-boundary options remain separate; no new pair credit is claimed.
 
 Static HTML equality does not execute interactive assertion blocks, so it does
 not credit those witnesses. Hydration-owned and Node-only scenarios can carry

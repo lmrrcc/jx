@@ -213,11 +213,65 @@ hydrate and lazy modes after a passing unmutated scratch baseline: 1 killed,
 0 survived, 0 unusable. Its runtime/consumer/spec source at `6c3aa63` is identical
 to rebased source `d897468`; scratch `jx-mutation-6746600491109191949` is retained.
 The catalog now has 121 entries; the historical full campaign still covers 100.
-These checks are Chrome-only and do not qualify native IDEs. The final push gate
-and Verify remain pending.
+These checks are Chrome-only and do not qualify native IDEs. [PR #53](https://github.com/lmrrcc/jx/pull/53)
+merged as `198c0b8` after its 15-step local gate passed in 308 seconds and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45598507275) and
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45598573765) passed on `30a8911`.
 
 Derived state from props, derived error state and committed error information are
 separate R-28-03b/03c slices. Compiler-generated context declarations and a typed
 third next-context argument for should-update remain R-28-03d; they are not
 provided by these factories. Existing `.jx` class syntax and class hot-reload
 reset behavior remain unchanged.
+
+## R-28-03b derived state from props — 25 November 2026
+
+`descriptor.withDerivedStateFromProps((nextProps, pendingState) -> patch)` returns
+a new immutable descriptor. Declare its result once, as for any component type:
+the new descriptor has its own native React type identity. The original remains
+unchanged. Existing factory, context, Pure and lifecycle settings are preserved;
+applying the method again replaces the derivation in the returned descriptor.
+
+The callback is static component behavior: it has no peer instance, must remain
+pure and must not call hooks, schedule updates or perform effects. React invokes
+the actual native `Type.getDerivedStateFromProps` after construction and when it
+processes subsequent updates. Queued state updaters run before derivation, and
+native should-update/Pure policy runs afterward. React can repeat or discard
+these calculations. This bridge does not emulate that ordering in Java.
+
+The callback consumes checked props and state values and returns a `StatePatch`
+owned by the descriptor's state schema. A null result preserves pending state;
+an empty patch remains an empty object merge. Omitted fields survive, while a
+present field declared nullable can explicitly become null. A foreign-schema
+patch fails explicitly. Callback failures propagate unchanged through the Java
+dispatcher and through the native callback; no catch produces a successful value.
+The public contract requires non-null initial state, matching the existing class
+slice. It does not yet add nullable initial state or compiler-generated derived
+lifecycle declarations.
+
+The [Java consumer](../../tests/conformance/src/main/java/jx/conformance/cases/ClassDerivedProps.java)
+and native React reference test constructor state followed by derived initial
+state, queued local updates, prop-triggered partial resets, explicit null fields,
+derivation after local updates, false SCU with updated current state, forceUpdate,
+and Pure bailouts for null and empty derivation patches. Real DOM handles survive
+these updates, and commit snapshots observe the previous DOM. No exact count is
+assumed for repeated render-phase invocations under Strict Mode.
+
+Integrated over functional merge `adcf22b`, package verification passes 42 core,
+48 compiler and 15 Maven-plugin tests. The complete bench passes **879 checks,
+169 skipped, across 131 cases**: client 129 React / 128 JX, hydrate 98 per side,
+static 104 and lazy 109. The new case and four prior class cases pass all eight
+projects each. Client, hydration and lazy execute interactions; static compares
+initial HTML only. JVM contracts also check schema rejection and unchanged
+callback failure identity. Browser error-boundary qualification for derivation
+failures remains part of R-28-03c.
+
+Recorded case evidence adds only `class-derived-props`; all 54 existing pair
+witnesses remain green among 6,328 active candidates, with no new pair credit.
+This is Chrome-only evidence. The scoped `class-derived-props-dropped` campaign
+passed its unmutated baseline, then killed the mutation in all four JX projects:
+one killed, zero survived and zero unusable. It ran at `7c78a3d`; the derived
+runtime and fixture source is byte-identical after integration onto PR #54.
+Scratch evidence is `jx-mutation-2026455379713343602`. The catalog now has 124
+entries, including the two functional-contract mutants, while the historical
+full campaign still covers 100. Final push gate and Verify remain pending.
