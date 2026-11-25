@@ -527,11 +527,15 @@ bypass the policy. Actual DOM handles remain stable, and the unused legacy
 override is never invoked. Real-core javac consumers prove either overload form
 and their coexistence, source-mapped editing and invalid signature diagnostics.
 
-`CheckBaseline` and `git diff --check` pass. The wrong-context and
-omitted-authored-policy mutants are registered but unrun. Static projects compare
-initial HTML only; this is focused Chrome evidence, not a full integrated bench,
-gate or Verify result. No new feature-pair or aggregate result-table credit is
-claimed.
+Integration on the final lifecycle-authoring head `0011c1d` passes 51 core,
+53 compiler, 15 Maven-plugin and 10 LSP tests. The complete bench passes
+**903 checks, 169 skipped, across 134 cases**: client 132 React / 131 JX,
+hydrate 101, static 107 and lazy 112 per side. All 64 class cells pass; the
+recorded table adds `class-next-context` and pair evidence remains 54/6328.
+Runtime/compiler consumers and the shared spec are unchanged from the focused
+proof. `CheckBaseline` and `git diff --check` pass. The wrong-context and
+omitted-authored-policy mutants remain unrun. Static projects compare initial
+HTML only. Final gate, Verify and native IDE qualification remain pending.
 
 Remaining options are explicit, not accepted scope reductions: custom policies
 on PureComponent are currently rejected, although React can call such a method

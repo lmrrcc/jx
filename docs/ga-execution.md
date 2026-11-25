@@ -191,6 +191,14 @@ from that qualified source. This closes a bounded option gap without adding pair
 credit (54 / 6,328 unchanged). The local push gate, Verify and publication remain
 pending; no cross-browser or full parity qualification is implied.
 
+R-28-03e adds typed pending context to explicit and authored class update
+policies. Integration over `0011c1d` passes 51 core, 53 compiler, 15 Maven and
+10 LSP tests, plus **903 bench checks, 169 skipped, across 134 cases**:
+132 reference / 131 JX client, 101 hydrate, 107 static and 112 lazy per side.
+All 64 class cells pass; pair evidence stays 54/6328. Its two mutants remain
+unrun, and final gate/Verify are pending. The catalog contains 130 entries;
+the historical full campaign remains 100.
+
 R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
 using actual Flight and separate server/client Java programs. Seven Node and four
 Chrome checks passed, including suspension, rejection, abort and server-code

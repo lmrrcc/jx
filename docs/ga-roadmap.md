@@ -68,6 +68,12 @@ byte-identical source in the scoped candidate campaign. PR #58 merged as `338872
 after the 15-step gate passed in 352 seconds and both Verify checks passed on `0011c1d`.
 This does not qualify the native IDE distributions or add pair witnesses.
 
+Typed next-context policies (R-28-03e), including the generated `.jx` overload,
+pass **903 integrated checks, 169 skipped, 134 cases** on authoring head
+`0011c1d`. Package tests pass 51 core / 53 compiler / 15 Maven / 10 LSP checks;
+all 64 class cells pass. Pair evidence remains 54/6328. Its two scoped mutants,
+final gate and Verify remain pending.
+
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |

@@ -246,7 +246,11 @@ Verify checks passed on `0011c1d`.
 `class-next-context` compares a native React three-argument should-update method
 with both an explicit Java descriptor policy and a generated `.jx` overload.
 The runtime consumer passed eight projects before compiler implementation; the
-final 64-project class regression also passes. Both Java forms preserve current
+final 64-project class regression also passes. Integration over `0011c1d` passes
+51 core, 53 compiler, 15 Maven and 10 LSP tests; the complete bench passes
+903 checks/169 skipped/134 cases (132/131 client, 101 hydrate, 107 static and
+112 lazy per side). All 64 class cells pass; pair evidence stays 54/6328.
+Both Java forms preserve current
 values while receiving pending props/state/context, including provider identity
 and null, with no eager state change. Provider updates can commit despite false;
 initial rendering and forceUpdate bypass the policy. The authored three-argument
