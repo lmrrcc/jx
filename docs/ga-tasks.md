@@ -320,9 +320,22 @@ Resolved the same day: `Hooks.useFormState` and `Hooks.useFormStateAsync` are
 deprecated aliases of the action-state hooks, with the differential case
 `form-state`; the feature row is `equivalent`.
 Other rows marked supported have recorded limits: `useActionState` lacks permalink,
-`FormStatus` lacks action, ViewTransition lacks callbacks, resource preloads lack
+ViewTransition lacks callbacks, resource preloads lack
 image source-set/sizes, and external stores lack server snapshots (R-21). Include
 these in R-31 acceptance; export-name coverage alone is insufficient.
+
+R-31-FORM-STATUS, 25 November 2026: 🟨 implemented locally. `FormStatus.action()`
+preserves the submitted Java function, a button override or the action-state
+dispatcher; a native React function returns a stable Java handle that can be passed
+back unchanged. `actionUrl()` preserves the URL alternative observed in the pinned
+runtime during an `onSubmit` transition. The expanded existing `form-status` case
+passes all eight React/JX projects, including repeated submissions after a parent
+render, native React interoperability/replay, no parent form and the URL path with
+no navigation or automatic reset. The package and structural checks pass. Two
+targeted mutants are registered but not yet run; integrated full bench, push gate
+and Verify remain pending. This adds no case ID or feature-pair claim. The original
+three-argument constructor remains available; record patterns/equality now include
+the two new action alternatives, as documented in [the language guide](language.md).
 
 R-01 result, 21 November 2026: all four cases passed on JX without a defect; the
 rows are now `supported` (three) and `equivalent` (dotted names).

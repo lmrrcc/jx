@@ -130,7 +130,7 @@ final class ReactHooks implements HookRuntime {
             return async ? AsyncBridge.thenable((Promise<?>) java.util.Objects.requireNonNull(next, "The action returned null")) : next;
         }, initial);
         JSObject dispatch = setter(triple);
-        FormAction formAction = memoRaw(() -> new Forms.NativeAction(dispatch), Dependencies.none());
+        FormAction formAction = memoRaw(() -> Forms.action(dispatch), Dependencies.none());
         return new ActionState<>(Interop.value(value(triple)), formAction, third(triple));
     }
     @Override public <T> State<T> optimistic(T value) {
@@ -151,7 +151,8 @@ final class ReactHooks implements HookRuntime {
         HotReload.slot("form-status");
         JSObject status = formStatusNative();
         JSObject data = statusData(status);
-        return new FormStatus(statusPending(status), data == null ? null : new Forms.BrowserFormData(data), statusMethod(status));
+        return new FormStatus(statusPending(status), data == null ? null : new Forms.BrowserFormData(data),
+                statusMethod(status), Forms.action(statusAction(status)), statusActionUrl(status));
     }
     @JSBody(params = {"action", "initial"}, script = "return React.useActionState(function(previous, data) { return action(previous, data); }, initial);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject actionStateNative(StateAction action, Object initial);
     @JSBody(params = "triple", script = "return !!triple[2];") private static native boolean third(JSObject triple);
@@ -161,6 +162,8 @@ final class ReactHooks implements HookRuntime {
     @JSBody(params = "status", script = "return !!status.pending;") private static native boolean statusPending(JSObject status);
     @JSBody(params = "status", script = "return status.data ? status.data : null;") private static native JSObject statusData(JSObject status);
     @JSBody(params = "status", script = "return status.pending && status.method ? String(status.method) : null;") private static native String statusMethod(JSObject status);
+    @JSBody(params = "status", script = "return typeof status.action === 'function' ? status.action : null;") private static native JSObject statusAction(JSObject status);
+    @JSBody(params = "status", script = "return typeof status.action === 'string' ? status.action : null;") private static native String statusActionUrl(JSObject status);
     @JSFunctor interface PromiseAction extends JSObject { JSObject run(); }
     @JSBody(params = {"start", "action"}, script = "start(function() { return action(); });") private static native void startPromiseNative(JSObject start, PromiseAction action);
     @Override public <T> T use(Promise<T> promise) { return Interop.value(useNative(AsyncBridge.thenable(promise))); }

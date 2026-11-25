@@ -1,15 +1,47 @@
 package jx.conformance.cases;
 
 import jx.Component;
+import jx.Dependencies;
+import jx.FormAction;
 import jx.FormStatus;
 import jx.Hooks;
+import jx.Ref;
 import jx.View;
+import org.teavm.jso.JSBody;
+import org.teavm.jso.JSBodyImport;
+import org.teavm.jso.JSObject;
 
-/** The submit button of the form-status case; it reads the status of the enclosing form. */
+/** Native probe uses React's public hook to verify the bridge preserves function identity. */
 @Component
 public final class FormSubmit {
-    public static View render() {
+    public record Props(FormAction primary, FormAction alternate) {}
+    private record Seen(FormAction action, JSObject nativeAction) {}
+
+    public static View render(Props props) {
         FormStatus status = Hooks.useFormStatus();
-        return <button type="submit" disabled={status.pending()}>{status.pending() ? "Sending" : "Send"}</button>;
+        JSObject nativeAction = nativeAction();
+        Ref<Seen> observed = Hooks.useRef(null);
+        Seen previous = observed.current();
+        boolean stable = !status.pending() || previous == null || previous.action() != status.action()
+                || same(previous.nativeAction(), nativeAction);
+        Hooks.useEffect(() -> {
+            if (status.pending()) observed.set(new Seen(status.action(), nativeAction));
+            return null;
+        }, Dependencies.of(status.pending(), status.action()));
+        String identity = status.actionUrl() != null ? "url:" + status.actionUrl() : status.action() == null ? "none" : status.action() == props.primary()
+                ? "primary" : status.action() == props.alternate() ? "alternate" : "unknown";
+        String details = status.pending()
+                ? status.method() + ":" + status.data().get("payload") : "idle";
+        return (
+            <section>
+                <button type="submit" disabled={status.pending()}>{status.pending() ? "Sending" : "Send"}</button>
+                <button type="submit" formAction={props.alternate()} disabled={status.pending()}>Alternate</button>
+                <p data-testid="form-action-status">{identity + ":" + details + ":" + stable}</p>
+            </section>
+        );
     }
+    @JSBody(script = "return ReactDOM.useFormStatus().action;", imports = @JSBodyImport(alias = "ReactDOM", fromModule = "react-dom"))
+    private static native JSObject nativeAction();
+    @JSBody(params = {"first", "second"}, script = "return first === second;")
+    private static native boolean same(JSObject first, JSObject second);
 }

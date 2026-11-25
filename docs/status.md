@@ -221,8 +221,11 @@ need their own measurements.
    track implemented client APIs and their limits. Root options, actual lazy code
    splitting, JX server/static rendering, hydration, resume and the RSC protocol
    remain open. API names marked supported do not imply all options or modes:
-   external-store server snapshots, action permalinks, `FormStatus.action`,
+   external-store server snapshots, action permalinks,
    ViewTransition callbacks and image preload source-set options are not exposed.
+   `FormStatus.action` and the observed URL alternative now have a typed adapter
+   and focused differential checks; integrated qualification is tracked as
+   R-31-FORM-STATUS in [the task list](ga-tasks.md).
 5. The demo is one local workspace, bound to loopback with no login or sessions.
    Its transactional capacity limit is 500 tasks, so successful creates remain
    visible after reload. A hosted multi-user product needs its own

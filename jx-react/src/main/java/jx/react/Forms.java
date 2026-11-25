@@ -11,6 +11,8 @@ import org.teavm.jso.JSObject;
 
 /** Form actions and form data at the React boundary. */
 final class Forms {
+    private static final JSObject FUNCTIONS = weakMap();
+    private static final JSObject ACTIONS = weakMap();
     private Forms() {}
 
     @JSFunctor interface Submit extends JSObject { JSObject submit(JSObject data); }
@@ -39,13 +41,39 @@ final class Forms {
     /** The JavaScript value for an {@code action} or {@code formAction} property. */
     static JSObject function(FormAction action) {
         if (action instanceof NativeAction nativeAction) return nativeAction.function();
-        return function(data -> {
+        JSObject existing = lookupFunction(FUNCTIONS, action);
+        if (existing != null) return existing;
+        JSObject result = function(data -> {
             FormData fields = new BrowserFormData(data);
             if (action instanceof FormAction.OfPromise async) return AsyncBridge.thenable(async.start(fields));
             action.run(fields);
             return null;
         });
+        remember(FUNCTIONS, ACTIONS, action, result);
+        return result;
     }
+
+    /** One Java handle per native action. These weak associations belong to one
+     * TeaVM generation and store functions, not submission payloads. A retained
+     * application function still owns whatever data its closure captures.
+     */
+    static FormAction action(JSObject function) {
+        if (function == null) return null;
+        Object existing = lookupAction(ACTIONS, function);
+        if (existing instanceof FormAction action) return action;
+        if (existing != null) throw new IllegalStateException("Invalid form action mapping");
+        FormAction action = new NativeAction(function);
+        remember(FUNCTIONS, ACTIONS, action, function);
+        return action;
+    }
+
+    @JSBody(script = "return new WeakMap();") private static native JSObject weakMap();
+    @JSBody(params = {"functions", "action"}, script = "return functions.get(action) || null;")
+    private static native JSObject lookupFunction(JSObject functions, Object action);
+    @JSBody(params = {"actions", "nativeFunction"}, script = "return actions.get(nativeFunction) || null;")
+    private static native Object lookupAction(JSObject actions, JSObject function);
+    @JSBody(params = {"functions", "actions", "action", "nativeFunction"}, script = "functions.set(action, nativeFunction); actions.set(nativeFunction, action);")
+    private static native void remember(JSObject functions, JSObject actions, Object action, JSObject function);
 
     @JSBody(params = "submit", script = "return function(data) { var result = submit(data); return result === null ? undefined : result; };") private static native JSObject function(Submit submit);
     @JSBody(params = {"action", "data"}, script = "action(data === null ? undefined : data);") private static native void call(JSObject action, JSObject data);

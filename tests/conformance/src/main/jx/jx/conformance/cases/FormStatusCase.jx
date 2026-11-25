@@ -1,25 +1,69 @@
 package jx.conformance.cases;
 
-import static jx.Async.await;
-
-import jx.Async;
+import jx.ActionState;
 import jx.Component;
+import jx.Dependencies;
 import jx.FormAction;
+import jx.FormStatus;
+import jx.Hooks;
 import jx.Promise;
+import jx.State;
 import jx.View;
+import jx.Views;
+import jx.conformance.NativeFormStatus;
+import jx.react.React;
+import org.teavm.jso.JSObject;
 
-/** Case form-status: a child of the form sees the pending submission. */
+/** A committed form owns a controlled pending action; status exposes its actual identity. */
 @Component
 public final class FormStatusCase {
-    private static Promise.Resolver<Void> release;
+    private static final class Pending {
+        private Promise.Resolver<Void> resolver;
+        Promise<Void> submit() {
+            if (resolver != null) throw new IllegalStateException("Submission already pending");
+            return Promise.create(created -> resolver = created);
+        }
+        void release() {
+            Promise.Resolver<Void> current = resolver;
+            resolver = null;
+            if (current != null) current.resolve(null);
+        }
+    }
 
     public static View render() {
+        Pending pending = Hooks.useMemo(Pending::new, Dependencies.none());
+        Hooks.useEffect(() -> pending::release, Dependencies.none());
+        FormAction primary = Hooks.useMemo(() -> FormAction.async(data -> pending.submit()), Dependencies.none());
+        FormAction alternate = Hooks.useMemo(() -> FormAction.async(data -> pending.submit()), Dependencies.none());
+        ActionState<Integer> action = Hooks.useActionStateAsync(
+                (previous, data) -> pending.submit().map(ignored -> previous + 1), 0);
+        State<Boolean> dispatcher = Hooks.useState(false);
+        State<Boolean> urlAction = Hooks.useState(false);
+        State<Boolean> nativeMode = Hooks.useState(false);
+        JSObject nativeProps = Hooks.useMemo(() -> NativeFormStatus.props(pending::submit), Dependencies.none());
+        State<Integer> pulse = Hooks.useState(0);
+        FormStatus outside = Hooks.useFormStatus();
+        FormAction selected = dispatcher.value() ? action.action() : primary;
         return (
             <main>
-                <form action={FormAction.async(data -> Async.run(() -> { await(Promise.<Void>create(resolver -> release = resolver)); }))}>
-                    <FormSubmit />
-                </form>
-                <button onClick={event -> release.resolve(null)}>Release</button>
+                {nativeMode.value() ? Views.component(NativeFormStatus.TYPE, nativeProps) : urlAction.value() ? <form action="/submit" onSubmit={event -> {
+                    event.preventDefault();
+                    React.startTransitionAsync(pending::submit);
+                }}>
+                    <input aria-label="Payload" name="payload" defaultValue="sample" />
+                    <FormSubmit primary={selected} alternate={alternate} />
+                </form> : <form action={selected}>
+                    <input aria-label="Payload" name="payload" defaultValue="sample" />
+                    <FormSubmit primary={selected} alternate={alternate} />
+                </form>}
+                <button onClick={event -> pending.release()}>Release</button>
+                <button onClick={event -> pulse.update(value -> value + 1)}>Pulse</button>
+                <button onClick={event -> dispatcher.set(true)}>Use dispatcher</button>
+                <button onClick={event -> urlAction.set(true)}>Use URL action</button>
+                <button onClick={event -> nativeMode.set(true)}>Use native form</button>
+                <p data-testid="form-pulse">{pulse.value()}</p>
+                <p data-testid="form-result">{action.state()}</p>
+                <p data-testid="form-outside">{outside.action() == null && !outside.pending() ? "outside idle" : "invalid"}</p>
             </main>
         );
     }
