@@ -117,15 +117,16 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The complete R-27-03b local run passes 795 checks, with 133 skipped
-cells across 116 case IDs: client 114 reference / 113 JX, hydrate 89 per side,
-static 95 per side and lazy 100 per side. Forty-five pairs have complete local evidence
-in their declared modes; 5,311 of the
+The complete R-27-03c local run passes 803 checks, with 133 skipped
+cells across 117 case IDs: client 115 reference / 114 JX, hydrate 90 per side,
+static 96 per side and lazy 101 per side. Forty-eight pairs have complete local evidence
+in their declared modes; 5,308 of the
 5,356 current candidates remain open. The eventual universe includes 118 features
 and 6,903 candidate pairs. **R-27 remains partial.** See the
 [interaction evidence record](../../docs/ga-react-interactions.md) for the two
 initial combined scenarios, children-composition regressions, seven ref pairs,
-six portal pairs, four action pairs, three optimistic/store pairs and acceptance status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
+six portal pairs, four action pairs, three optimistic/store pairs, three transition
+pairs and acceptance status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
 at `413558b636679dd5926f4d7bf1c987ea707ed95c`, after its 755-check bench and green
 Verify. R-27-02b merged in [PR #40](https://github.com/lmrrcc/jx/pull/40) at
 `15c0c6eee36f506910e854c568547ebc6d3758ea`, with green
@@ -135,7 +136,8 @@ R-27-02c's scoped mutant was killed; [PR #41](https://github.com/lmrrcc/jx/pull/
 merged as `a0f5460` with green Verify. R-27-03a's scoped mutant was killed after
 its unmutated baseline passed; [PR #43](https://github.com/lmrrcc/jx/pull/43)
 merged as `1ba8c1d` with green Verify. R-27-03b's scoped mutant was killed after
-its unmutated baseline passed; this slice's Verify is pending. Browser evidence is Chrome-only and
+its unmutated baseline passed; its Verify is pending. R-27-03c's scoped mutation
+run is in progress and its Verify is pending. Browser evidence is Chrome-only and
 does not establish additional human or cross-browser qualification.
 
 The ref scenarios use actual Playwright element handles to compare DOM identity,
@@ -153,8 +155,8 @@ existing error-boundary equivalent. It checks captured submission payloads,
 sequential previous-state composition, pending status and reset, rejection that
 cancels successors, retry while pending and unmount/remount with a fresh owner.
 The cancellation behavior is fixture-local, not the G0 API; class components
-remain R-28. R-27-03a is merged; R-27-03b optimistic/store is in review and
-R-27-03c transition remains planned in this baseline.
+remain R-28. R-27-03a is merged; R-27-03b optimistic/store and R-27-03c transition
+are in review in this baseline.
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
 combine optimistic state with external-store snapshots, transitions and Java async
@@ -165,6 +167,17 @@ the fixture's gates and releases its actual request and subscription; a fresh pa
 starts independently. Explicit fixture disposal does not qualify automatic
 framework cancellation or complete the G0 API. Static mode compares initial HTML
 without executing these interaction assertions.
+
+The transition scenario also passes all eight focused checks. Its three witnesses
+cover urgent controlled input, ref-owned operations and async effect disposal.
+Replaced and canceled local consumers settle while their transports remain
+pending; unmount/remount prevents old work from updating a fresh instance.
+An ordered race successfully settles the old consumer, replaces its owner before
+its continuation, and verifies the visible result after the old transition ends.
+The replacement joins a separate transition only afterward, preventing action
+entanglement from hiding an incorrectly published result. This is fixture-local
+ownership, not a framework cancellation API. The existing async/transition pair
+is not counted again.
 
 The separate R-27-03-PROMISE prerequisite merged in
 [PR #42](https://github.com/lmrrcc/jx/pull/42) as `f2b64cb`. A throwing
@@ -254,8 +267,16 @@ Repeat it exclusively:
 java tools/MutateBench.java --only optimistic-duplicate-overlay
 ```
 
-The current catalog has **109 entries**; the historical full result still covers 100. These
-scoped campaigns do not establish a fresh full 109-mutant result.
+R-27-03c adds `transition-owner-guard-lost`, which removes the owner check before
+publication while retaining the canceled-outcome check. Its scoped run is in
+progress; no killed result is claimed yet. Repeat it exclusively:
+
+```sh
+java tools/MutateBench.java --only transition-owner-guard-lost
+```
+
+The current catalog has **110 entries**; the historical full result still covers 100. These
+scoped campaigns do not establish a fresh full 110-mutant result.
 
 ## Feature list
 
