@@ -30,8 +30,10 @@ R-27-03b merged as `3e24edb1b9ce74575b4ab4bb5ac873147d8b773b` in
 [PR #44](https://github.com/lmrrcc/jx/pull/44), with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45548420721) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45548370606).
-R-27-03c also passes its focused and complete local bench; its scoped mutant was
-killed after the shared scratch baseline passed. Its Verify is pending.
+R-27-03c merged as `812a27a4af3c684c1ca94400b958c909f806fe1f` in
+[PR #45](https://github.com/lmrrcc/jx/pull/45), with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45551387801) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45551292980).
 R-27-04 has complete local bench evidence for four server/resource pairs and a
 fatal-shell readiness correction. Its three scoped mutants were killed; Verify is pending.
 No additional human or cross-browser
@@ -180,8 +182,9 @@ This result comes from the shared exclusive transition/SSR run at `abfb24a`, in
 scratch `jx-mutation-1181316345297598843`; its transition implementation and spec
 are identical to this slice's rebased `d89e23f`. The shared run's 112-entry catalog
 includes later SSR cases; this slice's catalog has **110 entries**. Neither count
-is a new full campaign, and the historical full result remains 100. Verify is
-pending. To repeat the transition check alone, exclusively:
+is a new full campaign, and the historical full result remains 100. The full local
+gate and both Verify checks passed before PR #45 merged. To repeat the transition
+check alone, exclusively:
 
 ```sh
 java tools/MutateBench.java --only transition-owner-guard-lost
@@ -592,8 +595,8 @@ fresh full 104-mutant campaign.
 R-27-02 extends identity/composition/DOM interactions. R-27-03a merged with evidence
 for form actions and recovery. R-27-03b (optimistic updates over external-store
 snapshots) also merged with bench, mutation and green Verify evidence.
-R-27-03c (transition interactions) has local bench evidence and a killed scoped
-mutant, and remains in review pending Verify.
+R-27-03c (transition interactions) merged with bench evidence, a killed scoped
+mutant and both Verify checks green.
 Staged fixtures are preparation, not completed evidence.
 R-27-04 has local evidence for early streaming, request-context isolation,
 resource deduplication and retained hydration nodes; fatal shell errors reject both

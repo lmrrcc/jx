@@ -154,14 +154,17 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | ⬜ planned |
 | R-31 | M10 | Parity gate: zero `unsupported`, zero `untested`, only approved exclusions, mutation survivors zero, every case green in every applicable mode; all option-level limits implemented or explicitly accepted | closes the track | ⬜ planned |
 
-R-28-SCALAR prerequisite, 25 November 2026: 🟡 in review. Class-runtime work
+R-28-SCALAR prerequisite, 25 November 2026: ✅ merged in
+[PR #46](https://github.com/lmrrcc/jx/pull/46) as `03d9190`. Class-runtime work
 exposed an existing numeric bridge defect: TeaVM's Java-object conversion can
 merge signed zeros before React compares them. The isolated repair preserves the
 native scalar path and native dependency arrays. The initial three browser
 regressions failed before the repair and passed afterward. This standalone
 prerequisite also passes 36 runtime-package JVM tests and all 16 Chrome runtime
-checks, including strengthened commit/effect assertions; the local push gate and
-Verify remain pending. See the
+checks, including strengthened commit/effect assertions. The full 14-step local
+push gate and both Verify checks passed:
+[push CI](https://github.com/lmrrcc/jx/actions/runs/45553740461) and
+[PR CI](https://github.com/lmrrcc/jx/actions/runs/45553791574). See the
 [runtime contract and compiling consumer](runtime.md#signed-zero-boundary-regression).
 It enables no class-component API and adds no feature-pair coverage; R-28 remains
 open.
@@ -248,11 +251,11 @@ No broad area-level exclusion or reduction to feature families closes this task.
 | R-27-02a | Children mapping and flattening preserve keyed identity; explicit fragments stay opaque; single-child validation matches React | ✅ merged PR #39 at 413558b: 755 full bench and 12 runtime checks; six new pairs; three scoped mutants killed; green Verify |
 | R-27-02b | Keyed callback refs and imperative handles: replacement, fresh props, cleanup, Strict Mode and layout ordering | ✅ merged PR #40 at 15c0c6e: 771 full bench passes; seven new pairs in two scenarios; scoped mutant killed; green Verify |
 | R-27-02c | Initially closed portal: context, capture/bubble, propagation, payloads and focus after hydration | ✅ merged PR #41 at a0f5460: 779 full bench and 8 focused checks; six new pairs; scoped mutant killed; green Verify |
-| R-27-03 | Extend async, form action, optimistic, transition and external-store interactions, including controlled failure/recovery; delivery slices below | 🟡 in progress: Promise prerequisite, 03a and 03b merged; 03c under review |
+| R-27-03 | Extend async, form action, optimistic, transition and external-store interactions, including controlled failure/recovery; delivery slices below | ✅ delivery slices merged: Promise prerequisite and 03a–03c; remaining pair coverage stays in R-27-05 |
 | R-27-03-PROMISE | Prerequisite: isolate Promise observer delivery so a throwing observer cannot leave React's native thenable pending | ✅ merged PR #42 at f2b64cb: red/green JVM and Chrome evidence; nine Promise tests, 36 runtime-package JVM tests and 13 runtime Chrome checks; local gate and Verify passed |
 | R-27-03a | Combined form actions with submission state, reset and controlled failure/recovery | ✅ merged PR #43 at 1ba8c1d: 787 full bench and 8 focused checks; four new pairs; scoped mutant killed; local gate and Verify passed |
 | R-27-03b | Optimistic state over immutable external snapshots: remote rebase, rejected-request rollback and retry without duplicate commits | ✅ merged PR #44 at 3e24edb: 795 full bench and 8 focused checks; three new pairs; explicit close during both awaits releases requests and subscriptions; scoped mutant killed; local gate and Verify passed |
-| R-27-03c | Transition interactions with independent updates and controlled asynchronous completion | 🟡 review: 803 full bench and 8 focused checks pass; three new pairs; completed-result owner race and unmount isolation proved; scoped mutant killed after baseline passed, Verify pending |
+| R-27-03c | Transition interactions with independent updates and controlled asynchronous completion | ✅ merged PR #45 at 812a27a: 803 full bench and 8 focused checks; three new pairs; completed-result owner race and unmount isolation proved; scoped mutant killed after baseline passed; local gate and Verify passed |
 | R-27-04 | Extend SSR, hydration, streaming and resource interactions with mode-specific assertions | 🟡 review: 809 full bench checks pass; four new pairs, real early Writable bytes and retained hydration nodes; fatal-shell readiness regression corrected; three scoped mutants killed after baseline passed; Verify pending |
 | R-27-05 | Add deferred-feature interactions after R-28–R-30; review every remaining pair's applicability and close coverage gaps | ⬜ planned |
 
@@ -371,7 +374,8 @@ async/transition witness earns no duplicate credit. After the shared scratch
 baseline passed, `combined-transition-cancel` killed `transition-owner-guard-lost`
 (1 killed, 0 survived, 0 unusable). The exclusive run used `abfb24a`, with identical
 transition source and spec to rebased `d89e23f`, in scratch
-`jx-mutation-1181316345297598843`. Verify is pending. This slice's catalog has
+`jx-mutation-1181316345297598843`. The full local gate and both Verify checks
+passed before PR #45 merged as `812a27a`. This slice's catalog has
 110 entries; the shared run's 112 includes later SSR cases. Both remain separate
 from the historical 100-mutant full campaign. See the
 [transition evidence record](ga-react-interactions.md#r-27-03c-urgent-updates-operation-ownership-and-completion-races).
@@ -392,7 +396,7 @@ The full local push gate and CI Verify passed. [PR #42](https://github.com/lmrrc
 merged as `f2b64cbb92d2c77476840c77958a0eefdc87af8a`, with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45467245368) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45466911060).
-It adds no feature-pair witness; R-27-03a and 03b are merged, while 03c is in review.
+It adds no feature-pair witness; R-27-03a, 03b and 03c are merged.
 
 R-27-01 local evidence, 24 November 2026: the complete bench reports 731 passed and
 133 skipped cells: client 106 reference / 105 JX, hydrate 81 per side, static 87 per

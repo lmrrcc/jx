@@ -76,7 +76,8 @@ Ownership is fixture-local, not the G0 cancellation API. After the shared scratc
 baseline passed, `combined-transition-cancel` killed `transition-owner-guard-lost`
 (1 killed, 0 survived, 0 unusable). The exclusive run used `abfb24a` in scratch
 `jx-mutation-1181316345297598843`, with identical transition source to rebased
-`d89e23f`. Verify is pending. This slice's catalog has 110 entries; the shared
+`d89e23f`. PR #45 merged as `812a27a` after the full local gate and both Verify
+checks passed. This slice's catalog has 110 entries; the shared
 run's 112 includes later SSR cases. The historical full campaign remains 100.
 The [interaction evidence record](ga-react-interactions.md)
 keeps the 52 locally witnessed pairs separate from the 5,304 remaining active

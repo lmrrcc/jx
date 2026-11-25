@@ -60,7 +60,8 @@ Cancellation is fixture-local and permits transport to finish later; G0 remains
 open. After the shared scratch baseline passed, `combined-transition-cancel`
 killed `transition-owner-guard-lost` (1 killed, 0 survived, 0 unusable). The
 exclusive run used `abfb24a` in scratch `jx-mutation-1181316345297598843`, with
-identical transition source to rebased `d89e23f`. Verify is pending. This slice's
+identical transition source to rebased `d89e23f`. PR #45 merged as `812a27a` after
+the full local gate and both Verify checks passed. This slice's
 catalog has 110 entries; the shared run's 112 includes later SSR cases. The
 historical full campaign remains 100.
 The Promise prerequisite has nine Promise tests, 36 runtime-package JVM tests and
