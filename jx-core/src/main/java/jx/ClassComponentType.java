@@ -74,6 +74,14 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         if (defaultProps != null && defaultProps.schema() != props)
             throw new IllegalArgumentException("Default props belong to another class schema");
         this.defaultProps = defaultProps;
+        if (checkpoint != null) {
+            if (nullableState)
+                throw new IllegalArgumentException("Class checkpoints with nullable aggregate state are not qualified");
+            for (ClassSchema.Field<S,?> field : state.fields()) {
+                if (field.optional())
+                    throw new IllegalArgumentException("Class checkpoints with optional state fields are not qualified: " + field.name());
+            }
+        }
         if (this.lifecycles.contains(Lifecycle.SNAPSHOT) && !this.lifecycles.contains(Lifecycle.UPDATE))
             throw new IllegalArgumentException("Snapshot lifecycle requires update lifecycle");
     }
@@ -148,7 +156,10 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      * callbacks as Java null. A null patch preserves state; an empty patch merges to an
      * object, including from null. This does not offer resetting aggregate state to null.
      * No checkpoint/serialization support or compiler-generated sparse record is implied.
-     * Existing factory, context, lifecycle and derivation settings are preserved. */
+     * Existing factory, context, lifecycle and derivation settings are preserved.
+     * @throws IllegalArgumentException when this descriptor has a state checkpoint;
+     * nullable aggregate checkpoints are not yet qualified
+     */
     public ClassComponentType<P,S,C> withNullableState() {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
                 derivedState, derivedError, contextUpdate, true, checkpoint, defaultProps);
@@ -169,12 +180,17 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      * prevent replacement until this owner is removed. Restored owners must commit in the initial
      * tree; missing or delayed owners fail readiness and cannot restore into a later insertion.
      * This is not complete class hot reload.
-     * Pure classes are not qualified by this first slice and are rejected explicitly.
+     * Pure classes, nullable aggregate state and optional state fields are not qualified
+     * by this first slice and are rejected explicitly when configuring the descriptor.
+     * Required fields whose value type permits null remain valid: they cannot represent
+     * missing or undefined properties. This admission check prevents unqualified state
+     * from being captured; it does not preflight arbitrary candidate startup code.
      *
      * <p>Only the codec's string payload crosses generations. Constructors, ordinary instance
      * fields, refs, effects and pending callbacks restart; resources must not be encoded. A
      * schema/signature change resets this class deliberately. Use the browser rendering thread.
-     * @throws IllegalArgumentException if this descriptor is Pure, or metadata is invalid
+     * @throws IllegalArgumentException if this descriptor is Pure, permits null aggregate
+     * state, declares optional state fields, or the checkpoint metadata is invalid
      */
     public ClassComponentType<P,S,C> withStateCheckpoint(String signature, StateCodec<S> codec) {
         if (pure) throw new IllegalArgumentException("Pure class checkpoints are not qualified");
