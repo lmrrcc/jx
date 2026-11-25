@@ -289,7 +289,8 @@ Scratch evidence is `jx-mutation-2026455379713343602`. Reproduce it exclusively:
 java tools/MutateBench.java --only class-derived-props-dropped --keep
 ```
 
-Final gate and Verify are pending. Compiler-derived lifecycle syntax
+PR #55 merged as `84eb8cd` after the 15-step local gate (377 seconds) and both
+Verify checks passed on `021bc02`. Compiler-derived lifecycle syntax
 and browser error-boundary options remain separate; no new pair credit is claimed.
 
 Static HTML equality does not execute interactive assertion blocks, so it does

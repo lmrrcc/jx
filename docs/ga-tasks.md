@@ -333,11 +333,11 @@ passes all eight React/JX projects, including repeated submissions after a paren
 render, native React interoperability/replay, no parent form and the URL path with
 no navigation or automatic reset. The related actions/queues/reset/optimistic
 regression run also passes **64/64** checks across eight cases and four modes.
-Integrated over derived-state candidate `021bc02` on merged PR54 (`adcf22b`),
+Integrated over derived-state candidate `021bc02`, now merged as `84eb8cd` (PR55),
 the package passes 42 core, 48 compiler and 15 Maven tests. The full bench passes
 879 checks with 169 inapplicable cells across 131 cases: client 129 reference /
 128 JX, hydrate 98, static 104 and lazy 109 on each side. Both recorded result
-tables match; interaction evidence remains 54/6328. Source `e79d0ac` and the
+tables match; interaction evidence remains 54/6328. Source `b02009e` and the
 qualified mutation source `29f2914` are byte-identical for this capability. Both targeted
 mutants are killed by `form-status` after the unmutated baseline passes, with zero
 survivors or unusable mutations: dropped submitted action and recreated native
@@ -410,7 +410,7 @@ lifecycle parity or preserved class state across hot replacement.
 | R-28-02b | Qualify class-aware Java completion, navigation, rename and inspections in both native IDE adapters, including incomplete editor source | ⬜ planned |
 | R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options; split below | 🟡 in progress: native context merged in PR53; derived props in review; error lifecycle and compiler declaration sugar remain separate slices |
 | R-28-03a | Native contextType through additive typed factories; constructor/current context, Pure/SCU bypass, defaults/null, retained state and Activity lifecycle | ✅ done: PR [#53](https://github.com/lmrrcc/jx/pull/53), merged `198c0b8`; package 37 core/48 compiler/15 Maven tests; 855 checks/169 skipped/128 cases, unchanged 54/6328 pairs; captured-context mutant killed after baseline passed, zero survived/unusable; local gate 15/15 in 308 s and both Verify checks passed on `30a8911`; native instance retention preserved, no disposal guarantee |
-| R-28-03b | Pure derived-state-from-props with typed partial patches, null updates and native render timing | 🟡 review: integrated package 42 core/48 compiler/15 Maven tests; full bench over PR54 passes 879 checks/169 skipped/131 cases, all 40 class cells pass, unchanged 54/6328 pairs; constructor/setState/SCU/Pure/partial/null/empty behavior tested; dropped-derivation mutant killed after a passing baseline, zero survived/unusable; final gate/Verify pending |
+| R-28-03b | Pure derived-state-from-props with typed partial patches, null updates and native render timing | ✅ merged PR55 as 84eb8cd: integrated package 42 core/48 compiler/15 Maven tests; full bench over PR54 passes 879 checks/169 skipped/131 cases, all 40 class cells pass, unchanged 54/6328 pairs; constructor/setState/SCU/Pure/partial/null/empty behavior tested; dropped-derivation mutant killed after a passing baseline, zero survived/unusable; 15-step local gate passed in 377 seconds and both Verify checks passed on 021bc02 |
 | R-28-03c | Derived error state plus committed didCatch, checked Java error/component-stack information and recovery | ⬜ planned |
 | R-28-03d | Compiler context/derived-state declaration sugar, typed third nextContext argument for should-update, and remaining class option qualification | ⬜ planned |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |
