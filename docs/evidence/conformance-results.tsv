@@ -113,6 +113,7 @@ server-pipeable-stream	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-readable-stream	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-render-to-static-markup	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-render-to-string	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+server-resource-headers	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-resume	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-resume-nonce	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-resume-pipeable	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a

@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import {modeOf, sideOf, serverOf} from './bench.js';
+import {interaction, modeOf, sideOf, serverOf} from './bench.js';
 
 test('server-resource-headers: bounded request-owned hints and callback failures match native React', async ({}, info) => {
   test.skip(modeOf(info) !== 'client', 'server header callbacks have no browser rendering mode');
@@ -42,6 +42,20 @@ test('server-resource-headers: bounded request-owned hints and callback failures
       expect(second.events).toEqual(first.events);
       expect(second.links).toEqual(first.links.map(link => link?.replaceAll('first.test', 'other.test') ?? null));
       expect(second.html).toBe(first.html.replaceAll('first.test', 'other.test'));
+      if (limit === -1 && hints && !fail) {
+        await interaction('headers-' + kind + '-preconnect', async () => {
+          expect(first.links[0]).toContain('<https://first.test>; rel=preconnect');
+          expect(second.links[0]).toContain('<https://other.test>; rel=preconnect');
+          expect(first.links[0].match(/rel=preconnect/g)).toHaveLength(1);
+          expect(second.links[0].match(/rel=preconnect/g)).toHaveLength(1);
+        });
+        await interaction('headers-' + kind + '-preload', async () => {
+          for (const [result, origin] of [[first, 'first'], [second, 'other']]) {
+            expect(result.links[0]).toContain('https://' + origin + '.test/font.woff2');
+            expect(result.links[0]).toContain('https://' + origin + '.test/hero.png');
+          }
+        });
+      }
     }
   }
 });

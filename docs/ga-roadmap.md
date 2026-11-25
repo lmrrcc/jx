@@ -31,6 +31,15 @@ remains available; the expanded record shape is documented. PR #59 merged as
 passed on `4af20f2`. No new pair evidence or cross-browser qualification is
 claimed. The active interaction count remains 54 / 6,328.
 
+Latest local qualification, resource-header slice: **🟡 partial**, with package
+47 core/7 React/52 compiler/15 plugin and **911 full-bench checks, 193 skipped,
+138 cases** passing. Eight explicitly asserted header/resource pairs bring this
+candidate's evidence to **62/6328**, leaving **6266** active pairs open. This run
+also includes the fresh resume-nonce consumer. Mutation and publication gates
+for headers remain pending. This result precedes the subsequent class-policy
+integration; the combined tree awaits qualification. Earlier slice measurements
+below remain historical.
+
 R-29's runtime utilities add eight implemented feature rows: awaited asynchronous
 `act`, loaded runtime versions, raw development owner stacks and legacy batching.
 The integrated run over class authoring `3e1db97` passes 847 checks with 169 inapplicable
@@ -101,7 +110,7 @@ native editor qualification and class hot checkpoints are still open.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 top-level tasks done through R-26 and R-32; interaction, class, Flight, cache, utility, context, derived-props and direct lifecycle authoring slices merged through PR58 with green gates and Verify. Direct lifecycle authoring passes 895 checks and its compiler mutant was killed after a passing baseline. Pair evidence stays 54 / 6,328, with 6,274 open and 575 deferred-feature pairs. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | Local header/resume slice passes 911 checks across 138 cases and 62/6328 pairs before subsequent class-policy integration; 6266 active and 575 deferred-feature pairs remain. Final header publication gates remain pending. Class runtime slices are merged through PR62. Complete remaining APIs, options, class qualifications, Flight and combined scenarios. |
 | R-28 Java class runtime | 🟡 Partial | Runtime, direct authoring, native context, derived props, error lifecycles, typed next-context policies, nullable direct patches and custom Pure policies merged through PR62 after green gates and both Verify checks. The latest integrated bench passes 927 checks; the scoped policy mutant was killed after a passing baseline. Native editor qualification, remaining class options and class hot checkpoints remain open. |
 | R-31-01 responsive preload options | ✅ Done | PR #59 merged as a805810 after the 15-step gate and both Verify checks; integrated 903-check bench and both targeted mutants pass. Chrome evidence only; the broader R-31 parity gate remains open. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |

@@ -1,8 +1,8 @@
 # Server resource hint headers
 
-R-31 option-level work, 25 November 2026. Implementation and differential consumer
-are prepared; package, focused runtime checks, full bench, mutation and release
-gates have not yet run for this change. This is not a completed parity gate.
+R-31 option-level work, 25 November 2026. Implementation, focused differential
+consumer and full bench pass; mutation and release gates remain pending. This is
+not a completed parity gate.
 
 `ReactServer.StreamOptions.withHeaders` exposes an immutable `ResourceHeaders`
 snapshot of React's Link field. `link()` is null when React supplies no hints.
@@ -48,11 +48,34 @@ The differential case covers four initial renderers, duplicate preconnects,
 font/image hints, empty headers, a one-unit budget, a partial budget, concurrent
 request isolation, original callback failure, and exact React HTML/snapshot/order
 comparison. It is a Node server case: hydrate/static/lazy browser-mode rows do not
-apply. No new interaction-pair credit is claimed, and production HTTP/103 adapter
-qualification remains separate work.
+apply. Eight pair witnesses are registered, each with its own assertions for
+preconnect deduplication or font/image preload emission under one of the four
+renderers. Registration alone earns no credit: the full run must execute them
+successfully on both React and JX. Production HTTP/103 adapter qualification
+remains separate work.
 
 Two curated mutants target dropped Link values and ignored explicit budgets.
 They are registered but have not been executed; no mutation credit is claimed.
+
+## Executed evidence
+
+- Package passes **47 core, 7 React, 52 compiler and 15 Maven-plugin tests**,
+  including the compiling Java consumer. The initial sandbox attempt could not
+  open loopback sockets in six existing plugin tests; the authorized rerun passes
+  all of them. No checks were disabled.
+- Focused differential case: **2 passed, 6 mode cells inapplicable**, 11.0 seconds.
+  All four renderer variants, two complete simultaneous responses, header budgets,
+  empty hints, original Java callback failure and exact native output pass.
+- Full regression: **911 passed, 193 skipped, 138 cases**, 3.3 minutes. Client:
+  136 React /135 JX; hydrate: 101 each; static: 107 each; lazy: 112 each. This also
+  qualifies the separately added `server-resume-nonce` case in the complete run.
+- Eight separately marked renderer/resource witnesses and all 54 prior witnesses
+  pass in the full run: **62/6328**, with 6266 active pairs still without complete
+  evidence. Both result tables were generated from that successful full run.
+- Logs: `/private/tmp/jx-server-resource-headers-build.log` and
+  `/private/tmp/jx-server-resource-headers-focused.log`, and
+  `/private/tmp/jx-server-resource-headers-bench.log`. Package time under
+  concurrent validation is not a performance measurement.
 
 Primary references: React's
 [Web streaming options](https://react.dev/reference/react-dom/server/renderToReadableStream),

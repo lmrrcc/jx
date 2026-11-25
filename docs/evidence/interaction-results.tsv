@@ -17,6 +17,14 @@ children-state	pass	pass	pass	pass	n/a	n/a	pass	pass
 children-values	pass	pass	pass	pass	n/a	n/a	pass	pass
 context-effect	pass	pass	pass	pass	n/a	n/a	pass	pass
 context-state	pass	pass	pass	pass	n/a	n/a	pass	pass
+headers-pipeable-preconnect	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+headers-pipeable-preload	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+headers-prerender-node-preconnect	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+headers-prerender-node-preload	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+headers-prerender-preconnect	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+headers-prerender-preload	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+headers-readable-preconnect	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+headers-readable-preload	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 hydrate-id	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 hydrate-preload-reuse	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 hydrate-store	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
