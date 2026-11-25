@@ -1,6 +1,6 @@
 # Java class components on the React runtime
 
-Date: 24 November 2026. Status: R-28-01 local verification passed; scoped mutation,
+Date: 24 November 2026. Status: R-28-01 local verification and scoped mutation passed;
 push gate and Verify pending. The broader R-28 task remains incomplete.
 
 Java classes may own React component identity through a descriptor separate from
@@ -79,27 +79,33 @@ That focused run did not establish full conformance or pair evidence by itself.
 
 After inheriting the scalar prerequisite and Promise observer repair, the package
 passes 34 core, 41 compiler and 15 Maven-plugin tests. The complete local bench
-passes 811 checks with 133 inapplicable cells across 118 cases: client 116 React /
-115 JX, hydration 91 per side, static HTML 97 per side and lazy route 102 per side.
+passes 825 checks with 151 inapplicable cells across 122 cases after integration
+over SSR merge `7759933`: client 120 React / 119 JX, hydration 92 per side,
+static HTML 98 per side and lazy route 103 per side.
 The additional [keyed class consumer](../../tests/conformance/src/main/java/jx/conformance/cases/ClassKeyed.java)
 proves two already mounted Pure peers retain their real class refs, DOM nodes and
 state through both reorder directions without rendering equal projected props.
 Both class cases pass all eight projects. Two explicit interaction witnesses add
 evidence for PureComponent with keys and instance refs. Activating PureComponent
-increases the current universe to 105 features / 5,460 pairs, of which 47 have
+increases the current universe to 105 features / 5,460 pairs, of which 54 have
 complete local evidence. It does not shrink the eventual 118-feature scope.
-Three targeted mutants are prepared, but their execution, the push gate and
+The unmutated scratch baseline passed, then all three targeted mutants were
+killed: `class-pure-renders` by `class-keyed` and `class-runtime`, and
+`class-snapshot-lost` / `class-ref-detach-lost` by `class-runtime`. The result is
+3 killed, 0 survived, 0 unusable. This scoped run does not replace the historical
+100-entry full campaign; the catalog now contains 115 entries. Push gate and
 Verify remain pending.
 
 The first run exposed an existing signed-zero defect in the general scalar
 bridge. A separate prerequisite reproduces three independent hook/dependency/
-context failures and repairs the native scalar path; that prerequisite must land
-before this slice. Its focused checks do not establish full bridge parity.
+context failures and repairs the native scalar path; that prerequisite landed in
+PR #46 as `03d9190`, before this slice. Its focused checks do not establish full bridge parity.
 
 This slice requires non-null initial props/state and applies one conservative
 reserved-name rule to both schemas, including React's props-only `key`/`ref`
 names. Native class rendering may return null; the existing functional
 `ComponentType.render` null restriction is a separate unresolved contract.
+Direct null patches are rejected; functional updaters returning null are supported.
 The consumers prove keyed remount, an unaffected Pure sibling and keyed reorder.
 Advanced lifecycle options, class context,
 compiler-generated schemas, mixed numeric wrapper types and class checkpoints

@@ -51,6 +51,8 @@ state, including props-only names such as `key` and `ref`.
 `StatePatch<S>` is immutable and belongs to one state schema. An omitted field is
 unchanged; a present nullable field can be set to null. An empty patch is an empty
 object update, while a functional updater returning null requests no update.
+The direct patch overload currently rejects null; that React option remains
+outside this initial slice.
 `setState` queues a patch or a pure function of pending state and next props.
 Optional callbacks run after commit. `forceUpdate` uses React's native operation
 and bypasses `shouldComponentUpdate`. The peer's `props()` and `state()` read the
@@ -78,13 +80,15 @@ Local evidence on 25 November: the package passes 34 core, 41 compiler and 15
 Maven-plugin tests. The earlier `class-runtime` focused run passed all eight
 React/JX projects; interactive assertions ran in client, hydrate and lazy modes,
 while static mode compared initial HTML. The complete bench including
-`ClassKeyed` now passes 811 checks, with 133 skipped across 118 case IDs: client
-116 reference / 115 JX, hydrate 91 per side, static 97 per side and lazy 102 per
+`ClassKeyed`, integrated over SSR merge `7759933`, passes 825 checks, with 151
+skipped across 122 case IDs: client 120 reference / 119 JX, hydrate 92 per side,
+static 98 per side and lazy 103 per
 side. Both class cases pass all eight projects. Their two new declared pair
-witnesses bring this branch's evidence to 47 / 5,460 active pairs; activating
+witnesses bring this branch's evidence to 54 / 5,460 active pairs; activating
 `PureComponent` expands the candidate universe. This count follows this branch's
-feature and case inventory. Scoped mutation, push-gate and Verify acceptance
-remain pending. These Chrome checks do not close
+feature and case inventory. All three scoped mutants were killed after the
+unmutated scratch baseline passed, with zero survivors or unusable mutants.
+Push-gate and Verify acceptance remain pending. These Chrome checks do not close
 R-28: compiler-generated `.jx` class descriptors and editor support, advanced
 lifecycles, class context, the remaining option matrix and class checkpoints are
 not yet qualified.

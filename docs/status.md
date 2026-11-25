@@ -17,15 +17,17 @@ Two compiling consumers prove queue/commit behavior and keyed Pure reordering
 without replacing DOM nodes, class refs or state, or rendering unchanged fields.
 
 The package passes 34 core, 41 compiler and 15 Maven-plugin tests. The complete
-local bench passes **811 checks**, with 133 inapplicable cells across 118 case
-IDs: client 116 React / 115 JX, hydration 91 per side, static HTML 97 per side
-and lazy route 102 per side. Both class cases pass all eight projects. The two
-class witnesses bring this branch to 47 / 5,460 active pairs; 5,413 remain open.
+integrated bench over SSR merge `7759933` passes **825 checks**, with 151
+inapplicable cells across 122 case IDs: client 120 React / 119 JX, hydration 92
+per side, static HTML 98 per side and lazy route 103 per side. Both class cases
+pass all eight projects. The two class witnesses bring this branch to
+54 / 5,460 active pairs; 5,406 remain open.
 The expanded denominator includes the newly active PureComponent feature.
 
 R-28 remains partial: `.jx` class authoring, advanced lifecycle/context options
 and class hot checkpoints are still planned. Class hot replacement resets state.
-Three targeted mutants are prepared but have not run; push gate and Verify are
+All three targeted mutants were killed after the isolated baseline passed,
+with no survivors or unusable mutants; push gate and Verify are
 pending. These results are Chrome evidence, with no new human qualification.
 See [the class decision](decisions/0006-java-class-components.md) and
 [task slices](ga-tasks.md#r-28-implementation-slices).
