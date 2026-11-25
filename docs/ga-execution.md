@@ -214,6 +214,20 @@ Its callback-dropping mutant was killed after a passing baseline. The local
 15-step gate passed in 348 seconds and both Verify checks passed on `1c23a22`.
 Pair evidence remains 54/6328; other class options remain open.
 
+R-28-03g permits custom PureComponent update policies through typed descriptors
+and ordinary `.jx` declarations while retaining the actual native Pure base,
+default shallow comparison and development warning. Integration passes 56 core,
+2 React-option, 54 compiler, 15 Maven and 10 LSP tests; the complete bench passes
+**927 checks, 169 skipped, 137 cases**: client 135 reference / 134 JX, hydrate
+104, static 110 and lazy 115 per side. All 80 class cells pass. Its scoped
+policy-omission mutant was killed after a passing baseline on byte-identical
+capability sources; this is one of seven scoped mutations, not a new full-catalog
+campaign. The local 15-step gate passed in 311 seconds on `035e6ab`;
+[PR #62](https://github.com/lmrrcc/jx/pull/62) merged as `39dd3ce` after both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45676165881) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45675888499) passed.
+The pair register stays 54/6328 and R-28 remains partial.
+
 R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
 using actual Flight and separate server/client Java programs. Seven Node and four
 Chrome checks passed, including suspension, rejection, abort and server-code
