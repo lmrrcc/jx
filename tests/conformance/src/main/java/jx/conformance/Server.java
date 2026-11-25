@@ -30,6 +30,7 @@ final class Server {
 
     static void install() {
         CombinedServerExports.install();
+        SinkCompletionExports.install();
         register("reactVersion", React::version);
         register("domVersion", React::domVersion);
         register("clientVersion", React::clientVersion);
@@ -100,10 +101,10 @@ final class Server {
     /** Pipes the stream into one string, settled when the stream ends. */
     private static Promise<String> collect(ReactServer.PipeableStream stream) {
         StringBuilder html = new StringBuilder();
-        return Promise.create(resolver -> stream.pipe(new ReactServer.HtmlSink() {
+        return stream.pipe(new ReactServer.HtmlSink() {
             @Override public void write(String chunk) { html.append(chunk); }
-            @Override public void end() { resolver.resolve(html.toString()); }
-        }));
+            @Override public void end() {}
+        }).map(ignored -> html.toString());
     }
 
     /** Any client case as a view, for the hydrate mode of the bench. */

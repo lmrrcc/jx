@@ -207,6 +207,24 @@ Both scoped mutants are killed after the unmutated baseline passes:
 publication completed in PR #54, as recorded below. No interaction-
 pair credit or general R-31 completion is claimed.
 
+R-31-SERVER-SINK, 25 November 2026: 🟡 implemented locally. The synchronous
+Java `HtmlSink` overload of `PipeableStream.pipe` now returns a delivery promise.
+Previously a thrown write left the consumer pending: the new differential case
+passed on native React/Node and failed on JX before the fix. Delivery now rejects
+with the original Java failure for first/late writes or `end`, stops subsequent
+callbacks, and is independent of renderer readiness. The case also checks a
+second pipe rejection, abort with successful fallback delivery, UTF-8 across
+multiple chunks, late data, and an unaffected sibling request. Package passes
+40 core, 48 compiler and 15 plugin tests; focused 2/2 Node checks and all 34 SSR
+checks pass (102 browser-mode cells inapplicable). Native Node Writable
+completion/backpressure/disposal remains host-owned. The pre-GA return descriptor
+change requires consumer recompilation; ordinary statement calls remain valid.
+One targeted mutant is registered but unrun. Aggregate bench, push gate and
+Verify are pending; no new feature-pair credit or general stream-option parity
+is claimed. The lifecycle follows the public
+[React stream contract](https://react.dev/reference/react-dom/server/renderToPipeableStream)
+and [Node Writable lifecycle](https://nodejs.org/api/stream.html#class-streamwritable).
+
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven
 tests. The complete bench passes 871 checks with 169 inapplicable cells across

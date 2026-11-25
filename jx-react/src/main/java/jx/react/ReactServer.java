@@ -59,7 +59,12 @@ public final class ReactServer {
         public StreamOptions withError(Consumer<Throwable> callback) { return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, callback); }
     }
 
-    /** Receives streamed HTML in order. {@code end} is called once, after the last chunk. */
+    /** Receives decoded HTML synchronously on the Node event loop. The sink owns any storage it
+     * retains; this adapter does not buffer the document or provide asynchronous backpressure.
+     * Use the native Writable overload for an HTTP response or asynchronous destination.
+     * {@code end} is called once after the last successful write. A thrown write/end failure
+     * rejects the delivery promise, preserving an original Java throwable, and stops callbacks.
+     * End does not run after a failed write. */
     public interface HtmlSink {
         void write(String html);
         void end();
@@ -76,9 +81,14 @@ public final class ReactServer {
          * Rejects when the shell fails, since no output can be produced. */
         Promise<Void> allReady();
         /** Starts sending: what is ready now, then each boundary's content as it arrives. Call it
-         * once, after {@link #shellReady()} or {@link #allReady()}. */
-        void pipe(HtmlSink sink);
-        /** As {@link #pipe(HtmlSink)}, to a Node {@code Writable} such as an HTTP response. */
+         * once, after {@link #shellReady()} or {@link #allReady()}. The non-null result resolves
+         * only after {@link HtmlSink#end()} returns; it rejects on a write/end failure, fatal
+         * renderer destruction or a repeated pipe call. Observe this result to distinguish
+         * delivery from renderer readiness. Aborting can successfully deliver fallback HTML;
+         * successful delivery does not guarantee that every boundary rendered its content. */
+        Promise<Void> pipe(HtmlSink sink);
+        /** Starts sending to a borrowed Node {@code Writable}, such as an HTTP response. The host
+         * owns completion/error/close observation, backpressure and disposal of that Writable. */
         void pipe(JSObject writable);
         /** Stops rendering; boundaries still waiting send their fallback for the browser to finish. */
         void abort();
@@ -130,7 +140,10 @@ public final class ReactServer {
         return new PipeableStream() {
             @Override public Promise<Void> shellReady() { return shell.promise; }
             @Override public Promise<Void> allReady() { return all.promise; }
-            @Override public void pipe(HtmlSink sink) { Objects.requireNonNull(sink); pipeSink(stream, sink::write, sink::end); }
+            @Override public Promise<Void> pipe(HtmlSink sink) {
+                Objects.requireNonNull(sink);
+                return React.promise(pipeSink(stream, sink::write, sink::end)).map(ignored -> null);
+            }
             @Override public void pipe(JSObject writable) { pipeNative(stream, Objects.requireNonNull(writable)); }
             @Override public void abort() { abortNative(stream); }
         };
@@ -190,14 +203,20 @@ public final class ReactServer {
     @JSBody(params = {"element", "state", "settings"}, script = "return ReactDOMServer.resume(element, state, settings);", imports = @JSBodyImport(alias = "ReactDOMServer", fromModule = "react-dom/server"))
     private static native JSObject resumeNative(JSObject element, JSObject state, JSObject settings);
     @JSBody(params = {"stream", "writable"}, script = "stream.pipe(writable);") private static native void pipeNative(JSObject stream, JSObject writable);
-    // React writes to anything shaped like a Node Writable; this one decodes the bytes for a Java sink.
-    @JSBody(params = {"stream", "write", "end"}, script = "var decoder = new TextDecoder();"
-            + " var target = { write: function(chunk) { write(typeof chunk === 'string' ? chunk : decoder.decode(chunk, {stream: true})); return true; },"
-            + " end: function() { var tail = decoder.decode(); if (tail) write(tail); end(); },"
+    // Synchronous destinations never emit drain/error/close themselves. Callback failures are
+    // rejected here and rethrown to React so its renderer also stops the affected request.
+    @JSBody(params = {"stream", "write", "end"}, script = "return new Promise(function(resolve, reject) {"
+            + " var decoder = new TextDecoder(), terminal = false;"
+            + " var fail = function(error) { if (!terminal) { terminal = true; reject(error); } };"
+            + " var target = { write: function(chunk) { if (terminal) return false;"
+            + " try { write(typeof chunk === 'string' ? chunk : decoder.decode(chunk, {stream: true})); return true; }"
+            + " catch (error) { fail(error); throw error; } },"
+            + " end: function() { if (terminal) return; try { var tail = decoder.decode(); if (tail) write(tail);"
+            + " end(); terminal = true; resolve(null); } catch (error) { fail(error); throw error; } },"
             + " on: function() { return target; }, once: function() { return target; }, removeListener: function() { return target; },"
-            + " flush: function() {}, destroy: function() {} };"
-            + " stream.pipe(target);")
-    private static native void pipeSink(JSObject stream, Chunk write, Call end);
+            + " flush: function() {}, destroy: function(error) { fail(error || new Error('HTML stream destroyed before completion')); } };"
+            + " try { stream.pipe(target); } catch (error) { fail(error); } });")
+    private static native JSObject pipeSink(JSObject stream, Chunk write, Call end);
     @JSBody(params = "stream", script = "return stream.allReady;") private static native JSObject allReadyNative(JSObject stream);
     @JSBody(params = "stream", script = "var reader = stream.getReader(); var decoder = new TextDecoder(); var text = '';"
             + " var next = function() { return reader.read().then(function(part) { if (part.done) return text + decoder.decode(); text += decoder.decode(part.value, {stream: true}); return next(); }); };"
