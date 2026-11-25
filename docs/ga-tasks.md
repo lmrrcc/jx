@@ -219,8 +219,11 @@ multiple chunks, late data, and an unaffected sibling request. Package passes
 checks pass (102 browser-mode cells inapplicable). Native Node Writable
 completion/backpressure/disposal remains host-owned. The pre-GA return descriptor
 change requires consumer recompilation; ordinary statement calls remain valid.
-One targeted mutant is registered but unrun. Aggregate bench, push gate and
-Verify are pending; no new feature-pair credit or general stream-option parity
+The sink-failure mutant was killed by this case after a passing baseline, within
+the five-mutant `e63ea76` candidate campaign (5 killed, zero survived/unusable).
+That integrated candidate passes 905 checks /175 skipped across 135 cases; all
+five sink implementation/consumer files match this slice byte for byte. Scratch:
+`jx-mutation-7730846870036546774`. The push gate and Verify remain pending; no new feature-pair credit or general stream-option parity
 is claimed. The lifecycle follows the public
 [React stream contract](https://react.dev/reference/react-dom/server/renderToPipeableStream)
 and [Node Writable lifecycle](https://nodejs.org/api/stream.html#class-streamwritable).
