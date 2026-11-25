@@ -327,6 +327,18 @@ survivors or unusable mutants. This slice's quota is two; publication checks
 remain pending and no new pair credit is claimed. See the
 [import-map contract](evidence/server-import-map.md).
 
+R-31-NATIVE-WRITABLE, 25 November 2026: 🟡 focused qualification of the existing
+borrowed Node destination API. Package passes 56 core/10 React/54 compiler/15
+Maven checks and compiles two additional `.jx` consumers; three differential
+cases pass 6 Node checks, with 18 inapplicable cells. Multiple ready Suspense
+boundaries pause output until drain, asynchronous write/final errors preserve the
+native Error, and a real HTTP client disconnect aborts only its owned render while
+another response completes. The host explicitly observes terminal delivery and
+owns disconnect cancellation; no hard buffering limit is inferred from a
+high-water mark. Full bench, one new mutant and publication gates remain pending.
+No pair credit or production HTTP qualification is added. See the
+[native destination evidence](evidence/server-native-writable.md).
+
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven
 tests. The complete bench passes 871 checks with 169 inapplicable cells across

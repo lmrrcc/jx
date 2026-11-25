@@ -1,0 +1,23 @@
+package jx.conformance.cases;
+
+import java.util.ArrayList;
+import jx.Component;
+import jx.Promise;
+import jx.View;
+import jx.react.React;
+
+/** Several ready boundaries make native backpressure observable between segments. */
+@Component
+public final class NativePressurePage {
+    public record Props(Promise<String> data) {}
+
+    public static View render(Props props) {
+        var boundaries = new ArrayList<View>();
+        for (int index = 0; index < 5; index++) {
+            boundaries.add(new View.Keyed(React.suspense(
+                    <p>{"waiting-pressure-" + index}</p>,
+                    <NativePressureResult index={index} data={props.data()} />), Integer.toString(index)));
+        }
+        return <main>{boundaries}</main>;
+    }
+}

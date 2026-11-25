@@ -187,8 +187,12 @@ public final class ReactServer {
          * delivery from renderer readiness. Aborting can successfully deliver fallback HTML;
          * successful delivery does not guarantee that every boundary rendered its content. */
         Promise<Void> pipe(HtmlSink sink);
-        /** Starts sending to a borrowed Node {@code Writable}, such as an HTTP response. The host
-         * owns completion/error/close observation, backpressure and disposal of that Writable. */
+        /** Starts sending to a borrowed Node {@code Writable}, such as an HTTP response.
+         * React uses its native write/drain protocol; a completed boundary can exceed the
+         * destination's high-water mark, which is a buffering signal rather than a byte cap.
+         * The host owns finish/error/close observation and destination disposal. For an HTTP
+         * disconnect it must explicitly abort request-owned work; renderer readiness alone
+         * does not prove delivery. This overload does not return a completion promise. */
         void pipe(JSObject writable);
         /** Stops rendering; boundaries still waiting send their fallback for the browser to finish. */
         void abort();
