@@ -1,9 +1,9 @@
 # Server import maps
 
-R-31 option-level work, 25 November 2026. Implementation and a differential
-consumer are prepared; compilation, browser checks, full bench, mutations and
-publication gates are pending. No new runtime result or completed parity is
-claimed by this source commit.
+R-31 option-level work, 25 November 2026. Source `876c189` passes the package
+checks (47 core, 10 React, 52 compiler and 15 Maven tests) and the focused Chrome
+comparison (2 passed, 6 inapplicable cells). Full bench, mutations and publication
+gates remain pending; this is not a claim of completed parity.
 
 `ReactServer.StreamOptions.withImportMap` accepts a typed immutable `ImportMap`
 containing imports, scopes and integrity metadata. It preserves null versus
@@ -44,10 +44,10 @@ the pre-GA record shape has expanded and consumers should rebuild. Null
 
 The compiling [Java consumer](../../tests/conformance/src/main/java/jx/conformance/ImportMapExports.java)
 and [differential browser case](../../tests/conformance/specs/server-import-map.spec.js)
-are designed to verify exact React output, ordering before bootstrap modules,
+verify exact React output, ordering before bootstrap modules,
 request isolation, global versus scoped mappings, prefix mappings, special own
 keys, script terminator escaping, blocked imports, nonce propagation and a real
-integrity allow/deny check. No test result is recorded yet. The case runs in its
+integrity allow/deny check. The case runs in its
 own browser document rather than bench-root hydrate/static/lazy modes; no new
 interaction pair is credited merely by using these features together.
 
