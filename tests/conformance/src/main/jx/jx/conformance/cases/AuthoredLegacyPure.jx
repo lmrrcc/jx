@@ -1,0 +1,36 @@
+package jx.conformance.cases;
+
+import jx.*;
+import jx.conformance.Bench;
+
+@Component
+public final class AuthoredLegacyPure extends PureComponent<AuthoredLegacyPure.Props,AuthoredLegacyPure.Model,Void> {
+    public record Props(int revision) {}
+    public record Model(int count) {}
+    public AuthoredLegacyPure(Props props) { super(props, new Model(0)); }
+    private String current() { return props().revision() + "/" + state().count() + "/none"; }
+    private void mounting(String variant, int amount) {
+        Bench.log("pure:mount:" + variant);
+        setState((pending, props) -> statePatch().withCount(pending.count() + amount).build(),
+                () -> Bench.log("pure:mount-callback:" + variant + ":" + state().count()));
+    }
+    @Override protected void componentWillMount() { mounting("old", 1); }
+    @Override protected void UNSAFE_componentWillMount() { mounting("unsafe", 10); }
+    private void receiving(Props next, String variant, int amount) {
+        Bench.log("pure:receive:" + variant + ":" + current() + "->" + next.revision() + "/none");
+        if (next.revision() != props().revision())
+            setState((pending, props) -> statePatch().withCount(pending.count() + amount).build(),
+                    () -> Bench.log("pure:receive-callback:" + variant + ":" + state().count()));
+    }
+    @Override protected void componentWillReceiveProps(Props next) { receiving(next, "old", 100); }
+    @Override protected void UNSAFE_componentWillReceiveProps(Props next) { receiving(next, "unsafe", 1000); }
+    private void updating(Props next, Model pending, String variant) {
+        Bench.log("pure:update:" + variant + ":" + current() + "->" + next.revision() + "/" + pending.count() + "/none");
+    }
+    @Override protected void componentWillUpdate(Props next, Model pending) { updating(next, pending, "old"); }
+    @Override protected void UNSAFE_componentWillUpdate(Props next, Model pending) { updating(next, pending, "unsafe"); }
+    @Override public View render() {
+        Bench.log("pure:render");
+        return <output data-testid="authored-legacy-pure">{props().revision() + "/" + state().count()}</output>;
+    }
+}

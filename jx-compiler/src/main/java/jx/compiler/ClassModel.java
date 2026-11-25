@@ -20,8 +20,9 @@ final class ClassModel {
     private static final Set<String> JAVA_LANG_FIELDS = Set.of("String", "Integer", "Long", "Float", "Double",
             "Boolean", "Byte", "Short", "Character", "Object", "Void");
     private static final Set<String> UNSUPPORTED_LIFECYCLES = Set.of("context", "contextTypes",
-            "childContextTypes", "getChildContext", "componentWillMount", "componentWillReceiveProps",
-            "componentWillUpdate");
+            "childContextTypes", "getChildContext");
+    private static final Set<String> LEGACY_LIFECYCLES = Set.of("componentWillMount", "UNSAFE_componentWillMount",
+            "componentWillReceiveProps", "UNSAFE_componentWillReceiveProps", "componentWillUpdate", "UNSAFE_componentWillUpdate");
 
     private final ParsedSource parsed;
     private final ClassTree owner;
@@ -81,8 +82,10 @@ final class ClassModel {
             String name = memberName(member);
             if (GENERATED.contains(name) || defaultDeclaration && DEFAULTS_GENERATED.contains(name))
                 error("JX110", "'" + name + "' is reserved for generated class component members", member);
-            if (UNSUPPORTED_LIFECYCLES.contains(name) || name.startsWith("UNSAFE_"))
+            if (UNSUPPORTED_LIFECYCLES.contains(name) || name.startsWith("UNSAFE_") && !LEGACY_LIFECYCLES.contains(name))
                 error("JX111", "Native class authoring does not yet support React lifecycle member '" + name + "'", member);
+            if (LEGACY_LIFECYCLES.contains(name) && !(member instanceof MethodTree))
+                error("JX111", "Native lifecycle '" + name + "' must be declared as an instance method", member);
         }
         List<MethodTree> renders = methods("render");
         if (renders.size() != 1 || !instanceMethod(renders.getFirst(), 0, true)
@@ -102,6 +105,7 @@ final class ClassModel {
         List<ComponentMetadata.Prop> stateFields = fields(state, false);
         boolean contextShouldUpdate = contextShouldUpdate(arguments, contextValue);
         Set<ComponentMetadata.Lifecycle> lifecycles = lifecycles(arguments, contextShouldUpdate);
+        Set<ComponentMetadata.Lifecycle> contextLifecycles = legacyLifecycles(arguments, contextValue, lifecycles);
         boolean derivedProps = derivation("getDerivedStateFromProps", arguments.subList(0, 2), arguments.get(1), false);
         boolean derivedError = derivation("getDerivedStateFromError", List.of(), arguments.get(1), true);
         if (diagnostics.size() != before) return null;
@@ -112,7 +116,7 @@ final class ClassModel {
         return new ComponentMetadata(qualified(name), name, packageName, imports, true, properties,
                 parsed.source().path(), declaration, descriptorOffset, ComponentMetadata.Memo.NONE, 0,
                 new ComponentMetadata.ClassSpec(kind, state.getSimpleName().toString(), stateFields, lifecycles,
-                        contextValue == null ? null : spelling(contextValue), derivedProps, derivedError, contextShouldUpdate, defaults));
+                        contextValue == null ? null : spelling(contextValue), derivedProps, derivedError, contextShouldUpdate, defaults, contextLifecycles));
     }
 
     private boolean defaultProps(Tree propsType) {
@@ -215,6 +219,48 @@ final class ClassModel {
         if (result.contains(ComponentMetadata.Lifecycle.SNAPSHOT) && !result.contains(ComponentMetadata.Lifecycle.UPDATE))
             error("JX111", "getSnapshotBeforeUpdate requires componentDidUpdate to consume its snapshot", owner);
         return result;
+    }
+
+    private Set<ComponentMetadata.Lifecycle> legacyLifecycles(List<? extends Tree> arguments, Tree contextValue,
+                                                             Set<ComponentMetadata.Lifecycle> lifecycles) {
+        Set<ComponentMetadata.Lifecycle> contextual = EnumSet.noneOf(ComponentMetadata.Lifecycle.class);
+        lifecycle("componentWillMount", ComponentMetadata.Lifecycle.WILL_MOUNT, List.of(), "void", lifecycles);
+        lifecycle("UNSAFE_componentWillMount", ComponentMetadata.Lifecycle.UNSAFE_WILL_MOUNT, List.of(), "void", lifecycles);
+        legacy("componentWillReceiveProps", ComponentMetadata.Lifecycle.WILL_RECEIVE_PROPS,
+                arguments.subList(0, 1), contextValue, lifecycles, contextual);
+        legacy("UNSAFE_componentWillReceiveProps", ComponentMetadata.Lifecycle.UNSAFE_WILL_RECEIVE_PROPS,
+                arguments.subList(0, 1), contextValue, lifecycles, contextual);
+        legacy("componentWillUpdate", ComponentMetadata.Lifecycle.WILL_UPDATE,
+                arguments.subList(0, 2), contextValue, lifecycles, contextual);
+        legacy("UNSAFE_componentWillUpdate", ComponentMetadata.Lifecycle.UNSAFE_WILL_UPDATE,
+                arguments.subList(0, 2), contextValue, lifecycles, contextual);
+        return contextual;
+    }
+
+    private void legacy(String name, ComponentMetadata.Lifecycle capability, List<? extends Tree> parameters,
+                        Tree contextValue, Set<ComponentMetadata.Lifecycle> lifecycles,
+                        Set<ComponentMetadata.Lifecycle> contextual) {
+        boolean plainSeen = false, contextSeen = false;
+        for (MethodTree method : methods(name)) {
+            int arity = method.getParameters().size();
+            boolean withContext = arity == parameters.size() + 1;
+            boolean valid = arity == parameters.size() || withContext && contextValue != null;
+            valid &= instanceMethod(method, arity, false) && method.getBody() != null
+                    && canonical(method.getReturnType()).equals("void")
+                    && !(withContext ? contextSeen : plainSeen);
+            if (valid) for (int index = 0; index < parameters.size(); index++)
+                valid &= sameType(method.getParameters().get(index).getType(), parameters.get(index));
+            if (valid && withContext)
+                valid = sameType(method.getParameters().getLast().getType(), contextValue);
+            if (!valid) error("JX111", "'" + name + "' requires one public or protected void instance method with the declared Props"
+                    + (parameters.size() == 2 ? " and state" : "")
+                    + " types; one overload may append the declared contextType value type", method);
+            else {
+                lifecycles.add(capability);
+                if (withContext) { contextual.add(capability); contextSeen = true; }
+                else plainSeen = true;
+            }
+        }
     }
 
     private Tree contextValue() {

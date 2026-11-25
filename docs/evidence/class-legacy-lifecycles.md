@@ -132,11 +132,55 @@ npm run build:bench-production
 BENCH_PORT=59191 node_modules/.bin/playwright test -c tests/conformance/playwright.config.js -g 'class-legacy'
 ```
 
+## Direct `.jx` authoring — R-28-03h2b
+
+The compiler discovers all six lifecycle declarations on direct normal and Pure
+class components. It validates public/protected instance visibility, `void`,
+concrete bodies, exact declared parameter types and the absence of method type
+parameters. Receive/update methods may have one ordinary override and one typed
+next-context overload. The latter requires `contextType` and takes precedence
+only for its selected spelling. Unsupported fields, ambiguous/extra overloads,
+wrong arity/types, static/private methods and removed legacy context members
+remain source-located `JX111` errors. Java attribution continues to check bodies
+and checked exceptions.
+
+`ClassSpec.contextLifecycles` is an immutable set restricted to the four typed
+receive/update capabilities. It requires matching native flags and context
+metadata. The previous four-, seven-, eight- and nine-argument metadata
+constructors remain; record component enumeration, patterns and printed shape
+expand. The generated descriptor composes typed adapters before native defaults,
+preserving the independent lazy schema holder and existing `defaultProps` flag.
+
+The compiling [normal class](../../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredLegacy.jx),
+[Pure class](../../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredLegacyPure.jx)
+and [parent](../../tests/conformance/src/main/jx/jx/conformance/cases/ClassLegacyAuthoring.jx)
+exercise all six declarations. The normal class has ordinary overrides that fail
+if incorrectly chosen, typed overloads, context and an omitted prop receiving its
+native default. The Pure class uses ordinary overrides. The shared
+`class-legacy-authoring` case proves native queued state, callbacks, no Pure
+render on equal fields, pending versus current context including null, retained
+DOM and exact development warnings. Static mode compares initial HTML only.
+
+On the combined source baseline `cc929bb`, the package passes **82 core /17 React
+/62 compiler /15 Maven-plugin tests** and real TeaVM compilation (29.464 s).
+The new case passes **8/8 React/JX projects** (10.5 s). Three new compiler tests
+compile both executable and editor projections against the actual core, run the
+generated descriptors, verify defaults/policy composition in both modifier
+orders, and map body type errors and editable expressions to original `.jx`
+locations. The former negative test for a supported mount callback now tests
+React's removed `getChildContext` instead. No test is disabled.
+
+Logs: `/private/tmp/jx-class-legacy-authoring-compiler.log`,
+`/private/tmp/jx-class-legacy-authoring-build.log` and
+`/private/tmp/jx-class-legacy-authoring-focused.log`. No separate full run or result
+table update is claimed. The new `class-legacy-authoring-context-lost` mutant is
+registered but unrun; full integration and publication remain pending. The active
+interaction scope stays 113 features/6,328 candidate pairs, with no added witness.
+
 ## Remaining scope
 
-Automatic `.jx` declaration discovery, typed next-context overloads and original
-source diagnostics are a separate compiler slice. The explicit Java consumer
-does not establish native IDE completion, production-mode warnings, all possible
+The compiler and explicit Java consumers do not establish native IDE completion,
+production-mode warnings, all possible
 concurrent interruption sequences or checkpoint compatibility for these methods.
 Default props and general sparse/nullable authoring have separate acceptance.
 No supported class option is silently marked not applicable.
