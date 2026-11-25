@@ -139,9 +139,9 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The integrated lifecycle-authoring run passes 895 checks, with 169 skipped cells
-across 133 case IDs: client 131 reference / 130 JX, hydrate 100 per side, static
-106 per side and lazy 111 per side. Fifty-four pairs have complete local
+The integrated responsive-preload run passes 903 checks, with 169 skipped cells
+across 134 case IDs: client 132 reference / 131 JX, hydrate 101 per side, static
+107 per side and lazy 112 per side. Fifty-four pairs have complete local
 evidence in their declared modes; 6,274 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate

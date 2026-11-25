@@ -45,14 +45,16 @@ qualification is implied by these automated results.
 ## Current evidence and remaining scope
 
 R-29 adds eight supported/equivalent utility rows without adding pair witnesses.
-The lifecycle-authoring integration keeps all 54 existing witnesses green among
+The responsive-preload integration keeps all 54 existing witnesses green among
 6,328 active candidates: 113 active features, 6,274 pairs without complete
 evidence. Five deferred features account for 575 further pairs in the unchanged
-118-feature / 6,903-pair eventual universe. The complete run passes 895 checks,
-with 169 inapplicable cells across 133 case IDs; client 131 React / 130 JX,
-hydrate 100, static 106 and lazy 111 per side. The authored lifecycle case adds
-eight cells and no new pair witness; strict expected-error assertions pass eight
-focused projects. Its compiler mutant and final gate/Verify remain pending.
+118-feature / 6,903-pair eventual universe. The complete run passes 903 checks,
+with 169 inapplicable cells across 134 case IDs; client 132 React / 131 JX,
+hydrate 101, static 107 and lazy 112 per side. The responsive-preload case adds
+eight cells and no pair witness. Both scoped preload mutants were killed after
+the shared integration baseline passed; its final gate/Verify remain pending.
+The authored lifecycle case's strict expected-error assertions separately pass
+eight focused projects, and its compiler mutant was killed in the same campaign.
 The prerequisite native error-reporting mutant was killed after a passing baseline,
 with zero survived/unusable.
 Derived props merged in PR #55 as `84eb8cd` after a passing scoped mutant,

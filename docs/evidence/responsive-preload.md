@@ -40,11 +40,18 @@ assumptions about CORS normalization and interception-only request headers; the
 React reference and JX behaved alike. The final assertion checks the observable
 Referer header and does not claim unavailable Fetch Metadata headers were tested.
 
-Integrated source `0f41000` over FormStatus candidate `1b65e70` also passes package
-(42 core, two React options, 48 compiler and 15 plugin checks) and the complete
-bench: **887 passed, 169 skipped, 132 cases**. Client is 130 reference / 129 JX;
-hydrate 99, static 105 and lazy 110 per side. Only the `image-preload` case is
-added to the recorded results; interaction evidence remains 54/6328.
+Integrated source `9603b5b` over lifecycle-authoring candidate `0011c1d` passes
+package (47 core, two React options, 52 compiler and 15 plugin checks, in 28.632
+seconds) and the complete bench: **903 passed, 169 skipped, 134 cases**. Client is
+132 reference / 131 JX; hydrate 101, static 107 and lazy 112 per side. All 15
+reporter checks pass. Only the `image-preload` case is added to the prerequisite's
+recorded results; interaction evidence remains 54/6328. This integrated run used
+`BENCH_PORT=59181 BENCH_UPDATE=1 npm run test:bench`; the resulting tables were
+already identical to the recorded evidence.
+
+The earlier integration over FormStatus candidate `1b65e70`, source `0f41000`,
+passed 887 checks /169 skipped /132 cases. It is historical evidence, not the
+current integration total.
 
 Both `hint-image-sizes-dropped` and `hint-referrer-policy-dropped` were killed
 by `image-preload` after a passing unmutated baseline. They are the preload quota

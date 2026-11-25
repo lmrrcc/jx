@@ -178,6 +178,17 @@ Final gate/Verify remain pending. Following the source-preserving rebase
 onto the Forms-integrated error-lifecycle head, the catalog has 128 entries; the
 historical full campaign remains 100. Native IDE qualification is separate.
 
+R-31-01 adds responsive image preload settings and the request referrer policy
+through immutable `Resources.Options`, retaining its original constructor.
+Integrated source `9603b5b` over lifecycle authoring `0011c1d` passes package
+(47 core, two React option, 52 compiler and 15 Maven tests) and **903 bench checks,
+169 skipped, 134 cases**: client 132 reference / 131 JX, hydrate 101, static 107
+and lazy 112 per side. All 15 reporter checks pass. The two targeted preload
+mutants were killed after the shared baseline passed; those files are unchanged
+from that qualified source. This closes a bounded option gap without adding pair
+credit (54 / 6,328 unchanged). The local push gate, Verify and publication remain
+pending; no cross-browser or full parity qualification is implied.
+
 R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
 using actual Flight and separate server/client Java programs. Seven Node and four
 Chrome checks passed, including suspension, rejection, abort and server-code
