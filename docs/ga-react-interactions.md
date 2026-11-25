@@ -28,8 +28,8 @@ R-27-03a merged as `1ba8c1daab8f5587b37f9cf9dd2fc7e369205aaa` in
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45480798051).
 R-27-03b passes its focused and complete local bench, and its scoped mutant was
 killed after the unmutated baseline passed. This optimistic/store slice's Verify is pending.
-R-27-03c also passes its focused and complete local bench; its scoped mutation
-run is in progress and its Verify is pending.
+R-27-03c also passes its focused and complete local bench; its scoped mutant was
+killed after the shared scratch baseline passed. Its Verify is pending.
 No additional human or cross-browser
 qualification is implied by these automated results.
 
@@ -168,9 +168,14 @@ initial HTML without interactive credit. The local ownership logic does not
 complete G0's cancellation API or promise automatic cancellation of external I/O.
 
 `transition-owner-guard-lost` removes the publication owner check while preserving
-the canceled-outcome check. Its scoped run is **in progress**; no killed result is
-claimed yet. The catalog has **110 entries**, separate from the historical full
-campaign of 100. Verify is pending. To repeat the scoped check exclusively:
+the canceled-outcome check. After the unmutated scratch baseline passed,
+`combined-transition-cancel` killed it: **1 killed, 0 survived, 0 unusable**.
+This result comes from the shared exclusive transition/SSR run at `abfb24a`, in
+scratch `jx-mutation-1181316345297598843`; its transition implementation and spec
+are identical to this slice's rebased `1d07fba`. The shared run's 112-entry catalog
+includes later SSR cases; this slice's catalog has **110 entries**. Neither count
+is a new full campaign, and the historical full result remains 100. Verify is
+pending. To repeat the transition check alone, exclusively:
 
 ```sh
 java tools/MutateBench.java --only transition-owner-guard-lost
@@ -496,8 +501,8 @@ fresh full 104-mutant campaign.
 R-27-02 extends identity/composition/DOM interactions. R-27-03a merged with evidence
 for form actions and recovery. R-27-03b (optimistic updates over external-store
 snapshots) has local bench and mutation evidence and remains in review.
-R-27-03c (transition interactions) has local bench evidence and remains in review;
-its scoped mutation result is still pending.
+R-27-03c (transition interactions) has local bench evidence and a killed scoped
+mutant, and remains in review pending Verify.
 Staged fixtures are preparation, not completed evidence.
 R-27-04 extends server/resource interactions. Each selects explicit
 remaining pair IDs. R-27-05 follows R-28–R-30, exercises the deferred features and

@@ -136,8 +136,8 @@ R-27-02c's scoped mutant was killed; [PR #41](https://github.com/lmrrcc/jx/pull/
 merged as `a0f5460` with green Verify. R-27-03a's scoped mutant was killed after
 its unmutated baseline passed; [PR #43](https://github.com/lmrrcc/jx/pull/43)
 merged as `1ba8c1d` with green Verify. R-27-03b's scoped mutant was killed after
-its unmutated baseline passed; its Verify is pending. R-27-03c's scoped mutation
-run is in progress and its Verify is pending. Browser evidence is Chrome-only and
+its unmutated baseline passed; its Verify is pending. R-27-03c's scoped mutant
+was killed after its shared scratch baseline passed; its Verify is pending. Browser evidence is Chrome-only and
 does not establish additional human or cross-browser qualification.
 
 The ref scenarios use actual Playwright element handles to compare DOM identity,
@@ -268,8 +268,12 @@ java tools/MutateBench.java --only optimistic-duplicate-overlay
 ```
 
 R-27-03c adds `transition-owner-guard-lost`, which removes the owner check before
-publication while retaining the canceled-outcome check. Its scoped run is in
-progress; no killed result is claimed yet. Repeat it exclusively:
+publication while retaining the canceled-outcome check. After the unmutated
+scratch baseline passed, `combined-transition-cancel` killed it: **1 killed,
+0 survived, 0 unusable**. This came from the exclusive shared transition/SSR run
+at `abfb24a`, scratch `jx-mutation-1181316345297598843`; its transition source and
+spec are identical to rebased `1d07fba`. The shared catalog has 112 entries because
+it includes later SSR cases. Repeat just this transition check exclusively:
 
 ```sh
 java tools/MutateBench.java --only transition-owner-guard-lost

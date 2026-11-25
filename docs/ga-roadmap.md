@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01, R-27-02a–02c, the Promise prerequisite and R-27-03a merged with green Verify. R-27-03c locally evidences 48 / 5,356 active pairs, with 5,308 open; its scoped mutation is in progress and Verify is pending. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01, R-27-02a–02c, the Promise prerequisite and R-27-03a merged with green Verify. R-27-03c locally evidences 48 / 5,356 active pairs, with 5,308 open; its scoped mutant was killed and Verify is pending. Complete remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -70,9 +70,12 @@ per side. Its eight focused checks pass. Urgent input remains responsive, replac
 and canceled consumers settle independently of transport, and unmount/remount
 isolates old work. An already settled result cannot publish after its owner changes;
 the test observes the old transition's completed UI before awaiting the replacement.
-Ownership is fixture-local, not the G0 cancellation API. Its scoped mutation run
-is in progress; Verify is pending. The current catalog has 110 entries, without
-a new full mutation campaign.
+Ownership is fixture-local, not the G0 cancellation API. After the shared scratch
+baseline passed, `combined-transition-cancel` killed `transition-owner-guard-lost`
+(1 killed, 0 survived, 0 unusable). The exclusive run used `abfb24a` in scratch
+`jx-mutation-1181316345297598843`, with identical transition source to rebased
+`1d07fba`. Verify is pending. This slice's catalog has 110 entries; the shared
+run's 112 includes later SSR cases. The historical full campaign remains 100.
 The [interaction evidence record](ga-react-interactions.md)
 keeps the 48 locally witnessed pairs separate from the 5,308 remaining active
 pairs. R-27-03b and R-27-03c are in review in this baseline.

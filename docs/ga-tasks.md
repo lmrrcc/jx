@@ -30,8 +30,8 @@ merged in [PR #42](https://github.com/lmrrcc/jx/pull/42) with green Verify.
 R-27-03a merged in [PR #43](https://github.com/lmrrcc/jx/pull/43) as `1ba8c1d`,
 with both Verify checks green. R-27-03c's complete local bench passes 803 checks
 with 48 witnessed pairs, while 5,308 current pairs remain without complete
-evidence. The optimistic/store slice's scoped mutant was killed; the transition
-slice's mutation run is in progress. Both slices' Verify is pending. R-27 remains
+evidence. Both slices' scoped mutants were killed after their unmutated baselines
+passed. Both slices' Verify is pending. R-27 remains
 partial; its slice status and the
 [interaction evidence record](ga-react-interactions.md) distinguish local results
 from outstanding acceptance.
@@ -237,7 +237,7 @@ No broad area-level exclusion or reduction to feature families closes this task.
 | R-27-03-PROMISE | Prerequisite: isolate Promise observer delivery so a throwing observer cannot leave React's native thenable pending | ✅ merged PR #42 at f2b64cb: red/green JVM and Chrome evidence; nine Promise tests, 36 runtime-package JVM tests and 13 runtime Chrome checks; local gate and Verify passed |
 | R-27-03a | Combined form actions with submission state, reset and controlled failure/recovery | ✅ merged PR #43 at 1ba8c1d: 787 full bench and 8 focused checks; four new pairs; scoped mutant killed; local gate and Verify passed |
 | R-27-03b | Optimistic state over immutable external snapshots: remote rebase, rejected-request rollback and retry without duplicate commits | 🟡 review: 795 full bench and 8 focused checks pass; three new pairs; explicit close during both awaits releases requests and subscriptions; scoped mutant killed; Verify pending |
-| R-27-03c | Transition interactions with independent updates and controlled asynchronous completion | 🟡 review: 803 full bench and 8 focused checks pass; three new pairs; completed-result owner race and unmount isolation proved; scoped mutation in progress, Verify pending |
+| R-27-03c | Transition interactions with independent updates and controlled asynchronous completion | 🟡 review: 803 full bench and 8 focused checks pass; three new pairs; completed-result owner race and unmount isolation proved; scoped mutant killed after baseline passed, Verify pending |
 | R-27-04 | Extend SSR, hydration, streaming and resource interactions with mode-specific assertions | ⬜ planned |
 | R-27-05 | Add deferred-feature interactions after R-28–R-30; review every remaining pair's applicability and close coverage gaps | ⬜ planned |
 
@@ -348,9 +348,13 @@ replacement, avoiding entanglement that could conceal stale publication.
 Unmount/remount isolates old work from a fresh instance. Ownership and consumer
 cancellation are fixture-local; transport may finish later and G0 remains open.
 Evidence reaches 48 / 5,356, with 5,308 active pairs open. The existing
-async/transition witness earns no duplicate credit. The scoped
-`transition-owner-guard-lost` run is in progress; Verify is pending. The catalog
-has 110 entries, separate from the historical 100-mutant full campaign. See the
+async/transition witness earns no duplicate credit. After the shared scratch
+baseline passed, `combined-transition-cancel` killed `transition-owner-guard-lost`
+(1 killed, 0 survived, 0 unusable). The exclusive run used `abfb24a`, with identical
+transition source and spec to rebased `1d07fba`, in scratch
+`jx-mutation-1181316345297598843`. Verify is pending. This slice's catalog has
+110 entries; the shared run's 112 includes later SSR cases. Both remain separate
+from the historical 100-mutant full campaign. See the
 [transition evidence record](ga-react-interactions.md#r-27-03c-urgent-updates-operation-ownership-and-completion-races).
 
 R-27-03-PROMISE repairs a defect found while preparing those scenarios. Previously,

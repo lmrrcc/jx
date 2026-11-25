@@ -55,8 +55,12 @@ settled result becoming stale before its continuation, and effect cleanup before
 an independent instance mounts. The test observes the old transition ending
 before awaiting its replacement, so React entanglement cannot conceal stale UI.
 Cancellation is fixture-local and permits transport to finish later; G0 remains
-open. Its scoped mutation run is in progress; Verify is pending. The catalog now
-has 110 entries, still separate from the historical full campaign of 100.
+open. After the shared scratch baseline passed, `combined-transition-cancel`
+killed `transition-owner-guard-lost` (1 killed, 0 survived, 0 unusable). The
+exclusive run used `abfb24a` in scratch `jx-mutation-1181316345297598843`, with
+identical transition source to rebased `1d07fba`. Verify is pending. This slice's
+catalog has 110 entries; the shared run's 112 includes later SSR cases. The
+historical full campaign remains 100.
 The Promise prerequisite has nine Promise tests, 36 runtime-package JVM tests and
 13 runtime browser checks passing, followed by its full local gate and CI.
 [PR #42](https://github.com/lmrrcc/jx/pull/42) merged as `f2b64cb`, with
@@ -108,7 +112,7 @@ exists, not when its document or skeleton module lands.
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
 | GA-17 | Forms, validation, i18n and accessible primitives / A | GA-10, GA-15 | M3–M5 / L | Complex form, arrays/errors, locale/RTL, keyboard/reader, shared pure rules and server errors | ⬜ planned |
-| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02b, portal PR #41, Promise PR #42 and action PR #43 merged; R-27-03c locally evidences 48 active pairs; 5,308 active pairs plus deferred-feature interactions remain; transition scoped mutation in progress, Verify pending | 🟡 partial |
+| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02b, portal PR #41, Promise PR #42 and action PR #43 merged; R-27-03c locally evidences 48 active pairs; 5,308 active pairs plus deferred-feature interactions remain; transition scoped mutant killed, Verify pending | 🟡 partial |
 | GA-19 | HTTP headers/binary/upload/stream capabilities / C | GA-03, GA-10, GA-13 | M3–M5 / L | Auth/CSRF headers, upload progress, download, SSE/WS lifecycle, bounds/reconnect tested | ⬜ planned |
 | GA-20 | Real ecosystem binding SDK and catalog / R | GA-15, GA-18 | M4–M7 / L | Selected grid/editor/chart/headless/media bindings with refs/assets/cleanup; Java consumer examples | ⬜ planned |
 | GA-21 | Complex authenticated reference product / A | GA-12, GA-13, GA-16, GA-17, GA-19 | M4–M6 / L | Workspace/project workflow with roles, search/table/detail, forms/files/activity and two-tenant tests | ⬜ planned |
