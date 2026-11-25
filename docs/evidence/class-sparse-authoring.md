@@ -54,3 +54,33 @@ declarations to those APIs; it does not change native React state merging.
 Source/test implementation and any results must be added below with actual
 commands and outcomes. Native IDE qualification, arbitrary generic schemas,
 nullable props, general state deletion and portable hot codecs remain open.
+
+## Prepared implementation and checks
+
+`NullableState` is a source-only marker. The compiler resolves it explicitly,
+checks placement, and emits `withNullableState()` on the generated descriptor.
+`ClassSpec.stateLayout` contains state-specific `StateField` entries separately
+from `Prop.optional`; every prior constructor retains its strict-state behavior.
+Schema generation uses `optionalField`/`find` for Presence and the existing
+checked codecs for its value type. The record shape expands before GA; source
+constructors are retained, but record deconstruction shape is not unchanged.
+
+The real-core compiler test prepares executable/editor checks for normal/Pure
+classes, fully qualified annotations and Presence arrays/references, source
+shadowing, invalid placement/types, builder collisions, mapped argument errors,
+nullable previous-state signatures and strict required props. It also checks the
+generated descriptor's checkpoint rejection for nullable and non-null sparse
+models without invoking either codec. These checks have **not run yet**.
+
+The `class-sparse-authoring` differential case uses actual authored normal/Pure
+classes and the native React reference. Its native-ref observer only reads the
+public instance's `state` and own keys. The shared assertions cover null-to-empty,
+absent-to-defined, own undefined-to-null, repeated equal-shaped Pure updates,
+queued partial merges, old handler snapshots, nullable previous lifecycle input
+and retained DOM/instance identity. Static mode compares initial HTML. The case
+is registered for both class features without adding an interaction pair.
+
+The targeted `class-authoring-nullable-lost` compiler mutant is registered but
+unrun. A source review found no concrete blocker; it is not execution evidence.
+Compilation, browser checks, full integration, mutation, gate and Verify remain
+pending while the separate exclusive mutation campaign owns local execution.

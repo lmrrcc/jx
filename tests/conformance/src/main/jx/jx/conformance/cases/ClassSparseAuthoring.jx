@@ -1,0 +1,31 @@
+package jx.conformance.cases;
+
+import jx.*;
+
+@Component
+public final class ClassSparseAuthoring {
+    public static View render() {
+        ClassRef<AuthoredSparse> normal = Hooks.useMemo(() -> new ClassRef<>(value -> {
+            if (value instanceof AuthoredSparse peer) return peer;
+            throw new IllegalArgumentException("Expected authored normal class");
+        }), Dependencies.none());
+        ClassRef<AuthoredSparsePure> pure = Hooks.useMemo(() -> new ClassRef<>(value -> {
+            if (value instanceof AuthoredSparsePure peer) return peer;
+            throw new IllegalArgumentException("Expected authored Pure class");
+        }), Dependencies.none());
+        return <main>
+            <button onClick={event -> normal.current().operate("empty")}>normal empty</button>
+            <button onClick={event -> normal.current().operate("partial")}>normal partial</button>
+            <button onClick={event -> normal.current().operate("undefined")}>normal undefined</button>
+            <button onClick={event -> normal.current().operate("null-field")}>normal null-field</button>
+            <button onClick={event -> normal.current().operate("queued")}>normal queued</button>
+            <button onClick={event -> pure.current().operate("empty")}>pure empty</button>
+            <button onClick={event -> pure.current().operate("partial")}>pure partial</button>
+            <button onClick={event -> pure.current().operate("undefined")}>pure undefined</button>
+            <button onClick={event -> pure.current().operate("null-field")}>pure null-field</button>
+            <button onClick={event -> pure.current().operate("queued")}>pure queued</button>
+            {ClassStateObserver.observe(<AuthoredSparse id="normal" ref={normal} />)}
+            {ClassStateObserver.observe(<AuthoredSparsePure id="pure" ref={pure} />)}
+        </main>;
+    }
+}

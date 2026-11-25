@@ -103,6 +103,13 @@ final class ClassModel {
                 + (contextValue == null ? "" : " and Supplier<" + spelling(contextValue) + "> for contextType"), owner);
         List<ComponentMetadata.Prop> properties = fields(props, true);
         List<ComponentMetadata.Prop> stateFields = fields(state, false);
+        List<ComponentMetadata.StateField> stateLayout = stateLayout(state, stateFields);
+        boolean nullableState = owner.getModifiers().getAnnotations().stream().anyMatch(annotation -> {
+            String name = annotation.getAnnotationType().toString();
+            return (name.equals("jx.NullableState") || owner.getMembers().stream().noneMatch(member ->
+                    member instanceof ClassTree nested && nested.getSimpleName().contentEquals("NullableState")))
+                    && JavaModel.isJxAnnotation("NullableState", name, packageName, imports, unit);
+        });
         boolean contextShouldUpdate = contextShouldUpdate(arguments, contextValue);
         Set<ComponentMetadata.Lifecycle> lifecycles = lifecycles(arguments, contextShouldUpdate);
         Set<ComponentMetadata.Lifecycle> contextLifecycles = legacyLifecycles(arguments, contextValue, lifecycles);
@@ -116,7 +123,8 @@ final class ClassModel {
         return new ComponentMetadata(qualified(name), name, packageName, imports, true, properties,
                 parsed.source().path(), declaration, descriptorOffset, ComponentMetadata.Memo.NONE, 0,
                 new ComponentMetadata.ClassSpec(kind, state.getSimpleName().toString(), stateFields, lifecycles,
-                        contextValue == null ? null : spelling(contextValue), derivedProps, derivedError, contextShouldUpdate, defaults, contextLifecycles));
+                        contextValue == null ? null : spelling(contextValue), derivedProps, derivedError, contextShouldUpdate, defaults,
+                        contextLifecycles, nullableState, stateLayout));
     }
 
     private boolean defaultProps(Tree propsType) {
@@ -161,19 +169,45 @@ final class ClassModel {
             if (!name.matches("[A-Za-z_$][A-Za-z0-9_$]*") || RESERVED_FIELDS.contains(name) || name.startsWith("__jx"))
                 error("JX110", "Record field '" + name + "' must be an ASCII Java identifier not reserved for native class identity or renderer metadata", variable);
             boolean generatesInput = owner.getMembers().stream().anyMatch(candidate -> memberName(candidate).equals("defaultProps"));
+            Tree presence = props ? null : presenceValue(variable.getType());
             if ((!props || generatesInput) && !name.isEmpty()) {
                 String setter = "with" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
                 if (!updateMethods.add(setter)) error("JX110", (props ? "Props field '" : "State field '") + name
                         + "' collides with another field's generated builder method '" + setter + "'", variable);
+                if (presence != null) {
+                    String undefined = "undefined" + Character.toUpperCase(name.charAt(0)) + name.substring(1);
+                    if (!updateMethods.add(undefined)) error("JX110", "State field '" + name
+                            + "' collides with generated builder method '" + undefined + "'", variable);
+                }
             }
             String javaType = spelling(variable.getType());
-            if (!fieldType(variable.getType())) error("JX110", "Class field '" + name + "' uses unsupported type " + javaType
-                    + "; use int, long, float, double, boolean, their boxed types, String, or a reifiable reference/array type", variable);
+            if (presence == null && (!fieldType(variable.getType()) || !props && namedType(variable.getType(), "jx.Presence")))
+                error("JX110", "Class field '" + name + "' uses unsupported type " + javaType
+                    + "; use supported scalar/reference types, or Presence<T> with a supported reference value type for state", variable);
             boolean optional = props && variable.getModifiers().getAnnotations().stream().anyMatch(annotation ->
                     JavaModel.isJxAnnotation("OptionalProp", annotation.getAnnotationType().toString(), packageName, imports, unit));
             fields.add(new ComponentMetadata.Prop(name, javaType, span(variable), optional));
         }
         return fields;
+    }
+
+    private Tree presenceValue(Tree tree) {
+        if (!(unannotated(tree) instanceof ParameterizedTypeTree type) || !namedType(type.getType(), "jx.Presence")
+                || type.getTypeArguments().size() != 1) return null;
+        Tree value = unannotated(type.getTypeArguments().getFirst());
+        return !(value instanceof PrimitiveTypeTree) && fieldType(value) && !namedType(value, "jx.Presence") ? value : null;
+    }
+
+    private List<ComponentMetadata.StateField> stateLayout(ClassTree state, List<ComponentMetadata.Prop> declarations) {
+        if (state == null) return List.of();
+        List<ComponentMetadata.StateField> result = new ArrayList<>();
+        for (Tree member : state.getMembers()) if (member instanceof VariableTree field
+                && !field.getModifiers().getFlags().contains(Modifier.STATIC)) {
+            Tree presence = presenceValue(field.getType());
+            result.add(new ComponentMetadata.StateField(declarations.get(result.size()),
+                    presence == null ? null : spelling(presence)));
+        }
+        return result;
     }
 
     private boolean fieldType(Tree tree) {

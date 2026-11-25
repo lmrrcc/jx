@@ -118,6 +118,7 @@ import { ClassDefaults, ClassDefaultsAuthoring } from './cases/class-defaults.js
 import { ClassPurePolicy } from './cases/class-pure-policy.jsx';
 import { ClassLegacy, ClassLegacySuppression, ClassLegacyInterrupted } from './cases/class-legacy.jsx';
 import { ClassLegacyAuthoring } from './cases/class-legacy-authoring.jsx';
+import { ClassSparseAuthoring } from './cases/class-sparse-authoring.jsx';
 
 export const cases = {
   'runtime-utilities': RuntimeUtilities,
@@ -150,6 +151,7 @@ export const cases = {
   'class-legacy-suppression': ClassLegacySuppression,
   'class-legacy-interrupted': ClassLegacyInterrupted,
   'class-legacy-authoring': ClassLegacyAuthoring,
+  'class-sparse-authoring': ClassSparseAuthoring,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,
   'callable-state': CallableState,

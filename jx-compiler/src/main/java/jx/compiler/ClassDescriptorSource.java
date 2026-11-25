@@ -12,20 +12,24 @@ final class ClassDescriptorSource {
         String state = spec.stateType();
         String owner = component.simpleName();
         StringBuilder out = new StringBuilder("\n    private static final class __JxMetadata {\n");
-        schema(out, "Props", component.props(), "p", "PROPS");
-        schema(out, state, spec.stateFields(), "s", "STATE");
+        schema(out, "Props", component.props().stream().map(field -> new ComponentMetadata.StateField(field, null)).toList(), "p", "PROPS");
+        schema(out, state, spec.stateLayout(), "s", "STATE");
         out.append("    }\n");
         if (spec.defaultProps()) propsInput(out,component.props());
         out.append("    /** Immutable partial state update; omitted fields retain their values. */\n")
                 .append("    public static final class StateUpdate {\n")
                 .append("        private final jx.StatePatch<").append(state).append("> value;\n")
                 .append("        private StateUpdate(jx.StatePatch<").append(state).append("> value) { this.value = value; }\n");
-        for (int index = 0; index < spec.stateFields().size(); index++) {
-            ComponentMetadata.Prop field = spec.stateFields().get(index);
+        for (int index = 0; index < spec.stateLayout().size(); index++) {
+            ComponentMetadata.StateField shape = spec.stateLayout().get(index);
+            ComponentMetadata.Prop field = shape.declaration();
             out.append("        public StateUpdate with").append(Character.toUpperCase(field.name().charAt(0)))
-                    .append(field.name().substring(1)).append('(').append(field.javaType())
+                    .append(field.name().substring(1)).append('(').append(shape.valueType())
                     .append(" value) { return new StateUpdate(this.value.set(__JxMetadata.s")
                     .append(index).append(", value)); }\n");
+            if (shape.sparse()) out.append("        public StateUpdate undefined")
+                    .append(Character.toUpperCase(field.name().charAt(0))).append(field.name().substring(1))
+                    .append("() { return new StateUpdate(value.undefined(__JxMetadata.s").append(index).append(")); }\n");
         }
         out.append("        /** Returns the checked patch without mutating this builder. */\n")
                 .append("        public jx.StatePatch<").append(state).append("> build() { return value; }\n")
@@ -59,6 +63,7 @@ final class ClassDescriptorSource {
                     .append(')');
         }
         if (spec.defaultProps()) out.append(".withDefaultProps(__jxDefaults())");
+        if (spec.nullableState()) out.append(".withNullableState()");
         out.append(";\n");
         return out.toString();
     }
@@ -94,14 +99,16 @@ final class ClassDescriptorSource {
         out.append("        return defaults;\n    }\n");
     }
 
-    private static void schema(StringBuilder out, String type, List<ComponentMetadata.Prop> fields,
+    private static void schema(StringBuilder out, String type, List<ComponentMetadata.StateField> fields,
                                String prefix, String name) {
         for (int index = 0; index < fields.size(); index++) {
-            ComponentMetadata.Prop field = fields.get(index);
+            ComponentMetadata.StateField shape = fields.get(index);
+            ComponentMetadata.Prop field = shape.declaration();
             out.append("        private static final jx.ClassSchema.Field<").append(type).append(", ")
-                    .append(boxed(field.javaType())).append("> ").append(prefix).append(index)
-                    .append(" = jx.ClassSchema.field(").append(Lowerer.quote(field.name())).append(", ")
-                    .append(codec(field.javaType())).append(", ").append(type).append("::")
+                    .append(boxed(shape.valueType())).append("> ").append(prefix).append(index)
+                    .append(shape.sparse() ? " = jx.ClassSchema.optionalField(" : " = jx.ClassSchema.field(")
+                    .append(Lowerer.quote(field.name())).append(", ")
+                    .append(codec(shape.valueType())).append(", ").append(type).append("::")
                     .append(field.name()).append(");\n");
         }
         out.append("        private static final jx.ClassSchema<").append(type).append("> ").append(name)
@@ -113,7 +120,7 @@ final class ClassDescriptorSource {
         out.append("), reader -> new ").append(type).append('(');
         for (int index = 0; index < fields.size(); index++) {
             if (index > 0) out.append(", ");
-            out.append("reader.get(").append(prefix).append(index).append(')');
+            out.append(fields.get(index).sparse() ? "reader.find(" : "reader.get(").append(prefix).append(index).append(')');
         }
         out.append("));\n");
     }

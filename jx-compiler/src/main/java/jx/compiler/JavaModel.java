@@ -4,6 +4,7 @@ import com.sun.source.tree.*;
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.SourcePositions;
 import com.sun.source.util.Trees;
+import com.sun.source.util.TreeScanner;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -51,6 +52,27 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
             String packageName = unit.getPackageName() == null ? "" : unit.getPackageName().toString();
             List<String> imports = unit.getImports().stream().filter(i -> !i.isStatic())
                     .map(i -> i.getQualifiedIdentifier().toString()).toList();
+            // This marker must not silently decorate a functional, nested or unprocessed class.
+            new TreeScanner<Void,Set<String>>() {
+                @Override public Void visitClass(ClassTree type, Set<String> enclosingNames) {
+                    var names = new java.util.HashSet<>(enclosingNames);
+                    type.getMembers().stream().filter(ClassTree.class::isInstance).map(ClassTree.class::cast)
+                            .map(value -> value.getSimpleName().toString()).forEach(names::add);
+                    for (AnnotationTree annotation : type.getModifiers().getAnnotations()) {
+                        String spelling = annotation.getAnnotationType().toString();
+                        if ((spelling.equals("jx.NullableState") || !names.contains("NullableState")
+                                && isJxAnnotation("NullableState", spelling, packageName, imports, unit))
+                                && (!unit.getTypeDecls().contains(type)
+                                || type.getModifiers().getAnnotations().stream().noneMatch(value ->
+                                    isComponentAnnotation(value.getAnnotationType().toString(), packageName, imports, unit))
+                                || ClassModel.kind(type, packageName, imports, unit) == null))
+                            diagnostics.add(Diagnostic.error(parsed.source(), "JX111",
+                                    "@NullableState requires a direct top-level @Component class extending ClassComponent or PureComponent",
+                                    span(positions, unit, annotation, shadow.length())));
+                    }
+                    return super.visitClass(type, names);
+                }
+            }.scan(unit, Set.of());
             List<ComponentMetadata> components = new ArrayList<>();
             for (Tree declaration : unit.getTypeDecls()) {
                 if (!(declaration instanceof ClassTree type)) continue;
