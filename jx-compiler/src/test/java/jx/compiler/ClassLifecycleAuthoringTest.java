@@ -150,8 +150,9 @@ class ClassLifecycleAuthoringTest {
                         && props().revision() == 1 && state().count() == 1 && theme.get().equals("day");
                 }
                 """;
-        for (boolean includeLegacy : List.of(false, true)) {
+        for (boolean pure : List.of(false, true)) for (boolean includeLegacy : List.of(false, true)) {
             String text = PANEL.replace("public String theme()", (includeLegacy ? legacy : "") + policy + "public String theme()");
+            if (pure) text = text.replace("extends ClassComponent", "extends PureComponent");
             SourceFile source = source(text);
             Compilation compilation = compiler.compile(List.of(source));
             assertTrue(compilation.successful(), compilation.diagnostics().toString());
@@ -172,7 +173,7 @@ class ClassLifecycleAuthoringTest {
                         }
                     }
                     """);
-            String output = "policy-" + includeLegacy;
+            String output = "policy-" + pure + "-" + includeLegacy;
             assertEquals(List.of(), check(compilation, List.of(probe), output));
             try (URLClassLoader loader = new URLClassLoader(new java.net.URL[]{directory.resolve(output).toUri().toURL()}, null)) {
                 assertEquals(true, loader.loadClass("demo.PolicyProbe").getMethod("verify").invoke(null));
@@ -192,7 +193,6 @@ class ClassLifecycleAuthoringTest {
                 contextual.replace("String nextContext", "Integer nextContext"),
                 contextual.replace("protected boolean shouldComponentUpdate", "protected static boolean shouldComponentUpdate"),
                 contextual.replace("protected boolean shouldComponentUpdate", "private boolean shouldComponentUpdate"),
-                contextual.replace("extends ClassComponent", "extends PureComponent"),
                 contextual.replace("public static final Context<String> contextType = new Context<>(\"day\");", ""))) {
             Compilation invalid = compiler.compile(List.of(source(text)));
             assertTrue(invalid.diagnostics().stream().anyMatch(value -> value.code().equals("JX111")), invalid.diagnostics().toString());

@@ -1,0 +1,35 @@
+package jx.conformance.cases;
+
+import jx.*;
+import jx.conformance.Bench;
+import java.util.function.Supplier;
+
+@Component
+public final class PureContextPolicy extends PureComponent<PureContextPolicy.Props, PureContextPolicy.Model, Void> {
+    public record Props(int revision, boolean allow) {}
+    public record Model(int count) {}
+    public static final Context<String> contextType = ClassPurePolicy.THEME;
+    private final Supplier<String> theme;
+    private final DomRef output = new DomRef();
+    public PureContextPolicy(Props props, Supplier<String> theme) { super(props, new Model(0)); this.theme = theme; }
+    protected boolean shouldComponentUpdate(Props next, Model pending, String nextContext) {
+        Bench.log("pure-policy:context:" + theme.get() + "->" + nextContext);
+        return next.allow();
+    }
+    @Override protected boolean shouldComponentUpdate(Props next, Model pending) {
+        throw new AssertionError("The three-argument policy takes precedence");
+    }
+    private String value() { return theme.get() + ":" + props().revision() + ":" + state().count() + ":" + props().allow(); }
+    private void increment() {
+        setState((pending, next) -> statePatch().withCount(pending.count() + 1).build(),
+                () -> Bench.log("pure-callback:context:" + value() + ":dom=" + output.current().textContent()));
+    }
+    @Override public View render() {
+        Bench.log("pure-render:context");
+        return <section>
+            <output ref={output} data-testid="context">{value()}</output>
+            <button onClick={event -> increment()}>Increment context</button>
+            <button onClick={event -> forceUpdate()}>Force context</button>
+        </section>;
+    }
+}

@@ -31,6 +31,7 @@ import jx.conformance.cases.ClassAuthoring;
 import jx.conformance.cases.ClassLifecycleAuthoring;
 import jx.conformance.cases.ClassNextContext;
 import jx.conformance.cases.ClassNullPatch;
+import jx.conformance.cases.ClassPurePolicy;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
 import jx.conformance.cases.DomRefFocus;
@@ -239,6 +240,7 @@ public final class Main {
             case "class-lifecycle-authoring" -> ClassLifecycleAuthoring.JX;
             case "class-next-context" -> ClassNextContext.JX;
             case "class-null-patch" -> ClassNullPatch.JX;
+            case "class-pure-policy" -> ClassPurePolicy.JX;
             default -> null;
         };
     }

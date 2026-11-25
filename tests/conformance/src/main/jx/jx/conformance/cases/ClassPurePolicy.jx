@@ -1,0 +1,25 @@
+package jx.conformance.cases;
+
+import jx.*;
+
+@Component
+public final class ClassPurePolicy {
+    public static final Context<String> THEME = new Context<>("day");
+    public static View render() {
+        State<Integer> pulse = Hooks.useState(0);
+        State<Integer> revision = Hooks.useState(0);
+        State<Boolean> allow = Hooks.useState(true);
+        State<String> theme = Hooks.useState("day");
+        return <main>
+            <output data-testid="pulse">{pulse.value()}</output>
+            <button onClick={event -> pulse.update(value -> value + 1)}>Same props</button>
+            <button onClick={event -> allow.set(false)}>Block policy</button>
+            <button onClick={event -> allow.set(true)}>Allow policy</button>
+            <button onClick={event -> revision.update(value -> value + 1)}>Advance props</button>
+            <button onClick={event -> theme.set("night")}>Change theme</button>
+            {THEME.provide(theme.value(),
+                <PureLegacyPolicy revision={revision.value()} allow={allow.value()} />,
+                <PureContextPolicy revision={revision.value()} allow={allow.value()} />)}
+        </main>;
+    }
+}

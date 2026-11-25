@@ -54,8 +54,6 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         this.derivedState = derivedState;
         this.derivedError = derivedError;
         this.contextUpdate = contextUpdate;
-        if (pure && (this.lifecycles.contains(Lifecycle.SHOULD_UPDATE) || contextUpdate != null))
-            throw new IllegalArgumentException("PureComponent uses native shallow comparison");
         if (this.lifecycles.contains(Lifecycle.SNAPSHOT) && !this.lifecycles.contains(Lifecycle.UPDATE))
             throw new IllegalArgumentException("Snapshot lifecycle requires update lifecycle");
     }
@@ -163,7 +161,8 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     }
     /** Returns a new descriptor with a typed native shouldComponentUpdate policy. Declare it
      * once: descriptor identity is native component identity. The requested context must be
-     * this descriptor's contextType, by identity. PureComponent rejects custom update policies.
+     * this descriptor's contextType, by identity. A PureComponent can supply a custom policy;
+     * React then uses it instead of shallow comparison and emits its development warning.
      * Existing factory, context, derivations and lifecycle settings are preserved.
      *
      * <p>This policy takes precedence over the peer's two-argument shouldComponentUpdate,
@@ -179,7 +178,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      * value is eagerly changed by this adapter. Exceptions propagate through React. The next
      * context is a borrowed value, not a live reader; retaining it retains that value normally.
      * @throws NullPointerException if requested or policy is null
-     * @throws IllegalArgumentException if context identity differs or this is a Pure descriptor
+     * @throws IllegalArgumentException if context identity differs
      */
     public <T> ClassComponentType<P,S,C> withContextShouldUpdate(Context<T> requested,
             ContextUpdatePolicy<P,S,C,T> policy) {

@@ -620,7 +620,7 @@ to the seven-mutant candidate whose full bench passed 931 checks/181 skipped.
 | Option | Status and next evidence |
 | --- | --- |
 | Null initial props/state | Open: design explicit nullable schema decoding and merge semantics before removing guards |
-| PureComponent with a custom should-update policy | Open: React can invoke it with a development warning; the current Java rejection is not parity |
+| PureComponent with a custom should-update policy | R-28-03g below: locally implemented and focused-tested; integrated qualification pending |
 | `componentWillMount`, `componentWillReceiveProps`, `componentWillUpdate`, and their `UNSAFE_` forms | Open: differential proof must cover scheduling and suppression by modern derivation/snapshot APIs |
 | Class `defaultProps` | Open: define absent versus explicit null props before compiler/runtime support |
 | Generic/indirect class authoring and wider field types | Open: preserve checked schemas and original-source diagnostics |
@@ -632,3 +632,39 @@ still lists deprecated lifecycle methods and class defaults. The
 [React 19 upgrade guide](https://react.dev/blog/2024/04/25/react-19-upgrade-guide#removed-legacy-context-using-contexttypes-and-getchildcontext)
 records removal of the old context API. Deprecated supported behavior remains
 work to implement; removed behavior is not a new compatibility target.
+
+## R-28-03g custom PureComponent policies — 25 November 2026
+
+React invokes a class's callable `shouldComponentUpdate` before considering Pure's
+default shallow comparison. It warns in development when a Pure class supplies
+such a policy. JX now preserves that supported behavior: descriptor factories and
+the compiler accept the ordinary two-argument override and the existing typed
+next-context policy. The native constructor still extends `React.PureComponent`;
+the bridge and warning are unchanged. Use `ClassComponent` for new custom-policy
+code, as React recommends, but do not reject compatible existing code.
+
+Both newly added JVM contracts failed with the old descriptor rejection. They
+now pass and verify dispatch, immutable policy replacement, precedence and the
+preserved Pure marker. Existing schema/context checks remain. The compiler's
+real-core javac and editor-projection tests cover both signatures and coexisting
+two/three-argument declarations; malformed return types are still rejected.
+The package passes 52 core, 54 compiler, 15 Maven-plugin and 10 LSP tests.
+
+The [ClassPurePolicy.jx consumer](../../tests/conformance/src/main/jx/jx/conformance/cases/ClassPurePolicy.jx)
+passes eight focused projects against actual React. A true policy renders even
+for equal props; a false one retains the previous DOM while current state/props
+advance and queued callbacks commit. Force updates and context changes render
+the latest state despite false policies. The three-argument method takes
+precedence over its two-argument overload. Real DOM identity persists and only
+React's expected Pure-policy warning is tolerated; unrelated errors fail.
+
+All ten class cases also pass 80/80 focused projects after the shared runtime and
+compiler change, including ordinary Pure shallow bailouts, class context,
+derivation/error lifecycles, authored snapshots and typed null patches.
+
+An initial fixture bundle was attempted before the Maven browser output existed;
+that incomplete-asset run is not qualification. After Maven completed, all bundles
+were rebuilt and all eight projects passed. Static projects compare initial HTML
+only. A policy-omission mutant is registered but unrun. Full integrated bench,
+mutation, push gate, Verify and native IDE qualification remain pending. No new
+feature-pair or aggregate result-table credit is claimed.

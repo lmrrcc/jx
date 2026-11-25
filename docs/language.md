@@ -96,8 +96,14 @@ parameterized fields, generic classes/records and indirect component inheritance
 are outside this slice. Primitive arrays remain reference values.
 
 Declared mount, update, unmount, snapshot and should-update overrides enable those
-existing runtime callbacks. `PureComponent` supplies shallow comparison and cannot
-declare should-update. Unsupported lifecycle declarations fail with `JX111`; schema
+existing runtime callbacks. `PureComponent` supplies shallow comparison by default.
+An explicit should-update override takes precedence, including the typed three-
+argument context policy; React emits its normal development warning. Prefer
+`ClassComponent` for new custom policies. React still bypasses a false policy for
+force updates and changed context. The compiling
+[PureContextPolicy.jx](../tests/conformance/src/main/jx/jx/conformance/cases/PureContextPolicy.jx)
+and [PureLegacyPolicy.jx](../tests/conformance/src/main/jx/jx/conformance/cases/PureLegacyPolicy.jx)
+exercise both signatures. Unsupported lifecycle declarations fail with `JX111`; schema
 and authoring constraints use `JX110`; hook-looking calls in native classes use
 `JX201`. Hooks belong to function components. Reserved native field names and
 generated members (`JX`, `StateUpdate`, `statePatch`, `__JxMetadata`) are rejected.

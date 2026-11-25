@@ -195,8 +195,6 @@ final class ClassModel {
         }
         if (result.contains(ComponentMetadata.Lifecycle.SNAPSHOT) && !result.contains(ComponentMetadata.Lifecycle.UPDATE))
             error("JX111", "getSnapshotBeforeUpdate requires componentDidUpdate to consume its snapshot", owner);
-        if (kind == ComponentMetadata.ClassKind.PURE_COMPONENT && result.contains(ComponentMetadata.Lifecycle.SHOULD_UPDATE))
-            error("JX111", "PureComponent supplies shallow comparison; do not override shouldComponentUpdate", owner);
         return result;
     }
 
