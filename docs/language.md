@@ -508,7 +508,13 @@ uncontrolled fields afterwards:
 - `FormAction.async(data -> Async.run(() -> { ... }))` is an asynchronous action;
   the form is pending until its promise is settled.
 - `Hooks.useFormStatus()` in a component inside the form returns a `FormStatus`
-  with `pending()`, `data()` and `method()`.
+  with `pending()`, `data()`, `method()` and nullable `action()` / `actionUrl()` alternatives. The action is the
+  actual submitted function, including a submit button's override and an
+  action-state dispatcher. Java actions preserve identity when crossing the
+  native React boundary. A URL reported by React during an `onSubmit` transition
+  is available through `actionUrl()`; `action()` remains null for that alternative.
+  Idle forms expose neither. Read this
+  snapshot during rendering; invoking an action is an event/transition operation.
 - `Hooks.useActionState(action, initial)` and `useActionStateAsync` return an
   `ActionState`: `state()`, the `action()` to give to the form, and `pending()`.
   The action receives the previous state and the form data and returns the next
@@ -518,6 +524,18 @@ uncontrolled fields afterwards:
   it returns a `ReducerState`.
 - `React.startTransitionAsync(() -> promise)` is the standalone asynchronous
   transition, and `React.requestFormReset(form)` resets a form by hand.
+
+`FormStatus` retains its three-argument constructor for source/binary call-site
+compatibility. Adding action components intentionally changes record
+patterns, structural equality and `toString` in this pre-GA API. Consumers using
+record patterns must include both action components or use accessor methods.
+
+The pinned React runtime reports a URL value during a prevented URL submission
+with an async transition. This differs from the current
+[useFormStatus documentation](https://react.dev/reference/react-dom/hooks/useFormStatus),
+which describes the action as a function or null. JX preserves the observed URL
+through its separate typed accessor; the differential consumer records that
+behavior rather than coercing the reference value to null.
 
 `ComponentType.lazy(name, () -> promiseOfComponent)` is React's `lazy`: the loader
 runs once, when the component first renders, and the nearest `React.suspense`

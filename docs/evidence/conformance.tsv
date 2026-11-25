@@ -48,7 +48,7 @@ react/jsx-runtime:jsxs	compiler	equivalent	children-prop	Markup lowering
 react/jsx-runtime:Fragment	compiler	equivalent	fragment	<>...</>		
 react-dom:createPortal	api	supported	portal,combined-portal-lifecycle	React.portal, React.documentBody		A view factory; the target is a DomElement
 react-dom:flushSync	api	supported	flush-sync	React.flushSync		
-react-dom:useFormStatus	hook	supported	form-status,combined-action-queue	Hooks.useFormStatus, FormStatus		The action field is not offered
+react-dom:useFormStatus	hook	supported	form-status,combined-action-queue	Hooks.useFormStatus, FormStatus		Typed action identity and separate actionUrl for URL submissions; primary/override/dispatcher/native replay and URL paths pass focused modes; integrated qualification pending
 react-dom:requestFormReset	api	supported	form-reset	React.requestFormReset		
 react-dom:preconnect	resource	supported	resource-hints	Resources.preconnect		
 react-dom:prefetchDNS	resource	supported	resource-hints	Resources.prefetchDNS		

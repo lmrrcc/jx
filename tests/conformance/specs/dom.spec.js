@@ -98,13 +98,61 @@ test('flush-sync: the DOM is updated before flushSync returns', async ({page, op
 
 test('form-status: a child of the form sees the pending submission', async ({page, open}) => {
   await open('form-status');
+  const status = page.getByTestId('form-action-status');
+  await expect(status).toHaveText('none:idle:true');
+  await expect(page.getByTestId('form-outside')).toHaveText('outside idle');
   await page.getByRole('button', {name: 'Send'}).click();
   await expect(page.getByRole('button', {name: 'Sending'})).toBeDisabled();
-  // The submission stays pending until the action is released, not only for an instant.
-  await page.waitForTimeout(250);
+  await expect(status).toHaveText('primary:get:sample:true');
+  await page.getByRole('button', {name: 'Pulse', exact: true}).click();
+  await expect(page.getByTestId('form-pulse')).toHaveText('1');
+  await expect(status).toHaveText('primary:get:sample:true');
+  await expect(page.getByTestId('form-outside')).toHaveText('outside idle');
   await expect(page.getByRole('button', {name: 'Sending'})).toBeDisabled();
   await page.getByRole('button', {name: 'Release'}).click();
   await expect(page.getByRole('button', {name: 'Send', exact: true})).toBeEnabled();
+  await expect(status).toHaveText('none:idle:true');
+  // A second submission after the parent's pulse must reuse the same native action.
+  await page.getByRole('button', {name: 'Send', exact: true}).click();
+  await expect(status).toHaveText('primary:get:sample:true');
+  await page.getByRole('button', {name: 'Release'}).click();
+  await expect(status).toHaveText('none:idle:true');
+  await page.getByRole('button', {name: 'Alternate', exact: true}).click();
+  await expect(status).toHaveText('alternate:get:sample:true');
+  await page.getByRole('button', {name: 'Release'}).click();
+  await expect(status).toHaveText('none:idle:true');
+  await page.getByRole('button', {name: 'Use dispatcher', exact: true}).click();
+  await page.getByRole('button', {name: 'Send', exact: true}).click();
+  await expect(status).toHaveText('primary:get:sample:true');
+  await page.getByRole('button', {name: 'Pulse', exact: true}).click();
+  await expect(page.getByTestId('form-pulse')).toHaveText('2');
+  await expect(status).toHaveText('primary:get:sample:true');
+  await page.getByRole('button', {name: 'Release'}).click();
+  await expect(page.getByTestId('form-result')).toHaveText('1');
+  await expect(status).toHaveText('none:idle:true');
+  await page.getByRole('button', {name: 'Use URL action', exact: true}).click();
+  await page.getByRole('textbox', {name: 'Payload'}).fill('edited');
+  const address = page.url();
+  await page.getByRole('button', {name: 'Send', exact: true}).click();
+  await expect(status).toHaveText('url:/submit:get:edited:true');
+  await page.getByRole('button', {name: 'Release'}).click();
+  await expect(status).toHaveText('none:idle:true');
+  await expect(page.getByRole('textbox', {name: 'Payload'})).toHaveValue('edited');
+  await expect(page).toHaveURL(address);
+  await page.getByRole('button', {name: 'Use native form', exact: true}).click();
+  const nativeStatus = page.getByTestId('native-form-status');
+  await expect(nativeStatus).toHaveText('idle:none:true');
+  await page.getByRole('button', {name: 'Native send', exact: true}).click();
+  await expect(nativeStatus).toHaveText('pending:function:true');
+  await page.getByRole('button', {name: 'Pulse', exact: true}).click();
+  await expect(page.getByTestId('form-pulse')).toHaveText('3');
+  await expect(nativeStatus).toHaveText('pending:function:true');
+  await page.getByRole('button', {name: 'Release'}).click();
+  await expect(nativeStatus).toHaveText('idle:none:true');
+  await page.getByRole('button', {name: 'Native replay', exact: true}).click();
+  await expect(nativeStatus).toHaveText('pending:function:true');
+  await page.getByRole('button', {name: 'Release'}).click();
+  await expect(nativeStatus).toHaveText('idle:none:true');
 });
 
 test('form-actions: function actions on a form and on a submit button receive form data', async ({page, open}) => {

@@ -1,0 +1,30 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.FormAction;
+import jx.FormStatus;
+import jx.Hooks;
+import jx.Ref;
+import jx.View;
+
+/** A native action becomes a stable Java handle and can be submitted again unchanged. */
+@Component
+public final class FormNativeSubmit {
+    public static View render() {
+        FormStatus status = Hooks.useFormStatus();
+        Ref<FormAction> observed = Hooks.useRef(null);
+        boolean stable = status.action() == null || observed.current() == null || observed.current() == status.action();
+        Hooks.useEffect(() -> {
+            if (observed.current() == null && status.action() != null) observed.set(status.action());
+            return null;
+        }, Dependencies.of(status.action()));
+        return (
+            <section>
+                <button type="submit" disabled={status.pending()}>Native send</button>
+                <button type="submit" formAction={observed.current()} disabled={status.pending() || observed.current() == null}>Native replay</button>
+                <p data-testid="native-form-status">{(status.pending() ? "pending:" : "idle:") + (status.action() == null ? "none:" : "function:") + stable}</p>
+            </section>
+        );
+    }
+}
