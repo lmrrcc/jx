@@ -14,6 +14,11 @@ public final class Views {
     }
     public static <P> View component(ComponentType<P> component, P props) { return component(component, props, null); }
     public static <P> View component(ComponentType<P> component, P props, String key) { return new View.ComponentView<>(component, props, key); }
+    public static <P,S,C extends ClassComponent<P,S,?>> View component(ClassComponentType<P,S,C> component, P props) {
+        return component(component, props, null, null);
+    }
+    public static <P,S,C extends ClassComponent<P,S,?>> View component(ClassComponentType<P,S,C> component,
+            P props, String key, ClassRef<C> ref) { return new View.ClassComponentView<>(component, props, key, ref); }
     /** Typed counterpart of React's {@code cloneElement} for a DOM element: a copy with
      * {@code extra} merged over its attributes, including key and ref, and with its children
      * replaced when any are given. Component views carry a typed Props record; build a new one
@@ -33,6 +38,7 @@ public final class Views {
      * element extension; false for text, empty positions, collections, portals and null. */
     public static boolean isValidElement(Object value) {
         return value instanceof View.Element || value instanceof View.Fragment || value instanceof View.ComponentView<?>
+                || value instanceof View.ClassComponentView<?,?,?>
                 || value instanceof View.Provider<?> || value instanceof View.Keyed || value instanceof View.ElementExtension;
     }
     /** A written fragment, which child utilities treat as a single element without visiting its contents. */
@@ -61,6 +67,7 @@ public final class Views {
             case null -> null;
             case View.Keyed keyed -> keyed.key();
             case View.ComponentView<?> component -> component.key();
+            case View.ClassComponentView<?,?,?> component -> component.key();
             case View.Element element -> {
                 String key = null;
                 for (Attributes.Entry entry : element.attributes().entries())

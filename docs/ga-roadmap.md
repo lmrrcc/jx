@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01, R-27-02a–02c, the Promise prerequisite and R-27-03a–03c merged with green Verify. R-27-04 locally evidences 52 / 5,356 active pairs, with 5,304 open; four transition/SSR scoped mutants were killed and Verify is pending. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27 slices through SSR R-27-04 and the Promise/scalar prerequisites merged with green Verify. R-28-01's native class runtime locally evidences 54 / 5,460 active pairs, with 5,406 open; three class mutants killed after the baseline passed, push gate and Verify pending. Complete class authoring, remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -80,15 +80,18 @@ baseline passed, `combined-transition-cancel` killed `transition-owner-guard-los
 checks passed. This slice's catalog has 110 entries; the shared
 run's 112 includes later SSR cases. The historical full campaign remains 100.
 The [interaction evidence record](ga-react-interactions.md)
-keeps the 52 locally witnessed pairs separate from the 5,304 remaining active
-pairs. R-27-03b and R-27-03c are merged; R-27-04 remains in review.
+keeps executed witnesses separate from remaining and deferred-feature pairs.
+R-27-03b, R-27-03c and R-27-04 are merged.
 R-27-04 passes 809 checks with 151 skipped across 120 case IDs: client 118
 reference / 117 JX, hydrate 90, static 96 and lazy 101 per side. Its four new
 witnesses prove early bytes in actual Node Writables, isolation while one request
 aborts, deduplicated preload hints and retained server nodes after hydration.
 A reproduced fatal-shell defect now rejects both readiness consumers instead of
 leaving `allReady()` pending. The three scoped SSR mutants were killed after a
-passing baseline; Verify remains pending. These
+passing baseline. [PR #47](https://github.com/lmrrcc/jx/pull/47) merged as
+`7759933` after the full local gate and green
+[push CI](https://github.com/lmrrcc/jx/actions/runs/45555926188) and
+[PR CI](https://github.com/lmrrcc/jx/actions/runs/45556004135). These
 proofs do not complete authenticated SSR G0 M1-26 or arbitrary loader cancellation.
 The Promise prerequisite merged as `f2b64cb` in
 [PR #42](https://github.com/lmrrcc/jx/pull/42), with
@@ -96,10 +99,26 @@ The Promise prerequisite merged as `f2b64cb` in
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45466911060):
 nine Promise tests, 36 runtime-package JVM tests and 13 runtime browser checks
 pass, together with its full local gate and CI. The eventual
-118-feature / 6,903-pair universe includes 1,547 additional deferred-feature pairs;
+118-feature / 6,903-pair universe includes 1,443 additional deferred-feature pairs
+after R-28-01 activates `PureComponent`;
 the scope is not reduced to the initial scenarios. Cross-browser and human
 qualification, and explicit applicability decisions, remain recorded requirements
 that the Chrome automated results do not satisfy.
+
+R-28-01's integrated local run passes **825 checks, 151 skipped, across 122 case
+IDs**: client **120 reference / 119 JX**, hydrate **92** per side, static **98**
+and lazy **103**. Both class cases pass all eight projects. The native class
+runtime delegates queues, shallow state merging, commit snapshots, refs and
+`PureComponent` comparison to actual React class instances. Two explicit
+PureComponent/key and PureComponent/ref witnesses bring the current total to
+**54 / 5,460**, leaving **5,406** active pairs open across 105 active features.
+It uses typed explicit descriptors and ordinary Java `Views`; `.jx` class authoring,
+native editor semantics and advanced lifecycle/context options remain later
+slices. Hot replacement resets class state, with typed class checkpoints still
+open. All three targeted class mutants were killed after the baseline passed,
+with no survivors or unusable mutants; the full push gate and Verify
+are pending. The catalog has 115 entries, while the historical full campaign
+remains 100. See [ADR 0006](decisions/0006-java-class-components.md).
 
 Progress, 21 November 2026: [GA-01](ga-01-baseline.md) is done, with CI green at
 `3688d25`. It found `78c9836` red in CI (counter example), restored a

@@ -117,16 +117,18 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The complete R-27-04 local run passes 809 checks, with 151 skipped
-cells across 120 case IDs: client 118 reference / 117 JX, hydrate 90 per side,
-static 96 per side and lazy 101 per side. Fifty-two pairs have complete local evidence
-in their declared modes; 5,304 of the
-5,356 current candidates remain open. The eventual universe includes 118 features
-and 6,903 candidate pairs. **R-27 remains partial.** See the
+The integrated R-28-01 local run passes 825 checks, with 151 skipped
+cells across 122 case IDs: client 120 reference / 119 JX, hydrate 92 per side,
+static 98 per side and lazy 103 per side. Fifty-four pairs have complete local
+evidence in their declared modes; 5,406 of the 5,460 current candidates remain
+open. The active universe now includes 105 features after `PureComponent` becomes
+available. The eventual universe still includes 118 features and 6,903 candidate
+pairs, including 1,443 deferred-feature pairs. **R-27 remains partial.** See the
 [interaction evidence record](../../docs/ga-react-interactions.md) for the two
 initial combined scenarios, children-composition regressions, seven ref pairs,
 six portal pairs, four action pairs, three optimistic/store pairs, three transition
-pairs, four server/resource pairs and acceptance status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
+pairs, four server/resource pairs, two PureComponent key/ref pairs and acceptance
+status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
 at `413558b636679dd5926f4d7bf1c987ea707ed95c`, after its 755-check bench and green
 Verify. R-27-02b merged in [PR #40](https://github.com/lmrrcc/jx/pull/40) at
 `15c0c6eee36f506910e854c568547ebc6d3758ea`, with green
@@ -139,7 +141,11 @@ merged as `1ba8c1d` with green Verify. R-27-03b's scoped mutant was killed after
 its unmutated baseline passed; [PR #44](https://github.com/lmrrcc/jx/pull/44)
 merged as `3e24edb` with both Verify checks green. R-27-03c's scoped mutant
 was killed after its shared scratch baseline passed; [PR #45](https://github.com/lmrrcc/jx/pull/45)
-merged as `812a27a` after its full local gate and both Verify checks passed. Browser evidence is Chrome-only and
+merged as `812a27a` after its full local gate and both Verify checks passed.
+SSR [PR #47](https://github.com/lmrrcc/jx/pull/47) merged as `7759933` with
+[green push CI](https://github.com/lmrrcc/jx/actions/runs/45555926188) and
+[green PR CI](https://github.com/lmrrcc/jx/actions/runs/45556004135).
+Browser evidence is Chrome-only and
 does not establish additional human or cross-browser qualification.
 
 The ref scenarios use actual Playwright element handles to compare DOM identity,
@@ -156,8 +162,9 @@ combine action state with form actions, form status, Java async functions and th
 existing error-boundary equivalent. It checks captured submission payloads,
 sequential previous-state composition, pending status and reset, rejection that
 cancels successors, retry while pending and unmount/remount with a fresh owner.
-The cancellation behavior is fixture-local, not the G0 API; class components
-remain R-28. R-27-03a, R-27-03b optimistic/store and R-27-03c transition are merged.
+The cancellation behavior is fixture-local, not the G0 API; this action fixture
+does not qualify R-28 class behavior. R-27-03a, R-27-03b optimistic/store and
+R-27-03c transition are merged.
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
 combine optimistic state with external-store snapshots, transitions and Java async
@@ -188,6 +195,20 @@ the defect; nine Promise JVM tests (included in 36 runtime-package JVM tests) an
 13 Chrome runtime checks pass, together with the full local gate and CI Verify.
 These [runtime checks](../../docs/runtime.md#promise-observer-isolation) added no
 case or feature-pair credit to the portal baseline of 779 passes and 38 pairs.
+
+The `class-runtime` and `class-keyed` cases compare typed Java peers with actual
+native `React.Component` and `React.PureComponent` instances. They check queued
+functional updates, omitted versus null fields, skipped-render state access,
+commit snapshots/callbacks, forceUpdate, null output without unmounting, and
+native shallow comparison. Keyed Pure peers retain their class refs, DOM nodes
+and state through both reorder directions without rendering unchanged props.
+Both cases pass all eight projects; the two pair witnesses run only in client,
+hydrate and lazy modes. This slice uses explicit descriptors and Java `Views`;
+`.jx` class authoring, native editor semantics and advanced lifecycle/context
+options remain open. Hot replacement resets class state; compatible typed class
+checkpoints are deferred. Three class mutants were killed after the isolated
+baseline passed, and the full push gate
+and Verify are pending. See [ADR 0006](../../docs/decisions/0006-java-class-components.md).
 
 Static HTML equality does not execute interactive assertion blocks, so it does
 not credit those witnesses. Hydration-owned and Node-only scenarios can carry
@@ -289,8 +310,18 @@ The full bench has passed with the new cases;
 See the [server interaction evidence](../../docs/ga-react-interactions.md#r-27-04-streaming-resource-hydration-and-fatal-readiness)
 for exact assertions and remaining destination-failure limits.
 
-The current catalog has **112 entries**; the historical full result still covers 100. These
-scoped campaigns do not establish a fresh full 110-mutant result.
+R-28-01 adds `class-pure-renders`, `class-snapshot-lost` and
+`class-ref-detach-lost`. After the unmutated baseline passed, the exclusive run
+killed all three: the Pure mutation fails `class-keyed` and `class-runtime`,
+while the snapshot and ref-detachment mutations fail `class-runtime`.
+Result: **3 killed, 0 survived, 0 unusable**. Repeat the scoped campaign alone:
+
+```sh
+java tools/MutateBench.java --only class-pure-renders,class-snapshot-lost,class-ref-detach-lost
+```
+
+The current catalog has **115 entries**; the historical full result
+still covers 100. Scoped campaigns do not establish a fresh full-catalog result.
 
 ## Feature list
 

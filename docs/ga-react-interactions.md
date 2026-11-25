@@ -35,34 +35,51 @@ R-27-03c merged as `812a27a4af3c684c1ca94400b958c909f806fe1f` in
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45551387801) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45551292980).
 R-27-04 has complete local bench evidence for four server/resource pairs and a
-fatal-shell readiness correction. Its three scoped mutants were killed; Verify is pending.
+fatal-shell readiness correction. Its three scoped mutants were killed;
+[PR #47](https://github.com/lmrrcc/jx/pull/47) merged as `7759933`, with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45555926188) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45556004135).
 No additional human or cross-browser
 qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
 
-The passing counts below include the complete R-27-04 local run. Its four
-server/resource pairs extend the transition slice's 48 to **52 / 5,356**, with
-**5,304** remaining. This server slice remains under review; the merged R-27-03c
-baseline has 48 complete pair witnesses.
+The passing counts below include the complete R-28-01 run integrated over SSR
+merge `7759933`. Two native class witnesses extend the merged server/resource
+baseline's 52 to **54 / 5,460**, with **5,406** remaining. Native PureComponent
+activates one previously deferred feature, expanding the candidate universe.
+R-28-01 remains under review; all three scoped mutants were killed after the
+scratch baseline passed, with push gate and Verify still pending.
 This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
 | --- | --- |
-| Currently supported/equivalent feature IDs | 104 |
-| Candidate unordered pairs among those IDs | 5,356 |
-| Pairs with a passing witness in every declared mode, on both React and JX | 52 |
-| Current candidate pairs without complete evidence | 5,304 |
+| Currently supported/equivalent feature IDs | 105 |
+| Candidate unordered pairs among those IDs | 5,460 |
+| Pairs with a passing witness in every declared mode, on both React and JX | 54 |
+| Current candidate pairs without complete evidence | 5,406 |
 | Eventual application-feature IDs | 118 |
 | Eventual candidate pairs | 6,903 |
-| Additional pairs involving the 14 deferred feature IDs | 1,547 |
+| Additional pairs involving the 13 deferred feature IDs | 1,443 |
 
 The candidate universe comes from the [feature ledger](evidence/conformance.tsv).
 Only `react-dom:browser` and `framework:react-compiler`, whose task is `none`, are
 outside the eventual application-feature universe. Alias rows remain distinct.
-R-28 adds `PureComponent`; R-29 adds nine deferred rows and R-30 adds four.
-`Component` already counts as an active feature, although its current error-boundary
-equivalent does not implement Java-authored class components.
+R-28-01 activates `PureComponent`; R-29 and R-30 retain 13 deferred rows.
+`Component` already counted as active through its previous error-boundary
+equivalent. Both class rows now describe actual native runtime support, with
+explicit remaining authoring, lifecycle, context and hot-checkpoint limits.
+
+The integrated run passes 825 checks with 151 inapplicable cells across 122
+cases: client 120 React / 119 JX, hydration 92 per side, static HTML 98 per side
+and lazy 103 per side. `class-runtime` checks native queued partial state,
+omission versus null, commit snapshots/callbacks, skipped-render current state,
+forceUpdate, null output, instance refs and Pure comparisons. `class-keyed`
+proves two peers keep their actual DOM nodes, Java instance refs and independent
+state through keyed reorders, without rendering equal fields. Its two pair
+markers execute in client, hydration and lazy modes; static HTML earns no
+interaction credit. The source consumers use explicit typed descriptors;
+compiler-generated class authoring remains a separate slice.
 
 Unlisted pairs are uncovered, not implicitly inapplicable. A pair may lack a
 meaningful interaction, but closing it that way requires a recorded, reviewed
@@ -308,7 +325,8 @@ The combined local bench passes **809 checks, 151 skipped, across 120 case IDs**
 Client/API results are **118/118 reference and 117/117 JX**; hydrate **90/90 each**,
 static **96/96 each** and lazy **101/101 each**. Four new executed witnesses bring
 the combined interaction evidence to **52 / 5,356**, with **5,304** pairs open.
-Its three scoped mutation checks passed; Verify is pending.
+Its three scoped mutation checks passed, followed by the local gate and both
+Verify checks; PR #47 merged as `7759933`.
 
 `combined-server-stream` uses actual Node `Writable` instances. Two request-owned
 data promises remain gated while the spec observes the first shell and fallback

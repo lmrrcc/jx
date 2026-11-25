@@ -22,6 +22,77 @@ has no JVM hook emulation. Hook calls must keep the same unconditional order in
 components and custom hooks; source diagnostics are practical checks, not a proof
 of arbitrary Java control flow.
 
+## Native Java class components
+
+The explicit class runtime creates actual native `React.Component` or
+`React.PureComponent` subclasses. Each mounted native instance owns one Java peer;
+React owns reconciliation, state queues, shallow merging, commit callbacks and
+lifecycle ordering. This is an additional runtime API; functional components and
+hooks remain the default authoring model, and `jx.Component` remains the annotation.
+
+Declare a stable `ClassComponentType<P,S,C>` once and compose it through
+`Views.component(type, props, key, ref)`. Extend `ClassComponent<P,S,X>` for ordinary
+classes or `PureComponent<P,S,X>` for native shallow comparison. `P` and `S` are
+immutable values; `X` is the typed snapshot passed from `getSnapshotBeforeUpdate`
+to `componentDidUpdate`. Descriptors explicitly select lifecycle support.
+Constructors, render methods and state updaters must be pure and cannot call
+hooks. Rendering may return null while retaining the class instance. Initial
+props and state must be non-null.
+
+`ClassSchema<T>` declares each field's name, accessor, value type and a checked
+constructor. Props and state become native objects with one property per declared
+field, so `PureComponent` uses React's comparison of those fields rather than an
+opaque aggregate record. Scalars follow the browser representation rules below;
+nested Java objects retain identity, even when their record values compare equal.
+Schema validation rejects duplicate fields, wrong schema ownership and invalid
+values. The current conservative reserved-name rule applies to both props and
+state, including props-only names such as `key` and `ref`.
+
+`StatePatch<S>` is immutable and belongs to one state schema. An omitted field is
+unchanged; a present nullable field can be set to null. An empty patch is an empty
+object update, while a functional updater returning null requests no update.
+The direct patch overload currently rejects null; that React option remains
+outside this initial slice.
+`setState` queues a patch or a pure function of pending state and next props.
+Optional callbacks run after commit. `forceUpdate` uses React's native operation
+and bypasses `shouldComponentUpdate`. The peer's `props()` and `state()` read the
+current native values even when rendering was skipped, and repeated reads of the
+same current snapshot retain decoded value identity. Historical aggregate identity
+across discarded work or simulated unmounts is not qualified.
+
+`ClassRef<C>` identifies the concrete Java peer through a checked decoder. Keep
+the ref stable; `current()` is null before attachment and after detachment. The
+class peer and its resources belong to that mounted instance. All calls run on
+the browser main thread. The initial hot-reload policy resets class state; opaque
+peers never cross TeaVM generations. Class checkpoints remain future work.
+
+Compiling consumers are
+[`ClassRuntime`](../tests/conformance/src/main/java/jx/conformance/cases/ClassRuntime.java)
+and [`ClassKeyed`](../tests/conformance/src/main/java/jx/conformance/cases/ClassKeyed.java).
+The first covers queued updates, omitted/null fields, commit snapshots and
+callbacks, skipped rendering, forceUpdate, null output, instance refs and native
+Pure comparisons. The second exercises keyed reordering of two Pure peers and
+checks DOM, class-ref and state retention without additional renders.
+See [the class-component decision](decisions/0006-java-class-components.md) for
+the API boundary and remaining R-28 slices.
+
+Local evidence on 25 November: the package passes 34 core, 41 compiler and 15
+Maven-plugin tests. The earlier `class-runtime` focused run passed all eight
+React/JX projects; interactive assertions ran in client, hydrate and lazy modes,
+while static mode compared initial HTML. The complete bench including
+`ClassKeyed`, integrated over SSR merge `7759933`, passes 825 checks, with 151
+skipped across 122 case IDs: client 120 reference / 119 JX, hydrate 92 per side,
+static 98 per side and lazy 103 per
+side. Both class cases pass all eight projects. Their two new declared pair
+witnesses bring this branch's evidence to 54 / 5,460 active pairs; activating
+`PureComponent` expands the candidate universe. This count follows this branch's
+feature and case inventory. All three scoped mutants were killed after the
+unmutated scratch baseline passed, with zero survivors or unusable mutants.
+Push-gate and Verify acceptance remain pending. These Chrome checks do not close
+R-28: compiler-generated `.jx` class descriptors and editor support, advanced
+lifecycles, class context, the remaining option matrix and class checkpoints are
+not yet qualified.
+
 ## Hook behavior
 
 | API | Contract and current evidence |

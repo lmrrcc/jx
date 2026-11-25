@@ -42,6 +42,8 @@ portal-layout	pass	pass	pass	pass	n/a	n/a	pass	pass
 portal-payload	pass	pass	pass	pass	n/a	n/a	pass	pass
 portal-propagation	pass	pass	pass	pass	n/a	n/a	pass	pass
 props-imperative-handle	pass	pass	pass	pass	n/a	n/a	pass	pass
+pure-instance-ref	pass	pass	pass	pass	n/a	n/a	pass	pass
+pure-keyed	pass	pass	pass	pass	n/a	n/a	pass	pass
 refprop-imperative-handle	pass	pass	pass	pass	n/a	n/a	pass	pass
 ssr-preload-dedupe	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 stream-context-isolation	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a

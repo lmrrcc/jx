@@ -75,10 +75,31 @@ Four server/resource pairs bring complete local evidence to 52 / 5,356, leaving
 5,304 active pairs open. Real Writable bytes precede gated data; aborting one
 request preserves the other provider; resource hints and actual server nodes
 survive hydration and updates. A fatal shell now rejects both readiness consumers.
-All three scoped SSR mutants were killed after a passing baseline; Verify is pending.
+All three scoped SSR mutants were killed after a passing baseline.
+[PR #47](https://github.com/lmrrcc/jx/pull/47) merged as `7759933` after the full
+local gate and both Verify workflows passed:
+[push CI](https://github.com/lmrrcc/jx/actions/runs/45555926188) and
+[PR CI](https://github.com/lmrrcc/jx/actions/runs/45556004135).
 These proofs do not complete protected
 SSR G0 M1-26, general destination-failure handling or cancellation of application I/O.
-R-27-03b and R-27-03c are merged; R-27-04 remains in review. See the
+R-27-03b, R-27-03c and R-27-04 are merged.
+
+R-28-01's integrated local bench passes **825 checks, with 151 skipped across
+122 case IDs**: client **120 reference / 119 JX**, hydrate **92**, static **98**
+and lazy **103** per side. Actual native React classes now have typed Java peers,
+state patches, commit snapshots and instance refs; `PureComponent` uses React's
+own shallow field comparison. The two new explicit key/ref witnesses bring
+evidence to **54 / 5,460**, with **5,406** active pairs open. Activating
+`PureComponent` increases the active universe to 105 features; the eventual
+118-feature / 6,903-pair universe is unchanged, leaving 1,443 deferred-feature
+pairs. This runtime slice uses explicit descriptors and ordinary Java `Views`.
+`.jx` class authoring, native editor support and advanced lifecycle/context
+options remain open. Hot replacement resets class state; compatible class
+checkpoints are not implemented. All three targeted mutants were killed after
+the unmutated baseline passed, with zero survivors or unusable mutants; the
+full push gate and Verify are pending. The 115-entry catalog is separate from
+the historical full campaign of 100. See the
+[class-runtime decision](decisions/0006-java-class-components.md) and the
 [interaction evidence record](ga-react-interactions.md) for the unchanged eventual
 118-feature / 6,903-pair scope and its limits. G0 remains open: the serialized lazy
 boundary and basic Node rendering/hydration proofs are delivered, while component
@@ -124,7 +145,7 @@ exists, not when its document or skeleton module lands.
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
 | GA-17 | Forms, validation, i18n and accessible primitives / A | GA-10, GA-15 | M3–M5 / L | Complex form, arrays/errors, locale/RTL, keyboard/reader, shared pure rules and server errors | ⬜ planned |
-| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02b, portal PR #41, Promise PR #42, action PR #43, optimistic PR #44 and transition PR #45 merged; R-27-04 locally evidences 52 active pairs; 5,304 active pairs plus deferred-feature interactions remain; four transition/SSR scoped mutants killed, Verify pending | 🟡 partial |
+| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02b and PR #41–#47 prerequisites through SSR merged; R-28-01 locally evidences 54 / 5,460 active pairs, with 5,406 open plus 1,443 deferred-feature pairs; native class runtime implemented, class authoring and remaining options open; three class mutants killed, push gate and Verify pending | 🟡 partial |
 | GA-19 | HTTP headers/binary/upload/stream capabilities / C | GA-03, GA-10, GA-13 | M3–M5 / L | Auth/CSRF headers, upload progress, download, SSE/WS lifecycle, bounds/reconnect tested | ⬜ planned |
 | GA-20 | Real ecosystem binding SDK and catalog / R | GA-15, GA-18 | M4–M7 / L | Selected grid/editor/chart/headless/media bindings with refs/assets/cleanup; Java consumer examples | ⬜ planned |
 | GA-21 | Complex authenticated reference product / A | GA-12, GA-13, GA-16, GA-17, GA-19 | M4–M6 / L | Workspace/project workflow with roles, search/table/detail, forms/files/activity and two-tenant tests | ⬜ planned |

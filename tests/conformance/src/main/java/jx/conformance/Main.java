@@ -20,6 +20,8 @@ import jx.conformance.cases.CombinedActionQueue;
 import jx.conformance.cases.CombinedOptimisticStore;
 import jx.conformance.cases.CombinedTransitionCancel;
 import jx.conformance.cases.CombinedResourceHydration;
+import jx.conformance.cases.ClassRuntime;
+import jx.conformance.cases.ClassKeyed;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
 import jx.conformance.cases.DomRefFocus;
@@ -213,6 +215,8 @@ public final class Main {
             case "combined-optimistic-store" -> CombinedOptimisticStore.JX;
             case "combined-transition-cancel" -> CombinedTransitionCancel.JX;
             case "combined-resource-hydration" -> CombinedResourceHydration.JX;
+            case "class-runtime" -> ClassRuntime.JX;
+            case "class-keyed" -> ClassKeyed.JX;
             default -> null;
         };
     }
