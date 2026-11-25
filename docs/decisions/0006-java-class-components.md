@@ -586,7 +586,9 @@ after handlers, and the ordered callbacks of a mixed null/increment queue.
 
 The package passes 50 core, 53 compiler, 15 Maven-plugin and 10 LSP tests, including
 three new JVM contracts for deferred evaluation, callback ownership, unchanged
-failure identity and preserved construction/null-updater guards. Integrated full
+failure identity and preserved construction/null-updater guards. All nine class
+cases then pass 72/72 focused projects, including the eight pre-existing class
+regressions. Integrated full
 bench, the registered callback-dropping mutant, push gate and Verify remain
 pending. No aggregate table or feature-pair credit is changed by this focused run.
 
