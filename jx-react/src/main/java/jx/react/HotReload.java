@@ -33,6 +33,7 @@ public final class HotReload {
         if (Objects.requireNonNull(value).isBlank() || value.length() > 1024) throw new IllegalArgumentException("Invalid hot-state identifier/schema");
     }
     static boolean enabled() { return ENABLED; }
+    static void classStateReset(String path) { if (ENABLED) classStateResetNative(path); }
     static JSObject begin(String path, String signature, boolean root) { return ENABLED ? beginNative(path, signature, root) : null; }
     static void end(JSObject frame) { if (frame != null) endNative(frame); }
     static void commit(JSObject frame) { if (frame != null) commitNative(frame); }
@@ -164,5 +165,6 @@ public final class HotReload {
     @JSBody(params = {"id", "signature", "schema"}, script = "var hot = globalThis.__JX_HOT__; var value = hot.incomingStores.get(id); hot.incomingStores.delete(id); if (!value) return null; if (value.signature !== signature || value.schema !== schema || typeof value.payload !== 'string') { hot.notice('Store reset: schema/signature changed for ' + id); return null; } return value.payload;") private static native String storePayload(String id, String signature, String schema);
     @JSBody(params = {"id", "signature", "schema", "encode", "stop"}, script = "var hot = globalThis.__JX_HOT__; if (hot.stores.size >= 128 || hot.stores.has(id)) throw new Error('Duplicate or excessive JX hot stores'); var token = {signature: signature, schema: schema, encode: encode, stop: stop}; hot.stores.set(id, token); return token;") private static native JSObject trackStoreNative(String id, String signature, String schema, Encoder encode, Stop stop);
     @JSBody(params = {"id", "token"}, script = "var stores = globalThis.__JX_HOT__.stores; if (stores.get(id) === token) stores.delete(id);") private static native void untrackStore(String id, JSObject token);
+    @JSBody(params = "path", script = "var hot = globalThis.__JX_HOT__; var message = 'Class state resets on hot replacement: ' + path; if (hot.notices.indexOf(message) < 0) hot.notice(message);") private static native void classStateResetNative(String path);
     @JSBody(params = "message", script = "globalThis.__JX_HOT__.notice(message);") private static native void notice(String message);
 }

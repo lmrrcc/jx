@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 /** An immutable description of elements. Descriptions do not invoke child components. */
-public sealed interface View permits View.Element, View.Text, View.Fragment, View.ComponentView, View.Provider, View.Empty, View.Items, View.Keyed, View.Extension {
+public sealed interface View permits View.Element, View.Text, View.Fragment, View.ComponentView, View.ClassComponentView, View.Provider, View.Empty, View.Items, View.Keyed, View.Extension {
     /** Renderer-specific, explicitly typed extension boundary; unsupported implementations fail explicitly. */
     non-sealed interface Extension extends View {
         /** The native node's explicit reconciliation key, or null when absent. An extension is
@@ -39,6 +39,10 @@ public sealed interface View permits View.Element, View.Text, View.Fragment, Vie
     }
     record ComponentView<P>(ComponentType<P> component, P props, String key) implements View {
         public ComponentView { Objects.requireNonNull(component); }
+    }
+    record ClassComponentView<P,S,C extends ClassComponent<P,S,?>>(ClassComponentType<P,S,C> component,
+            P props, String key, ClassRef<C> ref) implements View {
+        public ClassComponentView { Objects.requireNonNull(component).propsSchema().validate(props); }
     }
     /** A child position that renders nothing: what a null or boolean child becomes. It keeps its
      * place among its siblings, so a sibling after it keeps its identity when it is replaced. */

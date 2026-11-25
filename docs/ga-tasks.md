@@ -149,7 +149,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ✅ done |
 | R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | ✅ done: Luca's try-it confirms 715 passes and 133 inapplicable cells; Verify green at eb5a18a, 24 November |
 | R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-27-04 has local evidence for 52 / 5,356 active pairs; 5,304 remain open, plus deferred-feature pairs |
-| R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | ⬜ planned |
+| R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | 🟡 in progress: runtime slice R-28-01; no completion credit yet |
 | R-29 | M7 | Remaining small surface: `act` for JX tests, `captureOwnerStack`, version constants, `unstable_batchedUpdates`, `unstable_useCacheRefresh` | 9 | ⬜ planned |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | ⬜ planned |
 | R-31 | M10 | Parity gate: zero `unsupported`, zero `untested`, only approved exclusions, mutation survivors zero, every case green in every applicable mode; all option-level limits implemented or explicitly accepted | closes the track | ⬜ planned |
@@ -227,6 +227,26 @@ mutation evidence table or claim a full 102-mutant rerun. Luca's try-it run repo
 715 passed, 133 skipped and an exact match with the recorded table. Together with
 [green Verify at eb5a18a](https://github.com/lmrrcc/jx/actions/runs/45372691183),
 this closes R-26.
+
+### R-28 implementation slices
+
+Split before implementation on 24 November 2026. The [class runtime decision](decisions/0006-java-class-components.md)
+requires actual React classes with typed Java peers, native queues and shallow
+state merges. Functional components remain the foundation; `jx.Component` remains
+the annotation. Runtime support does not imply `.jx` class authoring, complete
+lifecycle parity or preserved class state across hot replacement.
+
+| Task | Deliverable | Status |
+| --- | --- | --- |
+| R-28-01 | Explicit Java descriptors and schemas; actual React Component/PureComponent; typed partial updates, basic lifecycle/snapshots/refs and compiling consumer with browser comparison | 🟡 local verification: 33 core, 41 compiler, 15 Maven tests and eight focused browser projects pass; scalar prerequisite, full conformance, mutation, push gate and Verify pending |
+| R-28-02 | `.jx` class authoring, generated field projections and patches, diagnostics and native editor projections | ⬜ planned |
+| R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options | ⬜ planned |
+| R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |
+
+Class hot replacement explicitly resets state in the first slice. Preservation
+requires a commit observer that covers skipped renders; `componentDidUpdate`
+alone is insufficient. Legacy lifecycle/default-prop/null-state behavior and
+generic schemas remain open until implemented or explicitly reviewed for R-31.
 
 ### R-27 implementation slices
 

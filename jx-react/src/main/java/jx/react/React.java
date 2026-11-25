@@ -284,6 +284,8 @@ public final class React {
             case View.Text text -> nativeText(text.value());
             case View.Fragment fragment -> withKey(fragment(children(fragment.children(), keyedPosition + "/fragment")), replacementKey);
             case View.ComponentView<?> component -> component(component, HotReload.childPath(component.component().name(), key, position, container), false, key);
+            case View.ClassComponentView<?,?,?> component -> ReactClasses.element(component,
+                    HotReload.childPath(component.component().name(), key, position, container), key);
             case View.Provider<?> provider -> withKey(provider(provider, keyedPosition), replacementKey);
             case View.Empty empty -> null;
             // A real array, so React gives the collection one position and matches its items by key.

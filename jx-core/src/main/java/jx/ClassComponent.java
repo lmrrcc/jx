@@ -1,0 +1,73 @@
+package jx;
+
+import java.util.Objects;
+import java.util.function.BiFunction;
+
+/** Java peer of an actual React class instance. Browser-main-thread only. Props/state are
+ * immutable values; React owns update evaluation and commit timing. Constructors, render and
+ * updater functions must be pure and may be repeated/discarded. Hooks are not allowed here.
+ * Class state currently resets on hot replacement; peers never cross TeaVM generations. */
+public abstract class ClassComponent<P,S,X> {
+    /** Renderer-owned instance access; applications do not implement or bind this adapter. */
+    public interface Host<P,S> {
+        P props(); S state();
+        void update(BiFunction<S,P,StatePatch<S>> updater, Runnable committed);
+        void force(Runnable committed);
+    }
+    private P initialProps;
+    private S initialState;
+    private Host<P,S> host;
+    protected ClassComponent(P props, S state) { initialProps = Objects.requireNonNull(props); initialState = Objects.requireNonNull(state); }
+    /** Current native instance values, including updates whose render was skipped. Repeated
+     * reads of the same current native snapshot reuse the decoded record. Historical snapshot
+     * identity after disposal/concurrent discard is not guaranteed. Declared reference fields
+     * retain their original identity. */
+    public final P props() { return host == null ? initialProps : host.props(); }
+    public final S state() { return host == null ? initialState : host.state(); }
+    /** Renderer initialization handoff, available only before binding. */
+    public final S initialState() {
+        if (host != null) throw new IllegalStateException("Initial class state has already been handed to the renderer");
+        return initialState;
+    }
+    /** Renderer entry point. A peer can belong to only one native instance. */
+    public final void bind(Host<P,S> host) {
+        if (this.host != null) throw new IllegalStateException("Class peer already bound");
+        this.host = Objects.requireNonNull(host);
+        initialProps = null;
+        initialState = null;
+    }
+    private Host<P,S> host() {
+        if (host == null) throw new IllegalStateException("Class updates are not allowed during construction");
+        return host;
+    }
+    public final void setState(StatePatch<S> patch) { setState(patch, null); }
+    public final void setState(StatePatch<S> patch, Runnable committed) {
+        Objects.requireNonNull(patch); host().update((state, props) -> patch, committed);
+    }
+    public final void setState(BiFunction<S,P,StatePatch<S>> updater) { setState(updater, null); }
+    /** Queues a pure updater over pending state and next props. Null means no update; callbacks
+     * are optional and run after commit, never while evaluating the updater. */
+    public final void setState(BiFunction<S,P,StatePatch<S>> updater, Runnable committed) {
+        host().update(Objects.requireNonNull(updater), committed);
+    }
+    /** Schedules native forceUpdate, bypassing shouldComponentUpdate. */
+    public final void forceUpdate(Runnable committed) { host().force(committed); }
+    public final void forceUpdate() { forceUpdate(null); }
+    /** Pure rendered description, or null to render nothing while retaining this instance. */
+    public abstract View render();
+    protected void componentDidMount() {}
+    protected void componentDidUpdate(P previousProps, S previousState, X snapshot) {}
+    protected void componentWillUnmount() {}
+    protected X getSnapshotBeforeUpdate(P previousProps, S previousState) { return null; }
+    protected boolean shouldComponentUpdate(P nextProps, S nextState) { return true; }
+    /** Renderer lifecycle dispatch. Register the corresponding descriptor capability. */
+    public final void mounted() { componentDidMount(); }
+    public final void unmounting() { componentWillUnmount(); }
+    public final boolean shouldUpdate(P nextProps, S nextState) { return shouldComponentUpdate(nextProps, nextState); }
+    public final void updated(P previousProps, S previousState) { componentDidUpdate(previousProps, previousState, null); }
+    /** Captures the typed snapshot now; the returned callback consumes it after DOM commit. */
+    public final Runnable snapshot(P previousProps, S previousState) {
+        X snapshot = getSnapshotBeforeUpdate(previousProps, previousState);
+        return () -> componentDidUpdate(previousProps, previousState, snapshot);
+    }
+}
