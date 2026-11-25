@@ -46,9 +46,13 @@ bench: **887 passed, 169 skipped, 132 cases**. Client is 130 reference / 129 JX;
 hydrate 99, static 105 and lazy 110 per side. Only the `image-preload` case is
 added to the recorded results; interaction evidence remains 54/6328.
 
-No mutation campaign has run yet for this capability. The curated
-`hint-image-sizes-dropped` and `hint-referrer-policy-dropped` mutations are registered
-but unexecuted. The local push gate and Verify remain pending.
+Both `hint-image-sizes-dropped` and `hint-referrer-policy-dropped` were killed
+by `image-preload` after a passing unmutated baseline. They are the preload quota
+of an exclusive five-mutant run: 5 killed, 0 survived, 0 unusable. The integrated
+candidate `e63ea76` passed 905 checks /175 skipped across 135 cases, with 54/6328
+interaction pairs unchanged. The six preload implementation/consumer files are
+byte-identical to the qualified slice. Scratch evidence:
+`jx-mutation-7730846870036546774`. The historical full campaign remains 100. The local push gate and Verify remain pending.
 The browser check is Chrome evidence, not cross-browser or GA qualification.
 
 Compatibility: existing constructor and accessor descriptors remain available.

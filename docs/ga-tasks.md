@@ -362,7 +362,10 @@ the case passed all eight React/JX mode combinations and both option-contract JV
 tests passed. Integrated source `0f41000` on FormStatus candidate `1b65e70` passes
 42 core, two React options, 48 compiler and 15 plugin checks plus the full bench:
 887 passed /169 skipped /132 cases, unchanged 54/6328 interaction pairs.
-Mutation runs, the publication gate and Verify remain pending; no blanket
+Both preload mutants were killed after a passing baseline in the five-mutant
+`e63ea76` integration campaign (5 killed, zero survived/unusable); its six preload
+implementation/consumer files match this slice byte for byte. The publication
+gate and Verify remain pending; no blanket
 preload or browser qualification follows from this slice. See the
 [focused evidence](evidence/responsive-preload.md).
 Adding record components preserves the old constructor and accessors but extends
