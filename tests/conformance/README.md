@@ -139,9 +139,9 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The integrated next-context run over responsive preload passes 911 checks, with
-169 skipped cells across 135 case IDs: client 133 reference / 132 JX, hydrate 102
-per side, static 108 per side and lazy 113 per side. Fifty-four pairs have complete local
+The merged null-patch run over responsive preload passes 919 checks, with
+169 skipped cells across 136 case IDs: client 134 reference / 133 JX, hydrate 103
+per side, static 109 per side and lazy 114 per side. Fifty-four pairs have complete local
 evidence in their declared modes; 6,274 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate
@@ -397,15 +397,18 @@ the seven scoped mutations with zero survived/unusable. The historical full
 campaign remains 100. Scratch evidence is `jx-mutation-2296619748002841958`;
 reproduce this slice exclusively with
 `java tools/MutateBench.java --only class-null-patch-callback-lost --keep`.
-Final gate and Verify remain pending.
 After rebasing onto preload plus next-context candidate `cc2776e`, package
 checks pass 54 core/2 React/53 compiler/15 Maven/10 LSP and the null-patch/preload
 focused comparison passes 16 projects. This partial run leaves the complete
-tables unchanged; the final publication gate supplies full integrated evidence.
+tables unchanged. The final 15-step gate passes in 348 seconds, including the
+complete bench with 919 checks/169 skipped/136 cases and unchanged 54/6328 pairs.
+PR [#61](https://github.com/lmrrcc/jx/pull/61) merged as `a93e325` after both
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45670379139) and
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45670577701) passed on `1c23a22`.
 
 `class-pure-policy` compares ordinary and context-aware custom policies on actual
 native Pure classes. The runtime/compiler guard regressions first failed, then
-passed after removing those guards. Integration passes 56 core, 54 compiler,
+passed after removing those guards. The integration before preload passes 56 core, 54 compiler,
 15 Maven and 10 LSP tests, plus 919 browser checks/169 skipped/136 cases,
 including all 80 class cells. Equal-props rendering, false-policy skips with fresh
 instance state, callback timing, force/context bypass, DOM identity and the native

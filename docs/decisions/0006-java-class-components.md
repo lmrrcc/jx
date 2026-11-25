@@ -604,16 +604,23 @@ full-catalog run. The runtime and nullable-patch fixture/spec files are
 byte-identical to this publication branch. Scratch evidence is
 `jx-mutation-2296619748002841958`. Run this slice exclusively with
 `java tools/MutateBench.java --only class-null-patch-callback-lost --keep`.
-Final push gate and Verify remain pending. The historical full mutation
+The final publication results follow below. The historical full mutation
 campaign remains 100; this slice's original catalog had 131 entries.
 
 The later source-preserving rebase onto next-context candidate `cc2776e`, which
 includes responsive preload, passes 54 core, 2 React-option, 53 compiler,
 15 Maven-plugin and 10 LSP tests. A focused comparison of `class-null-patch` and
 `image-preload` passes all 16 projects. It does not rewrite complete evidence or
-claim a new full-run count: the final publication gate will run the complete
-integrated suite. The runtime and nullable-patch fixtures also remain identical
+claim a new full-run count by itself. The runtime and nullable-patch fixtures remain identical
 to the seven-mutant candidate whose full bench passed 931 checks/181 skipped.
+
+Final integration onto next-context merge `3815001` passes the complete 15-step
+gate in 348 seconds, including **919 checks, 169 skipped, across 136 cases**:
+client 134 React / 133 JX, hydrate 103, static 109 and lazy 114 per side. All 72
+class cells pass; pair evidence remains 54/6328. PR
+[#61](https://github.com/lmrrcc/jx/pull/61) merged as `a93e325` after both
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45670379139) and
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45670577701) passed on `1c23a22`.
 
 ### Remaining option inventory
 
