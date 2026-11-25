@@ -102,6 +102,52 @@ in Java computation does not imply exact native JavaScript Number interoperabili
 Mutable values are not tracked: mutating a Java object in place does not create a
 new snapshot or dependency identity.
 
+### Signed-zero boundary regression
+
+The native comparison path must retain JavaScript scalars all the way to React.
+Returning a native number as Java `Object` passes it through TeaVM 0.16.0's
+`JSWrapper` numeric cache. Its `Map` uses SameValueZero and can merge `+0` and
+`-0` before React's `Object.is` comparison runs. A Java `JSObject[]` also boxes
+elements when they enter Java array storage, so merely changing the element type
+does not fix dependency comparisons.
+
+The bridge now uses the public TeaVM JSO scalar types, `JSObject` receiver
+signatures and a native JavaScript dependency array. Opaque Java values remain
+opaque; the existing exact-range Long policy and numeric normalization do not
+change. A deferred `useDebugValue` formatter captures its original Java argument,
+so it does not reconstruct a typed value from the normalized native scalar.
+
+The compiling [`ScalarBoundaryFixture`](../tests/runtime-browser/src/main/java/jx/fixture/ScalarBoundaryFixture.java)
+is isolated at `/?fixture=scalar-boundary`, outside the default hot-reload tree.
+Its three browser regressions independently check numeric state, dependency
+consumers and context. Boolean updates force dependency/provider rendering, so
+a broken numeric state bailout cannot hide those other defects. The tests cover
+both signed-zero directions, unchanged-sign state bailout, stable dependencies
+on an unrelated render, memo/callback, insertion/layout/passive effects,
+imperative handles and a memoized context consumer. Unexpected console or page
+errors fail the tests.
+
+Local reproduction on 25 November 2026: the first version of all three tests
+failed before the repair and passed after it in the implementation worktree.
+The standalone prerequisite then passed its runtime package (29 core and seven
+Elm JVM tests) and the complete 16-test Chrome runtime suite. That final run also
+includes the strengthened checks for unchanged-sign commit bailout and passive
+effects after an unrelated render, alongside Promise and hot-reload regressions.
+Generated JavaScript was checked for direct numeric values, native array slots
+and `Object.is` without the numeric wrapper round trip. The local push gate and
+Verify remain pending. These checks add no React feature-pair credit.
+Cross-browser behavior, changing numeric wrapper classes in a hook slot and
+DevTools formatter invocation have no new qualification from this regression.
+
+After building the runtime, the focused check is:
+
+```sh
+RUNTIME_PORT=4579 npx playwright test -c tests/runtime-browser/playwright.config.js tests/runtime-browser/tests/scalar-boundary.spec.js
+```
+
+`RUNTIME_PORT` defaults to 4373; it changes both the fixture server and browser
+test URL for isolated verification.
+
 ## DOM and interop
 
 `Views` supports native elements, fragments, components, keys, iterable children,

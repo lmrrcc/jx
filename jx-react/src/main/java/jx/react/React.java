@@ -460,7 +460,7 @@ public final class React {
     // Only its children array is returned; the temporary description is never rendered.
     // A dynamic collection does not take this path and retains React's missing-key checks.
     @JSBody(params = {"items", "fixed"}, script = "var values = Array.prototype.slice.call(items); return fixed && values.length > 1 ? React.createElement.apply(null, [React.Fragment, null].concat(values)).props.children : values;", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject array(Object[] items, boolean fixed);
-    @JSBody(params = {"object", "name", "value"}, script = "object[name] = value;") private static native void set(JSObject object, String name, Object value);
+    @JSBody(params = {"object", "name", "value"}, script = "object[name] = value;") private static native void set(JSObject object, String name, JSObject value);
     @JSBody(params = {"object", "name", "value"}, script = "object[name] = value;") private static native void setNative(JSObject object, String name, JSObject value);
     @JSBody(params = {"object", "name", "handler"}, script = "object[name] = handler;") private static native void setHandler(JSObject object, String name, Handler handler);
     // A memoized descriptor becomes React.memo. The comparison also requires the same hot-reload
@@ -476,7 +476,7 @@ public final class React {
     @JSBody(params = "children", script = "return React.createElement.apply(null, [React.Fragment, null].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject fragment(Object[] children);
     @JSBody(params = {"element", "key"}, script = "return key === null ? element : React.cloneElement(element, {key: key});", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject withKey(JSObject element, String key);
     @JSBody(params = "element", script = "return element.key == null ? null : String(element.key);") private static native String nativeKey(JSObject element);
-    @JSBody(params = {"context", "value", "identity", "children"}, script = "return React.createElement.apply(null, [context.jxProvider, {value: value, identity: identity}].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject provider(JSObject context, Object value, Object identity, Object[] children);
+    @JSBody(params = {"context", "value", "identity", "children"}, script = "return React.createElement.apply(null, [context.jxProvider, {value: value, identity: identity}].concat(children));", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject provider(JSObject context, Object value, JSObject identity, Object[] children);
     @JSBody(params = "error", script = "var cause = error && error.cause; return cause && typeof cause === 'object' ? cause : null;") private static native JSObject errorCause(JSObject error);
     @JSBody(params = {"elementId", "tree", "prefix", "caught", "uncaught", "recoverable"}, script = "var element = document.getElementById(elementId); if (!element) throw new Error('Missing React root: ' + elementId);"
             + " var stack = function(info) { return info && info.componentStack ? String(info.componentStack) : ''; };"

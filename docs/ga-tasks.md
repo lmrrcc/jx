@@ -153,6 +153,18 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | ⬜ planned |
 | R-31 | M10 | Parity gate: zero `unsupported`, zero `untested`, only approved exclusions, mutation survivors zero, every case green in every applicable mode; all option-level limits implemented or explicitly accepted | closes the track | ⬜ planned |
 
+R-28-SCALAR prerequisite, 25 November 2026: 🟡 in review. Class-runtime work
+exposed an existing numeric bridge defect: TeaVM's Java-object conversion can
+merge signed zeros before React compares them. The isolated repair preserves the
+native scalar path and native dependency arrays. The initial three browser
+regressions failed before the repair and passed afterward. This standalone
+prerequisite also passes 36 runtime-package JVM tests and all 16 Chrome runtime
+checks, including strengthened commit/effect assertions; the local push gate and
+Verify remain pending. See the
+[runtime contract and compiling consumer](runtime.md#signed-zero-boundary-regression).
+It enables no class-component API and adds no feature-pair coverage; R-28 remains
+open.
+
 Audit, 23 November 2026: R-16's primary action APIs and browser cases are delivered,
 but `useFormState` has no Java API or case and remains excluded in the feature
 register. Add the alias and a differential consumer case, or obtain an explicit

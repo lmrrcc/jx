@@ -8,5 +8,7 @@ globalThis.ForeignBadge = function ForeignBadge({ label }) {
 export { main };
 if (!globalThis.__JX_HOT__?.deferMain) {
   main([]);
-  createRoot(document.getElementById('export')).render(React.createElement(globalThis.ExportedCounter, {initial: 20}));
+  if (globalThis.ExportedCounter) {
+    createRoot(document.getElementById('export')).render(React.createElement(globalThis.ExportedCounter, {initial: 20}));
+  }
 }
