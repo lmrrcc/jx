@@ -418,7 +418,12 @@ after a passing baseline on `f49b48f`, one of the seven scoped mutations with
 zero survived/unusable; the historical full campaign remains 100. Scratch
 evidence is `jx-mutation-2296619748002841958`. Reproduce this slice exclusively
 with `java tools/MutateBench.java --only class-pure-policy-suppressed --keep`.
-Final gate/Verify remain pending.
+After integration over merged preload and null patches, the 15-step gate passes
+in 311 seconds: 56 core/2 React/54 compiler/15 Maven/10 LSP tests and the full
+927-check bench, with 169 skipped cells across 137 cases. All 80 class cells
+pass and pair evidence remains 54/6328. PR [#62](https://github.com/lmrrcc/jx/pull/62)
+merged as `39dd3ce` after both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45676165881)
+and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45675888499) passed on `035e6ab`.
 
 ## Mutation check
 
