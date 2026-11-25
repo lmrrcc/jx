@@ -15,7 +15,8 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27 slices through SSR R-27-04, the Promise/scalar prerequisites and R-28-01's native class runtime merged with green Verify. Evidence covers 54 / 5,460 active pairs, with 5,406 open; three class mutants killed after the baseline passed. Complete class authoring, remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27 slices through SSR R-27-04, the Promise/scalar prerequisites and R-28-01 merged with green Verify. The native class runtime evidences 54 / 5,460 active pairs, with 5,406 open; three class mutants killed after the baseline passed. Complete class authoring, remaining APIs, options and combined scenarios. |
+| R-28 Java class runtime | 🟡 Partial | R-28-01 merged as `ccfcb2d` after the local gate and both Verify checks passed. R-28-02a adds generated `.jx` class descriptors and typed patches with 8/8 focused projects and an integrated bench of 833 passed/151 skipped/123 cases; its compiler mutant was killed after a passing baseline, gate and Verify pending. Native editor qualification, advanced lifecycle/context options and class hot checkpoints remain open. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -116,9 +117,23 @@ It uses typed explicit descriptors and ordinary Java `Views`; `.jx` class author
 native editor semantics and advanced lifecycle/context options remain later
 slices. Hot replacement resets class state, with typed class checkpoints still
 open. All three targeted class mutants were killed after the baseline passed,
-with no survivors or unusable mutants; the full push gate and both Verify checks
-passed before PR #48 merged as `ccfcb2d`. The catalog has 115 entries, while the historical full campaign
+with no survivors or unusable mutants; the local 14-step gate and both Verify
+checks passed before PR #48 merged as `ccfcb2d`. That runtime slice's catalog
+has 115 entries, while the historical full campaign
 remains 100. See [ADR 0006](decisions/0006-java-class-components.md).
+
+R-28-02a adds direct class authoring in `.jx`: generated typed schemas, immutable
+partial patches, lifecycle descriptors and checked class tags/refs. Its integrated
+run passes **833 checks, 151 skipped, across 123 case IDs**: client **121 reference /
+120 JX**, hydrate **93** per side, static **99** and lazy **104**. All eight focused
+projects pass. Pair evidence remains **54 / 5,460** with **5,406** active pairs
+open; this compiler consumer adds no pair credit. The first authored subset uses
+direct, non-generic classes and nested record props/state, with field-type limits
+listed in ADR 0006. Native IDE qualification remains separate; advanced lifecycle/
+context options and class state preservation are still open. The compiler snapshot
+mutant was killed after the unmutated baseline passed, with no survivors or
+unusable mutants; the full push gate and Verify remain pending.
+The catalog has 116 entries, separate from the historical full campaign of 100.
 
 Progress, 21 November 2026: [GA-01](ga-01-baseline.md) is done, with CI green at
 `3688d25`. It found `78c9836` red in CI (counter example), restored a

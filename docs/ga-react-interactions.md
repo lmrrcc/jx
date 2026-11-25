@@ -44,15 +44,15 @@ qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
 
-The passing counts below include the complete R-28-01 run integrated over SSR
-merge `7759933`. Two native class witnesses extend the merged server/resource
+The passing counts below include R-28-02a's complete authoring run integrated
+over PR #48's merge `ccfcb2d`. Two native class runtime witnesses extend the merged server/resource
 baseline's 52 to **54 / 5,460**, with **5,406** remaining. Native PureComponent
 activates one previously deferred feature, expanding the candidate universe.
-R-28-01 merged as `ccfcb2d` in [PR #48](https://github.com/lmrrcc/jx/pull/48),
-after all three scoped mutants were killed, the full local gate passed, and
-both Verify checks were green:
-[push CI](https://github.com/lmrrcc/jx/actions/runs/45560759038) and
-[PR CI](https://github.com/lmrrcc/jx/actions/runs/45560907924).
+All three R-28-01 scoped mutants were killed after the scratch baseline passed.
+[PR #48](https://github.com/lmrrcc/jx/pull/48) merged as `ccfcb2d` after the local
+14-step gate and both Verify checks passed:
+[push](https://github.com/lmrrcc/jx/actions/runs/45560759038) and
+[PR](https://github.com/lmrrcc/jx/actions/runs/45560907924).
 This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
@@ -73,16 +73,20 @@ R-28-01 activates `PureComponent`; R-29 and R-30 retain 13 deferred rows.
 equivalent. Both class rows now describe actual native runtime support, with
 explicit remaining authoring, lifecycle, context and hot-checkpoint limits.
 
-The integrated run passes 825 checks with 151 inapplicable cells across 122
-cases: client 120 React / 119 JX, hydration 92 per side, static HTML 98 per side
-and lazy 103 per side. `class-runtime` checks native queued partial state,
+The integrated run passes 833 checks with 151 inapplicable cells across 123
+cases: client 121 React / 120 JX, hydration 93 per side, static HTML 99 per side
+and lazy 104 per side. `class-runtime` checks native queued partial state,
 omission versus null, commit snapshots/callbacks, skipped-render current state,
 forceUpdate, null output, instance refs and Pure comparisons. `class-keyed`
 proves two peers keep their actual DOM nodes, Java instance refs and independent
 state through keyed reorders, without rendering equal fields. Its two pair
 markers execute in client, hydration and lazy modes; static HTML earns no
-interaction credit. The source consumers use explicit typed descriptors;
-compiler-generated class authoring remains a separate slice.
+interaction credit. Those two consumers use explicit typed descriptors.
+`class-authoring` separately compiles the same native class contract from `.jx`;
+its eight passing cells add no feature-pair witnesses. The authoring snapshot
+mutant was killed after the unmutated baseline passed. Authoring push gate and
+Verify acceptance remain pending; native IDE qualification is
+outside this compiler slice.
 
 Unlisted pairs are uncovered, not implicitly inapplicable. A pair may lack a
 meaningful interaction, but closing it that way requires a recorded, reviewed

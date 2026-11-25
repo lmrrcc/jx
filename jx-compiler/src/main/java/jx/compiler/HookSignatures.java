@@ -37,7 +37,7 @@ final class HookSignatures {
                 for (Tree declaration : unit.getTypeDecls()) if (declaration instanceof ClassTree type) {
                     String name = packageName.isEmpty() ? type.getSimpleName().toString() : packageName + "." + type.getSimpleName();
                     ComponentMetadata component = components.stream().filter(c -> c.qualifiedName().equals(name)).findFirst().orElse(null);
-                    if (component == null) continue;
+                    if (component == null || component.classSpec() != null) continue;
                     Analyzer analyzer = new Analyzer(unit, type, component);
                     result.put(name, analyzer.signature());
                 }

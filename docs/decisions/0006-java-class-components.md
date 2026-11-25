@@ -1,8 +1,8 @@
 # Java class components on the React runtime
 
-Date: 24 November 2026. Status: R-28-01 merged in PR #48 at `ccfcb2d`, with local
-verification, scoped mutation, push gate and both Verify checks passed.
-The broader R-28 task remains incomplete.
+Date: 24 November 2026. Status: R-28-01 merged in PR #48 on 25 November after
+local verification, scoped mutation, push gate and Verify passed. R-28-02a is in
+review; the broader R-28 task remains incomplete.
 
 Java classes may own React component identity through a descriptor separate from
 the existing functional `ComponentType`. The browser creates an actual subclass
@@ -94,8 +94,11 @@ The unmutated scratch baseline passed, then all three targeted mutants were
 killed: `class-pure-renders` by `class-keyed` and `class-runtime`, and
 `class-snapshot-lost` / `class-ref-detach-lost` by `class-runtime`. The result is
 3 killed, 0 survived, 0 unusable. This scoped run does not replace the historical
-100-entry full campaign; the catalog now contains 115 entries. The full local
-push gate and both Verify checks passed before PR #48 merged.
+100-entry full campaign; that runtime slice's catalog contains 115 entries.
+The local push gate passed all 14 steps, and both Verify checks passed on tested
+head `b8657cb`: [push](https://github.com/lmrrcc/jx/actions/runs/45560759038) and
+[PR](https://github.com/lmrrcc/jx/actions/runs/45560907924).
+[PR #48](https://github.com/lmrrcc/jx/pull/48) merged as `ccfcb2d`.
 
 The first run exposed an existing signed-zero defect in the general scalar
 bridge. A separate prerequisite reproduces three independent hook/dependency/
@@ -111,3 +114,52 @@ The consumers prove keyed remount, an unaffected Pure sibling and keyed reorder.
 Advanced lifecycle options, class context,
 compiler-generated schemas, mixed numeric wrapper types and class checkpoints
 remain unqualified.
+
+## R-28-02a authoring decision — 25 November 2026
+
+The first authoring slice accepts `@Component` on a concrete, non-generic Java
+class directly extending `ClassComponent<Counter.Props, Counter.Model, Snapshot>`
+or `PureComponent` with the same type arguments. The author declares public,
+non-generic nested records for `Props` and the selected state type, a public
+constructor accepting Props, and a public instance `render()` containing `.jx`
+markup. The constructor initializes state through ordinary `super(props, model)`;
+no injected fields are required in the constructor.
+
+The compiler generates the native class `JX` descriptor, private typed field
+schemas, and an immutable `statePatch().withCount(value).build()` builder whose setter
+methods follow the state record. Schema fields live in a private lazy holder so
+an authored static initializer may call the patch builder before the generated
+JX declaration is reached. No map, reflection or unchecked decoder is introduced.
+Instance lifecycle declarations enable only the already implemented callbacks.
+Snapshot without an update lifecycle, unsupported lifecycle names and Pure's
+custom should-update policy receive explicit diagnostics.
+
+This slice supports int, long, float, double, boolean, String and corresponding
+boxed values, plus reifiable reference/array types. Reference fields are nullable;
+primitive fields are not. Parameterized field types, byte/short/char fields,
+generic class/state declarations and indirect class inheritance remain explicit
+authoring limits. The lower-level descriptor API is still available for schemas
+outside this generated subset. Reserved framework field and generated member
+names are rejected at source locations.
+
+Fluent setters use `with` followed by an uppercased first field character, leaving
+the remaining spelling unchanged. This avoids Object-method signature collisions;
+two state fields mapping to the same setter name are rejected before generation.
+
+Class tags construct typed Props and pass optional key and `ClassRef<Counter>`
+separately to `Views.component`. Functional component tags keep their current ref
+as an ordinary Props field. The shared native-Java editor projection emits the
+same class members and type contexts; projection/javac tests do not qualify the
+complete IDE experience. That editor acceptance remains R-28-02b. Class hot
+replacement still resets state, and this syntax slice adds no lifecycle parity.
+
+Integrated validation after rebase onto PR #48's merge `ccfcb2d`: 34 core,
+48 compiler and 15 Maven-plugin package tests; 10 LSP protocol tests; the authored
+class consumer passes all eight React/JX projects. The complete bench passes
+833 checks with 151 skipped across 123 cases: client 121 React / 120 JX, hydrate
+93 per side, static 99 per side and lazy 104 per side. The recorded case table
+adds only `class-authoring`; interaction evidence stays 54 / 5,460. The generated
+`class-authoring-snapshot-lost` mutant was killed by `class-authoring` after the
+unmutated scratch baseline passed: 1 killed, 0 survived, 0 unusable. The catalog
+has 116 entries; the historical full campaign still covers 100. Native IDE
+qualification, gate and Verify remain pending.

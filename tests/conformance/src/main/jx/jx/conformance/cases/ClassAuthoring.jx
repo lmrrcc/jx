@@ -1,0 +1,33 @@
+package jx.conformance.cases;
+
+import jx.*;
+
+/** Class tags, special class refs, ordinary props, a record spread and keyed lifecycle. */
+@Component
+public final class ClassAuthoring {
+    public static View render() {
+        ClassRef<AuthoredCounter> normal = Hooks.useMemo(() -> new ClassRef<>(value -> {
+            if (value instanceof AuthoredCounter counter) return counter;
+            throw new IllegalArgumentException("Expected AuthoredCounter");
+        }), Dependencies.none());
+        ClassRef<AuthoredPure> pure = Hooks.useMemo(() -> new ClassRef<>(value -> {
+            if (value instanceof AuthoredPure counter) return counter;
+            throw new IllegalArgumentException("Expected AuthoredPure");
+        }), Dependencies.none());
+        State<Integer> tick = Hooks.useState(0);
+        State<Integer> key = Hooks.useState(0);
+        State<Boolean> mounted = Hooks.useState(true);
+        State<String> inspection = Hooks.useState("uninspected");
+        return <main>
+            <button onClick={event -> tick.update(value -> value + 1)}>Equal authored props</button>
+            <button disabled={!mounted.value()} onClick={event -> normal.current().clearNote()}>Clear authored note</button>
+            <button disabled={!mounted.value()} onClick={event -> key.update(value -> value + 1)}>Remount authored</button>
+            <button disabled={!mounted.value()} onClick={event -> mounted.set(false)}>Unmount authored</button>
+            <button onClick={event -> inspection.set(normal.current() == null ? "detached" : "count=" + normal.current().state().count())}>Inspect authored ref</button>
+            <output data-testid="authored-pulse">{tick.value()}</output>
+            <output data-testid="authored-inspection">{inspection.value()}</output>
+            {mounted.value() ? <AuthoredCounter label="Count" initial={2} key={"normal-" + key.value()} ref={normal} /> : null}
+            <AuthoredPure {...new AuthoredPure.Props("Pure")} ref={pure} key="pure" />
+        </main>;
+    }
+}

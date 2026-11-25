@@ -30,7 +30,13 @@ React owns reconciliation, state queues, shallow merging, commit callbacks and
 lifecycle ordering. This is an additional runtime API; functional components and
 hooks remain the default authoring model, and `jx.Component` remains the annotation.
 
-Declare a stable `ClassComponentType<P,S,C>` once and compose it through
+Direct native classes can now be authored in `.jx` with `@Component`, public
+Props/state records, an ordinary Props constructor and an instance `render()`.
+The compiler generates the stable native descriptor, checked schemas and an
+immutable `statePatch().withCount(value).build()` API. See the
+[class authoring contract](language.md#native-class-components) and
+[AuthoredCounter.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredCounter.jx).
+The lower-level alternative is to declare a stable `ClassComponentType<P,S,C>` once and compose it through
 `Views.component(type, props, key, ref)`. Extend `ClassComponent<P,S,X>` for ordinary
 classes or `PureComponent<P,S,X>` for native shallow comparison. `P` and `S` are
 immutable values; `X` is the typed snapshot passed from `getSnapshotBeforeUpdate`
@@ -88,11 +94,27 @@ witnesses bring this branch's evidence to 54 / 5,460 active pairs; activating
 `PureComponent` expands the candidate universe. This count follows this branch's
 feature and case inventory. All three scoped mutants were killed after the
 unmutated scratch baseline passed, with zero survivors or unusable mutants.
-The full local gate and both Verify checks passed before PR #48 merged as
-`ccfcb2d`. These Chrome checks do not close
-R-28: compiler-generated `.jx` class descriptors and editor support, advanced
+PR [#48](https://github.com/lmrrcc/jx/pull/48) merged as `ccfcb2d` after the local
+14-step gate and both Verify checks passed. These Chrome checks do not close
+R-28: native editor qualification, advanced
 lifecycles, class context, the remaining option matrix and class checkpoints are
 not yet qualified.
+
+R-28-02a adds the `class-authoring` consumer through the generated syntax. Its
+focused run passes all eight React/JX projects, including initial static HTML
+equality; package checks pass 34 core, 48 compiler and 15 Maven-plugin tests, and
+the language-server reactor passes 10 protocol tests. The compiler tests compile
+the real core API with javac, exercise static patch initialization and verify
+source-mapped type errors. LSP tests cover cross-file class/prop navigation and
+typed class-ref completion without changing functional ref props. After rebase
+onto PR #48's merge `ccfcb2d`, the complete integrated bench passes 833 checks,
+with 151 skipped across 123 cases: client 121 reference / 120 JX, hydrate 93 per
+side, static 99 per side and lazy 104 per side. Both recorded TSVs come from that
+complete run. Pair evidence stays 54 / 5,460; this compiler consumer adds no pair
+witnesses. The `class-authoring-snapshot-lost` mutant was killed by the authored
+class case after the unmutated scratch baseline passed: 1 killed, 0 survived,
+0 unusable. The three runtime mutants already passed in R-28-01. Authoring push
+gate and Verify remain pending. No native IDE or human qualification is implied.
 
 ## Hook behavior
 

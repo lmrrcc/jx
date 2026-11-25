@@ -1,0 +1,41 @@
+package jx.conformance.cases;
+
+import jx.*;
+import jx.conformance.Bench;
+
+/** Native class authored entirely in Java plus markup; schemas and patches are generated. */
+@Component
+public final class AuthoredCounter extends ClassComponent<AuthoredCounter.Props, AuthoredCounter.Model, String> {
+    public record Props(int initial, String label) {}
+    public record Model(int count, String note) {}
+    private final DomRef output = new DomRef();
+
+    public AuthoredCounter(Props props) { super(props, new Model(props.initial(), "ready")); }
+
+    public void addThree() {
+        setState((pending, next) -> statePatch().withCount(pending.count() + 1).build());
+        setState((pending, next) -> statePatch().withCount(pending.count() + 1).build());
+        setState((pending, next) -> statePatch().withCount(pending.count() + 1).build(),
+                () -> Bench.log("authored:callback:" + state().count()));
+        Bench.log("authored:handler:" + state().count());
+    }
+
+    public void clearNote() { setState(statePatch().withNote(null).build()); }
+
+    @Override public View render() {
+        // Conformance instrumentation only; application effects belong in commits/events.
+        Bench.log("authored:render");
+        return <section>
+            <output ref={output} data-testid="authored-value">{props().label() + ":" + state().count() + ":" + (state().note() == null ? "<null>" : state().note())}</output>
+            <button onClick={event -> addThree()}>Authored add three</button>
+        </section>;
+    }
+    @Override protected void componentDidMount() { Bench.log("authored:mount"); }
+    @Override protected void componentWillUnmount() { Bench.log("authored:unmount"); }
+    @Override protected String getSnapshotBeforeUpdate(Props previousProps, Model previousState) {
+        return output.current().textContent();
+    }
+    @Override protected void componentDidUpdate(Props previousProps, Model previousState, String snapshot) {
+        Bench.log("authored:commit:" + snapshot + "->" + output.current().textContent());
+    }
+}

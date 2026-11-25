@@ -10,7 +10,7 @@ import javax.tools.JavaFileObject;
 
 /** Conservative syntax checks, not a call-graph or arbitrary side-effect proof. */
 final class HookRules {
-    static void check(GeneratedSource source, List<Diagnostic> diagnostics) {
+    static void check(GeneratedSource source, List<ComponentMetadata> components, List<Diagnostic> diagnostics) {
         var collector = new javax.tools.DiagnosticCollector<JavaFileObject>();
         try (var manager = JavaModel.compiler().getStandardFileManager(collector, null, java.nio.charset.StandardCharsets.UTF_8)) {
             JavacTask task = (JavacTask) JavaModel.compiler().getTask(null, manager, collector,
@@ -18,8 +18,11 @@ final class HookRules {
                     List.of(new JavaModel.MemorySource(source.relativePath().toString(), source.javaSource())));
             CompilationUnitTree unit = task.parse().iterator().next();
             var positions = Trees.instance(task).getSourcePositions();
+            String packageName = unit.getPackageName() == null ? "" : unit.getPackageName().toString();
             new TreeScanner<Void, Integer>() {
                 private boolean relevantMethod;
+                private boolean nativeClass;
+                private int classDepth;
                 @Override public Void visitBlock(BlockTree tree, Integer level) {
                     boolean priorReturn = false;
                     for (StatementTree statement : tree.getStatements()) {
@@ -38,7 +41,12 @@ final class HookRules {
                 @Override public Void visitMethodInvocation(MethodInvocationTree tree, Integer level) {
                     String called = tree.getMethodSelect().toString();
                     String name = called.substring(called.lastIndexOf('.') + 1);
-                    if (relevantMethod && level > 0 && hookName(name)) {
+                    if (nativeClass && hookName(name)) {
+                        int offset = source.sourceMap().sourceOffset(positions.getStartPosition(unit, tree));
+                        diagnostics.add(Diagnostic.error(source.source(), "JX201",
+                                "Hook '" + name + "' is not allowed in a native class component; use class state and lifecycle callbacks",
+                                new SourceSpan(offset, Math.min(offset + name.length(), source.source().content().length()))));
+                    } else if (relevantMethod && level > 0 && hookName(name)) {
                         int offset = source.sourceMap().sourceOffset(positions.getStartPosition(unit, tree));
                         diagnostics.add(Diagnostic.error(source.source(), "JX200",
                                 "Hook '" + name + "' must be called at the top level of render or a custom hook, outside branches, loops, try blocks and callbacks",
@@ -67,7 +75,13 @@ final class HookRules {
                 @Override public Void visitSwitchExpression(SwitchExpressionTree tree, Integer level) { return super.visitSwitchExpression(tree, level + 1); }
                 @Override public Void visitClass(ClassTree tree, Integer level) {
                     // Each method resets lexical placement; a local class never shares its parent's hook sequence.
-                    return super.visitClass(tree, level == null ? 0 : level);
+                    boolean previous = nativeClass;
+                    String name = packageName.isEmpty() ? tree.getSimpleName().toString() : packageName + "." + tree.getSimpleName();
+                    nativeClass = classDepth == 0 && components.stream().anyMatch(component ->
+                            component.qualifiedName().equals(name) && component.classSpec() != null);
+                    classDepth++;
+                    try { return super.visitClass(tree, level == null ? 0 : level); }
+                    finally { classDepth--; nativeClass = previous; }
                 }
             }.scan(unit, 0);
         } catch (IOException ex) { throw new IllegalStateException("Cannot inspect hook placement", ex); }

@@ -17,7 +17,7 @@ values keep their ordinary meaning; markup comments are not attribute syntax.
 A component is a non-generic top-level class annotated with `@jx.Component`
 (normally imported as `@Component`). This annotation is independent of Spring's
 `org.springframework.stereotype.Component` and does not enable dependency injection.
-It declares exactly one `public static View render()` method, or a
+The functional form declares exactly one `public static View render()` method, or a
 `public static View render(Props props)` method with a public nested record:
 
 ```java
@@ -43,6 +43,68 @@ public final class Counter {
 declared field order and references the generated `Counter.JX` descriptor.
 React invokes the render function. A parent does not call a child's render method
 during lowering. `JX` is a reserved static field name.
+
+### Native class components
+
+A public, concrete `@Component` class may directly extend
+`ClassComponent<Props, Model, Snapshot>` or `PureComponent<Props, Model, Snapshot>`.
+It declares public, non-generic nested `Props` and state records, a public constructor
+taking Props, and a public **instance** `render()` method:
+
+```java
+@Component
+public final class Counter extends ClassComponent<Counter.Props, Counter.Model, Void> {
+    public record Props(int initial) {}
+    public record Model(int count, String note) {}
+
+    public Counter(Props props) { super(props, new Model(props.initial(), "ready")); }
+
+    private void increment() {
+        setState((pending, nextProps) -> statePatch().withCount(pending.count() + 1).build());
+    }
+
+    @Override public View render() {
+        return <button onClick={event -> increment()}>{state().count()}</button>;
+    }
+}
+```
+
+The generated `Counter.JX` is a native `ClassComponentType`; React constructs the
+class instance and owns its state queue. The compiler also generates checked field
+schemas and an immutable `StateUpdate` builder. `statePatch().withNote(null).build()`
+sets just `note` to null, while an omitted field retains its value. Setting a field
+twice in one builder fails explicitly. A builder setter is `with` plus the field
+name with its first character uppercased; colliding names such as `count`/`Count`
+are rejected. Private lazy metadata permits the builder in an authored static
+initializer, without relying on the position of the generated `JX` field.
+
+`<Counter initial={2} key="counter" ref={counterRef} />` accepts a checked
+`ClassRef<Counter>` separately from Props. A full Props spread may accompany both
+`key` and this class ref. Functional component refs remain ordinary Props fields.
+Keys retain their existing nullable `String` contract. Class refs expose the Java
+peer after commit and clear on unmount; use a checked decoder when constructing one.
+
+The generated schema supports `int`, `long`, `float`, `double`, `boolean`, their
+boxed forms, `String`, and reifiable named/array reference types. References are
+nullable and preserve identity. Primitive fields reject null; the runtime's exact
+JavaScript-number policy still applies to `long`. Scalar `byte`/`short`/`char`,
+parameterized fields, generic classes/records and indirect component inheritance
+are outside this slice. Primitive arrays remain reference values.
+
+Declared mount, update, unmount, snapshot and should-update overrides enable those
+existing runtime callbacks. `PureComponent` supplies shallow comparison and cannot
+declare should-update. Unsupported lifecycle declarations fail with `JX111`; schema
+and authoring constraints use `JX110`; hook-looking calls in native classes use
+`JX201`. Hooks belong to function components. Reserved native field names and
+generated members (`JX`, `StateUpdate`, `statePatch`, `__JxMetadata`) are rejected.
+
+[AuthoredCounter.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredCounter.jx),
+[AuthoredPure.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredPure.jx)
+and their [parent](../tests/conformance/src/main/jx/jx/conformance/cases/ClassAuthoring.jx)
+are compiling consumers. Native editor qualification, advanced class lifecycles
+and state-preserving class hot replacement remain separate roadmap work; hot
+replacement currently resets class state. See the
+[authoring decision](decisions/0006-java-class-components.md#r-28-02a-authoring-decision--25-november-2026).
 
 ### Memoized components
 
@@ -122,7 +184,7 @@ such as `data-tone={props.tone()}` here, adds no attribute.
   in source order and the later one wins: `<a title="x" {...shared}>` takes the
   title from `shared`, `<a {...shared} title="x">` keeps `x`.
 - On a component the value is its whole Props record: `<Label {...props} />`. It
-  must be the only property besides `key`, because a record cannot be merged field
+  must be the only property besides `key` (and `ref` on a native class), because a record cannot be merged field
   by field; build the value in Java instead.
 
 ### Generic components
