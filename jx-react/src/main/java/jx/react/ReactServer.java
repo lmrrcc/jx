@@ -67,8 +67,10 @@ public final class ReactServer {
         /** Settled when everything outside {@code React.suspense} boundaries is rendered; it fails
          * when that part threw, and then nothing can be sent. */
         Promise<Void> shellReady();
-        /** Settled when every boundary has its content, for crawlers and static output.
-         * Rejects when the shell fails, since no complete output can be produced. */
+        /** Settled when React finishes its server work, for crawlers and static output.
+         * A boundary abandoned after an error or abort may still contain its fallback;
+         * readiness does not guarantee that every boundary produced content.
+         * Rejects when the shell fails, since no output can be produced. */
         Promise<Void> allReady();
         /** Starts sending: what is ready now, then each boundary's content as it arrives. Call it
          * once, after {@link #shellReady()} or {@link #allReady()}. */
