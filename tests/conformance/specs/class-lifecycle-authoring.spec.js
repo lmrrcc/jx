@@ -47,6 +47,10 @@ test('class-lifecycle-authoring: direct class markup composes context, static pa
     await expect(page.getByTestId('authored-lifecycle-identity')).toHaveText('same');
     await click('Increment lifecycle boundary');
     await expect(value).toHaveText('<null>:12:<null>');
+    expect(problems).toEqual([expect.stringMatching(/^console: /)]);
+    expect(problems[0]).toContain('authored lifecycle child failed');
+    expect(problems[0]).toContain('The above error occurred in');
+    expect(problems[0]).toMatch(/using the error boundary you provided, (?:jx\.conformance\.cases\.)?AuthoredLifecycle\.$/);
   } finally {
     await originalChild.dispose();
     await boundary.dispose();
