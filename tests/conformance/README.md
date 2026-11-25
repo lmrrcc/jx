@@ -136,7 +136,8 @@ R-27-02c's scoped mutant was killed; [PR #41](https://github.com/lmrrcc/jx/pull/
 merged as `a0f5460` with green Verify. R-27-03a's scoped mutant was killed after
 its unmutated baseline passed; [PR #43](https://github.com/lmrrcc/jx/pull/43)
 merged as `1ba8c1d` with green Verify. R-27-03b's scoped mutant was killed after
-its unmutated baseline passed; its Verify is pending. R-27-03c's scoped mutant
+its unmutated baseline passed; [PR #44](https://github.com/lmrrcc/jx/pull/44)
+merged as `3e24edb` with both Verify checks green. R-27-03c's scoped mutant
 was killed after its shared scratch baseline passed; its Verify is pending. Browser evidence is Chrome-only and
 does not establish additional human or cross-browser qualification.
 
@@ -155,8 +156,8 @@ existing error-boundary equivalent. It checks captured submission payloads,
 sequential previous-state composition, pending status and reset, rejection that
 cancels successors, retry while pending and unmount/remount with a fresh owner.
 The cancellation behavior is fixture-local, not the G0 API; class components
-remain R-28. R-27-03a is merged; R-27-03b optimistic/store and R-27-03c transition
-are in review in this baseline.
+remain R-28. R-27-03a and R-27-03b optimistic/store are merged; R-27-03c transition
+remains in review in this baseline.
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
 combine optimistic state with external-store snapshots, transitions and Java async
@@ -272,7 +273,7 @@ publication while retaining the canceled-outcome check. After the unmutated
 scratch baseline passed, `combined-transition-cancel` killed it: **1 killed,
 0 survived, 0 unusable**. This came from the exclusive shared transition/SSR run
 at `abfb24a`, scratch `jx-mutation-1181316345297598843`; its transition source and
-spec are identical to rebased `1d07fba`. The shared catalog has 112 entries because
+spec are identical to rebased `d89e23f`. The shared catalog has 112 entries because
 it includes later SSR cases. Repeat just this transition check exclusively:
 
 ```sh

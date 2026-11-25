@@ -26,8 +26,10 @@ R-27-03a merged as `1ba8c1daab8f5587b37f9cf9dd2fc7e369205aaa` in
 [PR #43](https://github.com/lmrrcc/jx/pull/43), with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45480919951) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45480798051).
-R-27-03b passes its focused and complete local bench, and its scoped mutant was
-killed after the unmutated baseline passed. This optimistic/store slice's Verify is pending.
+R-27-03b merged as `3e24edb1b9ce74575b4ab4bb5ac873147d8b773b` in
+[PR #44](https://github.com/lmrrcc/jx/pull/44), with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45548420721) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45548370606).
 R-27-03c also passes its focused and complete local bench; its scoped mutant was
 killed after the shared scratch baseline passed. Its Verify is pending.
 No additional human or cross-browser
@@ -37,8 +39,8 @@ qualification is implied by these automated results.
 
 The passing counts below include the complete R-27-03c local run. Its three
 transition pairs extend the optimistic/store slice's 45 to **48 / 5,356**, with
-**5,308** remaining. Both slices remain under review; the merged R-27-03a baseline
-has 42 complete pair witnesses.
+**5,308** remaining. The transition slice remains under review; the merged
+R-27-03b baseline has 45 complete pair witnesses.
 This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
@@ -130,7 +132,7 @@ separate controlled streaming assertion in R-27-04.
 
 ## R-27-03c: urgent updates, operation ownership and completion races
 
-Code revision `1d07fba` adds `combined-transition-cancel`. Native React and JX
+Code revision `d89e23f` adds `combined-transition-cancel`. Native React and JX
 share event-controlled transport gates, independently settled local consumers and
 an operation owner retained by `useRef` and disposed by `useEffect`. The fixture
 bounds requests to seven and audit entries to 64; it does not provide a public
@@ -172,7 +174,7 @@ the canceled-outcome check. After the unmutated scratch baseline passed,
 `combined-transition-cancel` killed it: **1 killed, 0 survived, 0 unusable**.
 This result comes from the shared exclusive transition/SSR run at `abfb24a`, in
 scratch `jx-mutation-1181316345297598843`; its transition implementation and spec
-are identical to this slice's rebased `1d07fba`. The shared run's 112-entry catalog
+are identical to this slice's rebased `d89e23f`. The shared run's 112-entry catalog
 includes later SSR cases; this slice's catalog has **110 entries**. Neither count
 is a new full campaign, and the historical full result remains 100. Verify is
 pending. To repeat the transition check alone, exclusively:
@@ -183,7 +185,7 @@ java tools/MutateBench.java --only transition-owner-guard-lost
 
 ## R-27-03b: optimistic snapshots, rollback and request disposal
 
-Code revision `7e41c53` adds `combined-optimistic-store`, using native React hooks
+Merged revision `3e24edb` adds `combined-optimistic-store`, using native React hooks
 and Java `Async.run`/`Async.await` against a typed, page-owned fixture store.
 Its immutable snapshots preserve unchanged identity; all response and completion
 gates are controlled by user events, without sleeps or network mocks.
@@ -211,7 +213,9 @@ with 133 skipped, across 116 case IDs**:
 
 All three witnesses pass in client, hydrate and lazy modes on both implementations,
 bringing complete local evidence to **45 / 5,356**, with **5,311** active pairs open.
-Static HTML equality supplies no interactive witness. Verify is pending.
+Static HTML equality supplies no interactive witness. The full local gate and
+both Verify checks passed before [PR #44](https://github.com/lmrrcc/jx/pull/44)
+merged as `3e24edb`.
 
 The unmutated scratch baseline passed, then `combined-optimistic-store` killed
 `optimistic-duplicate-overlay`: **1 killed, 0 survived, 0 unusable**. The mutant
@@ -500,7 +504,7 @@ fresh full 104-mutant campaign.
 
 R-27-02 extends identity/composition/DOM interactions. R-27-03a merged with evidence
 for form actions and recovery. R-27-03b (optimistic updates over external-store
-snapshots) has local bench and mutation evidence and remains in review.
+snapshots) also merged with bench, mutation and green Verify evidence.
 R-27-03c (transition interactions) has local bench evidence and a killed scoped
 mutant, and remains in review pending Verify.
 Staged fixtures are preparation, not completed evidence.
