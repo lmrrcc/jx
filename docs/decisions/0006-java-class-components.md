@@ -349,12 +349,16 @@ diagnostics and additional foreign kinds remain unqualified. The scoped
 one mutation, with zero survived/unusable. Only `class-error-lifecycle` fails, in
 client, hydration and lazy, because the committed catch report is absent; static
 correctly still passes. The campaign used commit `c27f881`; scratch evidence is
-`jx-mutation-1028723938717671193`. Final gate and Verify remain pending.
+`jx-mutation-1028723938717671193`.
 
 The final integration onto Forms merge `cc87f95` preserves the qualified class
 runtime, JVM tests, Java/reference consumers and strengthened shared spec byte
-for byte. Both recorded result tables are unchanged. The final push gate must
-qualify the combined tree. The catalog now includes 127 mutants, including the
+for byte. Both recorded result tables are unchanged. The final push gate passed
+all 15 steps in 342 seconds, including the 887-check bench. PR
+[#57](https://github.com/lmrrcc/jx/pull/57) merged as `6ebfc76` after both
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45635601496) and
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45635742220) passed on
+`baa2da5`. The catalog at that merge includes 127 mutants, including the
 two merged Forms mutants; the historical full campaign remains 100.
 
 ## R-28-03d direct lifecycle declarations — 25 November 2026

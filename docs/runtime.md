@@ -193,6 +193,12 @@ use the same typed runtime, as demonstrated by
 [AuthoredLifecycle.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredLifecycle.jx).
 Production diagnostics and server-render error recovery remain separate work.
 
+The runtime error-lifecycle slice merged in
+[PR #57](https://github.com/lmrrcc/jx/pull/57) as `6ebfc76`: the final integrated
+bench passed 887 checks with 169 skipped, its reporting mutant was killed after
+a passing baseline, and the 15-step local gate plus both Verify checks passed.
+This qualifies the explicit runtime contract, not the remaining class options.
+
 ## Hook behavior
 
 | API | Contract and current evidence |

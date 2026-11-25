@@ -212,8 +212,10 @@ initial HTML only. Run the mutant exclusively, with no other build/browser work:
 java tools/MutateBench.java --only class-error-report-dropped --keep
 ```
 
-The catalog has 127 entries; the historical full campaign remains 100. Final
-gate and Verify remain pending.
+The catalog at the error-lifecycle merge has 127 entries; the historical full
+campaign remains 100. PR [#57](https://github.com/lmrrcc/jx/pull/57) merged as
+`6ebfc76` after the 15-step gate passed in 342 seconds and both Verify checks
+passed on `baa2da5`.
 
 `class-lifecycle-authoring` exercises a direct `.jx` Pure class whose generated
 descriptor composes typed context, static prop/error derivation and committed
