@@ -160,7 +160,7 @@ on PR #55's tested tree passes 47 core, 48 compiler and 15 Maven tests, plus
 hydrate 99, static 105 and lazy 110 per side. All six class cases pass eight
 projects each. Tightened assertions for exactly eight expected caught reports
 and one event error pass a further eight focused checks. Pair evidence remains
-**54 / 6,328**. The reporting mutant was killed after a passing baseline, zero survived/unusable; the catalog has 125 entries,
+**54 / 6,328**. The reporting mutant was killed after a passing baseline, zero survived/unusable; the catalog has 127 entries,
 without rerunning the historical full campaign of 100. Final gate/Verify and
 production, server-error and broader foreign-value qualification remain open.
 

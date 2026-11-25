@@ -350,3 +350,9 @@ one mutation, with zero survived/unusable. Only `class-error-lifecycle` fails, i
 client, hydration and lazy, because the committed catch report is absent; static
 correctly still passes. The campaign used commit `c27f881`; scratch evidence is
 `jx-mutation-1028723938717671193`. Final gate and Verify remain pending.
+
+The final integration onto Forms merge `cc87f95` preserves the qualified class
+runtime, JVM tests, Java/reference consumers and strengthened shared spec byte
+for byte. Both recorded result tables are unchanged. The final push gate must
+qualify the combined tree. The catalog now includes 127 mutants, including the
+two merged Forms mutants; the historical full campaign remains 100.

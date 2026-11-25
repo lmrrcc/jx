@@ -324,7 +324,7 @@ ViewTransition lacks callbacks, resource preloads lack
 image source-set/sizes, and external stores lack server snapshots (R-21). Include
 these in R-31 acceptance; export-name coverage alone is insufficient.
 
-R-31-FORM-STATUS, 25 November 2026: 🟨 implemented locally. `FormStatus.action()`
+R-31-FORM-STATUS, 25 November 2026: ✅ merged PR #56. `FormStatus.action()`
 preserves the submitted Java function, a button override or the action-state
 dispatcher; a native React function returns a stable Java handle that can be passed
 back unchanged. `actionUrl()` preserves the URL alternative observed in the pinned
@@ -341,8 +341,12 @@ tables match; interaction evidence remains 54/6328. Source `b02009e` and the
 qualified mutation source `29f2914` are byte-identical for this capability. Both targeted
 mutants are killed by `form-status` after the unmutated baseline passes, with zero
 survivors or unusable mutations: dropped submitted action and recreated native
-action identity. The scratch run is `jx-mutation-15150223461760006907`. Final
-publication gate and Verify remain pending. This adds no case ID or
+action identity. The scratch run is `jx-mutation-15150223461760006907`.
+PR [#56](https://github.com/lmrrcc/jx/pull/56) merged as `cc87f95` after the 15-step
+gate passed in 308 seconds and both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45629724187) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45623547938) passed on
+`1b65e70`. This adds no case ID or
 feature-pair claim. The original
 three-argument constructor remains available; record patterns/equality now include
 the two new action alternatives, as documented in [the language guide](language.md).

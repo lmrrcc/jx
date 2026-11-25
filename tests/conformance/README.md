@@ -212,7 +212,7 @@ initial HTML only. Run the mutant exclusively, with no other build/browser work:
 java tools/MutateBench.java --only class-error-report-dropped --keep
 ```
 
-The catalog has 125 entries; the historical full campaign remains 100. Final
+The catalog has 127 entries; the historical full campaign remains 100. Final
 gate and Verify remain pending.
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
