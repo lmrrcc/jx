@@ -246,6 +246,18 @@ and remaining syntax limits are in ADR 0006. The generated-snapshot mutant was
 killed after the unmutated baseline passed; the full push gate and Verify remain pending. Native
 editor qualification remains a separate acceptance task.
 
+The separate `class-context` consumer exercises explicit typed native
+`contextType` factories. Its eight focused projects pass: constructor/default/
+nested/null values and provider identity, context changes through false SCU and
+Pure bailouts, and real DOM/state retention across Activity hide/show. It retains
+the actual instance in the hide event and updates it while hidden, including in
+hydration mode; it does not assume a parent mount effect sees a deferred hydrated
+child ref. Cleanup reads current context, and an intentionally retained instance
+keeps native React's last context after unmount. This is focused Chrome evidence,
+not a disposal guarantee or full class lifecycle parity. Static mode compares
+initial HTML only. The `class-context-captured` mutant is registered but unrun;
+no pair/result table has been updated for this slice.
+
 Static HTML equality does not execute interactive assertion blocks, so it does
 not credit those witnesses. Hydration-owned and Node-only scenarios can carry
 interaction evidence in the client projects without implying other mode coverage.

@@ -345,7 +345,11 @@ lifecycle parity or preserved class state across hot replacement.
 | R-28-02 | `.jx` class authoring, generated field projections and patches, diagnostics and native editor projections | 🟡 in progress: split into compiler/consumer slice 02a and editor qualification 02b; no completion credit yet |
 | R-28-02a | Direct native class declarations in `.jx`, generated typed schemas and immutable state-patch builder, class tags/refs, mapped diagnostics and compiling/browser consumers | ✅ merged PR #50 at 3e1db97: 34 core, 48 compiler, 15 Maven and 10 LSP tests pass; generated class consumer passes 8/8 projects; integrated bench 833 checks/151 skipped/123 cases and unchanged 54/5460 pairs; snapshot mutant killed after baseline passed; 15-step local gate and both Verify checks passed |
 | R-28-02b | Qualify class-aware Java completion, navigation, rename and inspections in both native IDE adapters, including incomplete editor source | ⬜ planned |
-| R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options | ⬜ planned |
+| R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options; split below | 🟡 in progress: R-28-03a runtime context focused evidence below; derived/error lifecycle and compiler context sugar remain planned |
+| R-28-03a | Native contextType through additive typed factories; constructor/current context, Pure/SCU bypass, defaults/null, retained state and Activity lifecycle | 🟡 review: package 36 core/48 compiler/15 Maven tests and eight new focused React/JX projects plus 24 existing class checks pass; no new pair credit, full integrated bench/mutant/gate/Verify pending; native class instance retention preserved, no disposal guarantee |
+| R-28-03b | Pure derived-state-from-props with typed partial patches, null updates and native render timing | ⬜ planned |
+| R-28-03c | Derived error state plus committed didCatch, checked Java error/component-stack information and recovery | ⬜ planned |
+| R-28-03d | Compiler context declaration sugar, typed third nextContext argument for should-update, and remaining class option qualification | ⬜ planned |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |
 
 Class hot replacement explicitly resets state in the first slice. Preservation

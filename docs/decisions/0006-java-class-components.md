@@ -165,3 +165,52 @@ unmutated scratch baseline passed: 1 killed, 0 survived, 0 unusable. The catalog
 has 116 entries; the historical full campaign still covers 100. Native IDE
 qualification remains pending. PR #50 passed the 15-step local gate in 278 seconds
 and [Verify](https://github.com/lmrrcc/jx/actions/runs/45565741808) before merging.
+
+## R-28-03a native context — 25 November 2026
+
+`ClassComponentType.normalWithContext` and `pureWithContext` add one typed
+`Context<T>` to an explicit descriptor. Their factory receives the initial props
+and a `Supplier<T>` that reads the native instance's current context. The reader
+is available in the constructor and remains usable in render, lifecycle callbacks
+and browser events. The renderer installs the actual React class `contextType`
+and passes React's constructor context through its normal base constructor.
+No hook, context subscription or functional wrapper implements class context.
+
+For example, an explicit descriptor may use `(props, theme) -> new Panel(props,
+theme)` as its factory. The peer stores that reader and calls `theme.get()` where
+a React class reads `this.context`. A missing provider uses the declared default;
+an explicit null provider stays null. Provider Java references retain their
+identity through the existing context wrapper. React schedules context changes,
+including those bypassing `PureComponent` or a false `shouldComponentUpdate`.
+
+The reader uses the same owner as the peer's existing props/state host. Retaining
+the Java peer or its reader intentionally retains the same native class instance,
+including its last context after unmount. This slice introduces neither a new
+instance registry nor a disposal promise. React can invoke layout cleanup during
+Strict Mode checks and when Activity hides a class without destroying its state;
+the bridge therefore adds no unmounted flag and keeps hidden instance updates
+available. Context remains readable during `componentWillUnmount` itself.
+
+The [Java consumer](../../tests/conformance/src/main/java/jx/conformance/cases/ClassContextCase.java)
+and native React reference prove constructor/default/nested/null context,
+reference identity, skipped state followed by a context-driven render, Pure
+bailouts, real DOM identity, and a retained instance updated while Activity is
+hidden. The latter is retained explicitly by the hide event: a parent mount
+effect need not observe a ref inside an Activity that has not yet hydrated.
+The consumer also checks context during cleanup and after intentional retention,
+with balanced mount/cleanup under Strict Mode and Activity reappearance.
+
+Local package verification passed 36 core, 48 compiler and 15 Maven-plugin tests.
+`class-context` passed eight focused React/JX projects: client, hydration and lazy
+execute the interactions; static compares initial HTML only. This is Chrome-only
+focused evidence. The existing `class-runtime`, `class-keyed` and `class-authoring`
+cases also pass all 24 checks after the shared host change. `CheckBaseline` and
+`git diff --check` pass. No aggregate result table or pair witness is changed. A captured
+initial-context mutant is registered but unrun; integrated bench, mutation, gate
+and Verify remain pending.
+
+Derived state from props, derived error state and committed error information are
+separate R-28-03b/03c slices. Compiler-generated context declarations and a typed
+third next-context argument for should-update remain R-28-03d; they are not
+provided by these factories. Existing `.jx` class syntax and class hot-reload
+reset behavior remain unchanged.
