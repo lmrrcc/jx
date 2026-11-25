@@ -112,6 +112,7 @@ import { ClassErrorLifecycle } from './cases/class-error-lifecycle.jsx';
 import { ClassAuthoring } from './cases/class-authoring.jsx';
 import { ClassLifecycleAuthoring } from './cases/class-lifecycle-authoring.jsx';
 import { ClassNextContext } from './cases/class-next-context.jsx';
+import { ClassNullPatch } from './cases/class-null-patch.jsx';
 
 export const cases = {
   'runtime-utilities': RuntimeUtilities,
@@ -134,6 +135,7 @@ export const cases = {
   'class-authoring': ClassAuthoring,
   'class-lifecycle-authoring': ClassLifecycleAuthoring,
   'class-next-context': ClassNextContext,
+  'class-null-patch': ClassNullPatch,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,
   'callable-state': CallableState,

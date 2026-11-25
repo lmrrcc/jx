@@ -57,8 +57,14 @@ state, including props-only names such as `key` and `ref`.
 `StatePatch<S>` is immutable and belongs to one state schema. An omitted field is
 unchanged; a present nullable field can be set to null. An empty patch is an empty
 object update, while a functional updater returning null requests no update.
-The direct patch overload currently rejects null; that React option remains
-outside this initial slice.
+The direct patch overload also accepts a typed null patch and preserves pending
+state. Its optional callback still runs after commit; other queued updates,
+props, context or derived state may still cause a render. A null updater function
+is rejected. Because Java has both patch and updater overloads, use a typed
+`StatePatch<Model>` null value rather than an ambiguous `setState(null)` call.
+This does not allow null initial props or state. The compiling
+[NullPatchCounter.jx](../tests/conformance/src/main/jx/jx/conformance/cases/NullPatchCounter.jx)
+consumer exercises queue order, callback timing and snapshot identity.
 `setState` queues a patch or a pure function of pending state and next props.
 Optional callbacks run after commit. `forceUpdate` uses React's native operation
 and bypasses `shouldComponentUpdate`. The peer's `props()` and `state()` read the

@@ -1,4 +1,5 @@
 id	file	find	replace	change
+class-null-patch-callback-lost	jx-core/src/main/java/jx/ClassComponent.java	host().update((state, props) -> patch, committed);	host().update((state, props) -> patch, patch == null ? null : committed);	A direct null state patch incorrectly drops its commit callback
 class-next-context-current	jx-react/src/main/java/jx/react/ReactClasses.java	this.__jx.should(props, state, context);	this.__jx.should(props, state, this.context);	Native update policy receives the previous context instead of the pending provider value
 class-authored-context-policy-lost	jx-compiler/src/main/java/jx/compiler/ClassDescriptorSource.java	if (spec.contextShouldUpdate()) out.append	if (false) out.append	Authored three-argument update policy is omitted and the legacy two-argument override runs
 class-authoring-error-derive-lost	jx-compiler/src/main/java/jx/compiler/ClassDescriptorSource.java	if (spec.derivedError()) out.append	if (false) out.append	Authored static error derivation is omitted from the native class descriptor

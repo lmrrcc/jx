@@ -247,7 +247,7 @@ Verify checks passed on `0011c1d`.
 with both an explicit Java descriptor policy and a generated `.jx` overload.
 The runtime consumer passed eight projects before compiler implementation; the
 final 64-project class regression also passes. Integration over preload
-candidate `4af20f2` passes 51 core, 2 React-option, 53 compiler, 15 Maven and
+base `a805810` passes 51 core, 2 React-option, 53 compiler, 15 Maven and
 10 LSP tests; the complete bench passes 911 checks/169 skipped/135 cases
 (133/132 client, 102 hydrate, 108 static and 113 lazy per side).
 All 64 class cells pass; pair evidence stays 54/6328.
@@ -265,6 +265,10 @@ after a passing baseline on `f49b48f`: `class-next-context-current` and
 with zero survived/unusable; the historical full campaign remains 100. Scratch
 evidence is `jx-mutation-2296619748002841958`. Run this slice exclusively with
 `java tools/MutateBench.java --only class-next-context-current,class-authored-context-policy-lost --keep`.
+PR [#60](https://github.com/lmrrcc/jx/pull/60) merged as `3815001` after the
+15-step gate passed in 373 seconds and both
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45665909511) and
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45666011061) passed on `251aaa7`.
 Static checks only initial HTML. Custom policies on PureComponent,
 null initial props/state, direct null patches, legacy/UNSAFE options, native IDE
 qualification and class checkpoints remain open. No aggregate table or pair
@@ -380,6 +384,24 @@ not credit those witnesses. Hydration-owned and Node-only scenarios can carry
 interaction evidence in the client projects without implying other mode coverage.
 `npm run test:bench` runs the reporter regression checks and the full matrix.
 Focused runs never replace complete case or interaction tables.
+
+`class-null-patch` reproduces a direct typed-null patch rejected by JX while the
+native React side commits its callback. The repair preserves null updater-function
+and constructor guards. Its integrated package passes 54 core, 53 compiler,
+15 Maven and 10 LSP tests; the full bench passes 911 checks/169 skipped/135 cases,
+including all 72 class cells. Native queue ordering, no-op state/DOM identity and
+after-commit callbacks match in client, hydration and lazy modes; static compares
+initial HTML only. Pair evidence remains 54/6328. The callback-dropping mutant
+was killed by `class-null-patch` after a passing baseline on `f49b48f`, one of
+the seven scoped mutations with zero survived/unusable. The historical full
+campaign remains 100. Scratch evidence is `jx-mutation-2296619748002841958`;
+reproduce this slice exclusively with
+`java tools/MutateBench.java --only class-null-patch-callback-lost --keep`.
+Final gate and Verify remain pending.
+After rebasing onto preload plus next-context candidate `cc2776e`, package
+checks pass 54 core/2 React/53 compiler/15 Maven/10 LSP and the null-patch/preload
+focused comparison passes 16 projects. This partial run leaves the complete
+tables unchanged; the final publication gate supplies full integrated evidence.
 
 ## Mutation check
 

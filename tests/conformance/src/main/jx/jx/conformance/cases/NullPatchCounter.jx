@@ -1,0 +1,66 @@
+package jx.conformance.cases;
+
+import jx.*;
+import jx.conformance.Bench;
+
+/** Typed null patches are queued no-ops; an empty patch is a distinct native merge. */
+@Component
+public final class NullPatchCounter extends ClassComponent<NullPatchCounter.Props, NullPatchCounter.Model, Void> {
+    public record Props() {}
+    public record Model(int count, String note) {}
+    private final DomRef output = new DomRef();
+    public NullPatchCounter(Props props) { super(props, new Model(0, "ready")); }
+    private String value() { return state().count() + ":" + (state().note() == null ? "<null>" : state().note()); }
+    private void completed(String operation, Model previous) {
+        Bench.log("null-patch:callback:" + operation + ":" + value()
+                + ":same=" + (state() == previous) + ":dom=" + output.current().textContent());
+    }
+    private void directNull() {
+        Model previous = state();
+        StatePatch<Model> noChange = null;
+        setState(noChange);
+        setState((StatePatch<Model>) null, () -> completed("direct", previous));
+        Bench.log("null-patch:handler:direct:" + value() + ":same=" + (state() == previous));
+    }
+    private void functionalNull() {
+        Model previous = state();
+        setState((pending, next) -> {
+            Bench.log("null-patch:updater:" + pending.count());
+            return null;
+        }, () -> completed("functional", previous));
+        Bench.log("null-patch:handler:functional:" + value() + ":same=" + (state() == previous));
+    }
+    private void emptyPatch() {
+        Model previous = state();
+        setState(statePatch().build(), () -> completed("empty", previous));
+    }
+    private void mixedQueue() {
+        Model previous = state();
+        setState((StatePatch<Model>) null, () -> completed("first", previous));
+        setState((pending, next) -> statePatch().withCount(pending.count() + 1).build(), () -> completed("middle", previous));
+        setState((StatePatch<Model>) null, () -> completed("last", previous));
+        Bench.log("null-patch:handler:mixed:" + value());
+    }
+    private void clearField() {
+        Model previous = state();
+        setState(statePatch().withNote(null).build(), () -> completed("field", previous));
+    }
+    @Override protected boolean shouldComponentUpdate(Props next, Model pending) {
+        Bench.log("null-patch:should:" + state().count() + "->" + pending.count());
+        return true;
+    }
+    @Override protected void componentDidUpdate(Props previous, Model old, Void snapshot) {
+        Bench.log("null-patch:commit:" + old.count() + "->" + state().count());
+    }
+    @Override public View render() {
+        Bench.log("null-patch:render");
+        return <section>
+            <output ref={output} data-testid="null-patch-value">{value()}</output>
+            <button onClick={event -> directNull()}>Direct null patch</button>
+            <button onClick={event -> functionalNull()}>Functional null patch</button>
+            <button onClick={event -> emptyPatch()}>Empty state patch</button>
+            <button onClick={event -> mixedQueue()}>Mixed null queue</button>
+            <button onClick={event -> clearField()}>Clear nullable field</button>
+        </section>;
+    }
+}

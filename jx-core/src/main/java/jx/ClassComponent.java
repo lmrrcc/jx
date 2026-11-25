@@ -40,13 +40,21 @@ public abstract class ClassComponent<P,S,X> {
         if (host == null) throw new IllegalStateException("Class updates are not allowed during construction");
         return host;
     }
+    /** Queues a partial state patch. A null patch preserves pending state; an empty patch
+     * still produces a merged state object. Java's overload resolution requires a typed
+     * null (for example a {@code StatePatch<S>} variable), because an updater overload also
+     * exists. A null patch does not permit null initial state or bypass field validation. */
     public final void setState(StatePatch<S> patch) { setState(patch, null); }
+    /** Queues a nullable partial patch and an optional callback. React commits the callback
+     * even when the patch is null and no render is needed; it never runs synchronously here.
+     * Other pending updates, derived state or changed props/context may still cause a render. */
     public final void setState(StatePatch<S> patch, Runnable committed) {
-        Objects.requireNonNull(patch); host().update((state, props) -> patch, committed);
+        host().update((state, props) -> patch, committed);
     }
     public final void setState(BiFunction<S,P,StatePatch<S>> updater) { setState(updater, null); }
-    /** Queues a pure updater over pending state and next props. Null means no update; callbacks
-     * are optional and run after commit, never while evaluating the updater. */
+    /** Queues a non-null pure updater over pending state and next props. A null result means
+     * no state change; the updater itself must be non-null. Optional callbacks run after
+     * commit, including for a null result, never while evaluating the updater. */
     public final void setState(BiFunction<S,P,StatePatch<S>> updater, Runnable committed) {
         host().update(Objects.requireNonNull(updater), committed);
     }
