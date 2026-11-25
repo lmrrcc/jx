@@ -16,16 +16,16 @@ public record ImportMap(Map<String, String> imports, Map<String, Map<String, Str
                         Map<String, String> integrity) {
     public ImportMap {
         Budget budget = new Budget();
-        imports = copy(imports, true, budget);
+        imports = copy(imports, true, true, budget);
         if (scopes != null) {
             var result = new LinkedHashMap<String, Map<String, String>>();
             for (var entry : scopes.entrySet()) {
-                String key = budget.key(entry.getKey());
-                result.put(key, copy(Objects.requireNonNull(entry.getValue(), "Null import-map scope"), true, budget));
+                String key = budget.key(entry.getKey(), false);
+                result.put(key, copy(Objects.requireNonNull(entry.getValue(), "Null import-map scope"), true, true, budget));
             }
             scopes = Collections.unmodifiableMap(result);
         }
-        integrity = copy(integrity, false, budget);
+        integrity = copy(integrity, false, false, budget);
     }
 
     /** Imports and scopes without integrity metadata. */
@@ -33,11 +33,11 @@ public record ImportMap(Map<String, String> imports, Map<String, Map<String, Str
         this(imports, scopes, null);
     }
 
-    private static Map<String, String> copy(Map<String, String> source, boolean nullable, Budget budget) {
+    private static Map<String, String> copy(Map<String, String> source, boolean nullable, boolean specifierKeys, Budget budget) {
         if (source == null) return null;
         var result = new LinkedHashMap<String, String>();
         for (var entry : source.entrySet()) {
-            String key = budget.key(entry.getKey());
+            String key = budget.key(entry.getKey(), specifierKeys);
             String value = entry.getValue();
             if (!nullable) Objects.requireNonNull(value, "Null integrity metadata");
             if (value != null) budget.text(value);
@@ -49,9 +49,9 @@ public record ImportMap(Map<String, String> imports, Map<String, Map<String, Str
     private static final class Budget {
         int entries;
         int units;
-        String key(String key) {
+        String key(String key, boolean specifier) {
             Objects.requireNonNull(key, "Null import-map key");
-            if (key.isEmpty()) throw new IllegalArgumentException("Empty import-map key");
+            if (specifier && key.isEmpty()) throw new IllegalArgumentException("Empty import-map specifier");
             if (++entries > 4096) throw new IllegalArgumentException("Import map exceeds 4096 entries");
             text(key);
             return key;

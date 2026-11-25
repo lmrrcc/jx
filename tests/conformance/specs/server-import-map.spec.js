@@ -13,7 +13,10 @@ test('server-import-map: Java module scopes, blocked imports, escaping and integ
     if (message.type() === 'error') errors.push(message.text());
     if (message.type() === 'warning') warnings.push(message.text());
   });
-  page.on('request', request => { if (new URL(request.url()).pathname.endsWith('/blocked')) blockedRequests.push(request.url()); });
+  page.on('request', request => {
+    if (['/blocked', '/maps/should-not-load.mjs', '/maps/fallback.mjs'].includes(new URL(request.url()).pathname))
+      blockedRequests.push(request.url());
+  });
   await page.route('**/map-entry.mjs', route => route.fulfill({contentType: 'text/javascript', body: `
     import {value as global} from 'shared';
     import scoped from '/scope/child.mjs';
@@ -25,13 +28,17 @@ test('server-import-map: Java module scopes, blocked imports, escaping and integ
     catch (error) { globalThis.__blocked = error instanceof TypeError; }
   `}));
   await page.route('**/scope/child.mjs', route => route.fulfill({contentType: 'text/javascript',
-    body: "import {value} from 'shared'; export default value;"}));
+    body: `import {value} from 'shared';
+      try { await import('scoped-blocked'); globalThis.__scopedBlocked = false; }
+      catch (error) { globalThis.__scopedBlocked = error instanceof TypeError; }
+      export default value;`}));
   await page.route('**/maps/**', route => {
     const path = new URL(route.request().url()).pathname;
     const body = path.endsWith('/global.mjs') ? source : path.endsWith('/scoped.mjs')
       ? "export const value = 'scoped';" : path.endsWith('/pkg/value.mjs') ? "export default 'prefixed';"
       : path.endsWith('/proto.mjs') ? "export default 'proto';" : path.endsWith('/constructor.mjs')
-      ? "export default 'constructor';" : "throw new Error('Unexpected module request');";
+      ? "export default 'constructor';" : path.endsWith('/empty.mjs') ? "export default 'empty-scope';"
+      : "throw new Error('Unexpected module request');";
     return route.fulfill({contentType: 'text/javascript', body});
   });
   for (const kind of ['readable', 'pipeable', 'prerender', 'prerender-node']) {
@@ -52,19 +59,23 @@ test('server-import-map: Java module scopes, blocked imports, escaping and integ
     errors.length = 0; warnings.length = 0;
     await page.goto(url);
     await expect.poll(() => page.evaluate(() => globalThis.__mapResult)).toEqual(['global', 'scoped', 'prefixed', 'proto', 'constructor']);
+    await expect.poll(() => page.evaluate(() => globalThis.__emptyScope)).toBe('empty-scope');
     await expect.poll(() => page.evaluate(() => globalThis.__blocked)).toBe(true);
+    expect(await page.evaluate(() => globalThis.__scopedBlocked)).toBe(true);
     expect(await page.evaluate(() => globalThis.__injected)).toBeUndefined();
     const map = await page.locator('script[type="importmap"]').evaluate(node => ({value: JSON.parse(node.textContent), nonce: node.nonce}));
     expect(Object.hasOwn(map.value.imports, '__proto__')).toBe(true);
     expect(map.value.imports.__proto__).toBe('/maps/proto.mjs');
     expect(map.value.imports.blocked).toBeNull();
+    expect(map.value.scopes['']['empty-shared']).toBe('/maps/empty.mjs');
+    expect(map.value.integrity['']).toBe(integrity);
     expect(Object.hasOwn(map.value.imports, 'escaped</script><script>globalThis.__injected=1</script>')).toBe(true);
     expect(map.nonce).toBe(kind.startsWith('prerender') ? '' : 'first');
     expect(errors).toEqual([]);
     // A null target is the standard resolution model's explicit block. Chrome warns
     // about its authoring shape; verify that precise warning rather than hiding it.
-    expect(warnings).toHaveLength(1);
-    expect(warnings[0]).toContain('blocked');
+    expect(warnings).toHaveLength(2);
+    expect(warnings.every(warning => warning.includes('blocked'))).toBe(true);
     expect(blockedRequests).toEqual([]);
   }
   const denied = new URL('/map-integrity-denied', info.project.use.baseURL).href;

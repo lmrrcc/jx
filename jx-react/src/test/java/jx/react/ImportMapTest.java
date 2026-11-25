@@ -31,6 +31,10 @@ class ImportMapTest {
 
     @Test void boundsAndSchemaRejectInvalidConstruction() {
         assertThrows(IllegalArgumentException.class, () -> new ImportMap(Map.of("", "/x"), null));
+        assertThrows(IllegalArgumentException.class, () -> new ImportMap(null, Map.of("/", Map.of("", "/x"))));
+        var baseReferences = new ImportMap(null, Map.of("", Map.of("module", "/x")), Map.of("", "sha256-example"));
+        assertTrue(baseReferences.scopes().containsKey(""));
+        assertEquals("sha256-example", baseReferences.integrity().get(""));
         var nullScope = new LinkedHashMap<String, Map<String, String>>();
         nullScope.put("/", null);
         assertThrows(NullPointerException.class, () -> new ImportMap(null, nullScope));

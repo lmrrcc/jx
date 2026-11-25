@@ -28,9 +28,20 @@ final class ImportMapExports {
         imports.put("constructor", "/maps/constructor.mjs");
         imports.put("escaped</script><script>globalThis.__injected=1</script>", "/maps/unused.mjs");
         imports.put("blocked", null);
-        var map = new ImportMap(imports, Map.of("/scope/", Map.of("shared", "/maps/" + token + "/scoped.mjs")),
-                Map.of("/maps/" + token + "/global.mjs", integrity));
-        var options = ReactServer.StreamOptions.defaults().withImportMap(map).withBootstrapModules(List.of("/map-entry.mjs"));
+        imports.put("empty-shared", "/maps/fallback.mjs");
+        imports.put("scoped-blocked", "/maps/should-not-load.mjs");
+        var scoped = new LinkedHashMap<String, String>();
+        scoped.put("shared", "/maps/" + token + "/scoped.mjs");
+        scoped.put("scoped-blocked", null);
+        var scopes = new LinkedHashMap<String, Map<String, String>>();
+        scopes.put("/scope/", scoped);
+        scopes.put("", Map.of("empty-shared", "/maps/empty.mjs"));
+        var integrities = new LinkedHashMap<String, String>();
+        integrities.put("/maps/" + token + "/global.mjs", integrity);
+        integrities.put("", integrity);
+        var map = new ImportMap(imports, scopes, integrities);
+        var options = ReactServer.StreamOptions.defaults().withImportMap(map).withBootstrapModules(List.of("/map-entry.mjs"))
+                .withBootstrapScriptContent("import('empty-shared').then(m => { globalThis.__emptyScope = m.default; });");
         if (!kind.startsWith("prerender")) options = options.withNonce(token);
         var page = Views.element("html", Attributes.create(), Views.element("head", Attributes.create()),
                 Views.element("body", Attributes.create(), Views.element("h1", Attributes.create(), "import maps")));

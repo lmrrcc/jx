@@ -9,7 +9,9 @@ claimed by this source commit.
 containing imports, scopes and integrity metadata. It preserves null versus
 empty top-level maps, nested insertion order, and explicit null import targets
 that block resolution. Input maps are copied recursively. Null scope bodies or
-integrity values and empty keys are rejected. One map retains at most 4096 entries
+integrity values and empty module-specifier keys are rejected. Empty scope or
+integrity keys remain valid relative references to the document base URL.
+One map retains at most 4096 entries
 (scope entries included) and 1 Mi UTF-16 code units. The framework creates native
 dictionaries without a prototype: `__proto__` and `constructor` are real own
 specifier keys, not special setters.

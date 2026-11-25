@@ -10,9 +10,13 @@ export async function renderImportMap(kind, token, integrity) {
   imports.constructor = '/maps/constructor.mjs';
   imports['escaped</script><script>globalThis.__injected=1</script>'] = '/maps/unused.mjs';
   imports.blocked = null;
+  imports['empty-shared'] = '/maps/fallback.mjs';
+  imports['scoped-blocked'] = '/maps/should-not-load.mjs';
   const options = {importMap: {imports,
-    scopes: {'/scope/': {shared: '/maps/' + token + '/scoped.mjs'}},
-    integrity: {['/maps/' + token + '/global.mjs']: integrity}}, bootstrapModules: ['/map-entry.mjs']};
+    scopes: {'/scope/': {shared: '/maps/' + token + '/scoped.mjs', 'scoped-blocked': null},
+      '': {'empty-shared': '/maps/empty.mjs'}},
+    integrity: {['/maps/' + token + '/global.mjs']: integrity, '': integrity}}, bootstrapModules: ['/map-entry.mjs'],
+    bootstrapScriptContent: "import('empty-shared').then(m => { globalThis.__emptyScope = m.default; });"};
   if (!kind.startsWith('prerender')) options.nonce = token;
   const page = <html><head/><body><h1>import maps</h1></body></html>;
   if (kind === 'readable') {
