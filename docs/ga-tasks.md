@@ -228,6 +228,15 @@ is claimed. The lifecycle follows the public
 [React stream contract](https://react.dev/reference/react-dom/server/renderToPipeableStream)
 and [Node Writable lifecycle](https://nodejs.org/api/stream.html#class-streamwritable).
 
+Sink integration candidate `256b2d1`, with class lifecycle authoring and responsive
+preloads: package **47 core, 2 React, 52 compiler and 15 Maven-plugin tests**
+passes in 35.321 seconds. The complete bench passes **905 checks /175 skipped
+across 135 cases** in 3.4 minutes: client 133 reference /132 JX, hydrate 101,
+static 107 and lazy 112 per side. Its five sink implementation/consumer files
+remain byte-identical to the successful mutation candidate `e63ea76`.
+All 54/6328 registered interaction pairs remain unchanged. Final publication
+onto merged main, the push gate and Verify remain pending.
+
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven
 tests. The complete bench passes 871 checks with 169 inapplicable cells across
