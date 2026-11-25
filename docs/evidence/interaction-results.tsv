@@ -6,6 +6,7 @@ action-queue-status	pass	pass	pass	pass	n/a	n/a	pass	pass
 activity-effects	pass	pass	pass	pass	n/a	n/a	pass	pass
 activity-state	pass	pass	pass	pass	n/a	n/a	pass	pass
 activity-store	pass	pass	pass	pass	n/a	n/a	pass	pass
+async-effect-disposal	pass	pass	pass	pass	n/a	n/a	pass	pass
 async-transition	pass	pass	pass	pass	n/a	n/a	pass	pass
 callback-ref-identity	pass	pass	pass	pass	n/a	n/a	pass	pass
 children-fragment	pass	pass	pass	pass	n/a	n/a	pass	pass
@@ -44,3 +45,5 @@ refprop-imperative-handle	pass	pass	pass	pass	n/a	n/a	pass	pass
 stream-suspense	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 strict-callback-ref	pass	pass	pass	pass	n/a	n/a	pass	pass
 strict-effects	pass	pass	pass	pass	n/a	n/a	pass	pass
+transition-owner-ref	pass	pass	pass	pass	n/a	n/a	pass	pass
+transition-urgent-input	pass	pass	pass	pass	n/a	n/a	pass	pass
