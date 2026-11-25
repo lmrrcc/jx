@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { compiledHotRuntimeVersion } from '../../jx-maven-plugin/src/main/resources/jx-hot-protocol.js';
 
 const root = fileURLToPath(new URL('../..', import.meta.url));
+const counterPort = Number(process.env.HOT_COUNTER_PORT || 4673);
+const todoPort = Number(process.env.HOT_TODO_PORT || 4773);
 
 async function development(example, port, run, { sourceRuntime = false } = {}) {
   await mkdir(path.join(root, '.cache/hot-reload'), { recursive: true });
@@ -74,7 +76,7 @@ test('runtime attestation accepts one version marker without invoking exports or
 });
 
 test('real .jx saves preserve counter state, apply new code/CSS, survive errors and reset changed hooks', async ({ page }) => {
-  await development('counter-app', 4673, async ({ project, url }) => {
+  await development('counter-app', counterPort, async ({ project, url }) => {
     const errors = []; page.on('pageerror', error => errors.push(error.message));
     await page.addInitScript(() => {
       globalThis.rootListenerRegistrations = 0;
@@ -140,7 +142,7 @@ test('real .jx saves preserve counter state, apply new code/CSS, survive errors 
 });
 
 test('compiled runtime drift and a missing attestation reject replacement before teardown', async ({ page }) => {
-  await development('counter-app', 4673, async ({ project, url }) => {
+  await development('counter-app', counterPort, async ({ project, url }) => {
     const errors = []; page.on('pageerror', error => errors.push(error.message));
     await page.goto(url);
     const first = page.getByRole('region', { name: 'First counter' });
@@ -202,7 +204,7 @@ test('compiled runtime drift and a missing attestation reject replacement before
 });
 
 test('real Todo .jx save keeps unsaved form/focus, URL and typed Elm model without replaying HTTP', async ({ page }) => {
-  await development('todo-app', 4773, async ({ project, url }) => {
+  await development('todo-app', todoPort, async ({ project, url }) => {
     const errors = []; page.on('pageerror', error => errors.push(error.message));
     let reads = 0;
     const todos = [{ id: 'hot-fixture', title: 'Preserved Java record', completed: false, version: 0 }];

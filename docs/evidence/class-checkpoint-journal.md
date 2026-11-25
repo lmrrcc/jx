@@ -2,8 +2,8 @@
 
 25 November 2026. This is a focused foundation, **not complete class hot reload**.
 Source commit: `a371b25` on preserved integration base `e63ea76`.
-The source-review corrections described below are prepared after `6b7ab4f`;
-their regression executions are pending and are not part of the earlier 18/18 result.
+Source-review corrections are committed as `a3e4e26` after `6b7ab4f`.
+Their qualification below is separate from the original 18/18 result.
 The full R-28-04 requirement still includes hidden commits, skipped renders,
 discarded work, incoming ownership, all class options and integration qualification.
 
@@ -37,7 +37,8 @@ React context, not a path prefix or DOM position. Portals inherit that context.
 A separately mounted native React root has no JX token: its exported Java class
 still renders and updates, but capture rejects the foreign owner before disposal,
 even when exactly one other JX root exists. Unmounting that foreign owner removes
-the rejection. This correction and its portal counterpart await execution.
+the rejection. The focused ownership/portal tests and full runtime suite below
+exercise both outcomes without suppressing browser console errors.
 
 The first slice requires one JX-owned root, connected ordinary classes and an
 initial restored tree whose class owners all commit. Pure is explicitly rejected
@@ -117,29 +118,48 @@ No full runtime/conformance matrix, mutation campaign, push gate, Verify or new
 interaction-pair credit is claimed. This branch starts at integration `e63ea76`;
 later nextContext/Pure modifiers must preserve checkpoint metadata when integrated.
 
-### Prepared review regressions — execution pending
+### Review corrections — local verification passed
 
-- A JVM call to `HotRuntime.version()` must work without browser-native startup.
-- The shared marker reader must accept exactly one version export, tolerate other
-  TeaVM metadata and reject missing/ambiguous/accessor markers without invoking them.
+- The scoped package passes **51 core, 3 React, 7 Elm, 52 compiler and 15 Maven
+  tests**, including actual TeaVM output. The added JVM call to
+  `HotRuntime.version()` works without browser-native startup. The first sandboxed
+  attempt could not bind the Maven tests' local HTTP sockets; repeating the same
+  package outside that sandbox passed without source changes.
+- The shared marker reader accepts exactly one version export, tolerates other
+  TeaVM metadata and rejects missing/ambiguous/accessor markers without invoking them.
 - A fresh TeaVM candidate is imported without calling `main`; an observed static
-  initializer on the entry class must not run during preflight.
+  initializer on the entry class does not run during preflight.
 - The real Maven development loop compiles the actual runtime sources in an
   isolated copy of Counter, with no shared JAR replacement or artifact install.
   Changing its protocol constant from 2 to 1 produces a real incompatible runtime;
-  loading it must reject before capture/dispose while the old node and counter
-  remain live. Restoring protocol 2 allows state-preserving replacement.
+  loading it rejects before capture/dispose while the old node and counter remain
+  live. Restoring protocol 2 allows state-preserving replacement.
 - The same session then compiles a main-only module without JX runtime reachability.
-  Its missing named export must fail bundling, leaving the published bundle byte
+  Its missing named export fails bundling, leaving the published bundle byte
   identical and the old counter live. Restoring the entry point recovers normally.
-- An exported checkpointed class in a separate native root must reject capture and
+- An exported checkpointed class in a separate native root rejects capture and
   replacement before teardown. Both roots retain their actual DOM nodes and continue
   incrementing; removing the foreign root leaves only the owned class checkpoint.
-- A class in a portal outside the JX root's DOM container must retain logical root
-  ownership and restore its encoded counter in an independent TeaVM generation.
+- A class in a portal outside the JX root's DOM container retains logical root
+  ownership and restores its encoded counter in an independent TeaVM generation.
 
-These additional probes have not yet run; the exclusive mutation campaign in a
-different worktree must finish before compilation or browser verification.
+The three focused Chrome checks pass, then the **complete runtime suite passes
+31/31**; those three are included in that total. The real hot workflow passes
+**4/4 checks**: the marker parser plus three Chrome journeys (Counter, compiled
+protocol drift/missing export, and Todo). The parent workflow uses an isolated
+physical Maven repository, and the protocol mutation remains inside its temporary
+source copy. No shared runtime artifact is replaced. Defaults for the normal
+gate are unchanged; dedicated ports reproduce the local runs:
+
+```sh
+env RUNTIME_PORT=59190 node_modules/.bin/playwright test \
+  -c tests/runtime-browser/playwright.config.js --workers=1
+env HOT_COUNTER_PORT=59192 HOT_TODO_PORT=59189 npm run test:hot
+```
+
+These checks establish local runtime and development-workflow behavior only.
+No full conformance matrix, scoped journal mutation, publication gate, Verify,
+new interaction credit or complete R-28-04 support is claimed.
 
 ## Remaining design requirement
 
