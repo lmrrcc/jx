@@ -55,6 +55,8 @@ eight cells and no pair witness. Both scoped preload mutants were killed after
 the shared integration baseline passed; its final gate/Verify remain pending.
 The authored lifecycle case's strict expected-error assertions separately pass
 eight focused projects, and its compiler mutant was killed in the same campaign.
+That lifecycle-authoring slice merged in PR #58 as `338872c` after its 15-step
+gate and both Verify checks passed on `0011c1d`; the preload gate is still pending.
 The prerequisite native error-reporting mutant was killed after a passing baseline,
 with zero survived/unusable.
 Derived props merged in PR #55 as `84eb8cd` after a passing scoped mutant,

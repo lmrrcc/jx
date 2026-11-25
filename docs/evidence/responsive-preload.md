@@ -40,7 +40,7 @@ assumptions about CORS normalization and interception-only request headers; the
 React reference and JX behaved alike. The final assertion checks the observable
 Referer header and does not claim unavailable Fetch Metadata headers were tested.
 
-Integrated source `9603b5b` over lifecycle-authoring candidate `0011c1d` passes
+Integrated source `33a2fae` over merged lifecycle authoring `338872c` passes
 package (47 core, two React options, 52 compiler and 15 plugin checks, in 28.632
 seconds) and the complete bench: **903 passed, 169 skipped, 134 cases**. Client is
 132 reference / 131 JX; hydrate 101, static 107 and lazy 112 per side. All 15
@@ -48,6 +48,10 @@ reporter checks pass. Only the `image-preload` case is added to the prerequisite
 recorded results; interaction evidence remains 54/6328. This integrated run used
 `BENCH_PORT=59181 BENCH_UPDATE=1 npm run test:bench`; the resulting tables were
 already identical to the recorded evidence.
+The final rebase onto PR #58's squash merge changes commit ancestry only;
+production, build and test files match the previously tested candidate byte for byte.
+PR #58 passed its 15-step gate and both Verify checks on `0011c1d`; this preload
+slice still awaits its own publication gate and Verify.
 
 The earlier integration over FormStatus candidate `1b65e70`, source `0f41000`,
 passed 887 checks /169 skipped /132 cases. It is historical evidence, not the

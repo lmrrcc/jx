@@ -240,7 +240,8 @@ in an exclusive build/browser window with
 Case evidence adds only this case; pair evidence stays 54/6328. The catalog has
 128 mutants after the source-preserving rebase onto the Forms-integrated error
 lifecycle head, with no new full-catalog run beyond the historical 100. The
-final combined gate and Verify remain pending.
+15-step gate passed in 352 seconds; PR #58 merged as `338872c` after both
+Verify checks passed on `0011c1d`.
 
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses

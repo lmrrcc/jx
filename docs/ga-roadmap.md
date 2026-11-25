@@ -13,7 +13,7 @@ Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
 Responsive image preload options (R-31-01) pass the integrated bench over
-lifecycle-authoring candidate `0011c1d`: **903 checks, 169 skipped, 134 cases**,
+merged lifecycle authoring `338872c`: **903 checks, 169 skipped, 134 cases**,
 plus 15 reporter checks. Package checks pass 47 core / two React option /
 52 compiler / 15 Maven tests. The browser selects responsive candidates, reuses
 equivalent links and obeys the requested referrer policy. Both scoped preload
@@ -64,14 +64,15 @@ Direct lifecycle authoring (R-28-03d) passes **895 integrated checks, 169 skippe
 133 cases**, including all 56 class cells. Package checks pass 47 core / 52
 compiler / 15 Maven / 10 LSP tests; its strict error-report assertions pass eight
 focused projects. Its compiler mutant was killed after a passing baseline on
-byte-identical source in the scoped candidate campaign. Final gate/Verify remain pending.
+byte-identical source in the scoped candidate campaign. PR #58 merged as `338872c`
+after the 15-step gate passed in 352 seconds and both Verify checks passed on `0011c1d`.
 This does not qualify the native IDE distributions or add pair witnesses.
 
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 top-level tasks done through R-26 and R-32; interaction, class, Flight, cache, utility, context, derived-props and error-lifecycle slices merged through PR57 with green Verify. Direct lifecycle authoring passes 895 checks, compiler mutant killed after a passing baseline; final gate/Verify pending. Pair evidence stays 54 / 6,328, with 6,274 open and 575 deferred-feature pairs. Complete remaining APIs, options and combined scenarios. |
-| R-28 Java class runtime | 🟡 Partial | Runtime, direct authoring, native context, derived props and error lifecycle merged after green gates and both Verify checks. Direct lifecycle authoring passes 895 integrated checks, compiler mutant killed after a passing baseline; final gate/Verify pending. Native editor qualification, remaining context/authoring options and class hot checkpoints remain open. |
+| React parity track / GA-18 | 🟡 Partial | 27 top-level tasks done through R-26 and R-32; interaction, class, Flight, cache, utility, context, derived-props and direct lifecycle authoring slices merged through PR58 with green gates and Verify. Direct lifecycle authoring passes 895 checks and its compiler mutant was killed after a passing baseline. Pair evidence stays 54 / 6,328, with 6,274 open and 575 deferred-feature pairs. Complete remaining APIs, options and combined scenarios. |
+| R-28 Java class runtime | 🟡 Partial | Runtime, direct authoring, native context, derived props and direct error lifecycle authoring merged through PR58 after green gates and both Verify checks. Direct lifecycle authoring passes 895 integrated checks and its compiler mutant was killed after a passing baseline. Native editor qualification, remaining context/authoring options and class hot checkpoints remain open. |
 | R-31-01 responsive preload options | 🟡 Partial | Integrated 903-check bench and both targeted mutants pass; local push gate, Verify and publication pending. Chrome evidence only; the R-31 parity gate remains open. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
