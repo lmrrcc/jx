@@ -4,6 +4,8 @@ import {renderToPipeableStream} from 'react-dom/server';
 
 const RequestContext = createContext('outside-request');
 
+function BrokenShell() { throw new Error('fatal shell failed'); }
+
 function Result({data}) {
   const result = use(data);
   const request = useContext(RequestContext);
@@ -22,6 +24,21 @@ function Streaming({request, data}) {
 }
 
 export const combinedServer = {
+  startFatalStream() {
+    const shell = Promise.withResolvers();
+    const all = Promise.withResolvers();
+    let errors = 0;
+    const stream = renderToPipeableStream(<BrokenShell />, {
+      onShellReady: shell.resolve,
+      // Native React signals a fatal root failure here. Neither readiness promise
+      // can succeed when that root has no output; both consumers must be notified.
+      onShellError(error) { shell.reject(error); all.reject(error); },
+      onAllReady: all.resolve,
+      onError() { errors++; }
+    });
+    return {shellReady: shell.promise, allReady: all.promise,
+      abort: () => stream.abort(), errors: () => errors};
+  },
   startCombinedStream(request) {
     const data = Promise.withResolvers();
     const shell = Promise.withResolvers();

@@ -67,7 +67,8 @@ public final class ReactServer {
         /** Settled when everything outside {@code React.suspense} boundaries is rendered; it fails
          * when that part threw, and then nothing can be sent. */
         Promise<Void> shellReady();
-        /** Settled when every boundary has its content, for crawlers and static output. */
+        /** Settled when every boundary has its content, for crawlers and static output.
+         * Rejects when the shell fails, since no complete output can be produced. */
         Promise<Void> allReady();
         /** Starts sending: what is ready now, then each boundary's content as it arrives. Call it
          * once, after {@link #shellReady()} or {@link #allReady()}. */
@@ -113,7 +114,11 @@ public final class ReactServer {
         Signal shell = new Signal();
         Signal all = new Signal();
         setCall(settings, "onShellReady", () -> shell.resolver.resolve(null));
-        setError(settings, "onShellError", error -> shell.resolver.reject(React.throwable(error)));
+        setError(settings, "onShellError", error -> {
+            Throwable failure = React.throwable(error);
+            shell.resolver.reject(failure);
+            all.resolver.reject(failure);
+        });
         setCall(settings, "onAllReady", () -> all.resolver.resolve(null));
         JSObject element = React.element(Objects.requireNonNull(view));
         JSObject stream = postponed == null ? pipeableNative(element, settings) : resumePipeableNative(element, postponed.state, settings);
