@@ -336,9 +336,12 @@ regression run also passes **64/64** checks across eight cases and four modes.
 Integrated over `8fdbed0`, the package passes 35 core, 48 compiler and 15 Maven
 tests. The full bench passes 847 checks with 169 inapplicable cells across 127
 cases and matches both recorded result tables; interaction evidence remains
-54/6328. Source `29f2914` retains the earlier focused behavior. Two targeted
-mutants are registered but not yet run; final integration, push gate and Verify
-remain pending. This adds no case ID or feature-pair claim. The original
+54/6328. Source `29f2914` retains the earlier focused behavior. Both targeted
+mutants are killed by `form-status` after the unmutated baseline passes, with zero
+survivors or unusable mutations: dropped submitted action and recreated native
+action identity. The scratch run is `jx-mutation-15150223461760006907`. Final
+integration, push gate and Verify remain pending. This adds no case ID or
+feature-pair claim. The original
 three-argument constructor remains available; record patterns/equality now include
 the two new action alternatives, as documented in [the language guide](language.md).
 
