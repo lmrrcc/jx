@@ -12,11 +12,11 @@ react:createContext	api	supported	context-nested	Hooks.createContext, Context.pr
 react:useMemo	hook	supported	memo-recompute	Hooks.useMemo		
 react:useCallback	hook	supported	callback-identity,combined-keyed-refs	Hooks.useCallback		Memoized callback refs replace attachments only when dependencies change
 react:useId	hook	supported	use-id,hydrate-server	Hooks.useId		Server and client identifiers compared across hydration
-react:useSyncExternalStore	hook	supported	external-store,hydrate-server,combined-activity-store	Hooks.useSyncExternalStore, ExternalStore.serverSnapshot		Activity hides subscriptions and restores the latest snapshot
-react:useTransition	hook	supported	transition-pending,transition-promise	Hooks.useTransition, TransitionState		An async action returns a jx.Promise, usually from Async.run, or takes a completion callback
+react:useSyncExternalStore	hook	supported	external-store,hydrate-server,combined-activity-store,combined-optimistic-store	Hooks.useSyncExternalStore, ExternalStore.serverSnapshot		Activity hides subscriptions and restores the latest snapshot
+react:useTransition	hook	supported	transition-pending,transition-promise,combined-optimistic-store	Hooks.useTransition, TransitionState		An async action returns a jx.Promise, usually from Async.run, or takes a completion callback
 react:startTransition	api	supported	start-transition,transition-pending	React.startTransition		
 react:useDeferredValue	hook	supported	deferred-value	Hooks.useDeferredValue		Equal scalars compare by value
-react:useOptimistic	hook	supported	optimistic	Hooks.useOptimistic		Returns a State, or a ReducerState with an update function
+react:useOptimistic	hook	supported	optimistic,combined-optimistic-store	Hooks.useOptimistic		Returns a State, or a ReducerState with an update function
 react:useActionState	hook	supported	action-state,combined-action-queue	Hooks.useActionState, Hooks.useActionStateAsync, ActionState		The permalink argument is not offered
 react:use	hook	supported	use-promise	Hooks.use		Takes a jx.Promise or a Context
 react:useDebugValue	hook	supported	debug-value	Hooks.useDebugValue		The DevTools label itself is not asserted
@@ -92,7 +92,7 @@ jsx:generic-components	markup	supported	generic-list	generic Props record and re
 jsx:ref-as-prop	markup	supported	ref-as-prop,combined-imperative-handles	ref as a Props field		Switching supplied refs clears the old handle owner
 jsx:ref-callback	markup	supported	ref-callback,combined-keyed-refs	RefCallback, Attributes.ref		The returned cleanup runs on removal
 jsx:namespace-components	markup	equivalent	namespace-components	Fully qualified component class name		Java has no component namespace objects; the dotted form is a qualified class name
-jsx:async-functions	markup	equivalent	async-function,transition-promise,combined-action-queue	Async.run, Async.await, Promise		JavaScript async functions and promises; await works only in code called from Async.run
+jsx:async-functions	markup	equivalent	async-function,transition-promise,combined-action-queue,combined-optimistic-store	Async.run, Async.await, Promise		JavaScript async functions and promises; await works only in code called from Async.run
 dom:ref-on-element	dom	supported	dom-ref-focus,combined-portal-lifecycle	ref with Hooks.useDomRef		DomElement exposes focus and value only
 dom:attributes	dom	supported	attributes,dom-attributes	Markup attributes		Every name in React DOM table rendered on an HTML and an SVG element and compared with React; 16 names are covered by dedicated cases
 dom:style	dom	supported	attributes	Style		

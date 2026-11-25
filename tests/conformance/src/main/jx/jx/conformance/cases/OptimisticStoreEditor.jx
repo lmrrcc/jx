@@ -1,0 +1,65 @@
+package jx.conformance.cases;
+
+import static jx.Async.await;
+
+import java.util.List;
+import jx.Async;
+import jx.Component;
+import jx.Hooks;
+import jx.ReducerState;
+import jx.State;
+import jx.TransitionState;
+import jx.View;
+import jx.conformance.OptimisticPageStore;
+import jx.conformance.OptimisticPageStore.Attempt;
+import jx.conformance.OptimisticPageStore.Item;
+import jx.conformance.OptimisticPageStore.RequestFailure;
+import jx.react.React;
+
+/** Replays a pure optimistic addition over immutable external snapshots and catches request failure inside the action. */
+@Component
+public final class OptimisticStoreEditor {
+    public record Props(OptimisticPageStore store) {}
+
+    public static View render(Props props) {
+        OptimisticPageStore store = props.store();
+        List<Item> committed = Hooks.useSyncExternalStore(store);
+        ReducerState<List<Item>, Item> shown = Hooks.useOptimistic(committed, OptimisticPageStore::appendMissing);
+        TransitionState transition = Hooks.useTransition();
+        State<String> outcome = Hooks.useState("idle");
+        return (
+            <section aria-label="Optimistic editor">
+                <p data-testid="pending">{transition.pending() ? "pending" : "idle"}</p>
+                <p role="status">{outcome.value()}</p>
+                <button disabled={transition.pending()} onClick={event -> {
+                    outcome.set("waiting");
+                    transition.startAsync(() -> Async.run(() -> {
+                        Attempt attempt = store.begin();
+                        shown.dispatch().accept(new Item("local", "Local", true));
+                        try {
+                            Item confirmed = await(attempt.response());
+                            if (!store.closed()) {
+                                store.commit(confirmed);
+                                await(attempt.completion());
+                                if (!store.closed()) React.startTransition(() -> outcome.set("saved"));
+                            }
+                        } catch (RequestFailure rejected) {
+                            if (!store.closed()) React.startTransition(() -> outcome.set("failed " + rejected.getMessage()));
+                        } finally {
+                            store.end(attempt);
+                        }
+                    }));
+                }}>Add optimistic item</button>
+                <button disabled={!transition.pending()} onClick={event -> store.accept()}>Accept request</button>
+                <button disabled={!transition.pending()} onClick={event -> store.reject()}>Reject request</button>
+                <button disabled={!transition.pending()} onClick={event -> store.finishAction()}>Finish action</button>
+                <ul aria-label="Visible items">{shown.value().stream().map(item ->
+                    <li key={item.id()} data-id={item.id()} data-state={item.optimistic() ? "optimistic" : "confirmed"}>
+                        {item.label()}: {item.optimistic() ? "sending" : "saved"}
+                    </li>).toList()}</ul>
+                <ol aria-label="Committed items">{committed.stream().map(item ->
+                    <li key={item.id()} data-id={item.id()}>{item.label()}</li>).toList()}</ol>
+            </section>
+        );
+    }
+}

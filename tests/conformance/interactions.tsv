@@ -41,3 +41,6 @@ hydrate-store	react-dom/client:hydrateRoot	react:useSyncExternalStore	hydrate-se
 hydrate-id	react-dom/client:hydrateRoot	react:useId	hydrate-server	client	The server generated input identifier survives hydration unchanged
 portal-events	dom:mouse-events	react-dom:createPortal	portal	client,lazy	A portal click reaches its React ancestor despite separate DOM placement
 stream-suspense	react-dom/server:renderToPipeableStream	react:Suspense	server-stream-suspense	client	Collected stream HTML contains the shell and orders the Suspense fallback before the delayed content; early delivery is not measured
+optimistic-store	react:useOptimistic	react:useSyncExternalStore	combined-optimistic-store	client,hydrate,lazy	Pending optimistic state rebases on a remote snapshot and keeps exactly one confirmed item after commit
+optimistic-transition	react:useOptimistic	react:useTransition	combined-optimistic-store	client,hydrate,lazy	The optimistic overlay follows a pending transition through rejection rollback and a successful retry with a second completion gate
+optimistic-async	jsx:async-functions	react:useOptimistic	combined-optimistic-store	client,hydrate,lazy	Caught async rejection rolls back only the optimistic item and explicit owner close settles both gates and releases the active attempt

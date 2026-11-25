@@ -1,6 +1,6 @@
 # GA implementation sequence
 
-Revision 11, 24 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
+Revision 12, 25 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
 the [work package register](ga-execution.md) into an ordered list of tasks, grouped
 by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
@@ -27,9 +27,10 @@ rendering mode) is complete: Luca's try-it run matched all recorded results on
 That makes 27 complete React tasks. R-27-01 and R-27-02a–02c merged with green
 Verify, establishing 38 executed pair witnesses. The Promise prerequisite also
 merged in [PR #42](https://github.com/lmrrcc/jx/pull/42) with green Verify.
-R-27-03a's complete local bench passes 787 checks
-with 42 witnessed pairs, while 5,314 current pairs remain without complete
-evidence. The action slice's scoped mutant was killed; its Verify is pending. R-27 remains
+R-27-03a merged in [PR #43](https://github.com/lmrrcc/jx/pull/43) as `1ba8c1d`,
+with both Verify checks green. R-27-03b's complete local bench passes 795 checks
+with 45 witnessed pairs, while 5,311 current pairs remain without complete
+evidence. The optimistic/store slice's scoped mutant was killed; its Verify is pending. R-27 remains
 partial; its slice status and the
 [interaction evidence record](ga-react-interactions.md) distinguish local results
 from outstanding acceptance.
@@ -143,7 +144,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-24 | M6 | Resume: `resume`, `resumeToPipeableStream`, `resumeAndPrerender`, `resumeAndPrerenderToNodeStream` | 4 | ✅ done |
 | R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ✅ done |
 | R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | ✅ done: Luca's try-it confirms 715 passes and 133 inapplicable cells; Verify green at eb5a18a, 24 November |
-| R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-27-03a has local evidence for 42 / 5,356 active pairs; 5,314 remain open, plus deferred-feature pairs |
+| R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-27-03b has local evidence for 45 / 5,356 active pairs; 5,311 remain open, plus deferred-feature pairs |
 | R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | ⬜ planned |
 | R-29 | M7 | Remaining small surface: `act` for JX tests, `captureOwnerStack`, version constants, `unstable_batchedUpdates`, `unstable_useCacheRefresh` | 9 | ⬜ planned |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | ⬜ planned |
@@ -231,10 +232,10 @@ No broad area-level exclusion or reduction to feature families closes this task.
 | R-27-02a | Children mapping and flattening preserve keyed identity; explicit fragments stay opaque; single-child validation matches React | ✅ merged PR #39 at 413558b: 755 full bench and 12 runtime checks; six new pairs; three scoped mutants killed; green Verify |
 | R-27-02b | Keyed callback refs and imperative handles: replacement, fresh props, cleanup, Strict Mode and layout ordering | ✅ merged PR #40 at 15c0c6e: 771 full bench passes; seven new pairs in two scenarios; scoped mutant killed; green Verify |
 | R-27-02c | Initially closed portal: context, capture/bubble, propagation, payloads and focus after hydration | ✅ merged PR #41 at a0f5460: 779 full bench and 8 focused checks; six new pairs; scoped mutant killed; green Verify |
-| R-27-03 | Extend async, form action, optimistic, transition and external-store interactions, including controlled failure/recovery; delivery slices below | 🟡 in progress: Promise prerequisite merged; 03a under review; 03b and 03c planned |
+| R-27-03 | Extend async, form action, optimistic, transition and external-store interactions, including controlled failure/recovery; delivery slices below | 🟡 in progress: Promise prerequisite and 03a merged; 03b under review; 03c planned |
 | R-27-03-PROMISE | Prerequisite: isolate Promise observer delivery so a throwing observer cannot leave React's native thenable pending | ✅ merged PR #42 at f2b64cb: red/green JVM and Chrome evidence; nine Promise tests, 36 runtime-package JVM tests and 13 runtime Chrome checks; local gate and Verify passed |
-| R-27-03a | Combined form actions with submission state, reset and controlled failure/recovery | 🟡 review: 787 full bench and 8 focused checks pass; four new pairs; scoped mutant killed; Verify pending |
-| R-27-03b | Optimistic state over immutable external snapshots: remote rebase, rejected-request rollback and retry without duplicate commits | ⬜ planned |
+| R-27-03a | Combined form actions with submission state, reset and controlled failure/recovery | ✅ merged PR #43 at 1ba8c1d: 787 full bench and 8 focused checks; four new pairs; scoped mutant killed; local gate and Verify passed |
+| R-27-03b | Optimistic state over immutable external snapshots: remote rebase, rejected-request rollback and retry without duplicate commits | 🟡 review: 795 full bench and 8 focused checks pass; three new pairs; explicit close during both awaits releases requests and subscriptions; scoped mutant killed; Verify pending |
 | R-27-03c | Transition interactions with independent updates and controlled asynchronous completion | ⬜ planned |
 | R-27-04 | Extend SSR, hydration, streaming and resource interactions with mode-specific assertions | ⬜ planned |
 | R-27-05 | Add deferred-feature interactions after R-28–R-30; review every remaining pair's applicability and close coverage gaps | ⬜ planned |
@@ -313,9 +314,27 @@ does not complete the G0 request-ownership API or R-28 class components.
 Local evidence reaches 42 / 5,356, with 5,314 active pairs open, including the
 38-pair portal baseline merged in PR #41. The unmutated scratch baseline passed,
 then `combined-action-queue` killed `action-queue-previous-lost` (1 killed,
-0 survived, 0 unusable). Verify is pending. Catalog size is 108;
+0 survived, 0 unusable). [PR #43](https://github.com/lmrrcc/jx/pull/43) merged as
+`1ba8c1daab8f5587b37f9cf9dd2fc7e369205aaa`, with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45480919951) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45480798051). Its catalog size was 108;
 the historical full mutation campaign remains 100. Details and the scoped command
 are in the [action evidence record](ga-react-interactions.md#r-27-03a-queued-form-actions-and-recovery).
+
+R-27-03b local evidence: 795 passed, 133 skipped across 116 case IDs; client 114
+reference / 113 JX, hydration 89, static HTML 95 and lazy 100 per side. All eight
+focused checks pass. Three witnesses combine optimistic state with external
+snapshots, transitions and Java async functions. Remote updates rebase the
+pending view; rejection rolls back only the local addition; retry commits once
+while a second await keeps the transition pending. Closing during either await
+settles both fixture-owned gates and releases actual requests and subscriptions.
+This explicit fixture disposal does not deliver the G0 cancellation API.
+Local evidence reaches 45 / 5,356, with 5,311 active pairs open. The unmutated
+scratch baseline passed, then `combined-optimistic-store` killed
+`optimistic-duplicate-overlay` (1 killed, 0 survived, 0 unusable). Verify is
+pending. The catalog has 109 entries; the historical full campaign remains 100.
+Details and the scoped command are in the
+[optimistic/store evidence record](ga-react-interactions.md#r-27-03b-optimistic-snapshots-rollback-and-request-disposal).
 
 R-27-03-PROMISE repairs a defect found while preparing those scenarios. Previously,
 all waiting observers ran inside one microtask; an earlier observer throwing
@@ -333,7 +352,7 @@ The full local push gate and CI Verify passed. [PR #42](https://github.com/lmrrc
 merged as `f2b64cbb92d2c77476840c77958a0eefdc87af8a`, with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45467245368) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45466911060).
-It adds no feature-pair witness; R-27-03a is in review, while 03b and 03c remain planned.
+It adds no feature-pair witness; R-27-03a is merged, 03b is in review and 03c remains planned.
 
 R-27-01 local evidence, 24 November 2026: the complete bench reports 731 passed and
 133 skipped cells: client 106 reference / 105 JX, hydrate 81 per side, static 87 per
