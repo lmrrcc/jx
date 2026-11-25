@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 /** Stable identity and checked schemas of a Java-authored React class. Declare once. This
  * explicit descriptor API also underlies compiler-generated native class markup. */
 public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
-    public enum Lifecycle { MOUNT, UPDATE, UNMOUNT, SNAPSHOT, SHOULD_UPDATE }
+    public enum Lifecycle { MOUNT, UPDATE, UNMOUNT, SNAPSHOT, SHOULD_UPDATE, CATCH }
     /** Renderer-owned access to the one native context declared by a descriptor. Applications
      * receive the resulting typed reader through the context-aware factory, not this adapter. */
     public interface ContextAccess {
@@ -24,18 +24,20 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     private final boolean pure;
     private final Set<Lifecycle> lifecycles;
     private final BiFunction<P,S,StatePatch<S>> derivedState;
+    private final Function<Throwable,StatePatch<S>> derivedError;
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles) {
-        this(name, props, state, factory, context, pure, lifecycles, null);
+        this(name, props, state, factory, context, pure, lifecycles, null, null);
     }
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles,
-            BiFunction<P,S,StatePatch<S>> derivedState) {
+            BiFunction<P,S,StatePatch<S>> derivedState, Function<Throwable,StatePatch<S>> derivedError) {
         if (Objects.requireNonNull(name).isBlank()) throw new IllegalArgumentException("Empty class component name");
         this.name = name; this.props = Objects.requireNonNull(props); this.state = Objects.requireNonNull(state);
         this.factory = Objects.requireNonNull(factory); this.context = context;
         this.pure = pure; this.lifecycles = Set.copyOf(lifecycles);
         this.derivedState = derivedState;
+        this.derivedError = derivedError;
         if (pure && this.lifecycles.contains(Lifecycle.SHOULD_UPDATE)) throw new IllegalArgumentException("PureComponent uses native shallow comparison");
         if (this.lifecycles.contains(Lifecycle.SNAPSHOT) && !this.lifecycles.contains(Lifecycle.UPDATE))
             throw new IllegalArgumentException("Snapshot lifecycle requires update lifecycle");
@@ -99,7 +101,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDerivedStateFromProps(BiFunction<P,S,StatePatch<S>> callback) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                Objects.requireNonNull(callback, "callback"));
+                Objects.requireNonNull(callback, "callback"), derivedError);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasDerivedStateFromProps() { return derivedState != null; }
@@ -113,6 +115,33 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         props.validate(nextProps); state.validate(pendingState);
         StatePatch<S> patch = derivedState.apply(nextProps, pendingState);
         if (patch != null && patch.schema() != state) throw new IllegalArgumentException("Derived state patch belongs to another class schema");
+        return patch;
+    }
+    /** Returns a new descriptor with native static getDerivedStateFromError. Declare the result
+     * once to retain component identity. The original descriptor and all other settings remain
+     * unchanged. Repeating this operation replaces the callback in the returned descriptor.
+     *
+     * <p>The callback is pure render-phase work, without a peer instance, and can be repeated or
+     * discarded by React. Return a patch owned by this descriptor's state schema to render the
+     * fallback. Null means no derived change; omitted fields survive the native merge. Java
+     * failures preserve Throwable identity; the renderer documents foreign JavaScript failure
+     * projection. Reporting effects belong in componentDidCatch with Lifecycle.CATCH instead.
+     * React determines which descendant failures reach the boundary and propagates failures
+     * thrown by this callback to a parent boundary. Server-render errors are not caught here.
+     */
+    public ClassComponentType<P,S,C> withDerivedStateFromError(Function<Throwable,StatePatch<S>> callback) {
+        return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
+                derivedState, Objects.requireNonNull(callback, "callback"));
+    }
+    /** Renderer capability check; no callback is executed. */
+    public boolean hasDerivedStateFromError() { return derivedError != null; }
+    /** Renderer dispatch of the pure error derivation, with checked patch ownership.
+     * @throws IllegalStateException when no error derivation was configured
+     * @throws IllegalArgumentException when the callback returns another schema's patch */
+    public StatePatch<S> deriveStateFromError(Throwable error) {
+        if (derivedError == null) throw new IllegalStateException("No derived error callback configured");
+        StatePatch<S> patch = derivedError.apply(Objects.requireNonNull(error, "error"));
+        if (patch != null && patch.schema() != state) throw new IllegalArgumentException("Derived error patch belongs to another class schema");
         return patch;
     }
     public ClassSchema<P> propsSchema() { return props; }
