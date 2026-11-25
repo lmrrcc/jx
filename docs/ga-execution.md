@@ -193,13 +193,15 @@ gate passed in 436 seconds and both Verify checks passed on `4af20f2`;
 no cross-browser or full parity qualification is implied.
 
 R-28-03e adds typed pending context to explicit and authored class update
-policies. Integration over preload candidate `4af20f2` passes 51 core, 2 React,
+policies. Integration over merged preload `a805810` passes 51 core, 2 React,
 53 compiler, 15 Maven and 10 LSP tests, plus **911 bench checks, 169 skipped,
 across 135 cases**: 133 reference / 132 JX client, 102 hydrate, 108 static and
 113 lazy per side.
 All 64 class cells pass; pair evidence stays 54/6328. Its two mutants were
 killed after a passing baseline in the scoped seven-mutant `f49b48f` campaign;
-zero survived/unusable. Final gate/Verify are pending. The integrated catalog
+zero survived/unusable. PR [#60](https://github.com/lmrrcc/jx/pull/60) merged as
+`3815001` after the 15-step gate passed in 373 seconds and both Verify checks
+passed on `251aaa7`. The integrated catalog
 contains 132 entries;
 the historical full campaign remains 100.
 

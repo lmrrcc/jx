@@ -527,7 +527,7 @@ bypass the policy. Actual DOM handles remain stable, and the unused legacy
 override is never invoked. Real-core javac consumers prove either overload form
 and their coexistence, source-mapped editing and invalid signature diagnostics.
 
-Integration on responsive-preload candidate `4af20f2`, over merged lifecycle
+Integration on responsive-preload merge `a805810`, over merged lifecycle
 authoring `338872c`, passes 51 core, 2 React-option, 53 compiler, 15 Maven-plugin
 and 10 LSP tests. The complete bench passes
 **911 checks, 169 skipped, across 135 cases**: client 133 React / 132 JX,
@@ -546,8 +546,12 @@ five mutations belong to their own slices; the historical complete campaign
 remains 100. Scratch evidence is `jx-mutation-2296619748002841958`.
 Repeat just this slice exclusively with
 `java tools/MutateBench.java --only class-next-context-current,class-authored-context-policy-lost --keep`.
-Static projects compare initial HTML only. Final gate, Verify and native IDE
-qualification remain pending.
+Static projects compare initial HTML only. PR
+[#60](https://github.com/lmrrcc/jx/pull/60) merged as `3815001` after the final
+15-step gate passed in 373 seconds and both
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45665909511) and
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45666011061) passed on `251aaa7`.
+Native IDE qualification remains pending.
 
 Remaining options are explicit, not accepted scope reductions: custom policies
 on PureComponent are currently rejected, although React can call such a method
