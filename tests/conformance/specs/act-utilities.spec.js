@@ -38,10 +38,23 @@ test('act-utilities: awaited scopes flush async updates and cascading effects, n
     expect(nested.count).toBe('3');
     expect(nested.log.slice(-2)).toEqual(['cleanup:2', 'effect:3']);
     expect(await page.evaluate(() => globalThis.__benchUtilities.calls())).toBe(2);
+    const synchronous = await page.evaluate(async () => {
+      const result = globalThis.__benchUtilities.sync();
+      return {immediate: result.immediate, completed: await result.completion};
+    });
+    expect(synchronous.immediate.count).toBe('4');
+    expect(synchronous.immediate.log.slice(-2)).toEqual(['cleanup:3', 'effect:4']);
+    expect(synchronous.completed).toEqual({...synchronous.immediate, value: 'sync'});
+    expect(await page.evaluate(() => globalThis.__benchUtilities.calls())).toBe(3);
+    const syncError = await page.evaluate(async () => {
+      try { await globalThis.__benchUtilities.syncThrowing(); return 'fulfilled'; }
+      catch (error) { return error.message; }
+    });
+    expect(syncError).toContain('sync act threw');
     const last = await page.evaluate(() => globalThis.__benchUtilities.unmount());
     mounted = false;
     expect(last.count).toBeNull();
-    expect(last.log.at(-1)).toBe('cleanup:3');
+    expect(last.log.at(-1)).toBe('cleanup:4');
   } finally {
     if (mounted) await page.evaluate(() => globalThis.__benchUtilities.unmount());
     await page.evaluate(() => { delete globalThis.IS_REACT_ACT_ENVIRONMENT; });

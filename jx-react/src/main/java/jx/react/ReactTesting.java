@@ -10,11 +10,35 @@ import org.teavm.jso.JSBodyImport;
 import org.teavm.jso.JSFunctor;
 import org.teavm.jso.JSObject;
 
-/** Asynchronous React test utilities for browser-compiled Java. These are test-host APIs,
+/** React test utilities for browser-compiled Java. These are test-host APIs,
  * not application scheduling primitives. The host owns React's test environment setting
  * ({@code globalThis.IS_REACT_ACT_ENVIRONMENT = true}) and restores it when finished. */
 public final class ReactTesting {
     private ReactTesting() {}
+
+    /** Runs a synchronous callback through React's native synchronous {@code act} scope.
+     * React can flush synchronous updates before this method returns, but work that suspends or
+     * crosses an asynchronous boundary still needs the returned non-null promise to be awaited.
+     * Always await it before starting another independent scope. Prefer the asynchronous
+     * {@link #act(Supplier)} form for new tests; React plans to remove synchronous scopes.
+     *
+     * <p>The callback runs once. Thrown callback/flush failures reject the result; a production
+     * build rejects before invoking the callback. Java throwable identity is preserved. Null
+     * callbacks are rejected immediately. The test host owns the act environment setting and
+     * all calls run on the single rendering thread. No cancellation or overlap guarantee is
+     * added by this overload. Use a typed {@code Runnable} when a Java lambda is also compatible
+     * with the asynchronous supplier overload. */
+    public static Promise<Void> act(Runnable action) {
+        Objects.requireNonNull(action);
+        Async.installRuntime(AsyncBridge.INSTANCE);
+        return Promise.create(resolver -> {
+            JSObject completion = actNative(() -> {
+                action.run();
+                return null; // synchronous test scope
+            });
+            React.promise(completion).whenSettled(ignored -> resolver.resolve(null), resolver::reject);
+        });
+    }
 
     /** Runs an asynchronous test scope through React's {@code act} and settles after React has
      * flushed the updates and effects it schedules. Always await the returned promise before

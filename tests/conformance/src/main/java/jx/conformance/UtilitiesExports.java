@@ -37,7 +37,7 @@ public final class UtilitiesExports {
         Bench.seedMarkup("<div id=\"act-root\"></div>");
         Session session = new Session();
         install(session::mount, session::start, () -> session.release.resolve(null), session::nested,
-                session::fail, session::throwing, session::unmount, () -> session.calls,
+                session::fail, session::throwing, session::sync, session::syncThrowing, session::unmount, () -> session.calls,
                 ReactDiagnostics.captureOwnerStack());
     }
 
@@ -74,6 +74,20 @@ public final class UtilitiesExports {
         }
         JSObject fail() { return report(ReactTesting.act(() -> Promise.rejected(new IllegalStateException("act rejected")))); }
         JSObject throwing() { return report(ReactTesting.act(() -> { throw new IllegalStateException("act threw"); })); }
+        JSObject sync() {
+            Runnable update = () -> { calls++; store.publish(4); };
+            Promise<Void> completed = ReactTesting.act(update);
+            // Observe immediately, before returning to the host or awaiting any promise.
+            return synchronous(snapshot("immediate"), report(completed.map(ignored -> "sync")));
+        }
+        JSObject syncThrowing() {
+            IllegalStateException failure = new IllegalStateException("sync act threw");
+            Runnable action = () -> { throw failure; };
+            return report(ReactTesting.act(action).recover(error -> {
+                if (error != failure) throw new IllegalStateException("Synchronous act lost Java failure identity");
+                throw failure;
+            }).map(ignored -> "unexpected success"));
+        }
         JSObject unmount() {
             return report(ReactTesting.act(() -> {
                 root.close();
@@ -88,9 +102,11 @@ public final class UtilitiesExports {
     // assertion could accidentally hide an implementation that resolves before React flushes.
     @JSBody(params = "value", script = "return {value: value, count: document.getElementById('act-count')?.textContent ?? null, log: [...(globalThis.__benchLog || [])]};")
     private static native JSObject snapshot(String value);
-    @JSBody(params = {"mount", "start", "release", "nested", "fail", "throwing", "unmount", "calls", "outside"},
+    @JSBody(params = {"immediate", "completion"}, script = "return {immediate: immediate, completion: completion};")
+    private static native JSObject synchronous(JSObject immediate, JSObject completion);
+    @JSBody(params = {"mount", "start", "release", "nested", "fail", "throwing", "sync", "syncThrowing", "unmount", "calls", "outside"},
             script = "document.getElementById('app').dataset.bench = 'act-utilities';"
-                    + " globalThis.__benchUtilities = {mount, start, release, nested, fail, throwing, unmount, calls, outside};")
+                    + " globalThis.__benchUtilities = {mount, start, release, nested, fail, throwing, sync, syncThrowing, unmount, calls, outside};")
     private static native void install(Later mount, Later start, Release release, Later nested, Later fail,
-                                      Later throwing, Later unmount, Count calls, String outside);
+                                      Later throwing, Later sync, Later syncThrowing, Later unmount, Count calls, String outside);
 }

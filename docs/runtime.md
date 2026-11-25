@@ -618,10 +618,27 @@ roots already batch automatically; this API does not promise immediate DOM reads
 before checking rendered output or starting another scope. It resolves after
 React flushes scheduled updates/effects and retains the Java callback result;
 callback and flush failures reject it. Nested scopes must also be awaited. There
-is no synchronous overload, cancellation or support for overlapping independent
-scopes. Production React does not implement `act`, so the returned promise rejects.
+is no cancellation or support for overlapping independent scopes. Production
+React does not implement `act`, so the returned promise rejects.
 The JavaScript test host owns `globalThis.IS_REACT_ACT_ENVIRONMENT = true` and its
 restoration; the library never changes that global setting.
+
+`ReactTesting.act(Runnable)` supplies a synchronous callback to native React.
+Synchronous work can flush before the call returns; always await its delivery
+promise as well, because suspending or asynchronous work is not guaranteed to
+finish synchronously. Prefer the supplier-of-promise overload for new tests:
+[React recommends awaited asynchronous scopes and plans to remove synchronous
+scopes](https://react.dev/reference/react/act). The runnable runs once, returns no
+value, and preserves an original Java failure. Production rejection happens
+before invoking it. The consumer checks the DOM and effect log immediately after
+the method returns, before any host await can hide delayed flushing, and again
+after completion. Its failure and production cases also run against native React.
+
+Pre-GA source compatibility: adding a functional-interface overload may change
+overload selection for untyped statement-expression or throwing lambdas and
+`act(null)`. Type the callback as `Runnable` for a synchronous scope or
+`Supplier<Promise<T>>` for an asynchronous scope. Existing typed method descriptors
+remain available; no asynchronous scope is converted to a synchronous one.
 
 The compiling consumer in `tests/conformance/src/main/java/jx/conformance/UtilitiesExports.java`
 mounts and disposes a root with `act`, releases an asynchronous gate, verifies an
