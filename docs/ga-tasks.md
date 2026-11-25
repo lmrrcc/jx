@@ -359,7 +359,10 @@ owned by React and the browser. The `image-preload` Java consumer and differenti
 case must prove actual candidate requests, no-referrer behavior, source-set/sizes
 deduplication, the legacy constructor, static HTML and hydration. On 25 November,
 the case passed all eight React/JX mode combinations and both option-contract JVM
-tests passed. Full regression, mutation runs and Verify remain pending; no blanket
+tests passed. Integrated source `0f41000` on FormStatus candidate `1b65e70` passes
+42 core, two React options, 48 compiler and 15 plugin checks plus the full bench:
+887 passed /169 skipped /132 cases, unchanged 54/6328 interaction pairs.
+Mutation runs, the publication gate and Verify remain pending; no blanket
 preload or browser qualification follows from this slice. See the
 [focused evidence](evidence/responsive-preload.md).
 Adding record components preserves the old constructor and accessors but extends

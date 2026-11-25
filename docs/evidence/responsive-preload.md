@@ -40,9 +40,15 @@ assumptions about CORS normalization and interception-only request headers; the
 React reference and JX behaved alike. The final assertion checks the observable
 Referer header and does not claim unavailable Fetch Metadata headers were tested.
 
-No complete bench or mutation campaign was run for this branch. The curated
+Integrated source `0f41000` over FormStatus candidate `1b65e70` also passes package
+(42 core, two React options, 48 compiler and 15 plugin checks) and the complete
+bench: **887 passed, 169 skipped, 132 cases**. Client is 130 reference / 129 JX;
+hydrate 99, static 105 and lazy 110 per side. Only the `image-preload` case is
+added to the recorded results; interaction evidence remains 54/6328.
+
+No mutation campaign has run yet for this capability. The curated
 `hint-image-sizes-dropped` and `hint-referrer-policy-dropped` mutations are registered
-but unexecuted. Result tables are unchanged; Verify and integration remain pending.
+but unexecuted. The local push gate and Verify remain pending.
 The browser check is Chrome evidence, not cross-browser or GA qualification.
 
 Compatibility: existing constructor and accessor descriptors remain available.
