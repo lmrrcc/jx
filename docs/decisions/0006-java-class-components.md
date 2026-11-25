@@ -469,3 +469,77 @@ they add no class evidence. Scratch evidence is
 build/browser window with
 `java tools/MutateBench.java --only class-authoring-error-derive-lost --keep`.
 The final push gate and Verify remain pending.
+
+## R-28-03e typed next-context update policy — 25 November 2026
+
+`withContextShouldUpdate(context, (peer, nextProps, nextState, nextContext) -> ...)`
+adds React's third should-update argument without changing the generic parameters
+of `ClassComponent`. The context must be the descriptor's declared context by
+identity; a new descriptor is returned, preserving its factory, schemas,
+derivations and lifecycle settings. Applications declare the resulting descriptor
+once. The modifier enables native should-update dispatch automatically and takes
+precedence over a registered two-argument peer override. Reapplying it replaces
+the policy only on the new descriptor.
+
+The adapter passes the callback's actual pending native context through checked
+descriptor access. It does not replace the instance's current context or add a
+subscription, global registry or separate peer owner. Props and state are checked
+against the descriptor schemas before dispatch. Pending context may be null; it
+is a value for that invocation, not the constructor's live reader. Java exceptions
+from the reader or policy propagate unchanged through the Java dispatcher.
+
+[React's public contract](https://react.dev/reference/react/Component#shouldcomponentupdate)
+separates current instance values from the pending arguments and bypasses the
+policy for initial rendering and forceUpdate. Inspection of the installed React
+DOM 19.3.1 implementation (`checkShouldComponentUpdate` and the class update path)
+also shows a changed context dependency can force a render after a false result.
+The fixture compares this behavior with an actual native three-argument React
+class; no manual update scheduling is substituted.
+
+After the explicit descriptor consumer passed all eight projects, compiler support
+was added for an ordinary public/protected Java overload:
+
+```java
+protected boolean shouldComponentUpdate(Props next, Model pending, Theme nextContext) {
+    return next.revision() != props().revision()
+        || pending.count() != state().count()
+        || nextContext != theme.get();
+}
+```
+
+This is an overload, without `@Override`: the Java base retains its existing
+two-argument method. Its third parameter must match the declared `contextType`
+value type. When both forms are present, the generated descriptor selects the
+three-argument overload; ordinary Java calls to either method keep normal Java
+resolution. The compiler generates the same typed policy modifier exercised by
+the runtime consumer. Authored method bodies remain mapped Java in editor
+projections, with no hidden context field.
+
+Runtime package and eight-project evidence preceded compiler implementation. The
+final package passes 47 core, 53 compiler, 15 Maven-plugin and 10 LSP tests. All
+64 focused class projects pass, including the combined authored/runtime consumer
+and seven existing class cases. Both peers observe current versus pending
+props/state/context and original context identity. The fixture also covers
+default/provider/null constructor values and provider changes to null.
+Queued changes do not eagerly mutate current values; false policies skip local
+updates while native provider changes still commit. Initial render and forceUpdate
+bypass the policy. Actual DOM handles remain stable, and the unused legacy
+override is never invoked. Real-core javac consumers prove either overload form
+and their coexistence, source-mapped editing and invalid signature diagnostics.
+
+`CheckBaseline` and `git diff --check` pass. The wrong-context and
+omitted-authored-policy mutants are registered but unrun. Static projects compare
+initial HTML only; this is focused Chrome evidence, not a full integrated bench,
+gate or Verify result. No new feature-pair or aggregate result-table credit is
+claimed.
+
+Remaining options are explicit, not accepted scope reductions: custom policies
+on PureComponent are currently rejected, although React can call such a method
+with a development warning; non-null initial props/state and direct patches,
+bounded class record authoring, legacy/UNSAFE lifecycle declarations, native IDE
+qualification and class hot checkpoints remain open under R-28-03f/02b/04.
+The option audit must distinguish React's deprecated lifecycle behavior from
+APIs removed by the pinned React version. Its inventory includes
+`componentWillMount`, `componentWillReceiveProps`, `componentWillUpdate`, their
+`UNSAFE_` forms, legacy context members and class `defaultProps`; none gains
+support merely because the current parser reports an explicit diagnostic.

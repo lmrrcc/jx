@@ -243,6 +243,21 @@ lifecycle head, with no new full-catalog run beyond the historical 100. The
 15-step gate passed in 352 seconds; PR #58 merged as `338872c` after both
 Verify checks passed on `0011c1d`.
 
+`class-next-context` compares a native React three-argument should-update method
+with both an explicit Java descriptor policy and a generated `.jx` overload.
+The runtime consumer passed eight projects before compiler implementation; the
+final 64-project class regression also passes. Both Java forms preserve current
+values while receiving pending props/state/context, including provider identity
+and null, with no eager state change. Provider updates can commit despite false;
+initial rendering and forceUpdate bypass the policy. The authored three-argument
+overload takes precedence over its two-argument override, while the legacy Java
+contract remains available. Real DOM identity is retained. Core and real-javac
+tests cover checked schemas, context identity, immutable descriptor composition,
+failure propagation and editor projections. Two scoped mutants are registered
+but unrun; static checks only initial HTML. Custom policies on PureComponent,
+null initial props/state, direct null patches, legacy/UNSAFE options, native IDE
+qualification and class checkpoints remain open. No aggregate table or pair
+witness is credited.
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
 combine optimistic state with external-store snapshots, transitions and Java async
