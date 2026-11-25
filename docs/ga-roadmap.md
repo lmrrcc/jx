@@ -1,11 +1,11 @@
 # JX general availability roadmap
 
-Version: **0.3 — interaction evidence**, 24 November 2026. Original plan: 19 November 2026.
+Version: **0.3 — interaction evidence**, 25 November 2026. Original plan: 19 November 2026.
 Original evidence baseline: repository commit `78c9836`; IntelliJ 0.3.2, VS Code 0.2.0,
 Java 25, TeaVM 0.16.0, React/React DOM 19.3.1. These are observed pins, not a
 promise to freeze upstream dependencies for a year.
 
-## Progress flags — 24 November 2026
+## Progress flags — 25 November 2026
 
 **✅ Done · 🟡 Partial · ⬜ Planned / to do · ➡️ Next · ⛔ Blocked.**
 Flags apply to the stated acceptance scope, not merely to the existence of code.
@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01 and R-27-02a–02c merged with green Verify, as did the Promise prerequisite. R-27-03a locally evidences 42 / 5,356 active pairs, with 5,314 open; its scoped mutant was killed and Verify is pending. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01, R-27-02a–02c, the Promise prerequisite and R-27-03a merged with green Verify. R-27-03b locally evidences 45 / 5,356 active pairs, with 5,311 open; its scoped mutant was killed and Verify is pending. Complete remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -51,12 +51,23 @@ per side. Its eight focused checks pass, including queued payloads and previous
 state, form status/reset, rejected successors and fresh ownership after retry or
 unmount. The cancellation logic is local to the fixture, not the G0 API.
 Its unmutated scratch baseline passed, then `combined-action-queue` killed
-`action-queue-previous-lost` (1 killed, 0 survived, 0 unusable). Verify is pending;
-the catalog has 108 entries, with no new full mutation campaign claimed.
+`action-queue-previous-lost` (1 killed, 0 survived, 0 unusable).
+[PR #43](https://github.com/lmrrcc/jx/pull/43) merged as `1ba8c1d`, with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45480919951) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45480798051).
+R-27-03b adds three optimistic/store pairs with 795 full-bench passes, 133 skipped
+cells and 116 case IDs: client 114 reference / 113 JX, hydrate 89, static 95 and
+lazy 100 per side. Its eight focused checks pass. The scenario proves remote
+snapshot rebasing, rejected-request rollback, one committed item during a pending
+retry, and explicit owner disposal during both awaits. Disposal is fixture-local;
+it does not deliver the G0 cancellation API. Its unmutated baseline passed, then
+`combined-optimistic-store` killed `optimistic-duplicate-overlay` (1 killed,
+0 survived, 0 unusable). Verify is pending. The catalog has 109 entries;
+the historical full campaign remains 100.
 The [interaction evidence record](ga-react-interactions.md)
-keeps the 42 locally witnessed pairs separate from the 5,314 remaining active
-pairs. R-27-03a is in review; optimistic/store and transition slices remain
-planned in this baseline. The Promise prerequisite merged as `f2b64cb` in
+keeps the 45 locally witnessed pairs separate from the 5,311 remaining active
+pairs. R-27-03b is in review; the transition slice remains planned in this
+baseline. The Promise prerequisite merged as `f2b64cb` in
 [PR #42](https://github.com/lmrrcc/jx/pull/42), with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45467245368) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45466911060):
