@@ -214,6 +214,20 @@ Its callback-dropping mutant was killed after a passing baseline. The local
 15-step gate passed in 348 seconds and both Verify checks passed on `1c23a22`.
 Pair evidence remains 54/6328; other class options remain open.
 
+R-28-03g permits custom PureComponent update policies through typed descriptors
+and ordinary `.jx` declarations while retaining the actual native Pure base,
+default shallow comparison and development warning. Integration passes 56 core,
+2 React-option, 54 compiler, 15 Maven and 10 LSP tests; the complete bench passes
+**927 checks, 169 skipped, 137 cases**: client 135 reference / 134 JX, hydrate
+104, static 110 and lazy 115 per side. All 80 class cells pass. Its scoped
+policy-omission mutant was killed after a passing baseline on byte-identical
+capability sources; this is one of seven scoped mutations, not a new full-catalog
+campaign. The local 15-step gate passed in 311 seconds on `035e6ab`;
+[PR #62](https://github.com/lmrrcc/jx/pull/62) merged as `39dd3ce` after both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45676165881) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45675888499) passed.
+The pair register stays 54/6328 and R-28 remains partial.
+
 R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
 using actual Flight and separate server/client Java programs. Seven Node and four
 Chrome checks passed, including suspension, rejection, abort and server-code
@@ -253,6 +267,13 @@ qualification remains R-28-02b. Advanced lifecycle/context
 options and class state preservation remain R-28-03/04. The scope and acceptance
 are recorded in [the R-28 slice table](ga-tasks.md#r-28-implementation-slices).
 
+Added 24 November 2026: [starter and fast development](ga-developer-experience.md)
+is an explicit product requirement. ST-01–ST-06 refine GA-09/12/13; HR-01–HR-10
+refine GA-08/24/25/26/27/28. All are planned. Luca confirmed on 25 November that
+the entire React parity track and all G0 proofs precede starter and fast-loop
+implementation. These slices do not add completed work to the register or change
+the remaining shared-contract/security prerequisites.
+
 ## Work package register
 
 The order of implementation is the [implementation sequence](ga-tasks.md): tasks
@@ -278,8 +299,8 @@ exists, not when its document or skeleton module lands.
 | GA-09 | Artifact identities and clean distribution rehearsal / Q | GA-01 | M1–M3 / M | Namespaces/owners verified; external consumer installs candidate artifacts without workspace caches | ⬜ planned |
 | GA-10 | Contract IR and generators v1 / C | GA-04 | M2–M3 / L | Java authority + generated async client/codecs/server boundary/schema; incompatible wire change fails | ⬜ planned |
 | GA-11 | Browser Java certification and dependency scanner / J | GA-01, GA-04 | M2–M6 / L | Per-method JVM/browser vectors and transitive unsupported-call diagnostics; size budgets | ⬜ planned |
-| GA-12 | Optional Boot starter/BOM and template / S | GA-10 | M2–M3 / L | External consumer; executable JAR in empty directory; auto-config backoff, route/caching tests | ⬜ planned |
-| GA-13 | Authenticated same-origin dev lifecycle / S | GA-03, GA-04 | M2–M4 / L | Session/CSRF/OIDC with hot updates; secure proxy/backend-fronting; owned backend/UI processes | ⬜ planned |
+| GA-12 | Optional Boot starter/BOM and template / S | GA-10 | M2–M3 / L | ST-01–06: React-style welcome, Maven create goal, one contract authority, independent three-command UI/API startup; executable Boot JAR in empty directory, auto-config backoff and route/caching tests | ⬜ planned |
+| GA-13 | Authenticated same-origin dev lifecycle / S | GA-03, GA-04 | M2–M4 / L | ST-05 one-command backend/UI readiness and process ownership; session/CSRF/OIDC with hot updates and secure backend-fronting; public demo does not qualify authentication | ⬜ planned |
 | GA-14 | Grammar, generic/default/forwarded props / L | GA-05 | M2–M4 / L | Typed reusable components, Java-equivalent JSX patterns, recovery/fuzz/mapped errors | 🟡 partial |
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
@@ -293,7 +314,7 @@ exists, not when its document or skeleton module lands.
 | GA-24 | IntelliJ editing and run/debug parity / T | GA-08, GA-14, GA-23 | M2–M7 / L | Native action corpus incl. safe closed-file edits; installed packages, trust, scale and version tests | ⬜ planned |
 | GA-25 | VS Code editing and run/debug parity / T | GA-08, GA-14, GA-23 | M2–M7 / L | Class/file rename, formatting, closed-file references, normal navigation and installed-JDT matrix | ⬜ planned |
 | GA-26 | TurboJ native .jx integration / T | GA-14, GA-23 | M4–M8 / L | Reuse compiler semantics; native mixed editor/run/debug with own acceptance corpus | ⬜ planned |
-| GA-27 | Hot update and cache scale / R | GA-10, GA-18, GA-23 | M4–M7 / M | Compatible typed checkpoint codecs, resets explained, no replay/leaks after 100 updates | ⬜ planned |
+| GA-27 | Fast development service and hot-update scale / R | React parity and G0; GA-10, GA-18, GA-23 for full qualification | After G0 / M2 proof; M4–M7 qualification / L | HR-01–10: measured edit-to-paint latency, persistent compiler/TeaVM/bundler, no Maven per UI edit, versioned IDE buffers, compatible checkpoints, bounded caches and no replay/leaks after 100 updates | ⬜ planned |
 | GA-28 | Cross-browser/OS/performance/a11y/security CI / Q | GA-01; each delivered feature | M1–M12 / L | Required matrix/payload/latency gates; real-device and manual evidence attached to RC | ⬜ planned |
 | GA-29 | Existing Spring/Kotlin and schema-first adapters / C | GA-10, GA-11 | M3–M7 / L | Java21/Kotlin Gradle Boot consumes Maven-built JX contracts/assets in clean CI+IDE; Rust-schema consumer; no forced backend/build-tool rewrite | ⬜ planned |
 | GA-30 | Static site pilot / M | GA-02, GA-22, GA-28 | M6–M8 / M | Complete low-risk site with existing URLs/forms/SEO, canary and rollback | ⬜ planned |

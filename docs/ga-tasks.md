@@ -11,6 +11,16 @@ slice and preserve automated gates. Record outstanding human qualification or
 applicability decisions explicitly; the request to continue is not evidence that
 an untested capability works.
 
+Plan amendment, 24 November 2026: add a React-style welcome example, a Maven
+generator for a complete Java/.jx and Spring application, and a persistent fast
+development service integrated with the editors. The
+[starter and fast development plan](ga-developer-experience.md) defines the
+proposed commands, boundaries, prerequisites and latency targets. ST/HR rows below
+are **planned implementation**, not delivered features. Execution order confirmed
+by Luca on 25 November: complete the React parity track and all G0 proofs first,
+then implement the starter and fast development service. This supersedes the
+earlier proposal to begin ST/HR slices after an individual parity task.
+
 Progress, 23 November 2026: M1-01 to M1-05 are done. R-01 to R-18 and R-32 were
 recorded complete; the audit of that day reopened R-16 because its promised
 `useFormState` alias was absent, and the alias with its bench case was added the
@@ -28,8 +38,8 @@ That makes 27 complete React tasks. R-27-01 and R-27-02a–02c merged with green
 Verify, establishing 38 executed pair witnesses. The Promise prerequisite also
 merged in [PR #42](https://github.com/lmrrcc/jx/pull/42) with green Verify.
 R-27-03a merged in [PR #43](https://github.com/lmrrcc/jx/pull/43) as `1ba8c1d`,
-with both Verify checks green. The null-patch slice merged in PR #61 over
-responsive preload and next-context policies passes 919 local bench checks
+with both Verify checks green. The Pure custom-policy slice merged in PR #62 over
+responsive preload and the preceding class policies passes 927 local bench checks
 with 54 witnessed pairs among 6,328 active candidates; 6,274 remain without
 complete evidence. The optimistic/store, transition and SSR scoped mutants were killed
 after their unmutated baselines passed. R-27-03b merged as `3e24edb` in
@@ -443,7 +453,7 @@ lifecycle parity or preserved class state across hot replacement.
 | R-28-03d | Direct `.jx` context/derived-state/error declarations, checked signatures, generated descriptors and editor projections, with a composed browser consumer | ✅ merged PR #58 at 338872c: integrated 47 core/52 compiler/15 Maven/10 LSP tests; full bench 895 checks/169 skipped/133 cases, all 56 class cells and unchanged 54/6328 pairs; strengthened expected-error assertions pass 8/8; real-core javac and source-mapped editor projections verified; scoped compiler mutant killed after a passing baseline; 15-step gate passed in 352 seconds and both Verify checks passed on 0011c1d; native IDE qualification remains separate |
 | R-28-03e | Typed third nextContext argument for should-update through an additive context-aware descriptor policy, then `.jx` overload support | ✅ done: PR [#60](https://github.com/lmrrcc/jx/pull/60), merged `3815001`; package 51 core/2 React/53 compiler/15 Maven/10 LSP; 911 checks/169 skipped/135 cases, all 64 class cells pass, unchanged 54/6328 pairs; explicit and generated policies preserve current versus pending values and take precedence over the old override; two scoped mutants killed after passing baseline, zero survived/unusable; local gate 15/15 in 373 s and both Verify checks passed on `251aaa7`; native IDE qualification remains separate |
 | R-28-03f | Nullable direct state patches with native queued callbacks, no-op identity, mixed-update ordering and ordinary `.jx` calls | ✅ done: PR [#61](https://github.com/lmrrcc/jx/pull/61), merged `a93e325`; original JX failed all three interactive modes while React passed; integrated package 54 core/2 React/53 compiler/15 Maven/10 LSP; final full bench 919 checks/169 skipped/136 cases and all 72 class cells pass; unchanged 54/6328 pairs; callback-dropping mutant killed after passing baseline, zero survived/unusable; local gate 15/15 in 348 s and both Verify checks passed on `1c23a22`; typed null preserves updater and constructor guards |
-| R-28-03g | Custom PureComponent should-update policies through typed descriptors and ordinary `.jx` declarations | 🟡 review: two JVM guard regressions red then green; prior integration before preload passed package 56 core/54 compiler/15 Maven/10 LSP and full 919 checks/169 skipped/136 cases, including all 80 class cells; native warning preserved; unchanged 54/6328 pairs; policy-omission mutant killed after passing baseline on f49b48f, zero survived/unusable (one of the seven scoped mutations); final integration gate/Verify pending |
+| R-28-03g | Custom PureComponent should-update policies through typed descriptors and ordinary `.jx` declarations | ✅ done: PR [#62](https://github.com/lmrrcc/jx/pull/62), merged `39dd3ce`, tested head `035e6ab`; two JVM guard regressions red then green; integrated package 56 core/2 React/54 compiler/15 Maven/10 LSP and full 927 checks/169 skipped/137 cases, including all 80 class cells; native warning preserved; unchanged 54/6328 pairs; policy-omission mutant killed after passing baseline on f49b48f, zero survived/unusable (one of the seven scoped mutations); local gate 15/15 in 311 s and both Verify checks passed |
 | R-28-03h | Remaining class options: schema plan for null initial props/state, deprecated/UNSAFE lifecycles, class defaultProps and general authoring limits | ⬜ planned: see ADR 0006 option inventory; React 19 removed legacy context APIs are not implementation targets; supported deprecated lifecycle forms remain open, and rejecting a supported option is not an accepted parity reduction |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |
 
@@ -713,8 +723,8 @@ Boot JAR serving UI and API, session and CSRF journey in development and product
 | M2-05 | 10 | Wire schema file; an incompatible contract change fails the build | `./mvnw -pl jx-contract test` | ⬜ planned |
 | M2-06 | 12 | `jx-spring-boot-starter`: serves packaged assets, SPA fallback that never answers `/api` or missing assets | `./mvnw -pl jx-spring-boot-starter test` | ⬜ planned |
 | M2-07 | 12 | Starter backs off to user configuration; BOM module | same | ⬜ planned |
-| M2-08 | 12 | Application template; a generated project builds and runs from an empty directory | `npm run test:template` | ⬜ planned |
-| M2-09 | 13 | Same-origin development: the backend fronts the dev server; owned process lifecycle | `npm run test:auth` | ⬜ planned |
+| M2-08 | 12 | Complete generated JX/Spring application; decomposed into ST-01–ST-06 below: welcome example, standalone template, Maven create goal, one-command startup and external consumer | Introduce `npm run test:template` in ST-06; it is not available yet | ⬜ planned |
+| M2-09 | 13 | Same-origin development: the backend fronts the dev server; ST-05 owns frontend/backend lifecycle and uses the shared HR development service | `npm run test:auth` once introduced with the authenticated profile | ⬜ planned |
 | M2-10 | 13 | Session expiry, logout and CSRF failure journeys, in development and from the packaged JAR | `npm run test:auth` | ⬜ planned |
 | M2-11 | 11 | Differential harness: the same vectors run on the JVM and in TeaVM | `npm run test:profile` | ⬜ planned |
 | M2-12 | 11 | First certified set: `BigDecimal`, `long`, selected `java.time` | `npm run test:profile` | ⬜ planned |
@@ -775,7 +785,7 @@ Boot JAR serving UI and API, session and CSRF journey in development and product
 | M7-01 | 23 | `.jx` breakpoints and stepping in the browser | ⬜ planned |
 | M7-02 | 24 | IntelliJ run and debug parity; safe closed-file edits | ⬜ planned |
 | M7-03 | 25 | VS Code class and file rename, formatting, closed-file references | ⬜ planned |
-| M7-04 | 27 | 100-update hot-reload soak without leaks or replay | ⬜ planned |
+| M7-04 | 27 | Broader hot-update qualification; HR-10 establishes the initial 100-update and latency checks earlier in the developer track | ⬜ planned |
 | M7-05 | 20 | Media and payment-element bindings | ⬜ planned |
 | M7-06 | 30 | Website pilots: Stacktrace and luca4j pages, with rollback | ⬜ planned |
 | M7-07 | 31 | Stack Sensei pilot: first read-only route as a separate implementation beside the existing frontend | ⬜ planned |
@@ -827,6 +837,52 @@ Boot JAR serving UI and API, session and CSRF journey in development and product
   21 November 2026 stay at M6-06, M7-06, M7-07 and M8-05, after the bench is green
   for the features they need. The Stack Sensei tasks are separate implementations that do not modify the
   existing frontend.
+
+## Starter and fast development
+
+Requested by Luca on 24 November 2026. Technical design and acceptance are in
+[the starter and fast development plan](ga-developer-experience.md). These slices
+refine existing work packages; they are not additional completions to count on top
+of M2-08/M2-09 or GA-27. Keep one PR per slice and split again if a slice cannot be
+demonstrated independently. No command or test named as a deliverable exists merely
+because it appears here.
+
+### Welcome example and application creation
+
+| Task | GA / prerequisite | Change and acceptance | Status |
+| --- | --- | --- | --- |
+| ST-01 | 12; current browser runtime | Small React-style welcome screen with readable App.jx, counter, props, CSS and edit instructions. Browser test proves offline local state and compatible hot update. Canonical template assets must be reused by the generator; this browser example alone is not the full-stack starter | ⬜ planned |
+| ST-02 | 12; ST-01, M1-17–19, M2-01–07 | Independent contract/web/server template: real typed Spring greeting with loading/error/retry, one contract authority, root wrapper, own locked tools and assets inside the Boot JAR. Test from outside the framework checkout and run the JAR in an empty directory | ⬜ planned |
+| ST-03 | 12; ST-02 | Project-independent Maven `create` goal with bundled versioned templates, coordinate/package validation and deterministic atomic generation. Reject non-empty destinations and escaping paths; creation works without an existing POM | ⬜ planned |
+| ST-04 | 09/12; ST-03 | Tool/bootstrap preflight and reproducibility: generated wrappers for supported OSes, pinned npm lockfile, automatic locked setup, actionable missing JDK/Node/Maven errors. No ancestor checkout or undocumented global tools | ⬜ planned |
+| ST-05 | 13; ST-02, HR-03; refines M2-09 | One root `jx:dev` invocation owns Spring and frontend readiness, one browser origin, ports, failure propagation and shutdown. API/asset errors retain correct responses; UI-only edits do not restart Spring. Public greeting and authenticated application profiles have separate claims | ⬜ planned |
+| ST-06 | 09/12/13; ST-03–05, M1-30, candidate artifacts | Fresh external consumer follows at most three commands; real browser API call, hot update, packaged JAR and process cleanup all pass. Introduce the template integration check and record cold/warm onboarding times; publish quick-start instructions only for resolvable artifacts | ⬜ planned |
+
+After React parity and G0, ST-01 and HR-01 are the first independent slices. ST-02 waits for the minimal
+shared-contract/Boot prerequisites rather than generating duplicated DTOs and
+handwritten wire codecs. ST-05 delivers the startup portion of M2-09; its later
+session/CSRF qualification remains required, so neither parent task is closed by
+the public greeting demo alone.
+
+### Fast compilation and editor buffers
+
+| Task | GA / prerequisite | Change and acceptance | Status |
+| --- | --- | --- | --- |
+| HR-01 | 08/27; existing dev loop | Instrument edit-to-painted-frame stages; benchmark starter/current Counter, Todo and 100-component fixture with cold/warm separation, at least 30 edits per category, p50/p95/max and named machine. Establish evidence before choosing caches or adopting budgets | ⬜ planned |
+| HR-02 | 27; HR-01 | Classify CSS/compatible image changes and publish them without Java or TeaVM compilation/remount. HTML shell/bootstrap/entry/vendor changes use an explicit restart path. Detect add/delete/rename and preserve errors/last-good output; demonstrate latency against HR-01 | ⬜ planned |
+| HR-03 | 27; HR-01 | Persistent isolated development JVM with typed versioned session protocol, resolved Maven model/toolchain and bounded build queue. CLI proves repeated source-only edits without Maven subprocesses; configuration changes invalidate/restart explicitly. Record process/protocol ADR | ⬜ planned |
+| HR-04 | 27; HR-03 | Reuse JX analysis and warm javac/file-manager infrastructure with in-memory sources/bytecode where supported. API/constant/generic/processor changes invalidate dependants; add/delete/rename and error recovery agree with clean Maven diagnostics and behavior | ⬜ planned |
+| HR-05 | 27; HR-04 | TeaVM development caches on the pinned release; qualify cache/loader invalidation and async bridge behavior. Materialize files where required by supported APIs; retain explicit fallback and compare warm output behavior against clean builds | ⬜ planned |
+| HR-06 | 27; HR-05 | Persistent bundler context, vendor reuse and immediate generation notification with bounded reconnect fallback. Atomic newest-successful publication; preserve checkpoint semantics and lazy-module retention boundaries | ⬜ planned |
+| HR-07 | 24; HR-06, M1-28 | IntelliJ saved/unsaved document snapshots through the service, revision-matched diagnostics and native Java editing retained. No compiler work on UI thread; test cancellation, multi-file changes, disposal, trust and stale-result rejection | ⬜ planned |
+| HR-08 | 25; HR-07 protocol | VS Code consumes the same service and buffer contract, with equivalent correctness and latency checks; no separate build implementation | ⬜ planned |
+| HR-09 | 26; HR-07 protocol, TurboJ project integration | TurboJ connects its native .jx editor to the same service. Preserve native Java analysis and prove versioned source changes; this connection alone does not close all GA-26 editing/debugging requirements | ⬜ planned |
+| HR-10 | 27/28; HR-06–08 | Initial latency and 100-update qualification: starter CSS p95 ≤200 ms, Java/.jx p95 ≤1 s, Todo/100 components ≤2 s as proposed targets; no replay or state/cleanup regressions, bounded caches and retained generations. Record achieved budgets before enforcing them | ⬜ planned |
+
+The targets above are unmeasured acceptance proposals, with methodology in the
+technical plan. HR work preserves the complete Maven Verify gate; it changes the
+interactive development loop. M1-28 includes the early editor measurement; M7-04
+extends qualification rather than deferring all latency work until beta.
 
 ## Language and developer experience
 
