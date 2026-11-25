@@ -136,9 +136,34 @@ across 128 cases: client 126 reference / 125 JX, hydrate 95, static 101 and lazy
 106 per side. The context and three existing class cases pass all eight projects.
 No new pair witness is claimed. The captured-context mutant was killed by
 `class-context` in client, hydration and lazy modes after a passing scratch
-baseline: 1 killed, 0 survived, 0 unusable. Gate and Verify remain pending. Compiler context syntax,
+baseline: 1 killed, 0 survived, 0 unusable. [PR #53](https://github.com/lmrrcc/jx/pull/53)
+merged as `198c0b8` after the 15-step local gate and both Verify checks passed on
+`30a8911`. Compiler context syntax,
 the third next-context should-update argument and preserved class hot state remain
 separate tasks.
+
+### State derived from class props
+
+`descriptor.withDerivedStateFromProps((nextProps, pendingState) -> patch)` adds
+React's native static `getDerivedStateFromProps`. It returns a new immutable
+descriptor, so declare the result once to keep component identity stable.
+Existing context, factory, Pure and lifecycle settings are preserved.
+
+React evaluates the callback after construction and queued state updates, before
+should-update or Pure comparison. It can repeat or discard the calculation.
+The callback has no peer instance and must remain pure: no hooks, external effects
+or scheduled updates. Return a patch belonging to the descriptor's state schema,
+or null to leave pending state unchanged. Omitted fields survive; explicitly
+nullable fields can become null. An empty patch remains an object merge.
+
+The compiling [`ClassDerivedProps`](../tests/conformance/src/main/java/jx/conformance/cases/ClassDerivedProps.java)
+consumer exercises initialization, local/prop-driven changes, skipped rendering,
+force updates, Pure bailouts and previous-DOM snapshots. The
+[class decision](decisions/0006-java-class-components.md#r-28-03b-derived-state-from-props--25-november-2026)
+records evidence and remaining qualification. This slice uses explicit Java
+descriptors; authored static lifecycle sugar, browser error-boundary qualification
+and committed class hot checkpoints remain separate work. Initial state still
+must be non-null.
 
 ## Hook behavior
 

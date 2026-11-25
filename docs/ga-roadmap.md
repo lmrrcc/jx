@@ -30,15 +30,22 @@ Native class context (R-28-03a) now passes the integrated bench over `8fdbed0`:
 24 previous class cells. Pair evidence stays **54 / 6,328**, with no automatic
 credit from the new consumer. Package checks pass 37 core / 48 compiler /
 15 Maven tests; the captured-context mutant was killed after a passing baseline
-on runtime/fixture source identical after rebase. The final context gate and
-Verify are pending. Derived/error lifecycle, class editor qualification and
+on runtime/fixture source identical after rebase. Context merged in PR #53 as
+`198c0b8` after its 15-step gate and both Verify checks passed on `30a8911`.
+Derived/error lifecycle, class editor qualification and
 committed class hot checkpoints remain separate work.
+
+Derived state from props (R-28-03b) passes **863 integrated checks, 169 skipped,
+129 cases** over context merge `198c0b8`, with all 40 class cells green. Package
+checks pass 39 core / 48 compiler / 15 Maven tests. It adds no pair witness.
+The dropped-derivation mutant is registered but unrun; mutation, final gate and
+Verify remain pending.
 
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 top-level tasks done through R-26 and R-32; interaction, class, Flight, cache and utility slices merged through PR52 with green Verify. Class context passes 855 integrated checks and a scoped mutant; its final gate/Verify are pending. Pair evidence remains 54 / 6,328, with 6,274 open and 575 deferred-feature pairs. Complete remaining APIs, options and combined scenarios. |
-| R-28 Java class runtime | 🟡 Partial | R-28-01 and R-28-02a merged after green local gates and both Verify checks. R-28-03a context passes all eight projects within 855 integrated checks; captured-context mutant killed after baseline passed, final gate/Verify pending. Native editor qualification, derived/error lifecycle, remaining context options and class hot checkpoints remain open. |
+| React parity track / GA-18 | 🟡 Partial | 27 top-level tasks done through R-26 and R-32; interaction, class, Flight, cache, utility and native class context slices merged through PR53 with green Verify. Derived props passes 863 integrated checks; its mutant and publication checks remain pending. Pair evidence stays 54 / 6,328, with 6,274 open and 575 deferred-feature pairs. Complete remaining APIs, options and combined scenarios. |
+| R-28 Java class runtime | 🟡 Partial | Runtime, direct authoring and native context merged after green local gates and both Verify checks. Derived props passes eight projects within 863 integrated checks; mutation/gate/Verify pending. Native editor qualification, error lifecycle, remaining context/authoring options and class hot checkpoints remain open. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |

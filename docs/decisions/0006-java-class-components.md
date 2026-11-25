@@ -213,8 +213,10 @@ hydrate and lazy modes after a passing unmutated scratch baseline: 1 killed,
 0 survived, 0 unusable. Its runtime/consumer/spec source at `6c3aa63` is identical
 to rebased source `d897468`; scratch `jx-mutation-6746600491109191949` is retained.
 The catalog now has 121 entries; the historical full campaign still covers 100.
-These checks are Chrome-only and do not qualify native IDEs. The final push gate
-and Verify remain pending.
+These checks are Chrome-only and do not qualify native IDEs. [PR #53](https://github.com/lmrrcc/jx/pull/53)
+merged as `198c0b8` after its 15-step local gate passed in 308 seconds and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45598507275) and
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45598573765) passed on `30a8911`.
 
 Derived state from props, derived error state and committed error information are
 separate R-28-03b/03c slices. Compiler-generated context declarations and a typed
@@ -255,13 +257,17 @@ and Pure bailouts for null and empty derivation patches. Real DOM handles surviv
 these updates, and commit snapshots observe the previous DOM. No exact count is
 assumed for repeated render-phase invocations under Strict Mode.
 
-Local package verification passes 38 core, 48 compiler and 15 Maven-plugin tests.
-The new case passes all eight focused React/JX projects. Client, hydration and
-lazy execute the interactions; static compares initial HTML only. JVM contracts
-also check schema rejection and unchanged callback failure identity. Browser
-error-boundary qualification for derivation failures remains part of R-28-03c.
-All 32 existing class runtime, key, authoring and context checks also pass after
-the native constructor bridge change. `CheckBaseline` and `git diff --check` pass.
-This is focused Chrome evidence, without new pair credit or aggregate table
-updates. A dropped-derivation mutant is registered but unrun. Integrated bench,
-mutation, gate and Verify remain pending.
+Integrated over context merge `198c0b8`, package verification passes 39 core,
+48 compiler and 15 Maven-plugin tests. The complete bench passes **863 checks,
+169 skipped, across 129 cases**: client 127 React / 126 JX, hydrate 96 per side,
+static 102 and lazy 107. The new case and four prior class cases pass all eight
+projects each. Client, hydration and lazy execute interactions; static compares
+initial HTML only. JVM contracts also check schema rejection and unchanged
+callback failure identity. Browser error-boundary qualification for derivation
+failures remains part of R-28-03c.
+
+Recorded case evidence adds only `class-derived-props`; all 54 existing pair
+witnesses remain green among 6,328 active candidates, with no new pair credit.
+This is Chrome-only evidence. The `class-derived-props-dropped` mutant is
+registered but unrun; the catalog has 122 entries and the historical full campaign
+still covers 100. Mutation, final push gate and Verify remain pending.
