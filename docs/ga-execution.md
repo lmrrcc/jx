@@ -123,6 +123,12 @@ using actual Flight and separate server/client Java programs. Seven Node and fou
 Chrome checks pass locally, including suspension, rejection, abort and server-code
 exclusion from browser chunks/maps. Verify is pending. The broad R-30 package,
 its capability-ledger rows and authenticated G0 acceptance remain open.
+R-30-03 adds typed `ReactCache.cache` functions and `cacheSignal` with eight
+differential Node checks. The combined local RSC command now passes 15 Node and
+four Chrome checks. Same-key requests remain isolated, recursive calls preserve
+arguments, and cache lifetimes end on success, failure and abort. This remains a
+local proof pending Verify, with zero/one/two-argument APIs and no automatic G0
+HTTP cancellation or broad Java coroutine-context qualification.
 
 The direct `.jx` authoring slice (R-28-02a) is rebased onto the merged R-28-01
 runtime. It generates typed schemas,

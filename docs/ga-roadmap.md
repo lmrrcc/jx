@@ -249,6 +249,10 @@ interactive Java client component in Chrome. Its seven Node and four browser
 checks establish a narrow transport boundary, suspension/error/abort behavior
 and server-source exclusion; Verify is pending. General client/server directives,
 cache APIs, server functions and production protocol qualification remain open.
+The subsequent R-30-03 cache slice has eight differential Node checks passing for
+typed zero/one/two-argument functions and cache lifetime signals. It adds explicit
+request isolation and cleanup evidence; arbitrary coroutine context, server
+functions, directive-driven packaging and production qualification remain open.
 Server data loading, typed HTTP mutations, SSR and hydration alone do not complete
 R-30. Re-estimate capacity and dates at the gates as its feasibility becomes known.
 
