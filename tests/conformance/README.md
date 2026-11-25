@@ -271,6 +271,14 @@ java tools/MutateBench.java --only class-context-captured --keep
 
 The final push gate and Verify are pending; the browser evidence is Chrome-only.
 
+`class-derived-props` adds a real native static getDerivedStateFromProps consumer.
+Its eight focused projects prove constructor-to-derived initialization, queued
+updates followed by derivation, partial/null/empty patches, SCU-skipped state and
+forceUpdate, Pure bailouts, previous-DOM snapshots and retained real DOM nodes.
+Static mode checks initial HTML only. A dropped-derivation mutant is registered
+but unrun; compiler-derived lifecycle syntax and browser error-boundary options
+remain separate. No aggregate results or interaction witnesses are changed.
+
 Static HTML equality does not execute interactive assertion blocks, so it does
 not credit those witnesses. Hydration-owned and Node-only scenarios can carry
 interaction evidence in the client projects without implying other mode coverage.

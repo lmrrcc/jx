@@ -383,9 +383,9 @@ lifecycle parity or preserved class state across hot replacement.
 | R-28-02b | Qualify class-aware Java completion, navigation, rename and inspections in both native IDE adapters, including incomplete editor source | ⬜ planned |
 | R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options; split below | 🟡 in progress: R-28-03a runtime context focused evidence below; derived/error lifecycle and compiler context sugar remain planned |
 | R-28-03a | Native contextType through additive typed factories; constructor/current context, Pure/SCU bypass, defaults/null, retained state and Activity lifecycle | ✅ merged PR53 as 198c0b8: package 37 core/48 compiler/15 Maven tests, integrated bench 855 passed/169 skipped/128 cases, unchanged 54/6328 pairs; captured-context mutant killed after baseline passed; 15-step gate and both Verify checks green on 30a8911; retained peer owns its native instance, no disposal guarantee |
-| R-28-03b | Pure derived-state-from-props with typed partial patches, null updates and native render timing | ⬜ planned |
+| R-28-03b | Pure derived-state-from-props with typed partial patches, null updates and native render timing | 🟡 review: prior package 38 core/48 compiler/15 Maven tests, eight new focused projects and 32 existing class checks pass; constructor/setState/SCU/Pure/partial/null/empty behavior tested; integrated bench/mutant/gate/Verify pending |
 | R-28-03c | Derived error state plus committed didCatch, checked Java error/component-stack information and recovery | ⬜ planned |
-| R-28-03d | Compiler context declaration sugar, typed third nextContext argument for should-update, and remaining class option qualification | ⬜ planned |
+| R-28-03d | Compiler context/derived-state declaration sugar, typed third nextContext argument for should-update, and remaining class option qualification | ⬜ planned |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |
 
 R-28-03a publication evidence: [PR #53](https://github.com/lmrrcc/jx/pull/53)

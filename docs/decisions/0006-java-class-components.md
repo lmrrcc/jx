@@ -221,3 +221,47 @@ separate R-28-03b/03c slices. Compiler-generated context declarations and a type
 third next-context argument for should-update remain R-28-03d; they are not
 provided by these factories. Existing `.jx` class syntax and class hot-reload
 reset behavior remain unchanged.
+
+## R-28-03b derived state from props — 25 November 2026
+
+`descriptor.withDerivedStateFromProps((nextProps, pendingState) -> patch)` returns
+a new immutable descriptor. Declare its result once, as for any component type:
+the new descriptor has its own native React type identity. The original remains
+unchanged. Existing factory, context, Pure and lifecycle settings are preserved;
+applying the method again replaces the derivation in the returned descriptor.
+
+The callback is static component behavior: it has no peer instance, must remain
+pure and must not call hooks, schedule updates or perform effects. React invokes
+the actual native `Type.getDerivedStateFromProps` after construction and when it
+processes subsequent updates. Queued state updaters run before derivation, and
+native should-update/Pure policy runs afterward. React can repeat or discard
+these calculations. This bridge does not emulate that ordering in Java.
+
+The callback consumes checked props and state values and returns a `StatePatch`
+owned by the descriptor's state schema. A null result preserves pending state;
+an empty patch remains an empty object merge. Omitted fields survive, while a
+present field declared nullable can explicitly become null. A foreign-schema
+patch fails explicitly. Callback failures propagate unchanged through the Java
+dispatcher and through the native callback; no catch produces a successful value.
+The public contract requires non-null initial state, matching the existing class
+slice. It does not yet add nullable initial state or compiler-generated derived
+lifecycle declarations.
+
+The [Java consumer](../../tests/conformance/src/main/java/jx/conformance/cases/ClassDerivedProps.java)
+and native React reference test constructor state followed by derived initial
+state, queued local updates, prop-triggered partial resets, explicit null fields,
+derivation after local updates, false SCU with updated current state, forceUpdate,
+and Pure bailouts for null and empty derivation patches. Real DOM handles survive
+these updates, and commit snapshots observe the previous DOM. No exact count is
+assumed for repeated render-phase invocations under Strict Mode.
+
+Local package verification passes 38 core, 48 compiler and 15 Maven-plugin tests.
+The new case passes all eight focused React/JX projects. Client, hydration and
+lazy execute the interactions; static compares initial HTML only. JVM contracts
+also check schema rejection and unchanged callback failure identity. Browser
+error-boundary qualification for derivation failures remains part of R-28-03c.
+All 32 existing class runtime, key, authoring and context checks also pass after
+the native constructor bridge change. `CheckBaseline` and `git diff --check` pass.
+This is focused Chrome evidence, without new pair credit or aggregate table
+updates. A dropped-derivation mutant is registered but unrun. Integrated bench,
+mutation, gate and Verify remain pending.
