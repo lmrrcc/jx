@@ -314,8 +314,11 @@ integrity-error accounting after independent review. Integrated source `8c5c337`
 passes 56 core/10 React/54 compiler/15 Maven package tests and the complete bench:
 937 passed, 199 skipped, 142 cases; client 140 reference/139 JX, hydrate 104,
 static 110, lazy 115 per side. All 62/6328 existing interaction pairs pass.
-Mutation and publication checks remain pending; no new
-pair credit is claimed. See the [import-map contract](evidence/server-import-map.md).
+Both scope-dropping and integrity-dropping mutations were killed by this case
+after a passing baseline in the five-mutant `eb536cd` campaign, with zero
+survivors or unusable mutants. This slice's quota is two; publication checks
+remain pending and no new pair credit is claimed. See the
+[import-map contract](evidence/server-import-map.md).
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven

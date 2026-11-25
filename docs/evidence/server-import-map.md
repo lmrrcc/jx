@@ -5,7 +5,8 @@ package checks (56 core, 10 React, 54 compiler and 15 Maven tests) and the compl
 bench: **937 passed, 199 skipped, 142 cases**. Client mode passes 140 reference /
 139 JX checks; hydration 104, static HTML 110 and lazy mode 115 per side. All
 62/6328 registered interaction pairs remain green; this option adds no pair credit.
-Mutations and publication gates remain pending; this is not completed parity.
+Both scoped mutants are killed; publication gates remain pending. This is not
+completed parity.
 
 `ReactServer.StreamOptions.withImportMap` accepts a typed immutable `ImportMap`
 containing imports, scopes and integrity metadata. It preserves null versus
@@ -60,8 +61,20 @@ module still runs. Both focused checks passed again before integration. The
 integrated full run adds only the `server-import-map` row to the recorded case
 table; all previous rows and the interaction table are unchanged. The run also
 qualifies the parent header/resume, bootstrap, synchronous act and sink consumers
-alongside all three pending class-policy slices. Those slices retain their own
+alongside the three class-policy slices, subsequently merged through PR62. Those slices retain their own
 publication and mutation evidence; no full mutation-catalog claim is made.
+
+The two import-map mutations (`server-import-scopes-dropped` and
+`server-import-integrity-dropped`) were killed by `server-import-map` after the
+unmutated baseline passed on combined candidate `eb536cd`. That exclusive run
+killed five mutants total, with zero survivors or unusable mutants; this slice's
+quota is two. Import-map implementation, consumer and spec files are unchanged.
+Scratch: `jx-mutation-11888686568552705847`; log:
+`/private/tmp/jx-server-options-mutations.log`. Repeat only in an exclusive slot:
+
+```sh
+java tools/MutateBench.java --only server-import-scopes-dropped,server-import-integrity-dropped --keep
+```
 
 The pinned React 19.3.1 implementation serializes the typed object through its
 public `importMap` option. The public documentation marks some nonce behavior
