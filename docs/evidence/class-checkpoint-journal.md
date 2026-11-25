@@ -2,6 +2,8 @@
 
 25 November 2026. This is a focused foundation, **not complete class hot reload**.
 Source commit: `a371b25` on preserved integration base `e63ea76`.
+The source-review corrections described below are prepared after `6b7ab4f`;
+their regression executions are pending and are not part of the earlier 18/18 result.
 The full R-28-04 requirement still includes hidden commits, skipped renders,
 discarded work, incoming ownership, all class options and integration qualification.
 
@@ -30,6 +32,13 @@ deletion, including deletion while hidden. Promotion and cleanup require the
 exact registered owner token, preventing old-generation work from affecting a
 replacement owner. No private Fiber fields or duplicate state scheduler are used.
 
+Root membership is an actual registered token passed through a private native
+React context, not a path prefix or DOM position. Portals inherit that context.
+A separately mounted native React root has no JX token: its exported Java class
+still renders and updates, but capture rejects the foreign owner before disposal,
+even when exactly one other JX root exists. Unmounting that foreign owner removes
+the rejection. This correction and its portal counterpart await execution.
+
 The first slice requires one JX-owned root, connected ordinary classes and an
 initial restored tree whose class owners all commit. Pure is explicitly rejected
 by the opt-in API. Hidden/disconnected owners, queued hidden updates, props-only
@@ -55,11 +64,22 @@ before incoming maps change. Only encoded strings appear in captured class rows.
 The in-memory runtime protocol is now 2. Portable checkpoint JSON stays version 1
 with an optional validated `classes` array. A generated development bootstrap
 uses the shared protocol guard at module evaluation, before application startup.
+The corrected bootstrap reads a single validated `protocolN` export name on the
+actual TeaVM-compiled `HotRuntime` class, not a plugin constant. This name and the
+Java runtime's check derive from the same version constant. It never invokes the
+exported wrapper, which TeaVM would otherwise use to initialize the application
+entry class. The probe neither enables hot replacement nor initializes React or
+application state. A missing `JxHotRuntime` named export fails bundling before
+publishing assets. Runtime reachability supplies the export automatically; no
+entry-point annotation is required. Production still needs only `main`. See the
+[migration instructions](../maven.md#development-runtime-attestation).
 The actual development loader rejects an old candidate without matching protocol
 metadata before calling capture/dispose. Changing runtime protocols requires a
 fresh development page; silently reusing the old version-1 maps is unsupported.
 
 ## Focused evidence
+
+The following results qualify source `a371b25`, before the source-review corrections.
 
 - Targeted Maven packages pass 51 core tests (four new descriptor contracts), two
   React tests, seven Elm tests, 52 compiler tests and 15 Maven-plugin tests.
@@ -96,6 +116,30 @@ env RUNTIME_PORT=59190 node_modules/.bin/playwright test \
 No full runtime/conformance matrix, mutation campaign, push gate, Verify or new
 interaction-pair credit is claimed. This branch starts at integration `e63ea76`;
 later nextContext/Pure modifiers must preserve checkpoint metadata when integrated.
+
+### Prepared review regressions — execution pending
+
+- A JVM call to `HotRuntime.version()` must work without browser-native startup.
+- The shared marker reader must accept exactly one version export, tolerate other
+  TeaVM metadata and reject missing/ambiguous/accessor markers without invoking them.
+- A fresh TeaVM candidate is imported without calling `main`; an observed static
+  initializer on the entry class must not run during preflight.
+- The real Maven development loop compiles the actual runtime sources in an
+  isolated copy of Counter, with no shared JAR replacement or artifact install.
+  Changing its protocol constant from 2 to 1 produces a real incompatible runtime;
+  loading it must reject before capture/dispose while the old node and counter
+  remain live. Restoring protocol 2 allows state-preserving replacement.
+- The same session then compiles a main-only module without JX runtime reachability.
+  Its missing named export must fail bundling, leaving the published bundle byte
+  identical and the old counter live. Restoring the entry point recovers normally.
+- An exported checkpointed class in a separate native root must reject capture and
+  replacement before teardown. Both roots retain their actual DOM nodes and continue
+  incrementing; removing the foreign root leaves only the owned class checkpoint.
+- A class in a portal outside the JX root's DOM container must retain logical root
+  ownership and restore its encoded counter in an independent TeaVM generation.
+
+These additional probes have not yet run; the exclusive mutation campaign in a
+different worktree must finish before compilation or browser verification.
 
 ## Remaining design requirement
 

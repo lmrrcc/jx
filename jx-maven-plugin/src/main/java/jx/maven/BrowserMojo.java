@@ -61,11 +61,13 @@ public final class BrowserMojo extends AbstractMojo {
                 }
             }
             String bootstrap = hotReload
-                    ? "import { assertHotRuntime, hotRuntimeVersion } from './hot-protocol.mjs';\n"
-                      + "export { main, hotRuntimeVersion };\nassertHotRuntime();\nconst hot = globalThis.__JX_HOT__;\n"
+                    ? "import { assertHotRuntime, compiledHotRuntimeVersion } from './hot-protocol.mjs';\n"
+                      + "const hotRuntimeVersion = compiledHotRuntimeVersion(JxHotRuntime);\n"
+                      + "export { main, hotRuntimeVersion };\nassertHotRuntime(hotRuntimeVersion);\nconst hot = globalThis.__JX_HOT__;\n"
                       + "if (!hot?.defer && !hot?.initialized) { if (hot?.boot) hot.boot(main).catch(console.error); else main(); }\n"
                     : "main();\n";
-            Files.writeString(entry, "// Generated framework bootstrap; application behavior is Java.\nimport { main } from "
+            Files.writeString(entry, "// Generated framework bootstrap; application behavior is Java.\nimport { "
+                    + (hotReload ? "main, JxHotRuntime" : "main") + " } from "
                     + quote(imported) + ";\n" + bootstrap, StandardCharsets.UTF_8);
             Path bundle = metadata.resolve("bundle/application.js");
             Files.createDirectories(bundle.getParent());

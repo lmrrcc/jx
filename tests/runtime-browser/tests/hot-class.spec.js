@@ -2,8 +2,8 @@ import {test, expect} from '@playwright/test';
 import {readFile, writeFile} from 'node:fs/promises';
 
 const events = page => page.evaluate(() => globalThis.hotClassEvents || []);
-async function open(page, skip = false) {
-  await page.goto('/hot?fixture=class-journal&skip=' + skip);
+async function open(page, skip = false, portal = false) {
+  await page.goto('/hot?fixture=class-journal&skip=' + skip + '&portal=' + portal);
   await expect(page.locator('#class-value')).toHaveText('0');
   await page.evaluate(() => globalThis.__JX_HOT__.ready());
 }
@@ -169,6 +169,22 @@ test('malformed or oversized class checkpoints fail validation before changing i
   await expect(page.locator('#class-value')).toHaveText('1');
 });
 
+test('reading a candidate runtime attestation does not initialize its application entry class', async ({page}) => {
+  await open(page);
+  const original = await page.locator('#class-value').elementHandle();
+  const result = await page.evaluate(async () => {
+    const before = globalThis.runtimeApplicationInitializations;
+    const candidate = await import('/application.js?preflight-only=' + crypto.randomUUID());
+    return {before, after: globalThis.runtimeApplicationInitializations,
+      protocol: candidate.hotRuntimeVersion, independent: candidate.main !== globalThis.hotFixtureModule.main};
+  });
+  expect(result).toEqual({before: 1, after: 1, protocol: 2, independent: true});
+  expect(await page.locator('#class-value').evaluate((node, old) => node === old, original)).toBe(true);
+  await original.dispose();
+  await page.locator('#class-add').click();
+  await expect(page.locator('#class-value')).toHaveText('1');
+});
+
 test('an older active runtime rejects the new candidate during evaluation before touching its DOM', async ({page}) => {
   await open(page);
   await page.locator('#class-add').click();
@@ -218,4 +234,56 @@ test('an incoming owner omitted before initial commit fails readiness and cannot
   await expect.poll(() => page.evaluate(() => globalThis.__JX_HOT__.failure))
     .toContain('owner did not commit in the initial tree');
   expect((await captured(page)).error).toContain('incoming class owners have not committed');
+});
+
+test('a checkpointed class in an external React root rejects capture even while one JX root exists', async ({page}) => {
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  await open(page);
+  await page.evaluate(() => globalThis.hotClassExternalMount());
+  const owned = page.locator('#root'), external = page.locator('#external-hot-root');
+  await expect(external.locator('#class-value')).toHaveText('0');
+  await owned.locator('#class-add').click();
+  await external.locator('#class-add').click();
+  await expect(owned.locator('#class-value')).toHaveText('1');
+  await expect(external.locator('#class-value')).toHaveText('1');
+  const ownedNode = await owned.locator('#class-value').elementHandle();
+  const externalNode = await external.locator('#class-value').elementHandle();
+  expect((await captured(page)).error).toMatch(/outside|external|owned root/i);
+  await expect(replace(page)).rejects.toThrow(/outside|external|owned root/i);
+  expect(await owned.locator('#class-value').evaluate((node, old) => node === old, ownedNode)).toBe(true);
+  expect(await external.locator('#class-value').evaluate((node, old) => node === old, externalNode)).toBe(true);
+  await ownedNode.dispose(); await externalNode.dispose();
+  await owned.locator('#class-add').click();
+  await external.locator('#class-add').click();
+  await expect(owned.locator('#class-value')).toHaveText('2');
+  await expect(external.locator('#class-value')).toHaveText('2');
+  expect(errors).toEqual([]);
+  // Removing the external owner must clear its rejection without capturing its state.
+  await page.evaluate(() => globalThis.hotClassExternalUnmount());
+  await expect(external).toHaveCount(0);
+  await expect.poll(async () => (await captured(page)).snapshot?.classes?.length).toBe(1);
+  expect((await captured(page)).snapshot.classes[0].payload).toBe('2');
+});
+
+test('a portal outside the root DOM retains the JX root owner and restores its committed class state', async ({page}) => {
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  await open(page, false, true);
+  const portal = page.locator('#class-portal');
+  await expect(portal).toHaveCount(1);
+  expect(await portal.evaluate(node => !document.getElementById('root').contains(node))).toBe(true);
+  await expect(page.locator('#root #class-value')).toHaveCount(0);
+  await portal.locator('#class-add').click();
+  await expect(portal.locator('#class-value')).toHaveText('1');
+  const result = await replace(page, {hotClassLabel: 'Portal generation'});
+  expect(result.independent).toBe(true);
+  expect(result.snapshot.classes).toHaveLength(1);
+  expect(result.snapshot.classes[0].payload).toBe('1');
+  await expect(page.locator('#root #class-generation')).toHaveText('Portal generation');
+  await expect(portal).toHaveCount(1);
+  await expect(portal.locator('#class-value')).toHaveText('1');
+  await portal.locator('#class-add').click();
+  await expect(portal.locator('#class-value')).toHaveText('2');
+  expect(errors).toEqual([]);
 });

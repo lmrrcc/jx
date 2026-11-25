@@ -6,6 +6,7 @@ import jx.react.ReactTesting;
 import java.util.List;
 import java.util.Set;
 import org.teavm.jso.JSBody;
+import org.teavm.jso.JSBodyImport;
 import org.teavm.jso.JSFunctor;
 import org.teavm.jso.JSObject;
 
@@ -62,6 +63,8 @@ public final class HotClassApplication {
             Set.of(ClassComponentType.Lifecycle.MOUNT, ClassComponentType.Lifecycle.UPDATE, ClassComponentType.Lifecycle.SHOULD_UPDATE))
             .withDerivedStateFromProps((props, state) -> props.minimum() > state.count() ? MODEL.patch().set(COUNT, props.minimum()) : null)
             .withStateCheckpoint("class-count:1", CODEC);
+    private static final ComponentType<Void> EXTERNAL = new ComponentType<>("hot.ExternalClassOwner", "external:1",
+            ignored -> Views.component(COUNTER, new Props(false, 0), "external", null));
     private static final ComponentType<Void> APP = new ComponentType<>("hot.ClassJournal", "journal:state,state,state,effect:1", ignored -> {
         State<Boolean> visible = Hooks.useState(true);
         State<Boolean> mounted = Hooks.useState(true);
@@ -78,11 +81,12 @@ public final class HotClassApplication {
                 button("class-remount", "Remount class", () -> mounted.set(true)),
                 button("class-derived", "Derive class state", () -> minimum.set(2)),
                 Views.element("output", Attributes.create().attr("id", "class-mode"), visible.value() ? "visible" : "hidden"),
-                React.suspense(Views.element("p", Attributes.create(), "Waiting"), React.activity(visible.value(), mounted.value() && !omit()
-                        ? Views.component(COUNTER, new Props(skip(), minimum.value()), "counter", REF) : null)));
+                position(React.suspense(Views.element("p", Attributes.create(), "Waiting"), React.activity(visible.value(), mounted.value() && !omit()
+                        ? Views.component(COUNTER, new Props(skip(), minimum.value()), "counter", REF) : null))));
     });
     public static void main() {
         ClassCheckpointNativeProbe.install();
+        installExternal(React.exportComponent(EXTERNAL, ignored -> null), nativeReact(), nativeCreateRoot());
         export(action -> React.thenable(ReactTesting.act((Runnable) () -> {
             if (!action.equals("increment-retained") || retained == null) throw new IllegalArgumentException("No retained class action");
             retained.increment();
@@ -92,6 +96,29 @@ public final class HotClassApplication {
     private static View button(String id, String text, Runnable action) {
         return Views.element("button", Attributes.create().attr("id", id).on("onClick", event -> action.run()), text);
     }
+    @JSBody(script = "return Runtime;", imports = @JSBodyImport(alias = "Runtime", fromModule = "react"))
+    private static native JSObject nativeReact();
+    @JSBody(script = "return Client.createRoot;", imports = @JSBodyImport(alias = "Client", fromModule = "react-dom/client"))
+    private static native JSObject nativeCreateRoot();
+    @JSBody(params = {"component", "runtime", "createRoot"}, script = """
+        globalThis.hotClassExternalMount = function() {
+            var node = document.createElement('div');
+            node.id = 'external-hot-root'; document.body.appendChild(node);
+            var root = createRoot(node);
+            root.render(runtime.createElement(component));
+            globalThis.hotClassExternalUnmount = function() {
+                root.unmount(); node.remove();
+                globalThis.hotClassExternalUnmount = null;
+            };
+        };
+        """)
+    private static native void installExternal(JSObject component, JSObject runtime, JSObject createRoot);
+    private static View position(View child) {
+        return portalMode() ? React.portal(React.documentBody(),
+                Views.element("aside", Attributes.create().attr("id", "class-portal"), child)) : child;
+    }
+    @JSBody(script = "return new URLSearchParams(location.search).get('portal') === 'true';")
+    private static native boolean portalMode();
     @JSFunctor interface TestAction extends JSObject { JSObject run(String action); }
     @JSBody(params = "action", script = """
         globalThis.hotClassAct = async function(name) {

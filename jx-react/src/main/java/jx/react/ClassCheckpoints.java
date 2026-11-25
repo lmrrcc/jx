@@ -39,12 +39,14 @@ final class ClassCheckpoints<S> {
     @JSBody(script = """
         return function ClassCheckpointOwner(input) {
             var hot = globalThis.__JX_HOT__;
-            if (!hot.classOwners) throw new Error('Class checkpoint protocol requires a fresh development page');
+            if (!hot.classOwners || !hot.classRootContext) throw new Error('Class checkpoint protocol requires a fresh development page');
+            var root = React.useContext(hot.classRootContext);
             var saved = React.useRef(null);
-            if (saved.current === null) saved.current = {path: input.path, journal: null};
+            if (saved.current === null) saved.current = {path: input.path, root: root, journal: null};
             var owner = saved.current;
             React.useInsertionEffect(function() {
                 if (owner.path !== input.path) throw new Error('Class checkpoint owner path changed');
+                if (owner.root !== root) throw new Error('Class checkpoint root ownership changed');
                 if (hot.classOwners.size >= 4096 && !hot.classOwners.has(owner.path))
                     throw new Error('Class checkpoint owner capacity exceeded');
                 var existing = hot.classOwners.get(owner.path);
@@ -57,7 +59,7 @@ final class ClassCheckpoints<S> {
                     }
                     owner.journal = null;
                 };
-            }, [owner, input.path]);
+            }, [owner, input.path, root]);
             var childProps = Object.assign({}, input.values, {__jxPath: input.path, __jxCheckpointOwner: owner});
             if (input.forwardedRef !== null) childProps.ref = input.forwardedRef;
             var element = React.createElement(input.type, childProps);

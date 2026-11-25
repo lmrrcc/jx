@@ -14,6 +14,9 @@ import org.teavm.jso.*;
 
 /** Compiling consumer fixture; Java owns application logic, JS bodies only instrument browser boundaries. */
 public final class RuntimeApplication {
+    static { initialized(); }
+    @JSBody(script = "globalThis.runtimeApplicationInitializations = (globalThis.runtimeApplicationInitializations || 0) + 1;")
+    private static native void initialized();
     public record CounterProps(String label, int initial) {}
     private record Value(int value) {}
     private static final Context<String> THEME = Hooks.createContext("default");
