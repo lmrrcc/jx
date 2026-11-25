@@ -18,6 +18,7 @@ children-values	pass	pass	pass	pass	n/a	n/a	pass	pass
 context-effect	pass	pass	pass	pass	n/a	n/a	pass	pass
 context-state	pass	pass	pass	pass	n/a	n/a	pass	pass
 hydrate-id	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+hydrate-preload-reuse	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 hydrate-store	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 key-callback-ref	pass	pass	pass	pass	n/a	n/a	pass	pass
 key-effect	pass	pass	pass	pass	n/a	n/a	pass	pass
@@ -42,7 +43,10 @@ portal-payload	pass	pass	pass	pass	n/a	n/a	pass	pass
 portal-propagation	pass	pass	pass	pass	n/a	n/a	pass	pass
 props-imperative-handle	pass	pass	pass	pass	n/a	n/a	pass	pass
 refprop-imperative-handle	pass	pass	pass	pass	n/a	n/a	pass	pass
+ssr-preload-dedupe	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+stream-context-isolation	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 stream-suspense	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+stream-use-gate	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 strict-callback-ref	pass	pass	pass	pass	n/a	n/a	pass	pass
 strict-effects	pass	pass	pass	pass	n/a	n/a	pass	pass
 transition-owner-ref	pass	pass	pass	pass	n/a	n/a	pass	pass

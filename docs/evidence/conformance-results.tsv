@@ -24,6 +24,8 @@ combined-keyed-context	pass	pass	pass	pass	pass	pass	pass	pass
 combined-keyed-refs	pass	pass	pass	pass	pass	pass	pass	pass
 combined-optimistic-store	pass	pass	pass	pass	pass	pass	pass	pass
 combined-portal-lifecycle	pass	pass	pass	pass	pass	pass	pass	pass
+combined-resource-hydration	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+combined-server-stream	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 combined-transition-cancel	pass	pass	pass	pass	pass	pass	pass	pass
 conditional	pass	pass	pass	pass	pass	pass	pass	pass
 context-nested	pass	pass	pass	pass	pass	pass	pass	pass
@@ -89,6 +91,7 @@ remount-by-key	pass	pass	pass	pass	pass	pass	pass	pass
 resource-elements	pass	pass	n/a	n/a	pass	pass	pass	pass
 resource-hints	pass	pass	n/a	n/a	pass	pass	pass	pass
 root-options	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+server-fatal-readiness	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-pipeable-stream	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-readable-stream	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-render-to-static-markup	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a

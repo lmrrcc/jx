@@ -15,6 +15,9 @@ if (id === 'hydrate-root') {
   container.innerHTML = renderToString(<StrictMode><Case /></StrictMode>);
   container.querySelector('button').benchServerNode = true;
   hydrateRoot(container, <StrictMode><Case /></StrictMode>);
+} else if (id === 'combined-resource-hydration') {
+  // The test server delivered this document; no client-side reseeding.
+  hydrateRoot(document.getElementById('app'), <StrictMode><Case /></StrictMode>);
 } else if (id === 'hydrate-server') {
   // The markup was rendered in Node; the test hands it to the page before the script runs.
   const container = document.getElementById('app');

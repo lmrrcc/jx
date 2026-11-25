@@ -60,7 +60,8 @@ Cancellation is fixture-local and permits transport to finish later; G0 remains
 open. After the shared scratch baseline passed, `combined-transition-cancel`
 killed `transition-owner-guard-lost` (1 killed, 0 survived, 0 unusable). The
 exclusive run used `abfb24a` in scratch `jx-mutation-1181316345297598843`, with
-identical transition source to rebased `d89e23f`. Verify is pending. This slice's
+identical transition source to rebased `d89e23f`. PR #45 merged as `812a27a` after
+the full local gate and both Verify checks passed. This slice's
 catalog has 110 entries; the shared run's 112 includes later SSR cases. The
 historical full campaign remains 100.
 The Promise prerequisite has nine Promise tests, 36 runtime-package JVM tests and
@@ -68,7 +69,16 @@ The Promise prerequisite has nine Promise tests, 36 runtime-package JVM tests an
 [PR #42](https://github.com/lmrrcc/jx/pull/42) merged as `f2b64cb`, with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45467245368) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45466911060).
-R-27-03b is merged; R-27-03c remains in review in this baseline. See the
+R-27-04's complete local bench passes 809 checks, with 151 skipped across 120
+case IDs: client 118 reference / 117 JX, hydrate 90, static 96 and lazy 101 per side.
+Four server/resource pairs bring complete local evidence to 52 / 5,356, leaving
+5,304 active pairs open. Real Writable bytes precede gated data; aborting one
+request preserves the other provider; resource hints and actual server nodes
+survive hydration and updates. A fatal shell now rejects both readiness consumers.
+All three scoped SSR mutants were killed after a passing baseline; Verify is pending.
+These proofs do not complete protected
+SSR G0 M1-26, general destination-failure handling or cancellation of application I/O.
+R-27-03b and R-27-03c are merged; R-27-04 remains in review. See the
 [interaction evidence record](ga-react-interactions.md) for the unchanged eventual
 118-feature / 6,903-pair scope and its limits. G0 remains open: the serialized lazy
 boundary and basic Node rendering/hydration proofs are delivered, while component
@@ -114,7 +124,7 @@ exists, not when its document or skeleton module lands.
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
 | GA-17 | Forms, validation, i18n and accessible primitives / A | GA-10, GA-15 | M3–M5 / L | Complex form, arrays/errors, locale/RTL, keyboard/reader, shared pure rules and server errors | ⬜ planned |
-| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02b, portal PR #41, Promise PR #42, action PR #43 and optimistic PR #44 merged; R-27-03c locally evidences 48 active pairs; 5,308 active pairs plus deferred-feature interactions remain; transition scoped mutant killed, Verify pending | 🟡 partial |
+| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02b, portal PR #41, Promise PR #42, action PR #43, optimistic PR #44 and transition PR #45 merged; R-27-04 locally evidences 52 active pairs; 5,304 active pairs plus deferred-feature interactions remain; four transition/SSR scoped mutants killed, Verify pending | 🟡 partial |
 | GA-19 | HTTP headers/binary/upload/stream capabilities / C | GA-03, GA-10, GA-13 | M3–M5 / L | Auth/CSRF headers, upload progress, download, SSE/WS lifecycle, bounds/reconnect tested | ⬜ planned |
 | GA-20 | Real ecosystem binding SDK and catalog / R | GA-15, GA-18 | M4–M7 / L | Selected grid/editor/chart/headless/media bindings with refs/assets/cleanup; Java consumer examples | ⬜ planned |
 | GA-21 | Complex authenticated reference product / A | GA-12, GA-13, GA-16, GA-17, GA-19 | M4–M6 / L | Workspace/project workflow with roles, search/table/detail, forms/files/activity and two-tenant tests | ⬜ planned |

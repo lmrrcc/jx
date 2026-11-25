@@ -2,6 +2,7 @@
 import { StrictMode, Suspense, use } from 'react';
 import { HydratedPage } from './cases/hydrate-server.jsx';
 import { cases } from './cases.jsx';
+import { combinedServer } from './combined-server.jsx';
 import { Writable } from 'node:stream';
 import {
   renderToPipeableStream, renderToReadableStream, renderToStaticMarkup, renderToString,
@@ -66,6 +67,7 @@ function Streaming() {
 }
 
 export const server = {
+  ...combinedServer,
   // Any client case as static HTML, for the static mode of the bench.
   renderStatic: async id => {
     const Case = cases[id];

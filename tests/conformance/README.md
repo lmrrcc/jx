@@ -117,16 +117,16 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The complete R-27-03c local run passes 803 checks, with 133 skipped
-cells across 117 case IDs: client 115 reference / 114 JX, hydrate 90 per side,
-static 96 per side and lazy 101 per side. Forty-eight pairs have complete local evidence
-in their declared modes; 5,308 of the
+The complete R-27-04 local run passes 809 checks, with 151 skipped
+cells across 120 case IDs: client 118 reference / 117 JX, hydrate 90 per side,
+static 96 per side and lazy 101 per side. Fifty-two pairs have complete local evidence
+in their declared modes; 5,304 of the
 5,356 current candidates remain open. The eventual universe includes 118 features
 and 6,903 candidate pairs. **R-27 remains partial.** See the
 [interaction evidence record](../../docs/ga-react-interactions.md) for the two
 initial combined scenarios, children-composition regressions, seven ref pairs,
 six portal pairs, four action pairs, three optimistic/store pairs, three transition
-pairs and acceptance status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
+pairs, four server/resource pairs and acceptance status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
 at `413558b636679dd5926f4d7bf1c987ea707ed95c`, after its 755-check bench and green
 Verify. R-27-02b merged in [PR #40](https://github.com/lmrrcc/jx/pull/40) at
 `15c0c6eee36f506910e854c568547ebc6d3758ea`, with green
@@ -138,7 +138,8 @@ its unmutated baseline passed; [PR #43](https://github.com/lmrrcc/jx/pull/43)
 merged as `1ba8c1d` with green Verify. R-27-03b's scoped mutant was killed after
 its unmutated baseline passed; [PR #44](https://github.com/lmrrcc/jx/pull/44)
 merged as `3e24edb` with both Verify checks green. R-27-03c's scoped mutant
-was killed after its shared scratch baseline passed; its Verify is pending. Browser evidence is Chrome-only and
+was killed after its shared scratch baseline passed; [PR #45](https://github.com/lmrrcc/jx/pull/45)
+merged as `812a27a` after its full local gate and both Verify checks passed. Browser evidence is Chrome-only and
 does not establish additional human or cross-browser qualification.
 
 The ref scenarios use actual Playwright element handles to compare DOM identity,
@@ -156,8 +157,7 @@ existing error-boundary equivalent. It checks captured submission payloads,
 sequential previous-state composition, pending status and reset, rejection that
 cancels successors, retry while pending and unmount/remount with a fresh owner.
 The cancellation behavior is fixture-local, not the G0 API; class components
-remain R-28. R-27-03a and R-27-03b optimistic/store are merged; R-27-03c transition
-remains in review in this baseline.
+remain R-28. R-27-03a, R-27-03b optimistic/store and R-27-03c transition are merged.
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
 combine optimistic state with external-store snapshots, transitions and Java async
@@ -280,7 +280,16 @@ it includes later SSR cases. Repeat just this transition check exclusively:
 java tools/MutateBench.java --only transition-owner-guard-lost
 ```
 
-The current catalog has **110 entries**; the historical full result still covers 100. These
+R-27-04 adds `stream-writable-waits-for-all` and `stream-fatal-all-pending`, and
+reuses `hint-preload-dropped` against the new resource-hydration case. All three
+were killed after the unmutated baseline passed. The same exclusive run at
+`abfb24a` included the transition mutant: **4 killed, 0 survived, 0 unusable**.
+The full bench has passed with the new cases;
+`test:ssr` now includes all streaming, prerender, resume and hydration checks.
+See the [server interaction evidence](../../docs/ga-react-interactions.md#r-27-04-streaming-resource-hydration-and-fatal-readiness)
+for exact assertions and remaining destination-failure limits.
+
+The current catalog has **112 entries**; the historical full result still covers 100. These
 scoped campaigns do not establish a fresh full 110-mutant result.
 
 ## Feature list

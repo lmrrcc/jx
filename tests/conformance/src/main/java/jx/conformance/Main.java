@@ -19,6 +19,7 @@ import jx.conformance.cases.CombinedPortalLifecycle;
 import jx.conformance.cases.CombinedActionQueue;
 import jx.conformance.cases.CombinedOptimisticStore;
 import jx.conformance.cases.CombinedTransitionCancel;
+import jx.conformance.cases.CombinedResourceHydration;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
 import jx.conformance.cases.DomRefFocus;
@@ -211,6 +212,7 @@ public final class Main {
             case "combined-action-queue" -> CombinedActionQueue.JX;
             case "combined-optimistic-store" -> CombinedOptimisticStore.JX;
             case "combined-transition-cancel" -> CombinedTransitionCancel.JX;
+            case "combined-resource-hydration" -> CombinedResourceHydration.JX;
             default -> null;
         };
     }
@@ -235,6 +237,10 @@ public final class Main {
                 // Server markup first, then hydration over the same nodes.
                 Bench.seed(jx.react.ReactServer.renderToString(React.strictMode(jx.Views.component(HydrateRoot.JX, null))));
                 React.hydrateStrict("app", HydrateRoot.JX, null);
+            }
+            case "combined-resource-hydration" -> {
+                // The test server delivered the initial document; preserve those exact nodes.
+                React.hydrateStrict("app", CombinedResourceHydration.JX, null);
             }
             case "hydrate-server" -> {
                 // The markup was rendered in Node; the test hands it to the page.

@@ -30,25 +30,29 @@ R-27-03b merged as `3e24edb1b9ce74575b4ab4bb5ac873147d8b773b` in
 [PR #44](https://github.com/lmrrcc/jx/pull/44), with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45548420721) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45548370606).
-R-27-03c also passes its focused and complete local bench; its scoped mutant was
-killed after the shared scratch baseline passed. Its Verify is pending.
+R-27-03c merged as `812a27a4af3c684c1ca94400b958c909f806fe1f` in
+[PR #45](https://github.com/lmrrcc/jx/pull/45), with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45551387801) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45551292980).
+R-27-04 has complete local bench evidence for four server/resource pairs and a
+fatal-shell readiness correction. Its three scoped mutants were killed; Verify is pending.
 No additional human or cross-browser
 qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
 
-The passing counts below include the complete R-27-03c local run. Its three
-transition pairs extend the optimistic/store slice's 45 to **48 / 5,356**, with
-**5,308** remaining. The transition slice remains under review; the merged
-R-27-03b baseline has 45 complete pair witnesses.
+The passing counts below include the complete R-27-04 local run. Its four
+server/resource pairs extend the transition slice's 48 to **52 / 5,356**, with
+**5,304** remaining. This server slice remains under review; the merged R-27-03c
+baseline has 48 complete pair witnesses.
 This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
 | --- | --- |
 | Currently supported/equivalent feature IDs | 104 |
 | Candidate unordered pairs among those IDs | 5,356 |
-| Pairs with a passing witness in every declared mode, on both React and JX | 48 |
-| Current candidate pairs without complete evidence | 5,308 |
+| Pairs with a passing witness in every declared mode, on both React and JX | 52 |
+| Current candidate pairs without complete evidence | 5,304 |
 | Eventual application-feature IDs | 118 |
 | Eventual candidate pairs | 6,903 |
 | Additional pairs involving the 14 deferred feature IDs | 1,547 |
@@ -114,9 +118,11 @@ golden-file comparison but retain checks on the assertions they execute.
 | R-27-03b optimistic/store case | Three pairs: optimistic state with immutable external-store snapshots, transitions and Java async functions. Remote publications rebase the overlay; rejection removes only the optimistic item; retry commits one item while a second await keeps the transition pending; explicit owner close settles both gates and releases requests and subscriptions. |
 | R-27-03c transition case | Three pairs: transition with urgent controlled input and ref-owned operations; Java async functions with effect disposal. Replaced and canceled consumers settle without waiting for transport; an already completed result cannot publish after owner replacement; unmount/remount isolates old work from the new instance. |
 
-The combined scenarios run their assertions in client, hydrate and lazy modes.
+The interactive component scenarios run their assertions in client, hydrate and lazy modes.
+R-27-04 owns its Node streaming and SSR-to-hydration lifecycle inside client-labelled
+projects, as explained below.
 Static mode renders the combined scenarios and compares HTML, but does not execute their
-interactive assertion blocks and therefore earns no pair credit. None of the 48
+interactive assertion blocks and therefore earns no pair credit. None of the 52
 current witnesses claims static interaction coverage.
 
 The register explicitly limits lazy/Suspense and portal/events to client/lazy.
@@ -126,9 +132,9 @@ uses client projects but executes in Node, not a browser page. These project nam
 must not be mistaken for extra browser-mode coverage. Existing case exclusions
 remain recorded in [`modes.tsv`](../tests/conformance/modes.tsv).
 
-The streaming witness checks shell/fallback/delayed-content ordering in the
-collected HTML. It does not measure early network delivery; that requires a
-separate controlled streaming assertion in R-27-04.
+The original streaming witness checks shell/fallback/delayed-content ordering in
+collected HTML. R-27-04 separately observes early bytes in a real Node Writable;
+an HTTP streaming deployment remains unqualified.
 
 ## R-27-03c: urgent updates, operation ownership and completion races
 
@@ -176,8 +182,9 @@ This result comes from the shared exclusive transition/SSR run at `abfb24a`, in
 scratch `jx-mutation-1181316345297598843`; its transition implementation and spec
 are identical to this slice's rebased `d89e23f`. The shared run's 112-entry catalog
 includes later SSR cases; this slice's catalog has **110 entries**. Neither count
-is a new full campaign, and the historical full result remains 100. Verify is
-pending. To repeat the transition check alone, exclusively:
+is a new full campaign, and the historical full result remains 100. The full local
+gate and both Verify checks passed before PR #45 merged. To repeat the transition
+check alone, exclusively:
 
 ```sh
 java tools/MutateBench.java --only transition-owner-guard-lost
@@ -294,6 +301,89 @@ The separate R-27-03-PROMISE prerequisite has local red/green JVM and Chrome
 evidence: nine Promise tests, 36 runtime-package JVM tests and 13 runtime browser
 checks pass. Its full local gate and CI Verify passed before PR #42 merged; it
 adds no pair credit.
+
+## R-27-04: streaming, resource hydration and fatal readiness
+
+The combined local bench passes **809 checks, 151 skipped, across 120 case IDs**.
+Client/API results are **118/118 reference and 117/117 JX**; hydrate **90/90 each**,
+static **96/96 each** and lazy **101/101 each**. Four new executed witnesses bring
+the combined interaction evidence to **52 / 5,356**, with **5,304** pairs open.
+Its three scoped mutation checks passed; Verify is pending.
+
+`combined-server-stream` uses actual Node `Writable` instances. Two request-owned
+data promises remain gated while the spec observes the first shell and fallback
+bytes. This would deadlock if piping waited for all content. The newer request
+is aborted and its destination finishes and closes; the older suspended request
+then resumes with its own context and data. Late data for the closed request
+changes neither its bytes nor its write count. Starting and completing the
+requests in opposite orders prevents a single global "current request" from
+accidentally satisfying the isolation assertion.
+
+`combined-resource-hydration` serves the actual server HTML as the initial browser
+document while holding the application module. The spec retains element handles
+to the resource link and button before allowing hydration. Two counter updates
+prove that handlers are attached, preserve those original nodes and leave exactly
+one preload link despite repeated preload calls.
+
+| Witness | Interacting APIs | Evidence |
+| --- | --- | --- |
+| `stream-use-gate` | `renderToPipeableStream` + `use` | Shell bytes arrive while both data promises remain gated. |
+| `stream-context-isolation` | `renderToPipeableStream` + `useContext` | Aborting one stream does not replace the surviving request's provider or leak its values. |
+| `ssr-preload-dedupe` | `renderToString` + `preload` | Repeated hints produce one link in the initial document. |
+| `hydrate-preload-reuse` | `hydrateRoot` + `preload` | Hydration and updates retain the original link and button without duplicate hints. |
+
+All four witnesses run in the **client-labelled projects**: the streaming case
+executes in Node, and the hydration case owns its own SSR-to-browser handoff.
+The latter is excluded from generic hydrate/static/lazy modes in `modes.tsv`.
+These results do not claim an HTTP streaming deployment, authenticated request
+isolation, automatic cancellation of arbitrary application loaders or completion
+of G0 M1-26. The older `stream-suspense` witness still proves collected HTML order;
+the new gated Writable witness supplies the separate early-delivery evidence.
+
+The additional `server-fatal-readiness` regression exposed a production defect.
+Before the fix, the React reference passed while JX rejected `shellReady()` but
+left `allReady()` pending after a fatal shell render. React's `onShellError` now
+rejects both JX signals with the same failure. The green test observes both
+rejections and one error notification, without treating an empty result as success.
+It adds no interaction-pair credit. `allReady()` means React finished its server
+work: a failed or aborted boundary may still contain fallback HTML.
+
+The test suite covers the full SSR API cases plus the existing hydration case.
+`npm run test:ssr` now selects streaming, prerender, resume and hydration as well
+as the string renderers; its former `server-render` filter missed those cases.
+The complete bench records every case and all declared interaction assertions.
+
+```sh
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -pl tests/conformance -am package
+npm run test:ssr
+BENCH_UPDATE=1 npm run test:bench
+```
+
+The unmutated scratch baseline passed. An exclusive run at code revision
+`abfb24a` tested these three SSR mutants together with
+`transition-owner-guard-lost`: **4 killed, 0 survived, 0 unusable**. SSR accounts for
+three of those results; the transition result is recorded in R-27-03c.
+
+| Mutant | Detecting case |
+| --- | --- |
+| `hint-preload-dropped` | `combined-resource-hydration`, `resource-hints` |
+| `stream-writable-waits-for-all` | `combined-server-stream` |
+| `stream-fatal-all-pending` | `server-fatal-readiness` |
+
+The last mutant restores the observed pending-readiness defect. The catalog has
+112 entries; this scoped run is not a new full campaign. The historical full
+campaign remains 100. Repeat the SSR subset exclusively:
+
+```sh
+java tools/MutateBench.java --only stream-writable-waits-for-all,stream-fatal-all-pending,hint-preload-dropped
+```
+
+Known unqualified failure path: a destination failure after the shell is emitted
+does not necessarily trigger React's `onShellError`; the Java `HtmlSink` adapter
+currently ignores destination destruction. The fatal-shell regression does not
+establish terminal readiness/error delivery for that different path. Reproduce
+and resolve it before advertising general sink-failure safety. Human and
+cross-browser qualification also remain open.
 
 ## R-27-02c: portal lifecycle, context and events
 
@@ -505,10 +595,12 @@ fresh full 104-mutant campaign.
 R-27-02 extends identity/composition/DOM interactions. R-27-03a merged with evidence
 for form actions and recovery. R-27-03b (optimistic updates over external-store
 snapshots) also merged with bench, mutation and green Verify evidence.
-R-27-03c (transition interactions) has local bench evidence and a killed scoped
-mutant, and remains in review pending Verify.
+R-27-03c (transition interactions) merged with bench evidence, a killed scoped
+mutant and both Verify checks green.
 Staged fixtures are preparation, not completed evidence.
-R-27-04 extends server/resource interactions. Each selects explicit
+R-27-04 has local evidence for early streaming, request-context isolation,
+resource deduplication and retained hydration nodes; fatal shell errors reject both
+readiness consumers. Its three scoped mutants were killed; Verify remains pending. Each slice selects explicit
 remaining pair IDs. R-27-05 follows R-28–R-30, exercises the deferred features and
 reviews the remaining applicability decisions. The parent R-27 stays open until
 every eventual application-feature pair has evidence or an explicitly accepted

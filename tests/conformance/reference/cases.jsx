@@ -2,6 +2,7 @@
 // Node server alike.
 import { StateCounter } from './cases/state-counter.jsx';
 import { CombinedPortalLifecycle } from './cases/combined-portal-lifecycle.jsx';
+import { CombinedResourceHydration } from './cases/combined-resource-hydration.jsx';
 import { StateLazyInit } from './cases/state-lazy-init.jsx';
 import { CallableState } from './cases/callable-state.jsx';
 import { ReducerBatch } from './cases/reducer-batch.jsx';
@@ -179,6 +180,7 @@ export const cases = {
   'dom-attributes': DomAttributes,
   'dom-events': DomEvents,
   'hydrate-server': HydratedPage,
+  'combined-resource-hydration': CombinedResourceHydration,
   'root-options': RootOptions,
   'form-state': FormState,
   'async-function': AsyncFunction,
