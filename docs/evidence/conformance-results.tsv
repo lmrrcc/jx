@@ -115,6 +115,7 @@ server-render-to-string	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-resume	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-resume-pipeable	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-runtime-versions	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+server-sink-completion	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-stream-suspense	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 spread-props	pass	pass	pass	pass	pass	pass	pass	pass
 start-transition	pass	pass	pass	pass	pass	pass	pass	pass

@@ -431,12 +431,18 @@ campaign remains 100. Repeat the SSR subset exclusively:
 java tools/MutateBench.java --only stream-writable-waits-for-all,stream-fatal-all-pending,hint-preload-dropped
 ```
 
-Known unqualified failure path: a destination failure after the shell is emitted
-does not necessarily trigger React's `onShellError`; the Java `HtmlSink` adapter
-currently ignores destination destruction. The fatal-shell regression does not
-establish terminal readiness/error delivery for that different path. Reproduce
-and resolve it before advertising general sink-failure safety. Human and
-cross-browser qualification also remain open.
+Follow-up R-31-SERVER-SINK, 25 November: a destination failure after shell delivery
+does not necessarily trigger React's `onShellError`. The Java `HtmlSink` previously
+ignored destruction and left its consumer pending. A differential reproduction
+passed on native React/Node and failed on JX; the local repair returns a separate
+delivery promise that rejects original Java write/end failures and prevents late
+callbacks. The focused case, all 34 SSR checks and the integrated 905-check candidate pass.
+Its sink-failure mutant is killed after a passing baseline within the exclusive
+five-mutant campaign (5 killed, zero survived/unusable), with five byte-identical
+sink files. Its publication gates remain pending. Observe delivery independently of renderer
+readiness. This qualifies a synchronous Java sink only; native HTTP Writable
+failure/backpressure/disposal and protected requests still require host-level
+qualification. Human and cross-browser qualification also remain open.
 
 ## R-27-02c: portal lifecycle, context and events
 

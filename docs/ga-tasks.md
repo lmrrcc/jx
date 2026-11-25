@@ -207,6 +207,36 @@ Both scoped mutants are killed after the unmutated baseline passes:
 publication completed in PR #54, as recorded below. No interaction-
 pair credit or general R-31 completion is claimed.
 
+R-31-SERVER-SINK, 25 November 2026: 🟡 implemented locally. The synchronous
+Java `HtmlSink` overload of `PipeableStream.pipe` now returns a delivery promise.
+Previously a thrown write left the consumer pending: the new differential case
+passed on native React/Node and failed on JX before the fix. Delivery now rejects
+with the original Java failure for first/late writes or `end`, stops subsequent
+callbacks, and is independent of renderer readiness. The case also checks a
+second pipe rejection, abort with successful fallback delivery, UTF-8 across
+multiple chunks, late data, and an unaffected sibling request. Package passes
+40 core, 48 compiler and 15 plugin tests; focused 2/2 Node checks and all 34 SSR
+checks pass (102 browser-mode cells inapplicable). Native Node Writable
+completion/backpressure/disposal remains host-owned. The pre-GA return descriptor
+change requires consumer recompilation; ordinary statement calls remain valid.
+The sink-failure mutant was killed by this case after a passing baseline, within
+the five-mutant `e63ea76` candidate campaign (5 killed, zero survived/unusable).
+That integrated candidate passes 905 checks /175 skipped across 135 cases; all
+five sink implementation/consumer files match this slice byte for byte. Scratch:
+`jx-mutation-7730846870036546774`. The push gate and Verify remain pending; no new feature-pair credit or general stream-option parity
+is claimed. The lifecycle follows the public
+[React stream contract](https://react.dev/reference/react-dom/server/renderToPipeableStream)
+and [Node Writable lifecycle](https://nodejs.org/api/stream.html#class-streamwritable).
+
+Sink integration candidate `256b2d1`, with class lifecycle authoring and responsive
+preloads: package **47 core, 2 React, 52 compiler and 15 Maven-plugin tests**
+passes in 35.321 seconds. The complete bench passes **905 checks /175 skipped
+across 135 cases** in 3.4 minutes: client 133 reference /132 JX, hydrate 101,
+static 107 and lazy 112 per side. Its five sink implementation/consumer files
+remain byte-identical to the successful mutation candidate `e63ea76`.
+All 54/6328 registered interaction pairs remain unchanged. Final publication
+onto merged main, the push gate and Verify remain pending.
+
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven
 tests. The complete bench passes 871 checks with 169 inapplicable cells across

@@ -475,6 +475,29 @@ returns a `PipeableStream` with `shellReady()` and `allReady()` promises and
 promise of a `ReadableStream` that wraps the web stream. `StreamOptions` carries
 the identifier prefix, the bootstrap scripts and modules, and an error callback.
 
+The Java `HtmlSink` overload returns `Promise<Void>` for **delivery**, resolving
+after `end()` returns and rejecting if a write, end, or fatal renderer destruction
+fails. Observe this promise: `shellReady()` and `allReady()` describe rendering,
+not a successful response write. The original Java throwable is preserved. A
+failed write receives no subsequent writes or `end`; abort may instead finish
+successfully with Suspense fallbacks. A second `pipe` call rejects and leaves the
+first destination alone. The sink is synchronous on Node's event loop and owns
+any storage it accumulates; use the native `Writable` overload for asynchronous
+I/O, backpressure and host-owned completion/error/close handling.
+
+```java
+StringBuilder html = new StringBuilder();
+Promise<String> delivered = stream.pipe(new ReactServer.HtmlSink() {
+    @Override public void write(String chunk) { html.append(chunk); }
+    @Override public void end() {}
+}).map(ignored -> html.toString());
+```
+
+This pre-GA return-type change preserves ordinary Java statement calls but changes
+the binary method descriptor and any custom implementation of `PipeableStream`;
+recompile consumers. Ignoring the returned promise also ignores delivery failure.
+The compiling consumer is the conformance Node server's `collect` method.
+
 `ReactStatic.prerender(view, options)` and `ReactStatic.prerenderToNodeStream(view, options)`
 produce static HTML ahead of a request: they wait for every `React.suspense`
 boundary, so the output has no fallbacks. Each returns a `Prerendering` with the

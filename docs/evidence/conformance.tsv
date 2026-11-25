@@ -63,7 +63,7 @@ react-dom:version	constant	supported	runtime-utilities,server-runtime-versions	R
 react-dom/client:createRoot	api	supported	state-counter,unknown-case,root-options	React.mount, React.mountStrict, React.RootOptions		The three error callbacks and identifierPrefix; onDefaultTransitionIndicator is not offered
 react-dom/client:hydrateRoot	api	supported	hydrate-root,hydrate-server,combined-resource-hydration	React.hydrate, React.hydrateStrict		Takes the same RootOptions as mount
 react-dom/client:version	constant	supported	runtime-utilities,server-runtime-versions	React.clientVersion		Reads loaded export; browser and Node checks pass
-react-dom/server:renderToPipeableStream	server	supported	server-pipeable-stream,server-stream-suspense,combined-server-stream,server-fatal-readiness	ReactServer.renderToPipeableStream		Shell and all-ready are promises; pipes to a Java sink or a Node Writable
+react-dom/server:renderToPipeableStream	server	supported	server-pipeable-stream,server-stream-suspense,combined-server-stream,server-fatal-readiness,server-sink-completion	ReactServer.renderToPipeableStream		Shell and all-ready are promises; Java sink delivery promise preserves write/end failure; native Node Writable lifecycle remains host-owned
 react-dom/server:renderToReadableStream	server	supported	server-readable-stream	ReactServer.renderToReadableStream		Options: identifier prefix, bootstrap scripts and modules, onError
 react-dom/server:renderToStaticMarkup	server	supported	server-render-to-static-markup	ReactServer.renderToStaticMarkup		Runs in a Node host
 react-dom/server:renderToString	server	supported	server-render-to-string,combined-resource-hydration	ReactServer.renderToString		Runs in a Node host; the options other than identifierPrefix are not offered
