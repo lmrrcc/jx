@@ -268,7 +268,8 @@ typed zero/one/two-argument functions and cache lifetime signals. It adds explic
 request isolation and cleanup evidence. Twelve differential checks additionally
 prove request context through Java await/map/recovery and shared-promise observers;
 one Node check preserves observer error reporting. The combined local proof has
-28 Node and four Chrome passes, pending integrated Verify. Server functions,
+28 Node and four Chrome passes. PR #51 merged as `a7a3f62` after the 15-step gate
+and both Verify checks passed. Server functions,
 directive-driven packaging, abandoned-request retention and production
 qualification remain open.
 Server data loading, typed HTTP mutations, SSR and hydration alone do not complete

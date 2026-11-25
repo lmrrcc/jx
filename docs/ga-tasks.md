@@ -167,9 +167,9 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-29 | M7 | Remaining small surface; split into R-29-01 through R-29-04 below | 9 | 🟡 partial: 8 rows have full bench evidence; four scoped mutants killed after baseline passed; push gate/Verify pending, cache refresh and deep owner diagnostics remain open |
 | R-29-01 | M7 | Runtime version getters, development owner stacks and the legacy batching callback/return contract | 7 | 🟡 implemented with full bench evidence; R-29-04 diagnostic depth and publication gates remain open |
 | R-29-02 | M7 | Awaited asynchronous `act` for Java test consumers, including flushing, nesting, failure recovery and real production-build rejection | 1 | 🟡 implemented with full bench evidence; flush-bypass mutant killed after baseline passed; push gate/Verify pending; async-only contract |
-| R-29-03 | M8–M10 | `unstable_useCacheRefresh` with an exercised server cache owner and invalidation contract; depends on R-30 | 1 | ⬜ planned; blocked by the server-component/cache feasibility work |
+| R-29-03 | M8–M10 | `unstable_useCacheRefresh` with an exercised server cache owner and invalidation contract; depends on R-30 | 1 | ⬜ planned; cache/signal proof merged in PR51, but refresh ownership and invalidation still need implementation and evidence |
 | R-29-04 | M7 | Preserve useful development owner chains through deep Java/TeaVM element conversion without React-private stack mutation or global Error hooks; accepted limit or implementation required by R-31 | diagnostic depth | ⬜ planned: first R-29 run exposed truncated pure-Java owner chains |
-| R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | 🟨 partial — Flight proof merged PR #49 with green Verify; typed cache/signal and Java continuation context have 28 Node + 4 Chrome checks passing locally, integrated Verify pending. [ADR 0007](decisions/0007-react-server-components.md) tracks open directives, general references, server functions and production qualification |
+| R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | 🟡 partial — Flight PR49 and typed cache/signal/Java continuation context PR51 are merged with green local gates and both Verify checks; combined proof 28 Node + 4 Chrome. [ADR 0007](decisions/0007-react-server-components.md) tracks open directives, general references, server functions and production qualification |
 | R-31 | M10 | Parity gate: zero `unsupported`, zero `untested`, only approved exclusions, mutation survivors zero, every case green in every applicable mode; all option-level limits implemented or explicitly accepted | closes the track | ⬜ planned |
 
 R-28-SCALAR prerequisite, 25 November 2026: ✅ merged in
@@ -264,6 +264,13 @@ Maven package passes 34 core, 48 compiler and 15 Maven-plugin tests in 22.539
 seconds. All 54 interaction witnesses remain green among 6,328 active candidate
 pairs. This is source `52eb29e`; scoped mutation source equivalence is recorded
 above. These checks precede the full push gate and Verify; R-29 remains partial.
+
+Final integration preserves the merged request-cache/continuation changes from
+[PR #51](https://github.com/lmrrcc/jx/pull/51), merge `a7a3f62`, whose 15-step gate
+passed in 287 seconds and whose [push Verify](https://github.com/lmrrcc/jx/actions/runs/45587877665)
+and [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45588054123) are green.
+The rebased R-29 utility source is `79b0d28`; utility assertions and the four
+mutant targets are unchanged. Its final publication checks are still pending.
 
 Audit, 23 November 2026: R-16's primary action APIs and browser cases are delivered,
 but `useFormState` has no Java API or case and remains excluded in the feature

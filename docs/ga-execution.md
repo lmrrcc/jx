@@ -145,7 +145,8 @@ preserves uncaught-error reporting and sibling delivery. The combined local RSC
 command passes **28 Node and four Chrome checks**; all 16 runtime browser checks
 and ten JVM Promise checks also pass. Cache functions support zero/one/two
 arguments, and cache lifetimes end on success, failure and abort. This slice
-awaits integrated Verify; automatic HTTP cancellation, abandoned-request retention
+merged in PR #51 as `a7a3f62` after the 15-step gate and both Verify checks passed;
+automatic HTTP cancellation, abandoned-request retention
 measurement and authenticated G0 isolation remain open.
 
 The direct `.jx` authoring slice (R-28-02a) is rebased onto the merged R-28-01
