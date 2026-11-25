@@ -39,13 +39,20 @@ Derived state from props (R-28-03b) passes **879 integrated checks, 169 skipped,
 131 cases** over functional merge `adcf22b`, with all 40 class cells green. Package
 checks pass 42 core / 48 compiler / 15 Maven tests. It adds no pair witness.
 The dropped-derivation mutant was killed after a passing baseline, with zero
-survived/unusable. Final gate and Verify remain pending.
+survived/unusable. PR #55 merged as `84eb8cd` after the 15-step gate and both
+Verify checks passed on `021bc02`.
+
+Native error lifecycle (R-28-03c) passes **887 integrated checks, 169 skipped,
+132 cases**, with all 48 class cells green. Package checks pass 47 core /
+48 compiler / 15 Maven tests. A tightened check of the exact error-report
+sequence passes all eight projects. It adds no pair witness; the scoped reporting
+mutant was killed after a passing baseline, zero survived/unusable; final gate and Verify pending.
 
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 top-level tasks done through R-26 and R-32; interaction, class, Flight, cache, utility and native class context slices merged through PR54 with green Verify. Derived props passes 879 integrated checks; its scoped mutant was killed after a passing baseline and publication checks remain pending. Pair evidence stays 54 / 6,328, with 6,274 open and 575 deferred-feature pairs. Complete remaining APIs, options and combined scenarios. |
-| R-28 Java class runtime | 🟡 Partial | Runtime, direct authoring and native context merged after green local gates and both Verify checks. Derived props passes eight projects within 879 integrated checks; scoped mutant killed after a passing baseline; gate/Verify pending. Native editor qualification, error lifecycle, remaining context/authoring options and class hot checkpoints remain open. |
+| React parity track / GA-18 | 🟡 Partial | 27 top-level tasks done through R-26 and R-32; interaction, class, Flight, cache, utility, context and derived-props slices merged through PR55 with green Verify. Error lifecycle passes 887 integrated checks; scoped mutant killed after a passing baseline, zero survived/unusable, gate/Verify pending. Pair evidence stays 54 / 6,328, with 6,274 open and 575 deferred-feature pairs. Complete remaining APIs, options and combined scenarios. |
+| R-28 Java class runtime | 🟡 Partial | Runtime, direct authoring, native context and derived props merged after green gates and both Verify checks. Error lifecycle passes eight projects within 887 integrated checks; scoped mutant killed after a passing baseline, zero survived/unusable, gate/Verify pending. Native editor qualification, remaining context/authoring options and class hot checkpoints remain open. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |

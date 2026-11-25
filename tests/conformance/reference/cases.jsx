@@ -107,6 +107,7 @@ import { ClassRuntime } from './cases/class-runtime.jsx';
 import { ClassKeyed } from './cases/class-keyed.jsx';
 import { ClassContextCase } from './cases/class-context.jsx';
 import { ClassDerivedProps } from './cases/class-derived-props.jsx';
+import { ClassErrorLifecycle } from './cases/class-error-lifecycle.jsx';
 import { ClassAuthoring } from './cases/class-authoring.jsx';
 
 export const cases = {
@@ -126,6 +127,7 @@ export const cases = {
   'class-keyed': ClassKeyed,
   'class-context': ClassContextCase,
   'class-derived-props': ClassDerivedProps,
+  'class-error-lifecycle': ClassErrorLifecycle,
   'class-authoring': ClassAuthoring,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,

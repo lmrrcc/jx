@@ -58,11 +58,21 @@ public abstract class ClassComponent<P,S,X> {
     protected void componentDidMount() {}
     protected void componentDidUpdate(P previousProps, S previousState, X snapshot) {}
     protected void componentWillUnmount() {}
+    /** Committed report of a descendant failure caught by this native boundary. The descriptor
+     * must declare CATCH. Java failures retain their original Throwable identity; renderers
+     * explicitly project foreign failures. This callback may perform reporting effects.
+     * React does not route this component's own failures or event-handler errors here.
+     * Recovery state belongs in the descriptor's pure derived-error callback. */
+    protected void componentDidCatch(Throwable error, ComponentErrorInfo info) {}
     protected X getSnapshotBeforeUpdate(P previousProps, S previousState) { return null; }
     protected boolean shouldComponentUpdate(P nextProps, S nextState) { return true; }
     /** Renderer lifecycle dispatch. Register the corresponding descriptor capability. */
     public final void mounted() { componentDidMount(); }
     public final void unmounting() { componentWillUnmount(); }
+    /** Renderer dispatch of committed error reporting. */
+    public final void caught(Throwable error, ComponentErrorInfo info) {
+        componentDidCatch(Objects.requireNonNull(error), Objects.requireNonNull(info));
+    }
     public final boolean shouldUpdate(P nextProps, S nextState) { return shouldComponentUpdate(nextProps, nextState); }
     public final void updated(P previousProps, S previousState) { componentDidUpdate(previousProps, previousState, null); }
     /** Captures the typed snapshot now; the returned callback consumes it after DOM commit. */

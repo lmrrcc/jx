@@ -165,6 +165,32 @@ descriptors; authored static lifecycle sugar, browser error-boundary qualificati
 and committed class hot checkpoints remain separate work. Initial state still
 must be non-null.
 
+### Class error boundaries
+
+`descriptor.withDerivedStateFromError(error -> patch)` installs React's actual
+static error-state derivation. Like prop derivation, it creates a new descriptor
+and performs pure render-phase work that React can repeat. Return a patch from
+the descriptor's state schema, or null for no derived state change.
+
+Enable `Lifecycle.CATCH` to receive
+`componentDidCatch(Throwable, ComponentErrorInfo)` after React commits the
+fallback. Reporting and logging belong there. The
+[`ClassErrorLifecycle` consumer](../tests/conformance/src/main/java/jx/conformance/cases/ClassErrorLifecycle.java)
+demonstrates descendant render, derived-props and commit failures, recovery,
+keyed reset, and the boundary's own render/event exclusions.
+
+Compiled Java failures retain their original `Throwable` identity. A foreign
+JavaScript throw is exposed as `ReactError`, preserving its borrowed native value
+and distinguishing null from undefined. The wrapper itself has no stable identity
+promise. Its optional message/stack projection reads own string data properties;
+it does not invoke accessors or reconstruct Java source traces. Retaining the
+error can retain the foreign object graph. `ComponentErrorInfo.componentStack()`
+contains React's original component-stack string, which may be empty.
+
+The [class decision](decisions/0006-java-class-components.md#r-28-03c-native-error-lifecycle--25-november-2026)
+records the tested cases and diagnostic limits. Compiler lifecycle declarations,
+production diagnostics and server-render error recovery remain separate work.
+
 ## Hook behavior
 
 | API | Contract and current evidence |

@@ -139,9 +139,9 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The integrated derived-props run over PR #54 passes 879 checks, with 169 skipped
-cells across 131 case IDs: client 129 reference / 128 JX, hydrate 98 per side,
-static 104 per side and lazy 109 per side. Fifty-four pairs have complete local
+The integrated class-error run on PR #55's tested tree passes 887 checks, with
+169 skipped cells across 132 case IDs: client 130 reference / 129 JX, hydrate 99
+per side, static 105 per side and lazy 110 per side. Fifty-four pairs have complete local
 evidence in their declared modes; 6,274 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate
@@ -187,6 +187,33 @@ cancels successors, retry while pending and unmount/remount with a fresh owner.
 The cancellation behavior is fixture-local, not the G0 API; this action fixture
 does not qualify R-28 class behavior. R-27-03a, R-27-03b optimistic/store and
 R-27-03c transition are merged.
+
+`class-error-lifecycle` adds nested native class boundaries. Eight integrated
+projects prove recovery from Java child render, derived-props and commit errors,
+original failure identity, fallback DOM already committed when reporting runs,
+and React's component-stack string. Native React interop children throw a real
+Error, an object, null and undefined; the Java projection preserves their values
+and distinguishes their kinds. Its bounded diagnostic contract reads own string
+data properties and may omit accessor-backed Error stacks. This is tested within
+the Java consumer against actual native descriptors, not represented as a new
+React wrapper API. Reset retains boundary state while remounting the failed
+child; keyed remount resets the boundary. Actual DOM handles and an unaffected
+sibling establish identity. Own-boundary render and event errors follow React's
+exclusions. All 40 existing class checks also pass. The full run passes 887 checks,
+169 skipped, across 132 cases; package passes 47 core, 48 compiler and 15 Maven
+tests. A subsequent eight-project focused run requires exactly eight expected
+caught-error reports in order and one uncaught event error, rejecting unrelated
+reports. Case evidence adds only this case; interaction evidence stays 54/6328.
+The scoped reporting mutant was killed after a passing baseline, zero survived/unusable. Production diagnostics, server error
+recovery and compiler error lifecycle syntax remain unqualified; static checks
+initial HTML only. Run the mutant exclusively, with no other build/browser work:
+
+```sh
+java tools/MutateBench.java --only class-error-report-dropped --keep
+```
+
+The catalog has 127 entries; the historical full campaign remains 100. Final
+gate and Verify remain pending.
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
 combine optimistic state with external-store snapshots, transitions and Java async
