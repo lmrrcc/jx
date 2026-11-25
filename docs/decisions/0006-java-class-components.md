@@ -1,8 +1,9 @@
 # Java class components on the React runtime
 
 Date: 24 November 2026. Status: R-28-01 merged in PR #48 on 25 November after
-local verification, scoped mutation, push gate and Verify passed. R-28-02a is in
-review; the broader R-28 task remains incomplete.
+local verification, scoped mutation, push gate and Verify passed. R-28-02a merged
+in PR #50 as `3e1db97` after the 15-step gate and both Verify checks passed;
+the broader R-28 task remains incomplete.
 
 Java classes may own React component identity through a descriptor separate from
 the existing functional `ComponentType`. The browser creates an actual subclass
@@ -162,4 +163,5 @@ adds only `class-authoring`; interaction evidence stays 54 / 5,460. The generate
 `class-authoring-snapshot-lost` mutant was killed by `class-authoring` after the
 unmutated scratch baseline passed: 1 killed, 0 survived, 0 unusable. The catalog
 has 116 entries; the historical full campaign still covers 100. Native IDE
-qualification, gate and Verify remain pending.
+qualification remains pending. PR #50 passed the 15-step local gate in 278 seconds
+and [Verify](https://github.com/lmrrcc/jx/actions/runs/45565741808) before merging.

@@ -147,8 +147,8 @@ hydrate **93**, static **99** and lazy **104** per side. Recorded tables match
 this integrated run. It adds no pair witness: evidence remains **54 / 5,460**, with
 **5,406** active pairs open and **1,443** deferred-feature pairs. The generated
 snapshot mutant was killed by `class-authoring` after the unmutated baseline
-passed: 1 killed, 0 survived, 0 unusable. The full push gate and Verify remain
-pending. The catalog now has 116 entries; the historical full campaign remains
+passed: 1 killed, 0 survived, 0 unusable. PR #50 merged as `3e1db97` after the
+15-step local gate and both Verify checks passed. The catalog now has 116 entries; the historical full campaign remains
 100. The authored subset uses direct, non-generic classes with nested record
 props/state; remaining syntax limits are documented in ADR 0006. Native IDE
 qualification remains R-28-02b. Advanced lifecycle/context
@@ -186,7 +186,7 @@ exists, not when its document or skeleton module lands.
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
 | GA-17 | Forms, validation, i18n and accessible primitives / A | GA-10, GA-15 | M3–M5 / L | Complex form, arrays/errors, locale/RTL, keyboard/reader, shared pure rules and server errors | ⬜ planned |
-| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02b and PR #41–#48 prerequisites through SSR and native class runtime merged; 54 / 5,460 active pairs evidenced, with 5,406 open plus 1,443 deferred-feature pairs; class authoring in review and remaining options open; three runtime class mutants killed, local gate and both Verify checks passed | 🟡 partial |
+| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02b and PR #41–#48 prerequisites through SSR and native class runtime merged; 54 / 5,460 active pairs evidenced, with 5,406 open plus 1,443 deferred-feature pairs; class authoring merged PR50 with green gate/Verify and remaining options open; three runtime class mutants killed, local gate and both Verify checks passed | 🟡 partial |
 | GA-19 | HTTP headers/binary/upload/stream capabilities / C | GA-03, GA-10, GA-13 | M3–M5 / L | Auth/CSRF headers, upload progress, download, SSE/WS lifecycle, bounds/reconnect tested | ⬜ planned |
 | GA-20 | Real ecosystem binding SDK and catalog / R | GA-15, GA-18 | M4–M7 / L | Selected grid/editor/chart/headless/media bindings with refs/assets/cleanup; Java consumer examples | ⬜ planned |
 | GA-21 | Complex authenticated reference product / A | GA-12, GA-13, GA-16, GA-17, GA-19 | M4–M6 / L | Workspace/project workflow with roles, search/table/detail, forms/files/activity and two-tenant tests | ⬜ planned |
