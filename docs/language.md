@@ -96,8 +96,14 @@ parameterized fields, generic classes/records and indirect component inheritance
 are outside this slice. Primitive arrays remain reference values.
 
 Declared mount, update, unmount, snapshot and should-update overrides enable those
-existing runtime callbacks. `PureComponent` supplies shallow comparison and cannot
-declare should-update. Unsupported lifecycle declarations fail with `JX111`; schema
+existing runtime callbacks. `PureComponent` supplies shallow comparison by default.
+An explicit should-update override takes precedence, including the typed three-
+argument context policy; React emits its normal development warning. Prefer
+`ClassComponent` for new custom policies. React still bypasses a false policy for
+force updates and changed context. The compiling
+[PureContextPolicy.jx](../tests/conformance/src/main/jx/jx/conformance/cases/PureContextPolicy.jx)
+and [PureLegacyPolicy.jx](../tests/conformance/src/main/jx/jx/conformance/cases/PureLegacyPolicy.jx)
+exercise both signatures. Unsupported lifecycle declarations fail with `JX111`; schema
 and authoring constraints use `JX110`; hook-looking calls in native classes use
 `JX201`. Hooks belong to function components. Reserved native field names and
 generated members (`JX`, `StateUpdate`, `statePatch`, `__JxMetadata`) are rejected.
@@ -124,8 +130,13 @@ declared, the typed three-argument policy takes precedence. Keep the decision
 pure and use its arguments for pending values; instance accessors still expose
 the current values. See
 [AuthoredContextPolicy.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredContextPolicy.jx)
-for a compiling consumer. Custom policies on PureComponent remain a separate
-slice.
+for a compiling consumer. A class extending `PureComponent` may also declare the
+two-argument override or typed three-argument policy; the custom decision replaces
+the normal shallow comparison and React's development warning is preserved.
+The compiling
+[ClassPurePolicy.jx](../tests/conformance/src/main/jx/jx/conformance/cases/ClassPurePolicy.jx)
+consumer demonstrates both forms. Pure classes without a custom policy retain
+their normal native comparison.
 
 [AuthoredCounter.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredCounter.jx),
 [AuthoredPure.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredPure.jx)

@@ -53,7 +53,9 @@ class ClassContextContractTest {
         var legacy = ClassComponentType.normal("Legacy", MODEL, MODEL, props -> new Normal(props, () -> "legacy"), Set.of());
         assertNull(legacy.contextType());
         assertEquals("legacy", legacy.create(new Model(0)).constructedWith);
-        assertThrows(IllegalArgumentException.class, () -> ClassComponentType.pureWithContext(
-                "WrongPure", MODEL, MODEL, new Context<>("default"), Pure::new, Set.of(ClassComponentType.Lifecycle.SHOULD_UPDATE)));
+        var custom = ClassComponentType.pureWithContext("CustomPure", MODEL, MODEL,
+                new Context<>("default"), Pure::new, Set.of(ClassComponentType.Lifecycle.SHOULD_UPDATE));
+        assertTrue(custom.pure());
+        assertTrue(custom.lifecycle(ClassComponentType.Lifecycle.SHOULD_UPDATE));
     }
 }

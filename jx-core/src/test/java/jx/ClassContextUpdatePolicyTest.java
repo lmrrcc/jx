@@ -113,7 +113,7 @@ class ClassContextUpdatePolicyTest {
         assertFalse(base.hasContextShouldUpdate());
     }
 
-    @Test void policiesRequireTheDeclaredContextAndCannotReplaceNativePureComparison() {
+    @Test void policiesRequireTheDeclaredContextAndKeepNativePureIdentity() {
         Context<String> context = new Context<>("value");
         var contextual = descriptor(context);
         ClassComponentType.ContextUpdatePolicy<Model,Model,Peer,String> policy = (peer, props, state, nextContext) -> true;
@@ -122,7 +122,9 @@ class ClassContextUpdatePolicyTest {
         var pure = ClassComponentType.pureWithContext("Pure", MODEL, MODEL, context, PurePeer::new, Set.of());
         assertThrows(IllegalArgumentException.class, () -> plain.withContextShouldUpdate(context, policy));
         assertThrows(IllegalArgumentException.class, () -> contextual.withContextShouldUpdate(new Context<>("value"), policy));
-        assertThrows(IllegalArgumentException.class, () -> pure.withContextShouldUpdate(context, (peer, props, state, nextContext) -> true));
+        var customPure = pure.withContextShouldUpdate(context, (peer, props, state, nextContext) -> true);
+        assertTrue(customPure.pure());
+        assertTrue(customPure.hasContextShouldUpdate());
         assertThrows(NullPointerException.class, () -> contextual.withContextShouldUpdate(null, policy));
         assertThrows(NullPointerException.class, () -> contextual.withContextShouldUpdate(context, null));
         assertFalse(contextual.hasContextShouldUpdate()); assertFalse(plain.hasContextShouldUpdate());

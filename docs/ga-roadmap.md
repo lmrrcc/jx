@@ -79,11 +79,18 @@ zero survived/unusable. PR [#60](https://github.com/lmrrcc/jx/pull/60) merged as
 `3815001` after the 15-step gate passed in 373 seconds and both Verify checks
 passed on `251aaa7`.
 
+Nullable direct class patches (R-28-03f) merged in
+[PR #61](https://github.com/lmrrcc/jx/pull/61) as `a93e325`. The final integrated
+gate passes **919 checks, 169 skipped, 136 cases**, including all 72 class cells;
+the scoped callback-dropping mutation was killed after a passing baseline. All
+15 gate steps passed in 348 seconds and both Verify checks passed on `1c23a22`.
+Pure custom policies and the remaining class options are still separate work.
+
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
 | React parity track / GA-18 | 🟡 Partial | 27 top-level tasks done through R-26 and R-32; interaction, class, Flight, cache, utility, context, derived-props and direct lifecycle authoring slices merged through PR58 with green gates and Verify. Direct lifecycle authoring passes 895 checks and its compiler mutant was killed after a passing baseline. Pair evidence stays 54 / 6,328, with 6,274 open and 575 deferred-feature pairs. Complete remaining APIs, options and combined scenarios. |
-| R-28 Java class runtime | 🟡 Partial | Runtime, direct authoring, native context, derived props, error lifecycles and typed next-context policies merged through PR60 after green gates and both Verify checks. The latest integrated bench passes 911 checks; both next-context mutants were killed after a passing baseline. Native editor qualification, remaining class options and class hot checkpoints remain open. |
+| R-28 Java class runtime | 🟡 Partial | Runtime, direct authoring, native context, derived props, error lifecycles, typed next-context policies and nullable direct patches merged through PR61 after green gates and both Verify checks. The latest integrated bench passes 919 checks; the null-patch mutant was killed after a passing baseline. Native editor qualification, remaining class options and class hot checkpoints remain open. |
 | R-31-01 responsive preload options | ✅ Done | PR #59 merged as a805810 after the 15-step gate and both Verify checks; integrated 903-check bench and both targeted mutants pass. Chrome evidence only; the broader R-31 parity gate remains open. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |

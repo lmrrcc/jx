@@ -166,10 +166,22 @@ class ClassAuthoringTest {
                 COUNTER.replace("protected void componentDidUpdate(Props previous, Model state, String snapshot)",
                         "protected void componentDidUpdate(Props previous, Model state, Integer snapshot)"),
                 COUNTER.replace("@Override protected void componentDidUpdate(Props previous, Model state, String snapshot) {}", ""),
-                PURE.replace("@Override public View render()", "protected boolean shouldComponentUpdate(Props p, Model s) { return true; } @Override public View render()"))) {
+                PURE.replace("@Override public View render()", "protected String shouldComponentUpdate(Props p, Model s) { return \"invalid\"; } @Override public View render()"))) {
             Compilation result = compiler.compile(List.of(source(source.contains("class PureCounter") ? "PureCounter.jx" : "Counter.jx", source)));
             assertTrue(result.diagnostics().stream().anyMatch(value -> value.code().equals("JX111")), result.diagnostics().toString());
         }
+    }
+
+    @Test void pureClassesAcceptATypedTwoArgumentPolicyWithRealJavaAttribution() throws Exception {
+        String text = PURE.replace("@Override public View render()",
+                "@Override protected boolean shouldComponentUpdate(Props p, Model s) { return false; } @Override public View render()");
+        SourceFile source = source("PureCounter.jx", text);
+        Compilation compiled = compiler.compile(List.of(source));
+        assertTrue(compiled.successful(), compiled.diagnostics().toString());
+        assertTrue(compiled.components().getFirst().classSpec().lifecycles().contains(ComponentMetadata.Lifecycle.SHOULD_UPDATE));
+        assertEquals(List.of(), check(compiled, List.of(), "pure-policy"));
+        Compilation projection = new Compilation(EditorProjection.project(List.of(source)), List.of(), List.of());
+        assertEquals(List.of(), check(projection, List.of(), "pure-policy-editor"));
     }
 
     private List<SourceFile> sources(String counter, String app) {

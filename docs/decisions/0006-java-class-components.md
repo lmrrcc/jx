@@ -604,23 +604,30 @@ full-catalog run. The runtime and nullable-patch fixture/spec files are
 byte-identical to this publication branch. Scratch evidence is
 `jx-mutation-2296619748002841958`. Run this slice exclusively with
 `java tools/MutateBench.java --only class-null-patch-callback-lost --keep`.
-Final push gate and Verify remain pending. The historical full mutation
+The final publication results follow below. The historical full mutation
 campaign remains 100; this slice's original catalog had 131 entries.
 
 The later source-preserving rebase onto next-context candidate `cc2776e`, which
 includes responsive preload, passes 54 core, 2 React-option, 53 compiler,
 15 Maven-plugin and 10 LSP tests. A focused comparison of `class-null-patch` and
 `image-preload` passes all 16 projects. It does not rewrite complete evidence or
-claim a new full-run count: the final publication gate will run the complete
-integrated suite. The runtime and nullable-patch fixtures also remain identical
+claim a new full-run count by itself. The runtime and nullable-patch fixtures remain identical
 to the seven-mutant candidate whose full bench passed 931 checks/181 skipped.
+
+Final integration onto next-context merge `3815001` passes the complete 15-step
+gate in 348 seconds, including **919 checks, 169 skipped, across 136 cases**:
+client 134 React / 133 JX, hydrate 103, static 109 and lazy 114 per side. All 72
+class cells pass; pair evidence remains 54/6328. PR
+[#61](https://github.com/lmrrcc/jx/pull/61) merged as `a93e325` after both
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45670379139) and
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45670577701) passed on `1c23a22`.
 
 ### Remaining option inventory
 
 | Option | Status and next evidence |
 | --- | --- |
 | Null initial props/state | Open: design explicit nullable schema decoding and merge semantics before removing guards |
-| PureComponent with a custom should-update policy | Open: React can invoke it with a development warning; the current Java rejection is not parity |
+| PureComponent with a custom should-update policy | R-28-03g below: locally implemented and focused-tested; integrated qualification pending |
 | `componentWillMount`, `componentWillReceiveProps`, `componentWillUpdate`, and their `UNSAFE_` forms | Open: differential proof must cover scheduling and suppression by modern derivation/snapshot APIs |
 | Class `defaultProps` | Open: define absent versus explicit null props before compiler/runtime support |
 | Generic/indirect class authoring and wider field types | Open: preserve checked schemas and original-source diagnostics |
@@ -632,3 +639,51 @@ still lists deprecated lifecycle methods and class defaults. The
 [React 19 upgrade guide](https://react.dev/blog/2024/04/25/react-19-upgrade-guide#removed-legacy-context-using-contexttypes-and-getchildcontext)
 records removal of the old context API. Deprecated supported behavior remains
 work to implement; removed behavior is not a new compatibility target.
+
+## R-28-03g custom PureComponent policies — 25 November 2026
+
+React invokes a class's callable `shouldComponentUpdate` before considering Pure's
+default shallow comparison. It warns in development when a Pure class supplies
+such a policy. JX now preserves that supported behavior: descriptor factories and
+the compiler accept the ordinary two-argument override and the existing typed
+next-context policy. The native constructor still extends `React.PureComponent`;
+the bridge and warning are unchanged. Use `ClassComponent` for new custom-policy
+code, as React recommends, but do not reject compatible existing code.
+
+Both newly added JVM contracts failed with the old descriptor rejection. They
+now pass and verify dispatch, immutable policy replacement, precedence and the
+preserved Pure marker. Existing schema/context checks remain. The compiler's
+real-core javac and editor-projection tests cover both signatures and coexisting
+two/three-argument declarations; malformed return types are still rejected.
+The package passes 52 core, 54 compiler, 15 Maven-plugin and 10 LSP tests.
+
+The [ClassPurePolicy.jx consumer](../../tests/conformance/src/main/jx/jx/conformance/cases/ClassPurePolicy.jx)
+passes eight focused projects against actual React. A true policy renders even
+for equal props; a false one retains the previous DOM while current state/props
+advance and queued callbacks commit. Force updates and context changes render
+the latest state despite false policies. The three-argument method takes
+precedence over its two-argument overload. Real DOM identity persists and only
+React's expected Pure-policy warning is tolerated; unrelated errors fail.
+
+All ten class cases also pass 80/80 focused projects after the shared runtime and
+compiler change, including ordinary Pure shallow bailouts, class context,
+derivation/error lifecycles, authored snapshots and typed null patches.
+
+An initial fixture bundle was attempted before the Maven browser output existed;
+that incomplete-asset run is not qualification. After Maven completed, all bundles
+were rebuilt and all eight projects passed. Static projects compare initial HTML
+only. Integration over final authoring head `0011c1d` then passes 56 core,
+54 compiler, 15 Maven-plugin and 10 LSP tests. The complete bench passes
+**919 checks, 169 skipped, across 136 cases**: client 134 React / 133 JX,
+hydrate 103, static 109 and lazy 114 per side. All 80 class cells pass; the
+recorded case table includes `class-pure-policy` and pair evidence stays 54/6328.
+The policy-omission mutant was killed by `class-pure-policy` after an independent
+unmutated baseline passed: **1 killed, 0 survived, 0 unusable**. It is one of
+the seven scoped mutations on `f49b48f` (source `193181f`), whose complete bench
+passed 931 checks/181 skipped. The class runtime/compiler and Pure-policy
+fixture/spec files are byte-identical to this publication branch. Scratch
+evidence is `jx-mutation-2296619748002841958`; reproduce this slice exclusively
+with `java tools/MutateBench.java --only class-pure-policy-suppressed --keep`.
+Final push gate, Verify and native IDE qualification remain pending. This slice's
+original catalog had 132 entries, without a new full-catalog run beyond the
+historical 100.

@@ -205,6 +205,15 @@ passed on `251aaa7`. The integrated catalog
 contains 132 entries;
 the historical full campaign remains 100.
 
+R-28-03f merged in [PR #61](https://github.com/lmrrcc/jx/pull/61) as `a93e325`.
+The direct null-patch defect was reproduced against native React before repair.
+Final integration passes 54 core, 2 React-option, 53 compiler, 15 Maven and 10 LSP
+tests; the complete bench matches **919 passes, 169 skipped, 136 cases**:
+134 reference / 133 JX client, 103 hydrate, 109 static and 114 lazy per side.
+Its callback-dropping mutant was killed after a passing baseline. The local
+15-step gate passed in 348 seconds and both Verify checks passed on `1c23a22`.
+Pair evidence remains 54/6328; other class options remain open.
+
 R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
 using actual Flight and separate server/client Java programs. Seven Node and four
 Chrome checks passed, including suspension, rejection, abort and server-code

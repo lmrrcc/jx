@@ -1,0 +1,32 @@
+package jx.conformance.cases;
+
+import jx.*;
+import jx.conformance.Bench;
+import java.util.function.Supplier;
+
+@Component
+public final class PureLegacyPolicy extends PureComponent<PureLegacyPolicy.Props, PureLegacyPolicy.Model, Void> {
+    public record Props(int revision, boolean allow) {}
+    public record Model(int count) {}
+    public static final Context<String> contextType = ClassPurePolicy.THEME;
+    private final Supplier<String> theme;
+    private final DomRef output = new DomRef();
+    public PureLegacyPolicy(Props props, Supplier<String> theme) { super(props, new Model(0)); this.theme = theme; }
+    @Override protected boolean shouldComponentUpdate(Props next, Model pending) {
+        Bench.log("pure-policy:legacy:" + props().revision() + "->" + next.revision());
+        return next.allow();
+    }
+    private String value() { return theme.get() + ":" + props().revision() + ":" + state().count() + ":" + props().allow(); }
+    private void increment() {
+        setState((pending, next) -> statePatch().withCount(pending.count() + 1).build(),
+                () -> Bench.log("pure-callback:legacy:" + value() + ":dom=" + output.current().textContent()));
+    }
+    @Override public View render() {
+        Bench.log("pure-render:legacy");
+        return <section>
+            <output ref={output} data-testid="legacy">{value()}</output>
+            <button onClick={event -> increment()}>Increment legacy</button>
+            <button onClick={event -> forceUpdate()}>Force legacy</button>
+        </section>;
+    }
+}

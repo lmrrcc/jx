@@ -22,6 +22,7 @@ class-keyed	pass	pass	pass	pass	pass	pass	pass	pass
 class-lifecycle-authoring	pass	pass	pass	pass	pass	pass	pass	pass
 class-next-context	pass	pass	pass	pass	pass	pass	pass	pass
 class-null-patch	pass	pass	pass	pass	pass	pass	pass	pass
+class-pure-policy	pass	pass	pass	pass	pass	pass	pass	pass
 class-runtime	pass	pass	pass	pass	pass	pass	pass	pass
 clone-element	pass	pass	pass	pass	pass	pass	pass	pass
 combined-action-queue	pass	pass	pass	pass	pass	pass	pass	pass

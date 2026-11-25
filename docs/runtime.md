@@ -162,8 +162,13 @@ This policy takes precedence over the peer's two-argument
 `shouldComponentUpdate` override. It is pure, may be repeated or discarded, and
 must not schedule updates or perform effects. Initial mounting and `forceUpdate`
 bypass the policy; native provider changes can still cause rendering after a
-false result. The current slice supports ordinary class descriptors; custom
-PureComponent policies remain separate work.
+false result. Pure descriptors may also declare a custom two-argument override
+or typed context policy. The native class still extends `React.PureComponent`,
+but the custom decision takes precedence over its usual shallow comparison.
+React's development warning for this combination remains visible. Without a
+custom policy, native Pure comparison is unchanged. See the compiling
+[ClassPurePolicy.jx](../tests/conformance/src/main/jx/jx/conformance/cases/ClassPurePolicy.jx)
+consumer for both forms and their skip/force/context behavior.
 
 The compiling
 [`ClassNextContext`](../tests/conformance/src/main/java/jx/conformance/cases/ClassNextContext.java)
