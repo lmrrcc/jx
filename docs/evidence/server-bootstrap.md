@@ -16,8 +16,8 @@ matching CSP header. A managed `<style precedence="...">` must receive the same
 style nonce in its element props. `ReactStatic` rejects nonce-bearing options
 for all four prerender entry points before entering the native runtime: reusable
 static output must not retain per-request CSP authority. A request-time resume
-can pass a fresh nonce through `ReactServer`; resume nonce behavior is not
-qualified by this case.
+can pass a fresh nonce through `ReactServer`; the separate resume case below
+qualifies that behavior for the pinned Node/Chrome combination.
 
 Inline bootstrap content is executable, framework-owned source. React's script
 terminator escaping does not sanitize code or serialize untrusted application
@@ -85,10 +85,47 @@ exact behavior. The test allows exactly that report and rejects other console
 or page errors. Converting a string nonce into the object form changes output.
 
 This defect remains visible; the slice neither patches React nor relaxes the
-browser policy. Streaming continuation scripts, resumed output, import maps,
-header hints, form-state transport, production bundles and additional browsers
-need their own evidence. This is not blanket CSP or SSR qualification.
+browser policy. Ordinary streaming continuations, import maps, header hints,
+form-state transport, production bundles and additional browsers need their own
+evidence. This is not blanket CSP or SSR qualification.
 
 Primary contracts: [React pipeable rendering](https://react.dev/reference/react-dom/server/renderToPipeableStream),
 [readable rendering](https://react.dev/reference/react-dom/server/renderToReadableStream),
 and [static prerender's nonce restriction](https://react.dev/reference/react-dom/static/prerender).
+
+## Request-time resume qualification
+
+Source `7686627` adds a Java consumer and a native React reference for
+`resume` and `resumeToPipeableStream`. It waits for an actual Suspense attempt
+before aborting prerender, using a microtask observation barrier rather than a
+timer. Trusted postponed state crosses a JSON round trip. Two concurrent renders
+resume with different response nonces and independent data promises; there is
+no shared mutable request slot.
+
+Package passes **47 core, 4 React, 52 compiler and 15 Maven-plugin tests** in
+22.377 seconds. Focused Chrome run: **2 passed /6 mode cells inapplicable** in
+7.1 seconds. Exact native/JX shell and continuation HTML match. The continuation
+does not repeat the shell or replace the original bootstrap configuration.
+With the correct nonce, React's continuation instructions reveal the resolved
+content and apply its deferred style. With another response's nonce, that
+content stays hidden and the fallback remains; exactly the script and style CSP
+violations are expected. The original bootstrap executes exactly once in both
+cases. No production rendering code changed; its Java contract documentation
+now clarifies that resume does not retroactively authorize static scripts.
+
+The static prelude contains two known fixture scripts without nonces. The test
+asserts their exact source strings before granting their CSP hashes; it does
+not authorize arbitrary scripts found in untrusted HTML. React's documented
+guidance is to omit prerender bootstrap scripts when using request-time nonces.
+A nonce-only deployment cannot authorize already emitted static scripts merely
+by adding a nonce to resume. This fixture uses a deliberately bounded hash-plus-
+nonce policy; a general CSP host, external-script resume behavior, partial network
+delivery and cross-browser qualification remain open.
+
+The object nonce variant is evidenced against pinned React 19.3.1; the resume
+reference pages describe the string variant. See [resume](https://react.dev/reference/react-dom/server/resume)
+and [resumeToPipeableStream](https://react.dev/reference/react-dom/server/resumeToPipeableStream).
+Logs: `/private/tmp/jx-resume-nonce-build.log` and
+`/private/tmp/jx-resume-nonce-focused.log`. Full 137-case integration, publication
+gate and Verify remain pending; no new pair coverage or mutation qualification
+is attributed to this focused run.

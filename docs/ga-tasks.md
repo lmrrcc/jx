@@ -260,6 +260,16 @@ evidence. This branch's bootstrap source is byte-identical. Final publication on
 merged main, the gate and Verify remain pending; no pair credit is added.
 See the [bootstrap contract and evidence](evidence/server-bootstrap.md).
 
+R-31-SERVER-RESUME-NONCE, 25 November 2026: 🟡 focused qualification at
+`7686627`. Both native resume variants now have a Java/React differential
+consumer exercising fresh script/style nonces after a trusted postponed-state
+JSON round trip, exact output, two-request isolation, bootstrap preservation and
+real Chrome CSP allow/deny behavior. Two focused checks pass with six inapplicable
+mode cells; package passes 47 core/4 React/52 compiler/15 plugin. Static fixture
+scripts receive only pre-asserted hashes; no general CSP host policy is claimed.
+Full 137-case integration, publication gate and Verify remain pending; no added
+pair or mutant credit. Details are in the bootstrap evidence record above.
+
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven
 tests. The complete bench passes 871 checks with 169 inapplicable cells across
