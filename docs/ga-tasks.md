@@ -229,6 +229,17 @@ match the manifest pins. Four new curated mutants are registered for missing act
 flushing, owner stacks, batching return values and runtime versions, but have not
 been executed. This is not the local push gate or Verify, and R-29 remains partial.
 
+R-29 integrated evidence, 25 November 2026, code `ab30bef` on merged Flight
+`5fa53c0`: Maven package passes in 22.310 seconds; the four utility cases pass
+14 focused checks with 18 inapplicable cells. The complete bench passes **839
+checks, 169 skipped, across 126 case IDs** (4.5 minutes): client 124 reference /
+123 JX, hydrate 93, static 99 and lazy 104 per side. All 54 existing interaction
+witnesses pass; the eight utility rows expand the active universe to 113 features
+and 6,328 candidate pairs, leaving 6,274 without complete evidence. No new pair
+is credited from merely sharing a utility fixture. The four scoped utility
+mutants and publication gates remain pending; the historical 100-mutant campaign
+does not qualify them.
+
 Audit, 23 November 2026: R-16's primary action APIs and browser cases are delivered,
 but `useFormState` has no Java API or case and remains excluded in the feature
 register. Add the alias and a differential consumer case, or obtain an explicit

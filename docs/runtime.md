@@ -471,8 +471,10 @@ fixture's unminified bundle.
 
 The R-29 APIs below have compiling consumers and differential evidence:
 14 focused checks pass, with 18 inapplicable cells, on 25 November 2026. The
-subsequent full bench passes 801 checks with 151 inapplicable cells on base
-`1ba8c1d`. Mutation qualification, the local push gate and Verify are still pending;
+integrated full bench passes 839 checks with 169 inapplicable cells across 126
+cases, on merged Flight base `5fa53c0` (code `ab30bef`). Client 124 reference /
+123 JX, hydrate 93, static 99 and lazy 104 per side pass. Mutation qualification,
+the local push gate and Verify are still pending;
 these results do not qualify every diagnostic depth, synchronous test API or
 browser engine.
 

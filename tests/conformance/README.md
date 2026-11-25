@@ -42,9 +42,11 @@ and restores `IS_REACT_ACT_ENVIRONMENT` explicitly. Its assertions inspect snaps
 taken when `act` resolves, including a second update scheduled by an effect, so
 browser polling cannot mask an early completion. The focused run on 25 November
 passes 14 checks with 18 inapplicable cells: client 4/4 per side and one case per
-side in each other mode. The subsequent full run records 801 passes and 151
-inapplicable cells across 119 case IDs: client 117 reference / 116 JX, hydrate 89,
-static 95 and lazy 100 per side on base `1ba8c1d`. The production case checks the
+side in each other mode. The integrated full run records 839 passes and 169
+inapplicable cells across 126 case IDs: client 124 reference / 123 JX, hydrate 93,
+static 99 and lazy 104 per side on merged Flight base `5fa53c0` (code `ab30bef`).
+All 54 interaction witnesses pass among 6,328 active candidate pairs; utility
+cases add no automatic pair credit. The production case checks the
 esbuild input manifests for actual production React modules and no development
 modules, as well as the browser's version values. Deep pure-Java
 owner chains remain an explicit R-29-04/R-31 diagnostic gap; the owner-name witness
