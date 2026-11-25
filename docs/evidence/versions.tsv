@@ -18,6 +18,9 @@ maven.shade-plugin	3.6.1	jx-language-server/pom.xml
 teavm	0.16.0	pom.xml	
 react	19.3.1	package.json	exact; lockfile must agree
 react-dom	19.3.1	package.json	exact; lockfile must agree
+react-server-dom-webpack	19.3.1	package.json	Flight proof; exact React version alignment
+webpack	5.108.4	package.json	Flight proof only; official plugin requires the tested internal layout
+webpack-cli	7.3.1	package.json	Flight proof only
 scheduler	0.28.0	package-lock.json	transitive; from lockfile
 esbuild	0.28.2	package.json	
 playwright	1.65.1	package.json	drives the installed Chrome channel; Chrome itself is not pinned

@@ -1,0 +1,20 @@
+package jx.fixture.rsc.client;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.fixture.rsc.CounterProps;
+
+@Component
+public final class Counter {
+    public record Props(CounterProps value) {}
+    public static View render(Props props) {
+        State<Integer> count = Hooks.useState(props.value().initial());
+        return (
+            <button onClick={event -> count.update(previous -> previous + 1)}>
+                {props.value().label()}: {count.value()}
+            </button>
+        );
+    }
+}

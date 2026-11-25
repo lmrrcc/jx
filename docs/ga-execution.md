@@ -114,6 +114,12 @@ followed by the JX/Spring starter and faster hot reload. Preserve the automated
 gates and record human qualification or applicability decisions explicitly.
 The current browser evidence is Chrome automation, not cross-browser qualification.
 
+R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
+using actual Flight and separate server/client Java programs. Seven Node and four
+Chrome checks pass locally, including suspension, rejection, abort and server-code
+exclusion from browser chunks/maps. Verify is pending. The broad R-30 package,
+its capability-ledger rows and authenticated G0 acceptance remain open.
+
 ## Work package register
 
 The order of implementation is the [implementation sequence](ga-tasks.md): tasks

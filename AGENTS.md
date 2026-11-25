@@ -132,6 +132,7 @@ npm run test:proof
 npm run build:runtime
 npm run test:runtime
 npm run test:bench
+npm run test:rsc
 npm run test:lazy
 npm run test:counter
 npm run test:todo

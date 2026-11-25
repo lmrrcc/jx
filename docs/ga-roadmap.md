@@ -228,6 +228,12 @@ not an automatic consequence of supporting JSX. Under the 21 November scope
 decision, R-30 now includes the server-component protocol in the parity track,
 with a feasibility proof and decision record before implementation. This is
 unfinished scope, not delivered React Flight or Next.js drop-in compatibility.
+The R-30-01 [Flight proof](../tests/rsc-proof/README.md) now executes Java server
+components with the actual server-conditioned React runtime and decodes an
+interactive Java client component in Chrome. Its seven Node and four browser
+checks establish a narrow transport boundary, suspension/error/abort behavior
+and server-source exclusion; Verify is pending. General client/server directives,
+cache APIs, server functions and production protocol qualification remain open.
 Server data loading, typed HTTP mutations, SSR and hydration alone do not complete
 R-30. Re-estimate capacity and dates at the gates as its feasibility becomes known.
 

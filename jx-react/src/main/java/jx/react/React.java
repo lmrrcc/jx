@@ -8,13 +8,18 @@ import java.util.function.Supplier;
 import java.util.function.Consumer;
 import org.teavm.jso.*;
 
-/** React DOM renderer for browser-compiled Java. All methods are browser-main-thread only.
+/** React adapter for TeaVM-compiled Java. Client operations belong to the browser main thread;
+ * server hosts enter through {@link ReactServerComponents} or {@link ReactServer}.
  * React owns invocation, hooks, scheduling, keys, and reconciliation; this class converts descriptions. */
 public final class React {
     private static final JSObject COMPONENTS = weakMap();
     private static final JSObject CONTEXTS = weakMap();
     private static final JSObject REFS = weakMap();
-    private static final JSObject ERROR_BOUNDARY = boundaryType();
+    // The react-server condition omits client class components. Initialize this
+    // adapter only when a client boundary is actually composed, not for every view.
+    private static final class ErrorBoundaryType {
+        private static final JSObject TYPE = boundaryType();
+    }
     private React() {}
     @JSFunctor interface Render extends JSObject { JSObject render(JSObject props); }
     @JSFunctor interface Handler extends JSObject { void handle(JSObject event); }
@@ -35,7 +40,7 @@ public final class React {
      * Like React itself, this does not catch event callbacks or asynchronous work. */
     public static View boundary(View child, Function<Throwable, View> fallback) {
         Objects.requireNonNull(fallback);
-        return new NativeDescription(path -> boundary(ERROR_BOUNDARY,
+        return new NativeDescription(path -> boundary(ErrorBoundaryType.TYPE,
                 element(child, path + "/content", path + "/content"), error -> {
             Throwable javaError = JSExceptions.getJavaException(error);
             return element(fallback.apply(javaError == null ? new IllegalStateException(errorMessage(error)) : javaError),

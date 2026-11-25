@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build:proof": "esbuild proof/react-bridge/browser-entry.js --bundle --format=esm --sourcemap --outfile=proof/react-bridge/target/site/application.js",
     "test:proof": "playwright test -c proof/react-bridge/playwright.config.js",
@@ -17,9 +19,20 @@
     "build:bench-lazy": "esbuild host=tests/conformance/reference/lazy-host.jsx route=tests/conformance/reference/lazy-route.jsx --external:./route.js --bundle --splitting --format=esm --jsx=automatic --sourcemap --chunk-names=shared-[hash] --outdir=tests/conformance/target/reference-lazy/site --metafile=tests/conformance/target/reference-lazy/metafile.json && esbuild host=tests/conformance/lazy-host-entry.js route=tests/conformance/target/lazy-route/application.js --bundle --splitting --format=esm --sourcemap --chunk-names=shared-[hash] --outdir=tests/conformance/target/jx-lazy/site --metafile=tests/conformance/target/jx-lazy/metafile.json",
     "build:lazy": "esbuild host=tests/lazy-boundary/host-entry.js late=tests/lazy-boundary/module/target/browser/application.js --bundle --splitting --format=esm --sourcemap --outdir=tests/lazy-boundary/target/site",
     "test:lazy": "npm run build:lazy && playwright test -c tests/lazy-boundary/playwright.config.js",
+    "build:rsc": "esbuild tests/rsc-proof/server-entry.js --bundle --platform=node --format=cjs --packages=external --outfile=tests/rsc-proof/target/server.cjs && webpack --config tests/rsc-proof/webpack.config.cjs",
+    "test:rsc": "npm run build:rsc && node --conditions=react-server --test --test-timeout=10000 tests/rsc-proof/server-smoke.test.js tests/rsc-proof/artifacts.test.js && playwright test -c tests/rsc-proof/playwright.config.js",
     "test:ssr": "npm run build:bench && npm run build:bench-server && playwright test -c tests/conformance/playwright.config.js -g 'server-|hydrate-server|static-prerender|static-resume|combined-resource-hydration'",
     "test:bench": "node --test tests/conformance/report.test.js && npm run build:bench && npm run build:bench-server && npm run build:bench-lazy && BENCH_REQUIRE_COMPLETE=1 playwright test -c tests/conformance/playwright.config.js"
   },
-  "dependencies": { "react": "19.3.1", "react-dom": "19.3.1" },
-  "devDependencies": { "@playwright/test": "1.65.1", "esbuild": "0.28.2" }
+  "dependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "esbuild": "0.28.2",
+    "react-server-dom-webpack": "19.3.1",
+    "webpack": "5.108.4",
+    "webpack-cli": "7.3.1"
+  }
 }
