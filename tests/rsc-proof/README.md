@@ -22,7 +22,7 @@ npm run test:rsc
 ```
 
 `test:rsc` builds the framework host and the official webpack client manifest,
-runs fifteen Node checks, and runs four Chrome checks (two against ordinary React
+runs twenty-eight Node checks, and runs four Chrome checks (two against ordinary React
 and two against JX). The loopback browser host defaults to port **59182**;
 `RSC_PORT` can override it. It does not accept remote function calls.
 
@@ -42,6 +42,13 @@ The tests establish:
   values, failures, promises, recursive invocation, native key equality and cache
   lifetime notifications. Identical keys in concurrent requests produce distinct
   values; completion of one request does not end another request's scope.
+- Twelve differential Node checks keep request cache values and native cache signals
+  across `Async.await`, `Promise.map` and rejection recovery. They cover separate
+  externally settled promises, one Java promise observed by two requests, and new
+  request observers registered after that shared promise has already settled.
+- An isolated Node child verifies that a throwing Java observer reports the original
+  exception once, without starving sibling observers or the cached native thenable,
+  changing their delivery order, or creating an unhandled rejection.
 
 The original server smoke failed because `React` eagerly initialized a client
 error-boundary class absent from server-conditioned React. The adapter now
@@ -91,6 +98,35 @@ This API is not the still-pending G0 cancellation/useResource implementation.
 
 The typed adapter currently supports zero, one or two arguments. A record key
 uses identity, not automatic tuple/value equality. Java wrappers of a native
-signal need not have Java reference identity. Production streaming, Java async
-context after arbitrary coroutine suspension, GC/retention measurement and the
+signal need not have Java reference identity. Production streaming,
+GC/retention measurement and the
 main capability-matrix RSC qualification remain separate checks.
+
+## Async request ownership
+
+The first paired `await`/`map` regression passed in ordinary React and failed in
+JX: the Java promise queued each observer only when another job settled it, so
+the observer inherited the resolver's request context. React's cache and cache
+signal were consequently unavailable after the Java continuation resumed.
+
+`AsyncRuntime.reaction` now captures a scheduling operation when the observer is
+registered. The React adapter registers a native Promise reaction immediately,
+then resolves that promise directly at settlement. This retains the host context
+without adding another microtask before callback delivery. It does not read React
+private dispatchers or introduce a process-global request map. Existing runtimes
+can use the default `defer` implementation; subscriptions made before runtime
+installation keep their deferred bootstrap behavior and have no host context to
+capture at registration.
+
+All twelve differential context checks now pass. The ten JVM Promise checks and
+sixteen Chrome runtime checks also pass, including the existing throwing-observer
+regression. Browser observer failures use the host's `reportError`; Node's fallback
+reports an uncaught microtask error. The child-process test explicitly observes
+that error and must not be used as a production exception-recovery pattern.
+
+A pending promise owns its registered observers and their captured context until
+settlement or collection. Aborting a Flight request does not itself detach arbitrary
+Java promise observers or cancel external work. Cancellation, bounded retention
+under abandoned requests, production deployment and authenticated isolation retain
+their separate G0 acceptance criteria. Node documents the relevant native promise
+context behavior in [asynchronous context tracking](https://nodejs.org/api/async_context.html).

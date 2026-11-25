@@ -120,15 +120,20 @@ The current browser evidence is Chrome automation, not cross-browser qualificati
 
 R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
 using actual Flight and separate server/client Java programs. Seven Node and four
-Chrome checks pass locally, including suspension, rejection, abort and server-code
-exclusion from browser chunks/maps. Verify is pending. The broad R-30 package,
+Chrome checks passed, including suspension, rejection, abort and server-code
+exclusion from browser chunks/maps. PR #49 merged at `5fa53c0` after the 15-step
+local gate and [Verify](https://github.com/lmrrcc/jx/actions/runs/45563088488) passed. The broad R-30 package,
 its capability-ledger rows and authenticated G0 acceptance remain open.
 R-30-03 adds typed `ReactCache.cache` functions and `cacheSignal` with eight
-differential Node checks. The combined local RSC command now passes 15 Node and
-four Chrome checks. Same-key requests remain isolated, recursive calls preserve
-arguments, and cache lifetimes end on success, failure and abort. This remains a
-local proof pending Verify, with zero/one/two-argument APIs and no automatic G0
-HTTP cancellation or broad Java coroutine-context qualification.
+differential Node checks. Twelve additional context checks prove Java await/map/
+recovery retain each request's cache after external settlement, including a single
+promise shared by requests and late subscriptions. A Node observer-error check
+preserves uncaught-error reporting and sibling delivery. The combined local RSC
+command passes **28 Node and four Chrome checks**; all 16 runtime browser checks
+and ten JVM Promise checks also pass. Cache functions support zero/one/two
+arguments, and cache lifetimes end on success, failure and abort. This slice
+awaits integrated Verify; automatic HTTP cancellation, abandoned-request retention
+measurement and authenticated G0 isolation remain open.
 
 The direct `.jx` authoring slice (R-28-02a) is rebased onto the merged R-28-01
 runtime. It generates typed schemas,

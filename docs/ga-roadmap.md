@@ -247,12 +247,17 @@ The R-30-01 [Flight proof](../tests/rsc-proof/README.md) now executes Java serve
 components with the actual server-conditioned React runtime and decodes an
 interactive Java client component in Chrome. Its seven Node and four browser
 checks establish a narrow transport boundary, suspension/error/abort behavior
-and server-source exclusion; Verify is pending. General client/server directives,
-cache APIs, server functions and production protocol qualification remain open.
+and server-source exclusion; PR #49 merged as `5fa53c0` with green local gate and
+Verify. General client/server directives, server functions and production protocol
+qualification remain open.
 The subsequent R-30-03 cache slice has eight differential Node checks passing for
 typed zero/one/two-argument functions and cache lifetime signals. It adds explicit
-request isolation and cleanup evidence; arbitrary coroutine context, server
-functions, directive-driven packaging and production qualification remain open.
+request isolation and cleanup evidence. Twelve differential checks additionally
+prove request context through Java await/map/recovery and shared-promise observers;
+one Node check preserves observer error reporting. The combined local proof has
+28 Node and four Chrome passes, pending integrated Verify. Server functions,
+directive-driven packaging, abandoned-request retention and production
+qualification remain open.
 Server data loading, typed HTTP mutations, SSR and hydration alone do not complete
 R-30. Re-estimate capacity and dates at the gates as its feasibility becomes known.
 
