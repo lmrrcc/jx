@@ -35,3 +35,6 @@ combined-resource-hydration	lazy	the case serves its own initial SSR document an
 server-bootstrap	hydrate	complete server output with CSP is tested as its own browser document, not a bench root or lazy route
 server-bootstrap	static	complete server output with CSP is tested as its own browser document, not a bench root or lazy route
 server-bootstrap	lazy	complete server output with CSP is tested as its own browser document, not a bench root or lazy route
+server-resume-nonce	hydrate	complete prerender/resume output is served with its own CSP, not a bench-root hydration or lazy route
+server-resume-nonce	static	complete prerender/resume output is served with its own CSP, not a bench-root hydration or lazy route
+server-resume-nonce	lazy	complete prerender/resume output is served with its own CSP, not a bench-root hydration or lazy route

@@ -66,7 +66,8 @@ public final class ReactServer {
         /** Trusted JavaScript source emitted by React in an inline bootstrap script. Null omits it;
          * an empty string is retained. React escapes HTML script terminators, but does not sanitize
          * executable code or serialize application data: never concatenate untrusted input here.
-         * Set this on the initial render/prerender; resume uses the postponed bootstrap state. */
+         * Set this on the initial render/prerender; resume does not replace that bootstrap
+         * configuration or retroactively authorize scripts already emitted in static output. */
         public StreamOptions withBootstrapScriptContent(String source) {
             return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError, source, nonce);
         }
