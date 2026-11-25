@@ -22,7 +22,7 @@ npm run test:rsc
 ```
 
 `test:rsc` builds the framework host and the official webpack client manifest,
-runs seven Node checks, and runs four Chrome checks (two against ordinary React
+runs fifteen Node checks, and runs four Chrome checks (two against ordinary React
 and two against JX). The loopback browser host defaults to port **59182**;
 `RSC_PORT` can override it. It does not accept remote function calls.
 
@@ -38,6 +38,10 @@ The tests establish:
 - Browser chunks **and source maps** exclude the server application and its source.
   A positive control checks the server artifact really contains that application.
 - Malformed HTTP requests are rejected and server files are not served as assets.
+- Eight differential Node checks (four per side) exercise request-scoped cache
+  values, failures, promises, recursive invocation, native key equality and cache
+  lifetime notifications. Identical keys in concurrent requests produce distinct
+  values; completion of one request does not end another request's scope.
 
 The original server smoke failed because `React` eagerly initialized a client
 error-boundary class absent from server-conditioned React. The adapter now
@@ -46,8 +50,8 @@ remains covered by the existing browser gate.
 
 This is R-30-01 evidence, **not complete RSC support**. The two client references
 and props codecs are fixture-owned; general manifest generation, directive-based
-Java module separation, typed server functions, authorization, request-scoped
-`cache`/`cacheSignal`, version-skew behavior and production transport/error
+Java module separation, typed server functions, authorization, version-skew
+behavior and production transport/error
 redaction remain open. Development Flight can contain server diagnostic metadata;
 do not deploy this proof as a production endpoint. These requests carry public
 fixture values, so the isolation check is not authenticated G0 isolation evidence.
@@ -57,3 +61,36 @@ React's protocol integration is pinned to the exact runtime version. See
 choice and remaining slices. These dedicated proof results are separate from
 the differential capability ledger: they do not automatically mark its RSC rows
 supported or add interaction-pair credit.
+
+## Typed server cache
+
+`ReactCache.cache` accepts Java `Supplier`, `Function` and `BiFunction` and returns
+the corresponding typed function. The actual React cache owns values, failures,
+promises and request expiry; JX does not maintain a process-wide result cache.
+The compiling [CacheProbe](server/src/main/jx/jx/fixture/rsc/server/CacheProbe.jx)
+demonstrates these contracts, including a recursive function and nested failure.
+Null results are cached; callbacks preserve their original typed Java arguments.
+
+Keys use native strings/characters, booleans and boxed primitive numbers. Other
+objects, including records and arbitrary-precision numbers, use identity. Inexact
+long keys fail before lookup. The pinned React 19.3.1 cache uses native Map semantics
+for primitives: NaN matches itself, and positive/negative zero share an entry.
+Its request table keys the source function: two wrappers of the **same function
+instance** share that source's cache, while distinct functions do not. The initial
+reference test exposed this distinction from the description in React's cache
+documentation. These are tested runtime semantics, not a promise about future
+React versions; dependency upgrades must rerun the differential checks.
+
+`ReactCache.cacheSignal()` returns null outside server rendering, or a read-only
+`CacheSignal`. `onAbort` returns an idempotent cleanup and notifies immediately
+when the scope already ended. Completion, failure and abort are all tested, as is
+removal of a pending listener. `nativeSignal()` exposes the original standard
+AbortSignal to explicit host bindings. Ending a React cache does not automatically
+cancel arbitrary Java promises or HTTP work: the owner must propagate that signal.
+This API is not the still-pending G0 cancellation/useResource implementation.
+
+The typed adapter currently supports zero, one or two arguments. A record key
+uses identity, not automatic tuple/value equality. Java wrappers of a native
+signal need not have Java reference identity. Production streaming, Java async
+context after arbitrary coroutine suspension, GC/retention measurement and the
+main capability-matrix RSC qualification remain separate checks.

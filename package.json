@@ -20,7 +20,7 @@
     "build:lazy": "esbuild host=tests/lazy-boundary/host-entry.js late=tests/lazy-boundary/module/target/browser/application.js --bundle --splitting --format=esm --sourcemap --outdir=tests/lazy-boundary/target/site",
     "test:lazy": "npm run build:lazy && playwright test -c tests/lazy-boundary/playwright.config.js",
     "build:rsc": "esbuild tests/rsc-proof/server-entry.js --bundle --platform=node --format=cjs --packages=external --outfile=tests/rsc-proof/target/server.cjs && webpack --config tests/rsc-proof/webpack.config.cjs",
-    "test:rsc": "npm run build:rsc && node --conditions=react-server --test --test-timeout=10000 tests/rsc-proof/server-smoke.test.js tests/rsc-proof/artifacts.test.js && playwright test -c tests/rsc-proof/playwright.config.js",
+    "test:rsc": "npm run build:rsc && node --conditions=react-server --test --test-timeout=10000 tests/rsc-proof/server-smoke.test.js tests/rsc-proof/artifacts.test.js tests/rsc-proof/cache.test.js && playwright test -c tests/rsc-proof/playwright.config.js",
     "test:ssr": "npm run build:bench && npm run build:bench-server && playwright test -c tests/conformance/playwright.config.js -g 'server-|hydrate-server|static-prerender|static-resume|combined-resource-hydration'",
     "test:bench": "node --test tests/conformance/report.test.js && npm run build:bench && npm run build:bench-server && npm run build:bench-lazy && BENCH_REQUIRE_COMPLETE=1 playwright test -c tests/conformance/playwright.config.js"
   },

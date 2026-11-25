@@ -55,7 +55,7 @@ alignment and protocol round-trip tests are therefore release gates. Sources:
 | --- | --- | --- |
 | R-30-01 | Real Flight output from a Java server module; browser decodes and renders it through actual React; gated completion, error and abort are observable; server artifacts stay absent from the client | Implemented; local proof passes, Verify pending |
 | R-30-02 | Typed client-component references resolve through generated manifests; a Java client counter remains interactive; malformed payloads and unknown references fail explicitly | Planned |
-| R-30-03 | Request-scoped `cache` and `cacheSignal` behavior with explicit Java value mapping; concurrent requests, cached failure, cancellation and cleanup | Planned |
+| R-30-03 | Request-scoped `cache` and `cacheSignal` behavior with explicit Java value mapping; concurrent requests, cached failure, cancellation and cleanup | Implemented typed zero/one/two-argument cache and cache-lifetime signal; 8 differential Node checks pass locally, Verify pending; broad async-context/production qualification remains |
 | R-30-04 | Java authoring equivalents of client/server directives, build separation and server-function references with a typed allowlist and request authorization | Planned |
 | R-30-05 | Protocol/version-skew checks, error redaction, bounded transport, disposal and R-29 cache-refresh integration; qualification and updated parity ledger | Planned |
 
