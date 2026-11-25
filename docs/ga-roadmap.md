@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01, R-27-02a–02c, the Promise prerequisite and R-27-03a merged with green Verify. R-27-03b locally evidences 45 / 5,356 active pairs, with 5,311 open; its scoped mutant was killed and Verify is pending. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01, R-27-02a–02c, the Promise prerequisite and R-27-03a–03b merged with green Verify. R-27-03c locally evidences 48 / 5,356 active pairs, with 5,308 open; its scoped mutant was killed and Verify is pending. Complete remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -62,12 +62,26 @@ snapshot rebasing, rejected-request rollback, one committed item during a pendin
 retry, and explicit owner disposal during both awaits. Disposal is fixture-local;
 it does not deliver the G0 cancellation API. Its unmutated baseline passed, then
 `combined-optimistic-store` killed `optimistic-duplicate-overlay` (1 killed,
-0 survived, 0 unusable). Verify is pending. The catalog has 109 entries;
-the historical full campaign remains 100.
+0 survived, 0 unusable). [PR #44](https://github.com/lmrrcc/jx/pull/44) merged as
+`3e24edb`, with [green CI](https://github.com/lmrrcc/jx/actions/runs/45548420721)
+and [green CI](https://github.com/lmrrcc/jx/actions/runs/45548370606).
+That slice's catalog has 109 entries; the historical full campaign remains 100.
+R-27-03c adds three transition pairs with 803 full-bench passes, 133 skipped cells
+and 117 case IDs: client 115 reference / 114 JX, hydrate 90, static 96 and lazy 101
+per side. Its eight focused checks pass. Urgent input remains responsive, replaced
+and canceled consumers settle independently of transport, and unmount/remount
+isolates old work. An already settled result cannot publish after its owner changes;
+the test observes the old transition's completed UI before awaiting the replacement.
+Ownership is fixture-local, not the G0 cancellation API. After the shared scratch
+baseline passed, `combined-transition-cancel` killed `transition-owner-guard-lost`
+(1 killed, 0 survived, 0 unusable). The exclusive run used `abfb24a` in scratch
+`jx-mutation-1181316345297598843`, with identical transition source to rebased
+`d89e23f`. Verify is pending. This slice's catalog has 110 entries; the shared
+run's 112 includes later SSR cases. The historical full campaign remains 100.
 The [interaction evidence record](ga-react-interactions.md)
-keeps the 45 locally witnessed pairs separate from the 5,311 remaining active
-pairs. R-27-03b is in review; the transition slice remains planned in this
-baseline. The Promise prerequisite merged as `f2b64cb` in
+keeps the 48 locally witnessed pairs separate from the 5,308 remaining active
+pairs. R-27-03b is merged; R-27-03c remains in review in this baseline.
+The Promise prerequisite merged as `f2b64cb` in
 [PR #42](https://github.com/lmrrcc/jx/pull/42), with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45467245368) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45466911060):

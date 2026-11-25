@@ -26,24 +26,29 @@ R-27-03a merged as `1ba8c1daab8f5587b37f9cf9dd2fc7e369205aaa` in
 [PR #43](https://github.com/lmrrcc/jx/pull/43), with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45480919951) and
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45480798051).
-R-27-03b passes its focused and complete local bench, and its scoped mutant was
-killed after the unmutated baseline passed. This optimistic/store slice's Verify is pending.
+R-27-03b merged as `3e24edb1b9ce74575b4ab4bb5ac873147d8b773b` in
+[PR #44](https://github.com/lmrrcc/jx/pull/44), with
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45548420721) and
+[green CI](https://github.com/lmrrcc/jx/actions/runs/45548370606).
+R-27-03c also passes its focused and complete local bench; its scoped mutant was
+killed after the shared scratch baseline passed. Its Verify is pending.
 No additional human or cross-browser
 qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
 
-The passing counts below include the complete R-27-03b local run. Its three
-optimistic/store pairs increase the merged R-27-03a baseline of 42 to
-**45 / 5,356**, with **5,311** remaining. The optimistic/store slice remains under review.
+The passing counts below include the complete R-27-03c local run. Its three
+transition pairs extend the optimistic/store slice's 45 to **48 / 5,356**, with
+**5,308** remaining. The transition slice remains under review; the merged
+R-27-03b baseline has 45 complete pair witnesses.
 This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
 | --- | --- |
 | Currently supported/equivalent feature IDs | 104 |
 | Candidate unordered pairs among those IDs | 5,356 |
-| Pairs with a passing witness in every declared mode, on both React and JX | 45 |
-| Current candidate pairs without complete evidence | 5,311 |
+| Pairs with a passing witness in every declared mode, on both React and JX | 48 |
+| Current candidate pairs without complete evidence | 5,308 |
 | Eventual application-feature IDs | 118 |
 | Eventual candidate pairs | 6,903 |
 | Additional pairs involving the 14 deferred feature IDs | 1,547 |
@@ -107,10 +112,11 @@ golden-file comparison but retain checks on the assertions they execute.
 | R-27-02c portal case | Six pairs: portal with context, capture phases, event payloads, default/propagation controls, element refs and layout effects. Context follows React ancestry while DOM stays under `document.body`; close clears refs and disconnects the node, and reopen focuses a fresh input. |
 | R-27-03a action case | Four pairs: action state with form actions, form status, Java async functions and the existing error-boundary equivalent. Queued submissions retain their payloads and compose previous results; rejection cancels successors, while retry and unmount dispose fixture-owned waits before a fresh form is mounted. |
 | R-27-03b optimistic/store case | Three pairs: optimistic state with immutable external-store snapshots, transitions and Java async functions. Remote publications rebase the overlay; rejection removes only the optimistic item; retry commits one item while a second await keeps the transition pending; explicit owner close settles both gates and releases requests and subscriptions. |
+| R-27-03c transition case | Three pairs: transition with urgent controlled input and ref-owned operations; Java async functions with effect disposal. Replaced and canceled consumers settle without waiting for transport; an already completed result cannot publish after owner replacement; unmount/remount isolates old work from the new instance. |
 
 The combined scenarios run their assertions in client, hydrate and lazy modes.
 Static mode renders the combined scenarios and compares HTML, but does not execute their
-interactive assertion blocks and therefore earns no pair credit. None of the 45
+interactive assertion blocks and therefore earns no pair credit. None of the 48
 current witnesses claims static interaction coverage.
 
 The register explicitly limits lazy/Suspense and portal/events to client/lazy.
@@ -124,9 +130,62 @@ The streaming witness checks shell/fallback/delayed-content ordering in the
 collected HTML. It does not measure early network delivery; that requires a
 separate controlled streaming assertion in R-27-04.
 
+## R-27-03c: urgent updates, operation ownership and completion races
+
+Code revision `d89e23f` adds `combined-transition-cancel`. Native React and JX
+share event-controlled transport gates, independently settled local consumers and
+an operation owner retained by `useRef` and disposed by `useEffect`. The fixture
+bounds requests to seven and audit entries to 64; it does not provide a public
+cancellation API or cancel the transport itself.
+
+| Witness | Observable behavior |
+| --- | --- |
+| `transition-urgent-input` | Controlled input state and a separate rendered value commit while the async transition remains pending. |
+| `transition-owner-ref` | B replaces A and commits first; late A cannot overwrite B. Explicit cancellation settles C's consumer while its transport remains pending. A result already settled before replacement still cannot publish under its stale owner. |
+| `async-effect-disposal` | Unmount cleanup settles the old consumer; a fresh instance starts independently, commits its own result and ignores the old transport's later completion. |
+
+The completion race registers two transport observers. The first settles
+`RACE_OLD`'s consumer with a successful value; the second creates `RACE_NEW` before
+the first consumer's awaiting continuation runs. Canceling that already settled
+consumer cannot alter its outcome, so publication must independently check the
+current owner. The test observes the old transition becoming idle with the prior
+visible result intact before attaching the new consumer to another transition.
+This prevents concurrent action entanglement from hiding a stale intermediate
+publication. The new request then completes and becomes visible.
+
+The focused run passes **8 checks**. The full local bench passes **803 checks,
+with 133 skipped, across 117 case IDs**:
+
+| Mode | React | JX |
+| --- | ---: | ---: |
+| Client | 115 | 114 |
+| Hydrate | 90 | 90 |
+| Static HTML | 96 | 96 |
+| Lazy route | 101 | 101 |
+
+All three new witnesses pass in client, hydrate and lazy modes on both sides,
+bringing complete local evidence to **48 / 5,356**, with **5,308** active pairs open.
+The existing async/transition pair is not counted again. Static mode compares
+initial HTML without interactive credit. The local ownership logic does not
+complete G0's cancellation API or promise automatic cancellation of external I/O.
+
+`transition-owner-guard-lost` removes the publication owner check while preserving
+the canceled-outcome check. After the unmutated scratch baseline passed,
+`combined-transition-cancel` killed it: **1 killed, 0 survived, 0 unusable**.
+This result comes from the shared exclusive transition/SSR run at `abfb24a`, in
+scratch `jx-mutation-1181316345297598843`; its transition implementation and spec
+are identical to this slice's rebased `d89e23f`. The shared run's 112-entry catalog
+includes later SSR cases; this slice's catalog has **110 entries**. Neither count
+is a new full campaign, and the historical full result remains 100. Verify is
+pending. To repeat the transition check alone, exclusively:
+
+```sh
+java tools/MutateBench.java --only transition-owner-guard-lost
+```
+
 ## R-27-03b: optimistic snapshots, rollback and request disposal
 
-Code revision `7e41c53` adds `combined-optimistic-store`, using native React hooks
+Merged revision `3e24edb` adds `combined-optimistic-store`, using native React hooks
 and Java `Async.run`/`Async.await` against a typed, page-owned fixture store.
 Its immutable snapshots preserve unchanged identity; all response and completion
 gates are controlled by user events, without sleeps or network mocks.
@@ -154,13 +213,15 @@ with 133 skipped, across 116 case IDs**:
 
 All three witnesses pass in client, hydrate and lazy modes on both implementations,
 bringing complete local evidence to **45 / 5,356**, with **5,311** active pairs open.
-Static HTML equality supplies no interactive witness. Verify is pending.
+Static HTML equality supplies no interactive witness. The full local gate and
+both Verify checks passed before [PR #44](https://github.com/lmrrcc/jx/pull/44)
+merged as `3e24edb`.
 
 The unmutated scratch baseline passed, then `combined-optimistic-store` killed
 `optimistic-duplicate-overlay`: **1 killed, 0 survived, 0 unusable**. The mutant
 lets the pending optimistic reducer append a second copy of an already committed
 item, and fails the visible-list assertion while the second gate is still pending.
-The catalog contains **109 entries**; the historical full campaign still covers
+At this slice the catalog contained **109 entries**; the historical full campaign still covers
 100. Run the scoped check exclusively:
 
 ```sh
@@ -443,8 +504,9 @@ fresh full 104-mutant campaign.
 
 R-27-02 extends identity/composition/DOM interactions. R-27-03a merged with evidence
 for form actions and recovery. R-27-03b (optimistic updates over external-store
-snapshots) has local bench and mutation evidence and remains in review.
-R-27-03c (transition interactions) remains planned in this evidence baseline.
+snapshots) also merged with bench, mutation and green Verify evidence.
+R-27-03c (transition interactions) has local bench evidence and a killed scoped
+mutant, and remains in review pending Verify.
 Staged fixtures are preparation, not completed evidence.
 R-27-04 extends server/resource interactions. Each selects explicit
 remaining pair IDs. R-27-05 follows R-28–R-30, exercises the deferred features and

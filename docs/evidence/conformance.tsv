@@ -1,11 +1,11 @@
 feature	area	jx	cases	jx-api	task	note
 react:useState	hook	supported	state-counter,state-lazy-init,callable-state,batched-updates,combined-keyed-context,combined-activity-store,combined-children-map	Hooks.useState, Hooks.useStateLazy		Also exercised with keyed identity, context updates, mapped children and Activity
 react:useReducer	hook	supported	reducer-batch,reducer-lazy-init	Hooks.useReducer, Hooks.useReducerLazy		
-react:useEffect	hook	supported	effect-cleanup,effect-dependencies,combined-keyed-context,combined-activity-store,layout-effect-order	Hooks.useEffect		Also exercised with keyed removal, context changes and Activity cleanup
+react:useEffect	hook	supported	effect-cleanup,effect-dependencies,combined-keyed-context,combined-activity-store,layout-effect-order,combined-transition-cancel	Hooks.useEffect		Also exercised with keyed removal, context changes, Activity cleanup and disposal of fixture-owned async consumers
 react:useLayoutEffect	hook	supported	layout-effect-order,layout-effect-dependencies,dom-ref-focus,combined-keyed-refs,combined-portal-lifecycle	Hooks.useLayoutEffect		Layout reads callback ref attachment in combined scenarios
 react:useInsertionEffect	hook	supported	insertion-effect	Hooks.useInsertionEffect		
 react:useEffectEvent	hook	supported	effect-event	Hooks.useEffectEvent		Typed for Runnable and Consumer callbacks
-react:useRef	hook	supported	ref-persist,dom-ref-focus	Hooks.useRef, Hooks.useDomRef		
+react:useRef	hook	supported	ref-persist,dom-ref-focus,combined-transition-cancel	Hooks.useRef, Hooks.useDomRef		A ref retains the fixture-local operation owner across urgent and transition renders
 react:useImperativeHandle	hook	supported	imperative-handle,combined-imperative-handles	Hooks.useImperativeHandle		The handle is published through a Ref passed as a prop
 react:useContext	hook	supported	context-nested,combined-keyed-context,combined-portal-lifecycle	Hooks.useContext		Memoized consumers retain local state while context changes
 react:createContext	api	supported	context-nested	Hooks.createContext, Context.provide		
@@ -13,7 +13,7 @@ react:useMemo	hook	supported	memo-recompute	Hooks.useMemo
 react:useCallback	hook	supported	callback-identity,combined-keyed-refs	Hooks.useCallback		Memoized callback refs replace attachments only when dependencies change
 react:useId	hook	supported	use-id,hydrate-server	Hooks.useId		Server and client identifiers compared across hydration
 react:useSyncExternalStore	hook	supported	external-store,hydrate-server,combined-activity-store,combined-optimistic-store	Hooks.useSyncExternalStore, ExternalStore.serverSnapshot		Activity hides subscriptions and restores the latest snapshot
-react:useTransition	hook	supported	transition-pending,transition-promise,combined-optimistic-store	Hooks.useTransition, TransitionState		An async action returns a jx.Promise, usually from Async.run, or takes a completion callback
+react:useTransition	hook	supported	transition-pending,transition-promise,combined-optimistic-store,combined-transition-cancel	Hooks.useTransition, TransitionState		An async action returns a jx.Promise, usually from Async.run, or takes a completion callback; cancellation and late-result ownership in the combined fixture are application-local
 react:startTransition	api	supported	start-transition,transition-pending	React.startTransition		
 react:useDeferredValue	hook	supported	deferred-value	Hooks.useDeferredValue		Equal scalars compare by value
 react:useOptimistic	hook	supported	optimistic,combined-optimistic-store	Hooks.useOptimistic		Returns a State, or a ReducerState with an update function
@@ -92,7 +92,7 @@ jsx:generic-components	markup	supported	generic-list	generic Props record and re
 jsx:ref-as-prop	markup	supported	ref-as-prop,combined-imperative-handles	ref as a Props field		Switching supplied refs clears the old handle owner
 jsx:ref-callback	markup	supported	ref-callback,combined-keyed-refs	RefCallback, Attributes.ref		The returned cleanup runs on removal
 jsx:namespace-components	markup	equivalent	namespace-components	Fully qualified component class name		Java has no component namespace objects; the dotted form is a qualified class name
-jsx:async-functions	markup	equivalent	async-function,transition-promise,combined-action-queue,combined-optimistic-store	Async.run, Async.await, Promise		JavaScript async functions and promises; await works only in code called from Async.run
+jsx:async-functions	markup	equivalent	async-function,transition-promise,combined-action-queue,combined-optimistic-store,combined-transition-cancel	Async.run, Async.await, Promise		JavaScript async functions and promises; await works only in code called from Async.run; the combined transition fixture settles local consumers on effect cleanup without cancelling transport
 dom:ref-on-element	dom	supported	dom-ref-focus,combined-portal-lifecycle	ref with Hooks.useDomRef		DomElement exposes focus and value only
 dom:attributes	dom	supported	attributes,dom-attributes	Markup attributes		Every name in React DOM table rendered on an HTML and an SVG element and compared with React; 16 names are covered by dedicated cases
 dom:style	dom	supported	attributes	Style		
@@ -105,7 +105,7 @@ dom:capture-phase-events	dom	supported	capture-phase,dom-events,combined-portal-
 dom:focus-pointer-touch-wheel-events	dom	supported	pointer-events	Event.relatedTarget, pointerType, deltaY, touches		
 dom:composition-clipboard-drag-events	dom	supported	transfer-events	Event.data, transferData, setTransferData		Files and drag effects are not exposed
 dom:media-and-animation-events	dom	supported	media-events,dom-events	Event.animationName, propertyName, EventTarget.paused		Every media handler name is called as in React
-dom:controlled-input	dom	supported	controlled-input,key-event,combined-keyed-context			Keyed input drafts and DOM identity are checked together
+dom:controlled-input	dom	supported	controlled-input,key-event,combined-keyed-context,combined-transition-cancel			Keyed input drafts and DOM identity are checked together; urgent draft state commits while an independent async transition remains pending
 dom:controlled-checkbox	dom	supported	checkbox			
 dom:radio-select-textarea	dom	supported	choice-inputs	checked, value and onChange on radio, select and textarea		
 dom:uncontrolled-inputs	dom	supported	uncontrolled-inputs	defaultValue and defaultChecked attributes		

@@ -98,6 +98,7 @@ import { CombinedKeyedRefs } from './cases/combined-keyed-refs.jsx';
 import { CombinedImperativeHandles } from './cases/combined-imperative-handles.jsx';
 import { CombinedActionQueue } from './cases/combined-action-queue.jsx';
 import { CombinedOptimisticStore } from './cases/combined-optimistic-store.jsx';
+import { CombinedTransitionCancel } from './cases/combined-transition-cancel.jsx';
 
 export const cases = {
   'combined-portal-lifecycle': CombinedPortalLifecycle,
@@ -110,6 +111,7 @@ export const cases = {
   'combined-imperative-handles': CombinedImperativeHandles,
   'combined-action-queue': CombinedActionQueue,
   'combined-optimistic-store': CombinedOptimisticStore,
+  'combined-transition-cancel': CombinedTransitionCancel,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,
   'callable-state': CallableState,
