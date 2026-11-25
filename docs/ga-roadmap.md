@@ -20,10 +20,11 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
-Latest local combined qualification (`8c5c337`): **937 checks pass, 199 skipped,
-142 cases**, with 56 core/10 React/54 compiler/15 Maven package tests passing.
+Latest local combined qualification (`5643be9`): **943 checks pass, 217 skipped,
+145 cases**, with 56 core/10 React/54 compiler/15 Maven package tests passing.
 This integrates the class-policy, sink, act, bootstrap, resume, resource-header
-and import-map slices. All **62/6328** registered interaction pairs pass; **6266**
+and import-map slices, plus native Writable and real HTTP delivery consumers.
+All **62/6328** registered interaction pairs pass; **6266**
 remain without complete evidence. The integrated candidate is local: pending
 mutation and per-slice publication gates keep the broader work **🟡 partial**.
 The measurements below describe earlier slices, not additional passing tests.

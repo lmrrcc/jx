@@ -8,8 +8,12 @@ does not add an application server or change stream ownership.
 The package passes 56 core, 10 React, 54 compiler and 15 Maven tests, including
 TeaVM compilation of the two new `.jx` consumers. The focused Node comparison
 passes **6 checks, 18 inapplicable cells**, covering three cases on React and JX.
-Full integrated conformance, the new scoped mutant and publication gates remain
-pending. No feature-pair credit or production HTTP qualification is claimed.
+Integrated source `5643be9` also passes the full bench: **943 checks, 217 skipped,
+145 cases** (client 143 reference/142 JX; hydration 104, static HTML 110 and lazy
+115 per side). Only the three new case rows change; all prior results and all
+62/6328 interaction witnesses remain green. The scoped mutant and publication
+gates remain pending. No new feature-pair credit or production HTTP qualification
+is claimed.
 
 The [Java host consumer](../../tests/conformance/src/main/java/jx/conformance/CombinedServerExports.java)
 passes the actual supplied Node destination through the public Java API. The
