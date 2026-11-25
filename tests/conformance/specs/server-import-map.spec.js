@@ -63,13 +63,19 @@ test('server-import-map: Java module scopes, blocked imports, escaping and integ
     await expect.poll(() => page.evaluate(() => globalThis.__blocked)).toBe(true);
     expect(await page.evaluate(() => globalThis.__scopedBlocked)).toBe(true);
     expect(await page.evaluate(() => globalThis.__injected)).toBeUndefined();
-    const map = await page.locator('script[type="importmap"]').evaluate(node => ({value: JSON.parse(node.textContent), nonce: node.nonce}));
-    expect(Object.hasOwn(map.value.imports, '__proto__')).toBe(true);
-    expect(map.value.imports.__proto__).toBe('/maps/proto.mjs');
-    expect(map.value.imports.blocked).toBeNull();
-    expect(map.value.scopes['']['empty-shared']).toBe('/maps/empty.mjs');
-    expect(map.value.integrity['']).toBe(integrity);
-    expect(Object.hasOwn(map.value.imports, 'escaped</script><script>globalThis.__injected=1</script>')).toBe(true);
+    const map = await page.locator('script[type="importmap"]').evaluate(node => {
+      const value = JSON.parse(node.textContent);
+      return {hasProto: Object.hasOwn(value.imports, '__proto__'), proto: value.imports.__proto__,
+        blocked: value.imports.blocked, emptyScope: value.scopes['']['empty-shared'],
+        emptyIntegrity: value.integrity[''], nonce: node.nonce,
+        hasEscaped: Object.hasOwn(value.imports, 'escaped</script><script>globalThis.__injected=1</script>')};
+    });
+    expect(map.hasProto).toBe(true);
+    expect(map.proto).toBe('/maps/proto.mjs');
+    expect(map.blocked).toBeNull();
+    expect(map.emptyScope).toBe('/maps/empty.mjs');
+    expect(map.emptyIntegrity).toBe(integrity);
+    expect(map.hasEscaped).toBe(true);
     expect(map.nonce).toBe(kind.startsWith('prerender') ? '' : 'first');
     expect(errors).toEqual([]);
     // A null target is the standard resolution model's explicit block. Chrome warns
