@@ -32,6 +32,8 @@ final class ReactClasses {
     @JSFunctor interface Updated extends JSObject { void update(JSObject props, JSObject state); }
     @JSFunctor interface Snapshot extends JSObject { Done capture(JSObject props, JSObject state); }
     @JSFunctor interface ShouldUpdate extends JSObject { boolean update(JSObject props, JSObject state, Object context); }
+    @JSFunctor interface ReceiveProps extends JSObject { void receive(JSObject props, Object context); }
+    @JSFunctor interface BeforeUpdate extends JSObject { void update(JSObject props, JSObject state, Object context); }
     @JSFunctor interface Attach extends JSObject { void attach(JSObject instance); }
 
     /** One current decoded value per native instance and schema, never a history of snapshots. */
@@ -126,7 +128,10 @@ final class ReactClasses {
                 derive, deriveError, type.lifecycle(ClassComponentType.Lifecycle.CATCH),
                 checkpoint || type.lifecycle(ClassComponentType.Lifecycle.MOUNT), checkpoint || type.lifecycle(ClassComponentType.Lifecycle.UPDATE),
                 type.lifecycle(ClassComponentType.Lifecycle.SNAPSHOT),
-                type.lifecycle(ClassComponentType.Lifecycle.SHOULD_UPDATE));
+                type.lifecycle(ClassComponentType.Lifecycle.SHOULD_UPDATE),
+                type.lifecycle(ClassComponentType.Lifecycle.WILL_MOUNT), type.lifecycle(ClassComponentType.Lifecycle.UNSAFE_WILL_MOUNT),
+                type.lifecycle(ClassComponentType.Lifecycle.WILL_RECEIVE_PROPS), type.lifecycle(ClassComponentType.Lifecycle.UNSAFE_WILL_RECEIVE_PROPS),
+                type.lifecycle(ClassComponentType.Lifecycle.WILL_UPDATE), type.lifecycle(ClassComponentType.Lifecycle.UNSAFE_WILL_UPDATE));
         JSObject ref = javaRef == null ? null : ref(REFS, javaRef, instance ->
                 javaRef.attach(instance == null ? null : peer(instance)));
         return checkpoint ? ClassCheckpoints.element(constructor, encodedProps, key, path, ref, overrides)
@@ -197,8 +202,27 @@ final class ReactClasses {
             finally { propsValue.clear(); stateValue.clear(); }
         };
         Caught caught = (error, stack) -> peer.caught(ReactError.fromNative(error), new ComponentErrorInfo(stack));
+        JSObject legacy = legacyCallbacks(
+                () -> peer.beforeMount(ClassComponentType.LegacyVariant.DEPRECATED),
+                () -> peer.beforeMount(ClassComponentType.LegacyVariant.UNSAFE),
+                receiving(type, peer, propsValue, ClassComponentType.LegacyVariant.DEPRECATED),
+                receiving(type, peer, propsValue, ClassComponentType.LegacyVariant.UNSAFE),
+                updating(type, peer, propsValue, stateValue, ClassComponentType.LegacyVariant.DEPRECATED),
+                updating(type, peer, propsValue, stateValue, ClassComponentType.LegacyVariant.UNSAFE));
         return callbacks(peer, initialState, render, mounted,
-                updated, unmount, snapshot, should, caught);
+                updated, unmount, snapshot, should, caught, legacy);
+    }
+
+    private static <P,S,C extends ClassComponent<P,S,?>> ReceiveProps receiving(ClassComponentType<P,S,C> type,
+            C peer, Current<P> props, ClassComponentType.LegacyVariant variant) {
+        return (pendingProps, pendingContext) -> type.beforeReceiveProps(peer, variant, props.pending(pendingProps),
+                type.hasContextWillReceiveProps(variant) ? new PendingContext(type.contextType(), pendingContext) : null);
+    }
+    private static <P,S,C extends ClassComponent<P,S,?>> BeforeUpdate updating(ClassComponentType<P,S,C> type,
+            C peer, Current<P> props, Current<S> state, ClassComponentType.LegacyVariant variant) {
+        return (pendingProps, pendingState, pendingContext) -> type.beforeUpdate(peer, variant,
+                props.pending(pendingProps), state.pending(pendingState),
+                type.hasContextWillUpdate(variant) ? new PendingContext(type.contextType(), pendingContext) : null);
     }
 
     private static JSObject encode(ClassProps<?> props) {
@@ -281,13 +305,16 @@ final class ReactClasses {
     @JSBody(params = "props", script = "return props.__jxPath;") private static native String pathOf(JSObject props);
     @JSBody(params = {"instance", "updater", "committed"}, script = "instance.setState(function(state, props) { return updater(state, props); }, committed === null ? undefined : function() { committed(); });") private static native void updateNative(JSObject instance, Update updater, Done committed);
     @JSBody(params = {"instance", "committed"}, script = "instance.forceUpdate(committed === null ? undefined : function() { committed(); });") private static native void forceNative(JSObject instance, Done committed);
-    @JSBody(params = {"peer", "initial", "render", "mount", "update", "unmount", "snapshot", "should", "caught"}, script = "return {peer: peer, initial: initial, render: render, mount: mount, update: update, unmount: unmount, snapshot: snapshot, should: should, caught: caught};")
-    private static native JSObject callbacks(Object peer, JSObject initial, Render render, Done mount, Updated update, Done unmount, Snapshot snapshot, ShouldUpdate should, Caught caught);
+    @JSBody(params = {"peer", "initial", "render", "mount", "update", "unmount", "snapshot", "should", "caught", "legacy"}, script = "return {peer: peer, initial: initial, render: render, mount: mount, update: update, unmount: unmount, snapshot: snapshot, should: should, caught: caught, legacy: legacy};")
+    private static native JSObject callbacks(Object peer, JSObject initial, Render render, Done mount, Updated update, Done unmount, Snapshot snapshot, ShouldUpdate should, Caught caught, JSObject legacy);
+    @JSBody(params = {"mount", "unsafeMount", "receive", "unsafeReceive", "update", "unsafeUpdate"}, script = "return {mount: mount, unsafeMount: unsafeMount, receive: receive, unsafeReceive: unsafeReceive, update: update, unsafeUpdate: unsafeUpdate};")
+    private static native JSObject legacyCallbacks(Done mount, Done unsafeMount, ReceiveProps receive,
+            ReceiveProps unsafeReceive, BeforeUpdate update, BeforeUpdate unsafeUpdate);
     @JSBody(params = {"cache", "ref", "attach"}, script = "var fn = cache.get(ref); if (!fn) { fn = function(instance) { attach(instance); }; cache.set(ref, fn); } return fn;")
     private static native JSObject ref(JSObject cache, Object ref, Attach attach);
     @JSBody(params = {"constructor", "props", "key", "path", "ref", "overrides"}, script = "props.__jxPath = path; if (key !== null) props.key = key; if (ref !== null) props.ref = ref; var element = React.createElement(constructor, props); return overrides === null ? element : React.cloneElement(element, overrides);", imports = @JSBodyImport(alias = "React", fromModule = "react"))
     private static native JSObject element(JSObject constructor, JSObject props, String key, String path, JSObject ref, JSObject overrides);
-    @JSBody(params = {"cache", "descriptor", "create", "name", "pure", "context", "defaults", "derive", "deriveError", "caught", "mount", "update", "snapshot", "should"}, script = """
+    @JSBody(params = {"cache", "descriptor", "create", "name", "pure", "context", "defaults", "derive", "deriveError", "caught", "mount", "update", "snapshot", "should", "willMount", "unsafeWillMount", "willReceive", "unsafeWillReceive", "willUpdate", "unsafeWillUpdate"}, script = """
         var Type = cache.get(descriptor);
         if (Type) return Type;
         var Base = pure ? React.PureComponent : React.Component;
@@ -313,10 +340,18 @@ final class ReactClasses {
         };
         if (snapshot) Type.prototype.getSnapshotBeforeUpdate = function(props, state) { return this.__jx.snapshot(props, state); };
         if (should) Type.prototype.shouldComponentUpdate = function(props, state, context) { return this.__jx.should(props, state, context); };
+        if (willMount) Type.prototype.componentWillMount = function() { this.__jx.legacy.mount(); };
+        if (unsafeWillMount) Type.prototype.UNSAFE_componentWillMount = function() { this.__jx.legacy.unsafeMount(); };
+        if (willReceive) Type.prototype.componentWillReceiveProps = function(props, context) { this.__jx.legacy.receive(props, context); };
+        if (unsafeWillReceive) Type.prototype.UNSAFE_componentWillReceiveProps = function(props, context) { this.__jx.legacy.unsafeReceive(props, context); };
+        if (willUpdate) Type.prototype.componentWillUpdate = function(props, state, context) { this.__jx.legacy.update(props, state, context); };
+        if (unsafeWillUpdate) Type.prototype.UNSAFE_componentWillUpdate = function(props, state, context) { this.__jx.legacy.unsafeUpdate(props, state, context); };
         cache.set(descriptor, Type);
         return Type;
         """, imports = @JSBodyImport(alias = "React", fromModule = "react"))
     private static native JSObject constructor(JSObject cache, Object descriptor, Factory create, String name, boolean pure,
             JSObject context, JSObject defaults, DerivedState derive, DerivedError deriveError, boolean caught,
-            boolean mount, boolean update, boolean snapshot, boolean should);
+            boolean mount, boolean update, boolean snapshot, boolean should,
+            boolean willMount, boolean unsafeWillMount, boolean willReceive, boolean unsafeWillReceive,
+            boolean willUpdate, boolean unsafeWillUpdate);
 }

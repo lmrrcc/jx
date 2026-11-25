@@ -21,7 +21,11 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
                 throw new IllegalArgumentException("Class checkpoint schema must contain 1 to 256 characters");
         }
     }
-    public enum Lifecycle { MOUNT, UPDATE, UNMOUNT, SNAPSHOT, SHOULD_UPDATE, CATCH }
+    public enum Lifecycle { MOUNT, UPDATE, UNMOUNT, SNAPSHOT, SHOULD_UPDATE, CATCH,
+        WILL_MOUNT, UNSAFE_WILL_MOUNT, WILL_RECEIVE_PROPS, UNSAFE_WILL_RECEIVE_PROPS,
+        WILL_UPDATE, UNSAFE_WILL_UPDATE }
+    /** The two distinct native callbacks, not aliases. React may invoke both when declared. */
+    public enum LegacyVariant { DEPRECATED, UNSAFE }
     /** Renderer-owned access to the one native context declared by a descriptor. Applications
      * receive a typed reader through the context-aware factory or a value through the update
      * policy, not this adapter. */
@@ -41,6 +45,36 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     private interface ContextPolicy<P,S,C> {
         boolean shouldUpdate(C peer, P nextProps, S nextState, ContextAccess nextContext);
     }
+    /** Render-phase receive-props callback with the descriptor's concrete pending context.
+     * Current values remain on the peer; the context argument may be null. */
+    @FunctionalInterface
+    public interface ContextReceiveProps<P,S,C extends ClassComponent<P,S,?>,T> {
+        void receive(C peer, P nextProps, T nextContext);
+    }
+    /** Render-phase will-update callback with concrete pending state and context. */
+    @FunctionalInterface
+    public interface ContextWillUpdate<P,S,C extends ClassComponent<P,S,?>,T> {
+        void update(C peer, P nextProps, S nextState, T nextContext);
+    }
+    @FunctionalInterface
+    private interface ReceivePolicy<P,C> { void receive(C peer, P nextProps, ContextAccess nextContext); }
+    @FunctionalInterface
+    private interface WillUpdatePolicy<P,S,C> { void update(C peer, P nextProps, S nextState, ContextAccess nextContext); }
+    private record LegacyPolicies<P,S,C>(ReceivePolicy<P,C> receive, ReceivePolicy<P,C> unsafeReceive,
+            WillUpdatePolicy<P,S,C> update, WillUpdatePolicy<P,S,C> unsafeUpdate) {
+        ReceivePolicy<P,C> receive(LegacyVariant variant) { return variant == LegacyVariant.DEPRECATED ? receive : unsafeReceive; }
+        WillUpdatePolicy<P,S,C> update(LegacyVariant variant) { return variant == LegacyVariant.DEPRECATED ? update : unsafeUpdate; }
+        LegacyPolicies<P,S,C> withReceive(LegacyVariant variant, ReceivePolicy<P,C> callback) {
+            return variant == LegacyVariant.DEPRECATED
+                    ? new LegacyPolicies<>(callback, unsafeReceive, update, unsafeUpdate)
+                    : new LegacyPolicies<>(receive, callback, update, unsafeUpdate);
+        }
+        LegacyPolicies<P,S,C> withUpdate(LegacyVariant variant, WillUpdatePolicy<P,S,C> callback) {
+            return variant == LegacyVariant.DEPRECATED
+                    ? new LegacyPolicies<>(receive, unsafeReceive, callback, unsafeUpdate)
+                    : new LegacyPolicies<>(receive, unsafeReceive, update, callback);
+        }
+    }
     private final String name;
     private final ClassSchema<P> props;
     private final ClassSchema<S> state;
@@ -54,14 +88,17 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     private final boolean nullableState;
     private final Checkpoint<S> checkpoint;
     private final ClassProps<P> defaultProps;
+    private final LegacyPolicies<P,S,C> legacy;
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles) {
-        this(name, props, state, factory, context, pure, lifecycles, null, null, null, false, null, null);
+        this(name, props, state, factory, context, pure, lifecycles, null, null, null, false, null, null,
+                new LegacyPolicies<>(null, null, null, null));
     }
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles,
             BiFunction<P,S,StatePatch<S>> derivedState, Function<Throwable,StatePatch<S>> derivedError,
-            ContextPolicy<P,S,C> contextUpdate, boolean nullableState, Checkpoint<S> checkpoint, ClassProps<P> defaultProps) {
+            ContextPolicy<P,S,C> contextUpdate, boolean nullableState, Checkpoint<S> checkpoint, ClassProps<P> defaultProps,
+            LegacyPolicies<P,S,C> legacy) {
         if (Objects.requireNonNull(name).isBlank()) throw new IllegalArgumentException("Empty class component name");
         this.name = name; this.props = Objects.requireNonNull(props); this.state = Objects.requireNonNull(state);
         this.factory = Objects.requireNonNull(factory); this.context = context;
@@ -74,6 +111,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         if (defaultProps != null && defaultProps.schema() != props)
             throw new IllegalArgumentException("Default props belong to another class schema");
         this.defaultProps = defaultProps;
+        this.legacy = Objects.requireNonNull(legacy);
         if (this.lifecycles.contains(Lifecycle.SNAPSHOT) && !this.lifecycles.contains(Lifecycle.UPDATE))
             throw new IllegalArgumentException("Snapshot lifecycle requires update lifecycle");
     }
@@ -134,7 +172,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDefaultProps(ClassProps<P> defaults) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                derivedState, derivedError, contextUpdate, nullableState, checkpoint, defaults);
+                derivedState, derivedError, contextUpdate, nullableState, checkpoint, defaults, legacy);
     }
     /** Native default-property input, or null when no defaults are declared. */
     public ClassProps<P> defaultProps() { return defaultProps; }
@@ -153,7 +191,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withNullableState() {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                derivedState, derivedError, contextUpdate, true, checkpoint, defaultProps);
+                derivedState, derivedError, contextUpdate, true, checkpoint, defaultProps, legacy);
     }
     /** Whether null aggregate state is accepted; properties have separate presence rules. */
     public boolean nullableState() { return nullableState; }
@@ -189,7 +227,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     public ClassComponentType<P,S,C> withStateCheckpoint(String signature, StateCodec<S> codec) {
         if (pure) throw new IllegalArgumentException("Pure class checkpoints are not qualified");
         return new ClassComponentType<>(name, props, state, factory, context, false, lifecycles,
-                derivedState, derivedError, contextUpdate, nullableState, new Checkpoint<>(signature, codec), defaultProps);
+                derivedState, derivedError, contextUpdate, nullableState, new Checkpoint<>(signature, codec), defaultProps, legacy);
     }
     /** Renderer metadata, or null when this descriptor has not opted in. */
     public Checkpoint<S> checkpoint() { return checkpoint; }
@@ -213,7 +251,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDerivedStateFromProps(BiFunction<P,S,StatePatch<S>> callback) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                Objects.requireNonNull(callback, "callback"), derivedError, contextUpdate, nullableState, checkpoint, defaultProps);
+                Objects.requireNonNull(callback, "callback"), derivedError, contextUpdate, nullableState, checkpoint, defaultProps, legacy);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasDerivedStateFromProps() { return derivedState != null; }
@@ -243,7 +281,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDerivedStateFromError(Function<Throwable,StatePatch<S>> callback) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                derivedState, Objects.requireNonNull(callback, "callback"), contextUpdate, nullableState, checkpoint, defaultProps);
+                derivedState, Objects.requireNonNull(callback, "callback"), contextUpdate, nullableState, checkpoint, defaultProps, legacy);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasDerivedStateFromError() { return derivedError != null; }
@@ -284,7 +322,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
                 derivedState, derivedError, (peer, nextProps, nextState, nextContext) ->
                     policy.shouldUpdate(peer, nextProps, nextState,
-                            Objects.requireNonNull(nextContext.current(requested), "Missing next context reader").get()), nullableState, checkpoint, defaultProps);
+                            Objects.requireNonNull(nextContext.current(requested), "Missing next context reader").get()), nullableState, checkpoint, defaultProps, legacy);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasContextShouldUpdate() { return contextUpdate != null; }
@@ -298,13 +336,82 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         return contextUpdate == null ? peer.shouldUpdate(nextProps, nextState)
                 : contextUpdate.shouldUpdate(peer, nextProps, nextState, Objects.requireNonNull(nextContext, "Missing next context access"));
     }
+    /** Returns a descriptor with one typed native receive-props callback. The requested
+     * context must be this descriptor's contextType. The selected variant takes precedence
+     * over the peer's corresponding callback; the other spelling is unchanged. Calling this
+     * again replaces only that variant. All other descriptor settings are preserved.
+     *
+     * <p>React invokes the callback before processing its queued updates and deciding whether
+     * to render. The peer still exposes current props/state/context; arguments are pending.
+     * React owns warnings, modern-lifecycle suppression and retries. This callback is not a
+     * commit signal. Declare the resulting descriptor once to retain component identity.
+     * @throws IllegalArgumentException when context identity differs
+     * @throws NullPointerException when requested, variant or callback is null
+     */
+    public <T> ClassComponentType<P,S,C> withContextWillReceiveProps(Context<T> requested,
+            LegacyVariant variant, ContextReceiveProps<P,S,C,T> callback) {
+        requireLegacyContext(requested, variant); Objects.requireNonNull(callback, "callback");
+        ReceivePolicy<P,C> adapted = (peer, nextProps, nextContext) ->
+                callback.receive(peer, nextProps, Objects.requireNonNull(nextContext.current(requested), "Missing pending context reader").get());
+        return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
+                derivedState, derivedError, contextUpdate, nullableState, checkpoint, defaultProps, legacy.withReceive(variant, adapted));
+    }
+    /** Returns a descriptor with one typed native will-update callback. Ownership, variant
+     * precedence and immutable composition match {@link #withContextWillReceiveProps}.
+     * React invokes it only when it proceeds with an update, before assigning pending
+     * props/state/context to the instance. It is render-phase work, not committed effects.
+     * @throws IllegalArgumentException when context identity differs
+     * @throws NullPointerException when requested, variant or callback is null
+     */
+    public <T> ClassComponentType<P,S,C> withContextWillUpdate(Context<T> requested,
+            LegacyVariant variant, ContextWillUpdate<P,S,C,T> callback) {
+        requireLegacyContext(requested, variant); Objects.requireNonNull(callback, "callback");
+        WillUpdatePolicy<P,S,C> adapted = (peer, nextProps, nextState, nextContext) ->
+                callback.update(peer, nextProps, nextState,
+                        Objects.requireNonNull(nextContext.current(requested), "Missing pending context reader").get());
+        return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
+                derivedState, derivedError, contextUpdate, nullableState, checkpoint, defaultProps, legacy.withUpdate(variant, adapted));
+    }
+    private void requireLegacyContext(Context<?> requested, LegacyVariant variant) {
+        Objects.requireNonNull(requested, "requested"); Objects.requireNonNull(variant, "variant");
+        if (requested != context) throw new IllegalArgumentException("Legacy callback context does not belong to this descriptor");
+    }
+    /** Renderer capability checks; these do not evaluate callbacks or context readers. */
+    public boolean hasContextWillReceiveProps(LegacyVariant variant) {
+        return legacy.receive(Objects.requireNonNull(variant, "variant")) != null;
+    }
+    public boolean hasContextWillUpdate(LegacyVariant variant) {
+        return legacy.update(Objects.requireNonNull(variant, "variant")) != null;
+    }
+    /** Renderer dispatch with checked pending props and optional pending context access. */
+    public void beforeReceiveProps(C peer, LegacyVariant variant, P nextProps, ContextAccess nextContext) {
+        Objects.requireNonNull(peer, "peer"); Objects.requireNonNull(variant, "variant"); props.validate(nextProps);
+        var callback = legacy.receive(variant);
+        if (callback == null) peer.beforeReceiveProps(variant, nextProps);
+        else callback.receive(peer, nextProps, Objects.requireNonNull(nextContext, "Missing pending context access"));
+    }
+    /** Renderer dispatch with checked pending values; current peer values are unchanged. */
+    public void beforeUpdate(C peer, LegacyVariant variant, P nextProps, S nextState, ContextAccess nextContext) {
+        Objects.requireNonNull(peer, "peer"); Objects.requireNonNull(variant, "variant");
+        props.validate(nextProps); validateState(nextState);
+        var callback = legacy.update(variant);
+        if (callback == null) peer.beforeUpdate(variant, nextProps, nextState);
+        else callback.update(peer, nextProps, nextState, Objects.requireNonNull(nextContext, "Missing pending context access"));
+    }
     public ClassSchema<P> propsSchema() { return props; }
     public ClassSchema<S> stateSchema() { return state; }
     public boolean pure() { return pure; }
     /** The declared native context, or null for a descriptor without class context. */
     public Context<?> contextType() { return context; }
     public boolean lifecycle(Lifecycle lifecycle) {
-        return lifecycles.contains(lifecycle) || lifecycle == Lifecycle.SHOULD_UPDATE && contextUpdate != null;
+        return lifecycles.contains(lifecycle) || switch (lifecycle) {
+            case SHOULD_UPDATE -> contextUpdate != null;
+            case WILL_RECEIVE_PROPS -> legacy.receive() != null;
+            case UNSAFE_WILL_RECEIVE_PROPS -> legacy.unsafeReceive() != null;
+            case WILL_UPDATE -> legacy.update() != null;
+            case UNSAFE_WILL_UPDATE -> legacy.unsafeUpdate() != null;
+            default -> false;
+        };
     }
     /** Renderer construction. Initial props/state are checked before mounting. */
     public C create(P value) {

@@ -75,6 +75,12 @@ function Streaming() {
 }
 
 export const server = {
+  renderLegacy: id => {
+    globalThis.__benchLog = [];
+    const Case = cases[id];
+    const html = renderToString(<StrictMode><Case /></StrictMode>);
+    return {html, log: globalThis.__benchLog.slice()};
+  },
   renderBootstrap,
   resumeBootstrap,
   resourceHeaders,
