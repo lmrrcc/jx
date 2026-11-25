@@ -139,9 +139,9 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The merged null-patch run over responsive preload passes 919 checks, with
-169 skipped cells across 136 case IDs: client 134 reference / 133 JX, hydrate 103
-per side, static 109 per side and lazy 114 per side. Fifty-four pairs have complete local
+The merged sink-delivery run over the class policies passes 929 checks, with
+175 skipped cells across 138 case IDs: client 136 reference / 135 JX, hydrate 104
+per side, static 110 per side and lazy 115 per side. Fifty-four pairs have complete local
 evidence in their declared modes; 6,274 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate

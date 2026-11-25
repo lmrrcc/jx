@@ -439,8 +439,12 @@ delivery promise that rejects original Java write/end failures and prevents late
 callbacks. The focused case, all 34 SSR checks and the integrated 905-check candidate pass.
 Its sink-failure mutant is killed after a passing baseline within the exclusive
 five-mutant campaign (5 killed, zero survived/unusable), with five byte-identical
-sink files. Its publication gates remain pending. Observe delivery independently of renderer
-readiness. This qualifies a synchronous Java sink only; native HTTP Writable
+sink files. PR [#64](https://github.com/lmrrcc/jx/pull/64) merged as `ce25b13`
+after the 15-step local gate passed in 304 seconds and both Verify checks passed
+on `8d491d4`. The final integrated bench passes **929 checks /175 skipped across
+138 cases**: client 136 reference /135 JX, hydrate 104, static 110 and lazy 115 per
+side. All 54/6328 registered pairs remain unchanged. Observe delivery independently
+of renderer readiness. This qualifies a synchronous Java sink only; native HTTP Writable
 failure/backpressure/disposal and protected requests still require host-level
 qualification. Human and cross-browser qualification also remain open.
 

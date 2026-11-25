@@ -50,4 +50,10 @@ test('runtime-utilities-production: genuine production bundles omit owner stacks
     catch (error) { return {status: 'rejected', message: error.message, calls: api.calls(), outside: api.outside}; }
   });
   expect(result).toEqual({status: 'rejected', message: 'React act requires a development build', calls: 0, outside: null});
+  const synchronous = await page.evaluate(async () => {
+    const api = globalThis.__benchUtilities;
+    try { await api.sync().completion; return {status: 'fulfilled'}; }
+    catch (error) { return {status: 'rejected', message: error.message, calls: api.calls()}; }
+  });
+  expect(synchronous).toEqual({status: 'rejected', message: 'React act requires a development build', calls: 0});
 });

@@ -50,6 +50,19 @@ export function startActUtilities() {
     nested: () => report(act(async () => await act(async () => { store.publish(3); return 'nested'; }))),
     fail: () => report(act(async () => { throw new Error('act rejected'); })),
     throwing: () => report(act(() => { throw new Error('act threw'); })),
+    sync() {
+      const completed = act(() => { calls++; store.publish(4); });
+      const immediate = {value: 'immediate', count: document.getElementById('act-count')?.textContent ?? null,
+        log: [...(globalThis.__benchLog || [])]};
+      return {immediate, completion: report(completed.then(() => 'sync'))};
+    },
+    syncThrowing() {
+      const failure = new Error('sync act threw');
+      return report(act(() => { throw failure; }).catch(error => {
+        if (error !== failure) throw new Error('Synchronous act lost failure identity');
+        throw failure;
+      }));
+    },
     unmount: () => report(act(async () => { root.unmount(); return 'unmounted'; })),
     calls: () => calls,
     outside: typeof React.captureOwnerStack === 'function' ? React.captureOwnerStack() : null
