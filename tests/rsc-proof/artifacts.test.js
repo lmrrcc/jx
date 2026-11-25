@@ -39,7 +39,7 @@ test('server application code and sources are absent from all browser chunks and
   for (const name of files) {
     const source = await readFile(resolve(here, 'target/site', name), 'utf8');
     if (source.includes('__jxRscClient')) javaClient = true;
-    for (const forbidden of ['ServerPage', 'ServerEntry', 'jx.fixture.rsc.server', '__jxRscProof', '/server/src/']) {
+    for (const forbidden of ['ServerPage', 'ServerEntry', 'CacheProbe', 'AsyncContextProbe', 'ObserverErrorProbe', 'jx.fixture.rsc.server', '__jxRscProof', '/server/src/']) {
       assert.ok(!source.includes(forbidden), name + ' contains server code/source: ' + forbidden);
     }
   }

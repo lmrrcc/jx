@@ -53,9 +53,9 @@ alignment and protocol round-trip tests are therefore release gates. Sources:
 
 | Slice | Observable acceptance | Status |
 | --- | --- | --- |
-| R-30-01 | Real Flight output from a Java server module; browser decodes and renders it through actual React; gated completion, error and abort are observable; server artifacts stay absent from the client | Implemented; local proof passes, Verify pending |
+| R-30-01 | Real Flight output from a Java server module; browser decodes and renders it through actual React; gated completion, error and abort are observable; server artifacts stay absent from the client | ✅ merged PR #49 at 5fa53c0; 15-step local gate and both Verify checks passed |
 | R-30-02 | Typed client-component references resolve through generated manifests; a Java client counter remains interactive; malformed payloads and unknown references fail explicitly | Planned |
-| R-30-03 | Request-scoped `cache` and `cacheSignal` behavior with explicit Java value mapping; concurrent requests, cached failure, cancellation and cleanup | Planned |
+| R-30-03 | Request-scoped `cache` and `cacheSignal` behavior with explicit Java value mapping; concurrent requests, cached failure, cancellation and cleanup | 🟨 typed cache/signal, 8 cache and 12 async-context differential Node checks plus Node observer-error regression pass locally; integrated Verify pending; production/G0 cancellation and retention qualification remain |
 | R-30-04 | Java authoring equivalents of client/server directives, build separation and server-function references with a typed allowlist and request authorization | Planned |
 | R-30-05 | Protocol/version-skew checks, error redaction, bounded transport, disposal and R-29 cache-refresh integration; qualification and updated parity ledger | Planned |
 
@@ -69,10 +69,18 @@ The first Node smoke reproduced an eager client error-boundary initialization in
 `React`: server-conditioned React does not export the required client class API.
 Lazy initialization fixes that failure. `ReactServerComponents.element(View)`
 provides the server hook bootstrap without rendering the element itself. Seven
-Node checks and four Chrome checks now cover the
+Node checks and four Chrome checks cover the merged transport
 [proof's explicit guarantees](../../tests/rsc-proof/README.md); the ordinary
 browser gate still verifies client behavior. Client-only hooks and class
 components remain invalid in server components, as in React.
+
+The cache slice extends the proof command to 28 Node and four Chrome checks.
+Native promise reactions capture request context when each Java observer registers;
+settlement schedules delivery without an extra microtask. The original paired
+await/map regression was red only in JX and is now green. Shared-promise observers,
+late registration and rejected-data recovery also retain their own request scope.
+See the [async ownership evidence](../../tests/rsc-proof/README.md#async-request-ownership)
+for observer error handling and explicit cancellation/retention limits.
 
 The proof's Node transport is not a production deployment or a general remote
 Java invocation mechanism. Spring session/CSRF wiring, protected SSR snapshots,

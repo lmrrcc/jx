@@ -16,7 +16,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
 | React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27 slices through SSR R-27-04, the Promise/scalar prerequisites and R-28-01 merged with green Verify. The native class runtime evidences 54 / 5,460 active pairs, with 5,406 open; three class mutants killed after the baseline passed. Complete class authoring, remaining APIs, options and combined scenarios. |
-| R-28 Java class runtime | 🟡 Partial | R-28-01 merged as `ccfcb2d` after the local gate and both Verify checks passed. R-28-02a adds generated `.jx` class descriptors and typed patches with 8/8 focused projects and an integrated bench of 833 passed/151 skipped/123 cases; its compiler mutant was killed after a passing baseline, gate and Verify pending. Native editor qualification, advanced lifecycle/context options and class hot checkpoints remain open. |
+| R-28 Java class runtime | 🟡 Partial | R-28-01 merged as `ccfcb2d`; R-28-02a merged as `3e1db97` with green 15-step gate and both Verify checks. Generated `.jx` class descriptors and typed patches pass 8/8 focused projects and the integrated bench of 833 passed/151 skipped/123 cases; the compiler mutant was killed after a passing baseline. Native editor qualification, advanced lifecycle/context options and class hot checkpoints remain open. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -132,7 +132,8 @@ direct, non-generic classes and nested record props/state, with field-type limit
 listed in ADR 0006. Native IDE qualification remains separate; advanced lifecycle/
 context options and class state preservation are still open. The compiler snapshot
 mutant was killed after the unmutated baseline passed, with no survivors or
-unusable mutants; the full push gate and Verify remain pending.
+unusable mutants; PR #50 merged as `3e1db97` with the 15-step gate and both Verify
+checks green.
 The catalog has 116 entries, separate from the historical full campaign of 100.
 
 Progress, 21 November 2026: [GA-01](ga-01-baseline.md) is done, with CI green at
@@ -247,8 +248,17 @@ The R-30-01 [Flight proof](../tests/rsc-proof/README.md) now executes Java serve
 components with the actual server-conditioned React runtime and decodes an
 interactive Java client component in Chrome. Its seven Node and four browser
 checks establish a narrow transport boundary, suspension/error/abort behavior
-and server-source exclusion; Verify is pending. General client/server directives,
-cache APIs, server functions and production protocol qualification remain open.
+and server-source exclusion; PR #49 merged as `5fa53c0` with green local gate and
+Verify. General client/server directives, server functions and production protocol
+qualification remain open.
+The subsequent R-30-03 cache slice has eight differential Node checks passing for
+typed zero/one/two-argument functions and cache lifetime signals. It adds explicit
+request isolation and cleanup evidence. Twelve differential checks additionally
+prove request context through Java await/map/recovery and shared-promise observers;
+one Node check preserves observer error reporting. The combined local proof has
+28 Node and four Chrome passes, pending integrated Verify. Server functions,
+directive-driven packaging, abandoned-request retention and production
+qualification remain open.
 Server data loading, typed HTTP mutations, SSR and hydration alone do not complete
 R-30. Re-estimate capacity and dates at the gates as its feasibility becomes known.
 

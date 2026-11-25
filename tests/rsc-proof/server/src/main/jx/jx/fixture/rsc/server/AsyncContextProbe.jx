@@ -1,0 +1,78 @@
+package jx.fixture.rsc.server;
+
+import java.util.function.Function;
+import jx.Async;
+import jx.Component;
+import jx.Hooks;
+import jx.Promise;
+import jx.View;
+import jx.Views;
+import jx.react.CacheSignal;
+import jx.react.React;
+import jx.react.ReactCache;
+import jx.react.ReactServerComponents;
+import org.teavm.jso.JSBody;
+import org.teavm.jso.JSFunctor;
+import org.teavm.jso.JSObject;
+
+/** Regression for request ownership after a Java continuation resumes. */
+@Component
+public final class AsyncContextProbe {
+    public enum Mode { AWAIT, MAP, RECOVER }
+    public static final class Request {
+        final Mode mode;
+        final Promise<String> data;
+        private Runnable ready;
+        public Request(Mode mode, Promise<String> data, Runnable ready) {
+            this.mode = java.util.Objects.requireNonNull(mode);
+            this.data = java.util.Objects.requireNonNull(data);
+            this.ready = java.util.Objects.requireNonNull(ready);
+        }
+        void ready() {
+            if (ready != null) { Runnable callback = ready; ready = null; callback.run(); }
+        }
+    }
+    public record Props(Request request) {}
+    private static final Function<String, Object> VALUE = ReactCache.cache(ignored -> new Object());
+    private static final Function<Request, Promise<String>> READ = ReactCache.cache(request -> {
+        CacheSignal scope = ReactCache.cacheSignal();
+        if (scope == null) throw new IllegalStateException("Missing initial request scope");
+        Object value = VALUE.apply("same-key");
+        if (request.mode == Mode.MAP) {
+            return request.data.map(data -> checked(data, scope, value, "map"));
+        }
+        if (request.mode == Mode.RECOVER) {
+            return request.data.recover(error -> checked(error.getMessage(), scope, value, "recover"));
+        }
+        return Async.run(() -> checked(Async.await(request.data), scope, value, "await"));
+    });
+    private static String checked(String data, CacheSignal before, Object value, String mode) {
+        CacheSignal after = ReactCache.cacheSignal();
+        if (after == null || after.nativeSignal() != before.nativeSignal()) {
+            throw new IllegalStateException("Request scope lost after " + mode);
+        }
+        if (VALUE.apply("same-key") != value) throw new IllegalStateException("Request cache lost after " + mode);
+        return data;
+    }
+    public static View render(Props props) {
+        Promise<String> pending = READ.apply(props.request());
+        props.request().ready();
+        String data = Hooks.use(pending);
+        return <p data-testid="async-context">{data}</p>;
+    }
+
+    /** Each returned handle owns exactly one Java promise, shared by all its renders. */
+    public static JSObject shared(JSObject data) {
+        Promise<String> promise = React.promise(data).map(AsyncContextProbe::text);
+        return handle((mode, ready) -> {
+            var request = new Request(Mode.valueOf(mode), promise, ready::run);
+            return ReactServerComponents.element(Views.component(JX, new Props(request)));
+        });
+    }
+    @JSFunctor interface Ready extends JSObject { void run(); }
+    @JSFunctor interface Render extends JSObject { JSObject render(String mode, Ready ready); }
+    @JSBody(params = "render", script = "return {render: render};")
+    private static native JSObject handle(Render render);
+    @JSBody(params = "value", script = "if (typeof value !== 'string') throw new Error('Invalid shared proof data'); return value;")
+    private static native String text(JSObject value);
+}

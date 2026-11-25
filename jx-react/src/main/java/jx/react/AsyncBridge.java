@@ -22,6 +22,11 @@ final class AsyncBridge implements AsyncRuntime {
 
     @Override public void defer(Runnable task) { microtask(task::run); }
 
+    @Override public Runnable reaction(Runnable task) {
+        Task schedule = captureReaction(task::run);
+        return schedule::run;
+    }
+
     @Override public void start(Coroutine body) {
         if (inThread()) microtask(() -> startThread(body::run));
         else startThread(body::run);
@@ -54,6 +59,24 @@ final class AsyncBridge implements AsyncRuntime {
 
     @JSBody(script = "return new WeakMap();") private static native JSObject weakMap();
     @JSBody(params = "task", script = "queueMicrotask(task);") private static native void microtask(Task task);
+    // Native Promise reactions retain Node's async context at registration. A
+    // queueMicrotask created only at Java promise settlement would inherit the
+    // resolver's request instead. Resolve directly: an extra defer would reorder
+    // observers relative to other jobs. This hidden promise must not turn an
+    // observer exception into an unhandled rejection or silently consume it.
+    @JSBody(params = "task", script = """
+            var settle;
+            var pending = new Promise(function(resolve) { settle = resolve; });
+            pending.then(function() {
+                try { task(); }
+                catch (error) {
+                    if (typeof globalThis.reportError === 'function') globalThis.reportError(error);
+                    else queueMicrotask(function() { throw error; });
+                }
+            });
+            return function() { settle(); };
+            """)
+    private static native Task captureReaction(Task task);
     @JSBody(script = "return $rt_nativeThread() !== null;") private static native boolean inThread();
     @JSBody(params = "body", script = "$rt_startThread(function() { body(); });") private static native void startThread(Task body);
     @JSBody(params = {"cache", "promise", "subscribe"}, script = "var result = cache.get(promise); if (!result) { result = new Promise(function(resolve, reject) { subscribe(resolve, reject); }); cache.set(promise, result); } return result;")

@@ -1,0 +1,156 @@
+package jx.fixture.rsc.server;
+
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import jx.Component;
+import jx.Hooks;
+import jx.Promise;
+import jx.View;
+import jx.react.CacheSignal;
+import jx.react.ReactCache;
+import org.teavm.jso.JSBody;
+import org.teavm.jso.JSObject;
+
+/** Fixture instrumentation uses bounded counters, not a retained request registry. */
+@Component
+public final class CacheProbe {
+    private record Token(int id) {}
+    private record Key(int value) {}
+    private static int sequence;
+    private static int nullComputations;
+    private static Token token() {
+        if (sequence >= 10_000) throw new IllegalStateException("Fixture counter exhausted");
+        return new Token(++sequence);
+    }
+    private static final Function<Object, Token> BY_KEY = ReactCache.cache(ignored -> token());
+    private static final Supplier<Token> ZERO = ReactCache.cache(() -> token());
+    private static final BiFunction<String, Integer, Token> TWO = ReactCache.cache((first, second) -> token());
+    private static final Function<String, Token> BODY = ignored -> token();
+    private static final Function<String, Token> FIRST = ReactCache.cache(BODY);
+    private static final Function<String, Token> SECOND = ReactCache.cache(BODY);
+    private static final Function<String, Token> SEPARATE = ReactCache.cache(ignored -> token());
+    private static final Function<String, Token> FAILURE = ReactCache.cache(ignored -> {
+        throw new IllegalStateException("cached-failure-" + token().id());
+    });
+    private static final Function<String, Promise<Token>> ASYNC = ReactCache.cache(ignored -> Promise.resolved(token()));
+    private static final Function<String, String> NULL_VALUE = ReactCache.cache(ignored -> { nullComputations++; return null; });
+    private static final Recursive RECURSIVE = new Recursive();
+
+    private static final class Recursive implements Function<Integer, Integer> {
+        private final Function<Integer, Integer> cached = ReactCache.cache(this);
+        private int calls;
+        @Override public Integer apply(Integer value) {
+            calls++;
+            if (value < 0) throw new IllegalArgumentException("Nested fixture failure");
+            if (value == 0) return 0;
+            if (value == 2) {
+                try { cached.apply(-1); throw new AssertionError("Nested failure became success"); }
+                catch (IllegalArgumentException expected) { /* outer invocation continues */ }
+            }
+            return value + cached.apply(value - 1);
+        }
+    }
+
+    public record Props(Audit audit, Promise<String> data) {}
+
+    /** Owned by one test request and disposed explicitly by its host. */
+    public static final class Audit {
+        private Token shared;
+        private Token asynchronous;
+        private CacheSignal signal;
+        private Runnable cleanup;
+        private int aborts;
+        private int removed;
+        private int late;
+        private int renders;
+        private String data = "pending";
+        private boolean checked;
+        private Runnable ready;
+
+        public Audit(Runnable ready) { this.ready = java.util.Objects.requireNonNull(ready); }
+
+        public JSObject snapshot() {
+            return snapshot(shared == null ? 0 : shared.id(), asynchronous == null ? 0 : asynchronous.id(),
+                    signal != null && signal.aborted(), aborts, removed, late, renders, checked, data);
+        }
+        public void lateListener() {
+            require(signal != null, "No cache signal was observed");
+            signal.onAbort(() -> late++).run();
+        }
+        public void close() { ready = null; if (cleanup != null) { cleanup.run(); cleanup = null; } }
+        @JSBody(params = {"token", "async", "aborted", "aborts", "removed", "late", "renders", "checked", "data"},
+                script = "return {token, async, aborted, aborts, removed, late, renders, checked, data};")
+        private static native JSObject snapshot(int token, int async, boolean aborted, int aborts,
+                int removed, int late, int renders, boolean checked, String data);
+    }
+
+    /** Outside rendering, React must neither cache results nor expose a cache scope. */
+    public static boolean outside() {
+        int before = sequence;
+        Supplier<Token> unused = ReactCache.cache(() -> token());
+        return sequence == before && unused != null && ReactCache.cacheSignal() == null &&
+                BY_KEY.apply("outside") != BY_KEY.apply("outside") && ZERO.get() != ZERO.get();
+    }
+
+    public static View render(Props props) {
+        Audit audit = props.audit();
+        audit.renders++;
+        require(audit.renders <= 20, "Unbounded fixture retries");
+        Token shared = BY_KEY.apply("shared");
+        require(shared == BY_KEY.apply(new String("shared")), "Equal native string keys missed");
+        if (audit.shared != null) require(audit.shared == shared, "Cache lost across suspension");
+        audit.shared = shared;
+        require(ZERO.get() == ZERO.get(), "Zero-argument cache missed");
+        require(TWO.apply("pair", 1) == TWO.apply(new String("pair"), 1), "Two-argument cache missed");
+        require(TWO.apply("pair", 1) != TWO.apply("pair", 2), "Second key ignored");
+        require(FIRST.apply("same") == SECOND.apply("same"), "Wrappers lost source function identity");
+        require(FIRST.apply("same") != SEPARATE.apply("same"), "Distinct source functions shared a cache");
+        require(BY_KEY.apply(null) == BY_KEY.apply(null), "Null key missed");
+        require(NULL_VALUE.apply("null") == null, "Null result changed");
+        int nullCount = nullComputations;
+        require(NULL_VALUE.apply("null") == null && nullComputations == nullCount, "Null result was not cached");
+        require(BY_KEY.apply(Double.NaN) == BY_KEY.apply(Double.NaN), "NaN key missed");
+        require(BY_KEY.apply(0.0) == BY_KEY.apply(-0.0), "Native cache zero semantics changed");
+        require(BY_KEY.apply(Integer.valueOf(7)) == BY_KEY.apply(Double.valueOf(7)), "Native numeric keys differ");
+        Key object = new Key(5);
+        require(BY_KEY.apply(object) == BY_KEY.apply(object), "Object identity key missed");
+        require(BY_KEY.apply(object) != BY_KEY.apply(new Key(5)), "Java equals replaced identity");
+        require(failure() == failure(), "Cached failure identity changed");
+        require(RECURSIVE.cached.apply(6) == 21, "Recursive cache invocation lost its arguments");
+        int recursiveCalls = RECURSIVE.calls;
+        require(RECURSIVE.cached.apply(6) == 21 && RECURSIVE.calls == recursiveCalls, "Recursive result was not cached");
+        try { BY_KEY.apply(Long.MAX_VALUE); throw new IllegalStateException("Inexact long key accepted"); }
+        catch (IllegalArgumentException expected) { /* conversion rejects before the cache lookup */ }
+
+        CacheSignal signal = ReactCache.cacheSignal();
+        require(signal != null && !signal.aborted(), "Missing or expired active scope");
+        if (audit.signal == null) {
+            audit.signal = signal;
+            audit.cleanup = signal.onAbort(() -> audit.aborts++);
+            Runnable removed = signal.onAbort(() -> audit.removed++);
+            removed.run();
+            removed.run();
+        } else require(audit.signal.nativeSignal() == signal.nativeSignal(), "Signal changed within request");
+
+        Promise<Token> asynchronous = ASYNC.apply("async");
+        require(asynchronous == ASYNC.apply("async"), "Promise identity changed");
+        audit.asynchronous = Hooks.use(asynchronous);
+        if (!audit.checked) {
+            audit.checked = true;
+            Runnable ready = audit.ready;
+            audit.ready = null;
+            ready.run();
+        }
+        audit.data = Hooks.use(props.data());
+        return <p data-testid="cache-result">{audit.shared.id()}:{audit.data}</p>;
+    }
+
+    private static Throwable failure() {
+        try { FAILURE.apply("failure"); throw new AssertionError("Failure became success"); }
+        catch (IllegalStateException failure) { return failure; }
+    }
+    private static void require(boolean condition, String message) {
+        if (!condition) throw new IllegalStateException(message);
+    }
+}

@@ -29,7 +29,7 @@ public final class Promise<T> {
     private boolean settled;
     private T value;
     private Throwable error;
-    private List<Reaction<T>> reactions = new ArrayList<>();
+    private List<Runnable> reactions = new ArrayList<>();
 
     private Promise() {}
 
@@ -63,11 +63,14 @@ public final class Promise<T> {
     /** Calls exactly one of the callbacks once the promise is settled, also when it already is.
      * The call happens after the current browser job. Exceptions thrown by a callback are not
      * caught here; they do not prevent other observers from receiving settlement. Use
-     * {@link #map} or {@link #recover} to carry a failure forward. */
+     * {@link #map} or {@link #recover} to carry a failure forward. The configured
+     * renderer captures host async context when the observer is registered, not
+     * whichever request happens to settle this promise later. */
     public void whenSettled(Consumer<? super T> onValue, Consumer<? super Throwable> onError) {
         Reaction<T> reaction = new Reaction<>(Objects.requireNonNull(onValue), Objects.requireNonNull(onError));
-        if (settled) Async.runtime().defer(() -> deliver(reaction));
-        else reactions.add(reaction);
+        Runnable schedule = Async.reaction(() -> deliver(reaction));
+        if (settled) schedule.run();
+        else reactions.add(schedule);
     }
 
     /** The promise of {@code mapper}'s result. A failure of this promise, or an exception thrown
@@ -124,9 +127,9 @@ public final class Promise<T> {
         settled = true;
         value = result;
         error = failure;
-        List<Reaction<T>> waiting = reactions;
+        List<Runnable> waiting = reactions;
         reactions = null;
-        for (Reaction<T> reaction : waiting) Async.runtime().defer(() -> deliver(reaction));
+        for (Runnable schedule : waiting) schedule.run();
     }
 
     private void deliver(Reaction<T> reaction) {

@@ -19,7 +19,16 @@ class PromiseTest {
     /** A queue in place of browser microtasks; await drains it until the promise is settled. */
     private static final class QueueRuntime implements AsyncRuntime {
         final ArrayDeque<Runnable> queue = new ArrayDeque<>();
+        String context;
         @Override public void defer(Runnable task) { queue.add(task); }
+        @Override public Runnable reaction(Runnable task) {
+            String registered = context;
+            return () -> defer(() -> {
+                String previous = context;
+                context = registered;
+                try { task.run(); } finally { context = previous; }
+            });
+        }
         @Override public void start(Coroutine body) { body.run(); }
         @Override public void await(Promise<?> promise) {
             while (promise.pending()) {
@@ -35,7 +44,29 @@ class PromiseTest {
     private final List<String> seen = new ArrayList<>();
 
     @BeforeAll static void install() { Async.installRuntime(RUNTIME); }
-    @BeforeEach void reset() { RUNTIME.queue.clear(); }
+    @BeforeEach void reset() { RUNTIME.queue.clear(); RUNTIME.context = null; }
+
+    @Test void observersKeepTheirRegistrationContextInsteadOfTheResolverContext() {
+        List<Promise.Resolver<String>> resolver = new ArrayList<>();
+        Promise<String> source = Promise.create(resolver::add);
+        RUNTIME.context = "first";
+        source.whenSettled(value -> seen.add(RUNTIME.context + ":" + value), error -> {});
+        RUNTIME.context = "second";
+        Promise<String> mapped = source.map(value -> RUNTIME.context + ":" + value);
+        RUNTIME.context = "resolver";
+        resolver.getFirst().resolve("value");
+        assertEquals(List.of(), seen);
+        RUNTIME.drain();
+        assertEquals(List.of("first:value"), seen);
+        assertEquals("second:value", Async.await(mapped));
+        assertEquals("resolver", RUNTIME.context, "Each callback restores the surrounding job context");
+        RUNTIME.context = "late";
+        source.whenSettled(value -> seen.add(RUNTIME.context + ":" + value), error -> {});
+        RUNTIME.context = "other";
+        RUNTIME.drain();
+        assertEquals(List.of("first:value", "late:value"), seen);
+        assertEquals("other", RUNTIME.context);
+    }
 
     @Test void callbacksRunLaterAndInRegistrationOrder() {
         List<Promise.Resolver<String>> resolver = new ArrayList<>();
