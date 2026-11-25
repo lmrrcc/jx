@@ -274,7 +274,10 @@ one killed, zero survived and zero unusable. It ran at `7c78a3d`; the derived
 runtime and fixture source is byte-identical after integration onto PR #54.
 Scratch evidence is `jx-mutation-2026455379713343602`. The catalog now has 124
 entries, including the two functional-contract mutants, while the historical
-full campaign still covers 100. Final push gate and Verify remain pending.
+full campaign still covers 100. PR [#55](https://github.com/lmrrcc/jx/pull/55)
+merged as `84eb8cd` after the 15-step gate passed in 377 seconds and both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45611633361) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45610807085) passed on `021bc02`.
 
 ## R-28-03c native error lifecycle — 25 November 2026
 
@@ -328,12 +331,22 @@ uses a separate failed flag, because null is itself a valid native thrown value.
 
 The JVM contracts validate both orders of descriptor composition, schema and
 nullable-patch rules, original Throwable/reporting identity, callback failure
-propagation and verbatim/empty component-stack strings. The package passes 43
-core, 48 compiler and 15 Maven-plugin tests. All 48 focused class checks pass:
-eight new error-lifecycle projects plus 40 existing class checks. Client,
-hydration and lazy execute the interactions; static compares initial HTML only.
-This is Chrome-only local evidence on the preserved prerequisite branch, not a
-full integrated bench or gate. Compiler error
-lifecycle declarations, server-render error handling, production diagnostics and
-additional foreign kinds remain unqualified. A dropped committed-report mutant
-is registered but unrun; no pair or aggregate result table is updated.
+propagation and verbatim/empty component-stack strings. Integration onto PR #55's
+tested tree passes 47 core, 48 compiler and 15 Maven-plugin tests. The complete
+bench passes **887 checks, 169 skipped, across 132 cases**: client 130 React / 129
+JX, hydrate 99, static 105 and lazy 110 per side. All 48 class cells pass. A
+subsequent focused run passes all eight projects with tightened assertions:
+exactly eight expected caught-error console reports in order, one uncaught event
+error, and no unrelated reports, including React's native console format for
+null and undefined throws.
+
+Client, hydration and lazy execute the interactions; static compares initial HTML
+only. Recorded case evidence adds only `class-error-lifecycle`, with all 54 pair
+witnesses unchanged among 6,328 active pairs. This is Chrome-only evidence.
+Compiler error lifecycle declarations, server-render error handling, production
+diagnostics and additional foreign kinds remain unqualified. The scoped
+`class-error-report-dropped` campaign passed its unmutated baseline, then killed
+one mutation, with zero survived/unusable. Only `class-error-lifecycle` fails, in
+client, hydration and lazy, because the committed catch report is absent; static
+correctly still passes. The campaign used commit `c27f881`; scratch evidence is
+`jx-mutation-1028723938717671193`. Final gate and Verify remain pending.

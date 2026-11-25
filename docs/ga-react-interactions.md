@@ -45,14 +45,16 @@ qualification is implied by these automated results.
 ## Current evidence and remaining scope
 
 R-29 adds eight supported/equivalent utility rows without adding pair witnesses.
-The derived-props integration over functional merge `adcf22b` keeps all 54 existing witnesses green among
+The class-error integration on PR #55's tested tree keeps all 54 existing witnesses green among
 6,328 active candidates: 113 active features, 6,274 pairs without complete
 evidence. Five deferred features account for 575 further pairs in the unchanged
-118-feature / 6,903-pair eventual universe. The complete run passes 879 checks,
-with 169 inapplicable cells across 131 case IDs; client 129 React / 128 JX,
-hydrate 98, static 104 and lazy 109 per side. The derived-props case adds eight
-cells and no new pair witness; its scoped mutant was killed after a passing
-baseline, with zero survived/unusable. Final gate and Verify are pending.
+118-feature / 6,903-pair eventual universe. The complete run passes 887 checks,
+with 169 inapplicable cells across 132 case IDs; client 130 React / 129 JX,
+hydrate 99, static 105 and lazy 110 per side. The error-lifecycle case adds eight
+cells and no new pair witness; tightened report assertions pass eight additional
+focused projects. Its scoped mutant was killed after a passing baseline, zero survived/unusable, with final gate/Verify pending.
+Derived props merged in PR #55 as `84eb8cd` after a passing scoped mutant,
+15-step gate and both Verify checks on `021bc02`.
 The prior context case's captured-context mutant was killed after a passing
 baseline on runtime/fixture source identical after rebase. Context merged in
 PR #53 (`198c0b8`) after the 15-step gate and both Verify checks passed on `30a8911`.
