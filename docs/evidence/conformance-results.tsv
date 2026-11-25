@@ -13,6 +13,8 @@ child-values	pass	pass	pass	pass	pass	pass	pass	pass
 children-prop	pass	pass	pass	pass	pass	pass	pass	pass
 children-utilities	pass	pass	pass	pass	pass	pass	pass	pass
 choice-inputs	pass	pass	pass	pass	pass	pass	pass	pass
+class-keyed	pass	pass	pass	pass	pass	pass	pass	pass
+class-runtime	pass	pass	pass	pass	pass	pass	pass	pass
 clone-element	pass	pass	pass	pass	pass	pass	pass	pass
 combined-action-queue	pass	pass	pass	pass	pass	pass	pass	pass
 combined-activity-store	pass	pass	pass	pass	pass	pass	pass	pass

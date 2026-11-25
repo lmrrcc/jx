@@ -238,7 +238,7 @@ lifecycle parity or preserved class state across hot replacement.
 
 | Task | Deliverable | Status |
 | --- | --- | --- |
-| R-28-01 | Explicit Java descriptors and schemas; actual React Component/PureComponent; typed partial updates, basic lifecycle/snapshots/refs and compiling consumer with browser comparison | 🟡 local verification: 33 core, 41 compiler, 15 Maven tests and eight focused browser projects pass; scalar prerequisite, full conformance, mutation, push gate and Verify pending |
+| R-28-01 | Explicit Java descriptors and schemas; actual React Component/PureComponent; typed partial updates, basic lifecycle/snapshots/refs and compiling consumer with browser comparison | 🟡 review: 34 core, 41 compiler, 15 Maven tests and 811 complete bench checks pass; both class cases pass all eight projects; three curated mutants prepared, mutation execution, push gate and Verify pending |
 | R-28-02 | `.jx` class authoring, generated field projections and patches, diagnostics and native editor projections | ⬜ planned |
 | R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options | ⬜ planned |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |
@@ -248,13 +248,23 @@ requires a commit observer that covers skipped renders; `componentDidUpdate`
 alone is insufficient. Legacy lifecycle/default-prop/null-state behavior and
 generic schemas remain open until implemented or explicitly reviewed for R-31.
 
+The feature ledger marks both native class APIs `supported` with those explicit
+limits; this describes callable runtime support, not completion of all R-28
+options. `equivalent` described the previous error-boundary-only Java route and
+would be misleading for the new actual React class bridge. Activating the
+previously deferred PureComponent row increases the active universe from 104 to
+105 features, or 5,460 candidate pairs. The two new executed witnesses prove
+PureComponent with keys and instance refs; 47 pairs now have complete local
+evidence. Three new class mutants are pending an exclusive run:
+`java tools/MutateBench.java --only class-pure-renders,class-snapshot-lost,class-ref-detach-lost`.
+
 ### R-27 implementation slices
 
-Split before implementation on 24 November 2026 under working rule 5. The ledger
-contains 104 supported/equivalent feature IDs, giving 5,356 candidate unordered
+Split before implementation on 24 November 2026 under working rule 5. With the
+R-28-01 runtime slice, the ledger contains 105 supported/equivalent feature IDs, giving 5,460 candidate unordered
 pairs. Excluding only the two permanent non-API rows (`react-dom:browser` and
 `framework:react-compiler`), the eventual universe is 118 features / 6,903 pairs;
-1,547 additional pairs depend on the 14 deferred features. Alias rows remain
+1,443 additional pairs depend on the 13 deferred features. Alias rows remain
 distinct until an explicit applicability decision is reviewed. These counts are
 candidate relationships, not a claim that every pair has a meaningful interaction.
 

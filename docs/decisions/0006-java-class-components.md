@@ -1,7 +1,7 @@
 # Java class components on the React runtime
 
-Date: 24 November 2026. Status: implementation decision for R-28-01; verification
-pending. The broader R-28 task remains incomplete.
+Date: 24 November 2026. Status: R-28-01 local verification passed; scoped mutation,
+push gate and Verify pending. The broader R-28 task remains incomplete.
 
 Java classes may own React component identity through a descriptor separate from
 the existing functional `ComponentType`. The browser creates an actual subclass
@@ -75,8 +75,21 @@ projects: React/JX client, hydration, static HTML and lazy route. The interactiv
 assertions run in client, hydration and lazy modes; static mode checks initial
 HTML only. The case also proves null class output without unmounting, current
 instance props/state after a skipped render and stable current accessor identity.
-Full conformance, scoped mutation, push-gate and Verify checks are pending. No
-class feature or pair receives completion credit from this focused run alone.
+That focused run did not establish full conformance or pair evidence by itself.
+
+After inheriting the scalar prerequisite and Promise observer repair, the package
+passes 34 core, 41 compiler and 15 Maven-plugin tests. The complete local bench
+passes 811 checks with 133 inapplicable cells across 118 cases: client 116 React /
+115 JX, hydration 91 per side, static HTML 97 per side and lazy route 102 per side.
+The additional [keyed class consumer](../../tests/conformance/src/main/java/jx/conformance/cases/ClassKeyed.java)
+proves two already mounted Pure peers retain their real class refs, DOM nodes and
+state through both reorder directions without rendering equal projected props.
+Both class cases pass all eight projects. Two explicit interaction witnesses add
+evidence for PureComponent with keys and instance refs. Activating PureComponent
+increases the current universe to 105 features / 5,460 pairs, of which 47 have
+complete local evidence. It does not shrink the eventual 118-feature scope.
+Three targeted mutants are prepared, but their execution, the push gate and
+Verify remain pending.
 
 The first run exposed an existing signed-zero defect in the general scalar
 bridge. A separate prerequisite reproduces three independent hook/dependency/
@@ -87,7 +100,7 @@ This slice requires non-null initial props/state and applies one conservative
 reserved-name rule to both schemas, including React's props-only `key`/`ref`
 names. Native class rendering may return null; the existing functional
 `ComponentType.render` null restriction is a separate unresolved contract.
-The consumer proves keyed remount and an unaffected Pure sibling, not reordering
-two already mounted class peers. Advanced lifecycle options, class context,
+The consumers prove keyed remount, an unaffected Pure sibling and keyed reorder.
+Advanced lifecycle options, class context,
 compiler-generated schemas, mixed numeric wrapper types and class checkpoints
 remain unqualified.

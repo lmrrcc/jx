@@ -1,4 +1,6 @@
 id	feature-a	feature-b	case	modes	behavior
+pure-keyed	jsx:key	react:PureComponent	class-keyed	client,hydrate,lazy	Reordering keyed native PureComponent peers preserves their state and DOM nodes while equal projected fields skip rendering
+pure-instance-ref	react:PureComponent	react:createRef	class-keyed	client,hydrate,lazy	Checked class instance refs retain the original native PureComponent peers through state changes and keyed reorders without remounting
 portal-context	react-dom:createPortal	react:useContext	combined-portal-lifecycle	client,hydrate,lazy	Context updates cross the portal's logical ancestry without replacing its input node or draft
 portal-capture	dom:capture-phase-events	react-dom:createPortal	combined-portal-lifecycle	client,hydrate,lazy	Capture and bubble handlers follow the React ancestry across the separate portal DOM container
 portal-payload	dom:event-payload	react-dom:createPortal	combined-portal-lifecycle	client,hydrate,lazy	Portal handlers receive the original nested target and each logical currentTarget with updated defaultPrevented state

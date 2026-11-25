@@ -101,6 +101,7 @@ import { CombinedActionQueue } from './cases/combined-action-queue.jsx';
 import { CombinedOptimisticStore } from './cases/combined-optimistic-store.jsx';
 import { CombinedTransitionCancel } from './cases/combined-transition-cancel.jsx';
 import { ClassRuntime } from './cases/class-runtime.jsx';
+import { ClassKeyed } from './cases/class-keyed.jsx';
 
 export const cases = {
   'combined-portal-lifecycle': CombinedPortalLifecycle,
@@ -115,6 +116,7 @@ export const cases = {
   'combined-optimistic-store': CombinedOptimisticStore,
   'combined-transition-cancel': CombinedTransitionCancel,
   'class-runtime': ClassRuntime,
+  'class-keyed': ClassKeyed,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,
   'callable-state': CallableState,

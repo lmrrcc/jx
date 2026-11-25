@@ -8,6 +8,28 @@ browser, or editor distribution.
 The [GA roadmap](ga-roadmap.md) defines the next year of work, measurable release
 gates and portfolio migrations. Its planned capabilities are not delivered status.
 
+## R-28-01 update — 25 November 2026
+
+The first class runtime slice creates actual React `Component`/`PureComponent`
+instances backed by typed Java peers. Explicit schemas and partial patches support
+native queued updates, snapshots, lifecycle callbacks and checked instance refs.
+Two compiling consumers prove queue/commit behavior and keyed Pure reordering
+without replacing DOM nodes, class refs or state, or rendering unchanged fields.
+
+The package passes 34 core, 41 compiler and 15 Maven-plugin tests. The complete
+local bench passes **811 checks**, with 133 inapplicable cells across 118 case
+IDs: client 116 React / 115 JX, hydration 91 per side, static HTML 97 per side
+and lazy route 102 per side. Both class cases pass all eight projects. The two
+class witnesses bring this branch to 47 / 5,460 active pairs; 5,413 remain open.
+The expanded denominator includes the newly active PureComponent feature.
+
+R-28 remains partial: `.jx` class authoring, advanced lifecycle/context options
+and class hot checkpoints are still planned. Class hot replacement resets state.
+Three targeted mutants are prepared but have not run; push gate and Verify are
+pending. These results are Chrome evidence, with no new human qualification.
+See [the class decision](decisions/0006-java-class-components.md) and
+[task slices](ga-tasks.md#r-28-implementation-slices).
+
 ## R-26 update — 24 November 2026
 
 The conformance bench now runs client, hydration, static HTML and lazy-route
