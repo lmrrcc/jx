@@ -3,7 +3,6 @@
   <parent><groupId>dev.jx</groupId><artifactId>jx-parent</artifactId><version>0.1.0-SNAPSHOT</version></parent>
   <artifactId>jx-react</artifactId>
   <dependencies>
-    <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.13.4</version><scope>test</scope></dependency>
     <dependency><groupId>dev.jx</groupId><artifactId>jx-core</artifactId><version>${project.version}</version></dependency>
     <dependency><groupId>org.teavm</groupId><artifactId>teavm-jso</artifactId><version>${teavm.version}</version></dependency>
     <dependency><groupId>org.teavm</groupId><artifactId>teavm-jso-apis</artifactId><version>${teavm.version}</version></dependency>
