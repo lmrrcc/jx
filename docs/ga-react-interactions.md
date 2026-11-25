@@ -295,6 +295,75 @@ evidence: nine Promise tests, 36 runtime-package JVM tests and 13 runtime browse
 checks pass. Its full local gate and CI Verify passed before PR #42 merged; it
 adds no pair credit.
 
+## R-27-04: streaming, resource hydration and fatal readiness
+
+The combined local bench passes **809 checks, 151 skipped, across 120 case IDs**.
+Client/API results are **118/118 reference and 117/117 JX**; hydrate **90/90 each**,
+static **96/96 each** and lazy **101/101 each**. Four new executed witnesses bring
+the combined interaction evidence to **52 / 5,356**, with **5,304** pairs open.
+The mutation checks and Verify for this slice are still pending.
+
+`combined-server-stream` uses actual Node `Writable` instances. Two request-owned
+data promises remain gated while the spec observes the first shell and fallback
+bytes. This would deadlock if piping waited for all content. The newer request
+is aborted and its destination finishes and closes; the older suspended request
+then resumes with its own context and data. Late data for the closed request
+changes neither its bytes nor its write count. Starting and completing the
+requests in opposite orders prevents a single global "current request" from
+accidentally satisfying the isolation assertion.
+
+`combined-resource-hydration` serves the actual server HTML as the initial browser
+document while holding the application module. The spec retains element handles
+to the resource link and button before allowing hydration. Two counter updates
+prove that handlers are attached, preserve those original nodes and leave exactly
+one preload link despite repeated preload calls.
+
+| Witness | Interacting APIs | Evidence |
+| --- | --- | --- |
+| `stream-use-gate` | `renderToPipeableStream` + `use` | Shell bytes arrive while both data promises remain gated. |
+| `stream-context-isolation` | `renderToPipeableStream` + `useContext` | Aborting one stream does not replace the surviving request's provider or leak its values. |
+| `ssr-preload-dedupe` | `renderToString` + `preload` | Repeated hints produce one link in the initial document. |
+| `hydrate-preload-reuse` | `hydrateRoot` + `preload` | Hydration and updates retain the original link and button without duplicate hints. |
+
+All four witnesses run in the **client-labelled projects**: the streaming case
+executes in Node, and the hydration case owns its own SSR-to-browser handoff.
+The latter is excluded from generic hydrate/static/lazy modes in `modes.tsv`.
+These results do not claim an HTTP streaming deployment, authenticated request
+isolation, automatic cancellation of arbitrary application loaders or completion
+of G0 M1-26. The older `stream-suspense` witness still proves collected HTML order;
+the new gated Writable witness supplies the separate early-delivery evidence.
+
+The additional `server-fatal-readiness` regression exposed a production defect.
+Before the fix, the React reference passed while JX rejected `shellReady()` but
+left `allReady()` pending after a fatal shell render. React's `onShellError` now
+rejects both JX signals with the same failure. The green test observes both
+rejections and one error notification, without treating an empty result as success.
+It adds no interaction-pair credit. `allReady()` means React finished its server
+work: a failed or aborted boundary may still contain fallback HTML.
+
+The test suite covers the full SSR API cases plus the existing hydration case.
+`npm run test:ssr` now selects streaming, prerender, resume and hydration as well
+as the string renderers; its former `server-render` filter missed those cases.
+The complete bench records every case and all declared interaction assertions.
+
+```sh
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -pl tests/conformance -am package
+npm run test:ssr
+BENCH_UPDATE=1 npm run test:bench
+```
+
+The planned scoped mutation checks are `stream-writable-waits-for-all`,
+`stream-fatal-all-pending` and the existing `hint-preload-dropped`. Their outcomes
+must be recorded after execution; registration alone supplies no mutation result.
+The historical full mutation campaign remains separate.
+
+Known unqualified failure path: a destination failure after the shell is emitted
+does not necessarily trigger React's `onShellError`; the Java `HtmlSink` adapter
+currently ignores destination destruction. The fatal-shell regression does not
+establish terminal readiness/error delivery for that different path. Reproduce
+and resolve it before advertising general sink-failure safety. Human and
+cross-browser qualification also remain open.
+
 ## R-27-02c: portal lifecycle, context and events
 
 `combined-portal-lifecycle` adds six explicit pair witnesses in client, hydrate
