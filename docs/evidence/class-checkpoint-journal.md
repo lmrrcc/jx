@@ -213,11 +213,59 @@ default values or ordinary JSON omission must not silently collapse them.
 
 The conservative integration boundary is to reject checkpoint descriptors with
 nullable aggregate state or optional state fields, in either modifier order,
-before a running application can request replacement. That guard and its JVM and
-browser regressions remain to be implemented when the branches are combined.
+before a running application can request replacement. The combined-branch
+implementation and its separate evidence follow below.
 Future support must prove cross-generation round trips for all these states and
 retain the existing own-commit proof. This is pending work, not an accepted
 exclusion or a reason to mark R-28-04 complete.
+
+### Combined nullable/journal admission — source `c205ca2`
+
+The integration branch starts from qualified server/class candidate `f8565e6`,
+then combines nullable source `50fde0a`/`1ff6ac6` and the journal source and review
+corrections above. All immutable modifiers retain pending-context policies,
+nullable-state policy and checkpoint metadata; the renderer retains nullable
+decoding for constructor, derivation, previous-state and snapshot callbacks.
+
+The central descriptor constructor rejects a checkpoint when aggregate state is
+nullable or any state field is optional. Both modifier orders fail synchronously,
+without constructing a peer or executing its state codec. Required fields with
+nullable values remain legal. Ordinary nullable/sparse classes without checkpoints
+keep their native React behavior. No value is defaulted or synthesized.
+
+This prevents unqualified live state from entering the capture protocol. It does
+**not** preflight arbitrary initializers of a newly edited candidate: other invalid
+candidate startup code can still fail after teardown. That limitation remains
+separate from the actual compiled-runtime protocol preflight.
+
+The two new JVM regressions first failed because no exception was thrown; the
+browser regression independently observed `accepted` for the unsupported
+configuration. After the guard, the full package passes **69 core, 11 React,
+7 Elm, 54 compiler and 15 Maven tests**, including actual TeaVM compilation.
+All **32 runtime Chrome checks** pass, including the same admission regression;
+the old root and actual DOM node remain live, increment again and produce the
+correct committed checkpoint after all three rejected configuration attempts.
+The initial guarded run caught a missing favicon in the hot test page; adding
+the same data favicon used by the ordinary runtime page fixed the request,
+without filtering console errors. The class comparison then passes **96/96**
+checks: twelve cases across all eight React/JX projects.
+
+Logs: `/private/tmp/jx-checkpoint-admission-jvm-red.log`,
+`/private/tmp/jx-checkpoint-admission-browser-red.log`,
+`/private/tmp/jx-checkpoint-admission-package-green.log`,
+`/private/tmp/jx-checkpoint-admission-runtime-final.log`, and
+`/private/tmp/jx-checkpoint-admission-class-focused.log`.
+The combined full conformance run then passes **953 checks, with 199 mode skips
+across 144 cases**: client 142/142 reference and 141/141 JX; hydration 106/106,
+static HTML 112/112 and lazy routes 117/117 per side. The result table adds only
+the two nullable cases; all existing rows and the **62/6,328** pair witnesses stay
+unchanged (6,266 active candidate pairs remain open). This qualifies the combined
+`f8565e6` base and source `c205ca2`, not every later branch or main revision.
+The log is `/private/tmp/jx-checkpoint-admission-full.log`.
+
+Targeted hot mutations, nullable-state mutations and publication gate/Verify are
+still pending. This admission guard closes neither nullable checkpoint support
+nor the remaining R-28-04 commit-correlation requirements.
 
 ## Remaining design requirement
 
