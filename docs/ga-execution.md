@@ -161,8 +161,22 @@ hydrate 99, static 105 and lazy 110 per side. All six class cases pass eight
 projects each. Tightened assertions for exactly eight expected caught reports
 and one event error pass a further eight focused checks. Pair evidence remains
 **54 / 6,328**. The reporting mutant was killed after a passing baseline, zero survived/unusable; the catalog has 127 entries,
-without rerunning the historical full campaign of 100. Final gate/Verify and
-production, server-error and broader foreign-value qualification remain open.
+without rerunning the historical full campaign of 100. PR
+[#57](https://github.com/lmrrcc/jx/pull/57) merged as `6ebfc76` after the 15-step
+gate passed in 342 seconds and both Verify checks passed on `baa2da5`.
+Production, server-error and broader foreign-value qualification remain open.
+
+R-28-03d composes those lifecycles in direct `.jx` class declarations. The
+integrated package passes 47 core, 52 compiler, 15 Maven and 10 LSP tests. The
+complete bench passes **895 checks, 169 skipped, across 133 cases**: client 131
+reference / 130 JX, hydrate 100, static 106 and lazy 111 per side. All 56 class
+cells pass, as do eight focused checks with strict expected-error assertions.
+Case evidence adds one consumer; pair evidence stays **54 / 6,328**. The compiler
+mutant was killed after a passing baseline on byte-identical source in the
+five-mutant candidate campaign `e63ea76` (five killed, zero survived/unusable).
+Final gate/Verify remain pending. Following the source-preserving rebase
+onto the Forms-integrated error-lifecycle head, the catalog has 128 entries; the
+historical full campaign remains 100. Native IDE qualification is separate.
 
 R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
 using actual Flight and separate server/client Java programs. Seven Node and four
@@ -234,7 +248,7 @@ exists, not when its document or skeleton module lands.
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
 | GA-17 | Forms, validation, i18n and accessible primitives / A | GA-10, GA-15 | M3–M5 / L | Complex form, arrays/errors, locale/RTL, keyboard/reader, shared pure rules and server errors | ⬜ planned |
-| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger and differential fixtures. Interaction, class, Flight, cache, utility, context and derived-props slices merged through PR55; error lifecycle passes 887 integrated checks, scoped mutant killed after a passing baseline, zero survived/unusable, gate/Verify pending. Pair evidence remains 54 / 6,328, with 6,274 open plus 575 deferred-feature pairs; remaining APIs/options and combined scenarios open | 🟡 partial |
+| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger and differential fixtures. Interaction, class, Flight, cache, utility, context, derived-props and error-lifecycle slices merged through PR57; direct lifecycle authoring passes 895 checks, compiler mutant killed after a passing baseline; final gate/Verify pending. Pair evidence remains 54 / 6,328, with 6,274 open plus 575 deferred-feature pairs; remaining APIs/options and combined scenarios open | 🟡 partial |
 | GA-19 | HTTP headers/binary/upload/stream capabilities / C | GA-03, GA-10, GA-13 | M3–M5 / L | Auth/CSRF headers, upload progress, download, SSE/WS lifecycle, bounds/reconnect tested | ⬜ planned |
 | GA-20 | Real ecosystem binding SDK and catalog / R | GA-15, GA-18 | M4–M7 / L | Selected grid/editor/chart/headless/media bindings with refs/assets/cleanup; Java consumer examples | ⬜ planned |
 | GA-21 | Complex authenticated reference product / A | GA-12, GA-13, GA-16, GA-17, GA-19 | M4–M6 / L | Workspace/project workflow with roles, search/table/detail, forms/files/activity and two-tenant tests | ⬜ planned |

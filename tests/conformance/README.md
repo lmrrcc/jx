@@ -139,9 +139,9 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The integrated class-error run on PR #55's tested tree passes 887 checks, with
-169 skipped cells across 132 case IDs: client 130 reference / 129 JX, hydrate 99
-per side, static 105 per side and lazy 110 per side. Fifty-four pairs have complete local
+The integrated lifecycle-authoring run passes 895 checks, with 169 skipped cells
+across 133 case IDs: client 131 reference / 130 JX, hydrate 100 per side, static
+106 per side and lazy 111 per side. Fifty-four pairs have complete local
 evidence in their declared modes; 6,274 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate
@@ -212,8 +212,36 @@ initial HTML only. Run the mutant exclusively, with no other build/browser work:
 java tools/MutateBench.java --only class-error-report-dropped --keep
 ```
 
-The catalog has 127 entries; the historical full campaign remains 100. Final
-gate and Verify remain pending.
+The catalog at the error-lifecycle merge has 127 entries; the historical full
+campaign remains 100. PR [#57](https://github.com/lmrrcc/jx/pull/57) merged as
+`6ebfc76` after the 15-step gate passed in 342 seconds and both Verify checks
+passed on `baa2da5`.
+
+`class-lifecycle-authoring` exercises a direct `.jx` Pure class whose generated
+descriptor composes typed context, static prop/error derivation and committed
+didCatch. All eight focused projects pass, requiring exactly one expected caught
+report and no unrelated errors. The integrated package passes 47 core, 52 compiler,
+15 Maven and 10 LSP tests; the full bench passes 895 checks/169 skipped/133 cases,
+including all 56 class cells. Provider
+and null context updates retain local state, derived partial patches preserve
+unmentioned fields, and the callback observes the committed fallback and original
+Java error. Recovery retains the actual class-ref identity and independent local
+state while replacing the failed rendered subtree and recreating its child;
+Playwright DOM handles distinguish those operations. Static compares initial
+HTML only. Real-core javac and LSP tests cover signatures, typed source projection
+and original-source error mapping, without claiming native IDE qualification.
+The compiler mutant `class-authoring-error-derive-lost` was killed by this case
+after the unmutated baseline passed, in the five-mutant campaign on `e63ea76`
+(five killed, zero survived/unusable). This slice's compiler, LSP, authored
+consumers and shared spec are byte-identical to that candidate; the other four
+mutations qualify separate preload/sink/act work. Run just the compiler mutation
+in an exclusive build/browser window with
+`java tools/MutateBench.java --only class-authoring-error-derive-lost --keep`.
+Case evidence adds only this case; pair evidence stays 54/6328. The catalog has
+128 mutants after the source-preserving rebase onto the Forms-integrated error
+lifecycle head, with no new full-catalog run beyond the historical 100. The
+final combined gate and Verify remain pending.
+
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
 combine optimistic state with external-store snapshots, transitions and Java async

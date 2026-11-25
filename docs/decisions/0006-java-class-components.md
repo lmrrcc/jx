@@ -349,10 +349,123 @@ diagnostics and additional foreign kinds remain unqualified. The scoped
 one mutation, with zero survived/unusable. Only `class-error-lifecycle` fails, in
 client, hydration and lazy, because the committed catch report is absent; static
 correctly still passes. The campaign used commit `c27f881`; scratch evidence is
-`jx-mutation-1028723938717671193`. Final gate and Verify remain pending.
+`jx-mutation-1028723938717671193`.
 
 The final integration onto Forms merge `cc87f95` preserves the qualified class
 runtime, JVM tests, Java/reference consumers and strengthened shared spec byte
-for byte. Both recorded result tables are unchanged. The final push gate must
-qualify the combined tree. The catalog now includes 127 mutants, including the
+for byte. Both recorded result tables are unchanged. The final push gate passed
+all 15 steps in 342 seconds, including the 887-check bench. PR
+[#57](https://github.com/lmrrcc/jx/pull/57) merged as `6ebfc76` after both
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45635601496) and
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45635742220) passed on
+`baa2da5`. The catalog at that merge includes 127 mutants, including the
 two merged Forms mutants; the historical full campaign remains 100.
+
+## R-28-03d direct lifecycle declarations — 25 November 2026
+
+Native classes authored in `.jx` may declare their accepted lifecycle APIs with
+ordinary Java members. The compiler connects those declarations to the existing
+typed native descriptor; React still owns invocation and scheduling.
+
+```java
+@Component
+public final class Panel extends ClassComponent<Panel.Props, Panel.Model, Void> {
+    public record Props(int revision) {}
+    public record Model(int count, Throwable error) {}
+    public static final Context<String> contextType = new Context<>("day");
+    private final Supplier<String> theme;
+
+    public Panel(Props props, Supplier<String> theme) {
+        super(props, new Model(props.revision(), null));
+        this.theme = theme;
+    }
+
+    public static StatePatch<Model> getDerivedStateFromProps(Props next, Model pending) {
+        return next.revision() == pending.count() ? null
+                : statePatch().withCount(next.revision()).build();
+    }
+
+    public static StatePatch<Model> getDerivedStateFromError(Throwable error) {
+        return statePatch().withError(error).build();
+    }
+
+    @Override protected void componentDidCatch(Throwable error, ComponentErrorInfo info) {
+        report(error, info.componentStack());
+    }
+
+    @Override public View render() {
+        return <p>{theme.get()}: {state().count()}</p>;
+    }
+}
+```
+
+The excerpt omits the application's `report` implementation and imports from
+`jx` and `java.util.function.Supplier`. A runnable composed consumer is
+[AuthoredLifecycle.jx](../../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredLifecycle.jx).
+
+`contextType` must be one initialized `public static final Context<T>` field,
+with a concrete value type, paired with a public `(Props, Supplier<T>)`
+constructor. Without it, the original `(Props)` constructor remains the
+contract. The reader has the ownership, null and current-value semantics of
+`normalWithContext` / `pureWithContext`; no hidden instance field or subscription
+is introduced. Nested generic context values are Java types, independent of the
+bounded props/state field schema.
+
+The derivation methods are public, static, non-generic methods with the exact
+declared props/state types and a `StatePatch<State>` result. Error derivation
+takes `Throwable`; `componentDidCatch` is a public/protected void override taking
+`Throwable, ComponentErrorInfo`. Omitted fields, explicit null fields and null
+derivation results retain the existing runtime meaning. The generated descriptor
+chains both immutable modifiers when both methods are present. Its initialization
+follows authored static declarations, with schemas in the existing lazy holder.
+Checked constructor/callback exceptions remain ordinary javac errors.
+
+The parser reports malformed declarations at the authored member, respecting
+explicit imports and local shadow types. Java body attribution and editor
+projection remain the same compiler path; generated descriptor text is not an
+editable source region. This does not qualify native IDE rename, inspections or
+completion in running IDE distributions: that remains R-28-02b.
+
+The next-context argument of `shouldComponentUpdate` is a separate R-28-03e
+slice. Its proposed additive typed descriptor policy receives the Java peer,
+next props, next state and the value of the descriptor's matching `Context<T>`.
+It must preserve the existing two-argument override and specify precedence when
+both are configured. Compiler overload support follows runtime evidence. This
+slice does not change class generic parameters, null initial state, direct null
+updates or class hot checkpoints.
+
+Integrated package verification passes 47 core, 52 compiler, 15 Maven-plugin and 10 LSP
+tests. Real-core javac consumers cover normal and Pure factories, both chained
+derivations, typed context readers, import shadowing, fully qualified types and
+checked constructor/callback exceptions. Both generated code and editor
+projections type-check; invalid patch arguments map back to the authored method
+body, and the LSP retains class tag/ref metadata and editable Java mappings.
+
+The new browser consumer passes all eight focused projects with exactly one
+expected caught-error report and no unrelated console/page errors. The complete
+integrated bench then passes **895 checks, 169 skipped, across 133 cases**:
+client 131 React / 130 JX, hydrate 100, static 106 and lazy 111 per side. All seven
+class cases pass eight projects each. Context changes bypass Pure comparison without resetting local state;
+derived props update only their named fields; error derivation and committed
+reporting preserve the original Java failure. The initial test incorrectly
+expected the boundary's original host section to survive a descendant error.
+Both actual React and JX recreated that rendered subtree. The final test instead
+checks pre-error DOM stability, old-subtree detachment, independently edited local
+state and the actual class-ref identity retained across recovery, and a fresh
+child instance. Production runtime code was unchanged.
+
+Static mode compares initial HTML only. This is Chrome evidence on the integrated
+class-error branch. Recorded case evidence adds only `class-lifecycle-authoring`;
+all 54 pair witnesses remain green among 6,328 active candidates, with no new pair
+credit. After the source-preserving rebase onto PR #57's Forms-integrated head,
+the catalog has 128 mutants; the historical full campaign remains 100.
+The compiler mutant `class-authoring-error-derive-lost` was killed by
+`class-lifecycle-authoring` after the unmutated baseline passed. It ran in the
+five-mutant campaign on combined candidate `e63ea76`: five killed, zero survived
+or unusable, with compiler, LSP, authored consumers and shared spec byte-identical
+to this slice. The other four mutations qualify their own preload/sink/act work;
+they add no class evidence. Scratch evidence is
+`jx-mutation-7730846870036546774`. Repeat only this mutation in an exclusive
+build/browser window with
+`java tools/MutateBench.java --only class-authoring-error-derive-lost --keep`.
+The final push gate and Verify remain pending.

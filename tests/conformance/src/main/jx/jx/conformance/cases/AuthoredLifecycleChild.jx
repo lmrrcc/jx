@@ -1,0 +1,14 @@
+package jx.conformance.cases;
+
+import jx.*;
+
+@Component
+public final class AuthoredLifecycleChild {
+    public record Props(boolean fail) {}
+    public static final IllegalStateException FAILURE = new IllegalStateException("authored lifecycle child failed");
+    public static View render(Props props) {
+        State<Integer> count = Hooks.useState(0);
+        if (props.fail()) throw FAILURE;
+        return <button data-testid="authored-lifecycle-child" onClick={event -> count.update(value -> value + 1)}>Child: {count.value()}</button>;
+    }
+}

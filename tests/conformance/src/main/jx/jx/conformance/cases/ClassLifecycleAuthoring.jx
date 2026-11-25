@@ -1,0 +1,31 @@
+package jx.conformance.cases;
+
+import jx.*;
+
+@Component
+public final class ClassLifecycleAuthoring {
+    public static View render() {
+        State<String> theme = Hooks.useState("day");
+        State<Integer> revision = Hooks.useState(0);
+        State<Boolean> fail = Hooks.useState(false);
+        State<Integer> pulse = Hooks.useState(0);
+        State<String> identity = Hooks.useState("uninspected");
+        Ref<AuthoredLifecycle> beforeFailure = Hooks.useRef(null);
+        ClassRef<AuthoredLifecycle> boundary = Hooks.useMemo(() -> new ClassRef<>(value -> {
+            if (value instanceof AuthoredLifecycle typed) return typed;
+            throw new IllegalArgumentException("Expected AuthoredLifecycle");
+        }), Dependencies.none());
+        return <main>
+            <button onClick={event -> theme.set("night")}>Change lifecycle context</button>
+            <button onClick={event -> theme.set(null)}>Null lifecycle context</button>
+            <button onClick={event -> revision.update(value -> value + 1)}>Advance lifecycle revision</button>
+            <button onClick={event -> pulse.update(value -> value + 1)}>Equal lifecycle props</button>
+            <button onClick={event -> { beforeFailure.set(boundary.current()); fail.set(true); }}>Fail authored child</button>
+            <button onClick={event -> { fail.set(false); boundary.current().recover(); }}>Recover authored child</button>
+            <button onClick={event -> identity.set(boundary.current() != null && boundary.current() == beforeFailure.current() ? "same" : "different")}>Inspect lifecycle identity</button>
+            <output data-testid="authored-lifecycle-pulse">{pulse.value()}</output>
+            <output data-testid="authored-lifecycle-identity">{identity.value()}</output>
+            {AuthoredLifecycle.contextType.provide(theme.value(), <AuthoredLifecycle ref={boundary} revision={revision.value()} fail={fail.value()} />)}
+        </main>;
+    }
+}

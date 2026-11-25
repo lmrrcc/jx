@@ -138,9 +138,9 @@ No new pair witness is claimed. The captured-context mutant was killed by
 `class-context` in client, hydration and lazy modes after a passing scratch
 baseline: 1 killed, 0 survived, 0 unusable. [PR #53](https://github.com/lmrrcc/jx/pull/53)
 merged as `198c0b8` after the 15-step local gate and both Verify checks passed on
-`30a8911`. Compiler context syntax,
-the third next-context should-update argument and preserved class hot state remain
-separate tasks.
+`30a8911`. Direct `.jx` context declarations are supported by the
+[class authoring contract](language.md#native-class-components). The third
+next-context should-update argument and preserved class hot state remain separate tasks.
 
 ### State derived from class props
 
@@ -160,9 +160,9 @@ The compiling [`ClassDerivedProps`](../tests/conformance/src/main/java/jx/confor
 consumer exercises initialization, local/prop-driven changes, skipped rendering,
 force updates, Pure bailouts and previous-DOM snapshots. The
 [class decision](decisions/0006-java-class-components.md#r-28-03b-derived-state-from-props--25-november-2026)
-records evidence and remaining qualification. This slice uses explicit Java
-descriptors; authored static lifecycle sugar, browser error-boundary qualification
-and committed class hot checkpoints remain separate work. Initial state still
+records evidence and remaining qualification. Explicit descriptors and authored
+static lifecycle declarations share this runtime contract. Browser error-boundary
+qualification is described below; committed class hot checkpoints remain open. Initial state still
 must be non-null.
 
 ### Class error boundaries
@@ -188,8 +188,16 @@ error can retain the foreign object graph. `ComponentErrorInfo.componentStack()`
 contains React's original component-stack string, which may be empty.
 
 The [class decision](decisions/0006-java-class-components.md#r-28-03c-native-error-lifecycle--25-november-2026)
-records the tested cases and diagnostic limits. Compiler lifecycle declarations,
-production diagnostics and server-render error recovery remain separate work.
+records the tested cases and diagnostic limits. Direct `.jx` lifecycle declarations
+use the same typed runtime, as demonstrated by
+[AuthoredLifecycle.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredLifecycle.jx).
+Production diagnostics and server-render error recovery remain separate work.
+
+The runtime error-lifecycle slice merged in
+[PR #57](https://github.com/lmrrcc/jx/pull/57) as `6ebfc76`: the final integrated
+bench passed 887 checks with 169 skipped, its reporting mutant was killed after
+a passing baseline, and the 15-step local gate plus both Verify checks passed.
+This qualifies the explicit runtime contract, not the remaining class options.
 
 ## Hook behavior
 

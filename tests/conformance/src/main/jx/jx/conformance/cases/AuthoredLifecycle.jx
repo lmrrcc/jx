@@ -1,0 +1,54 @@
+package jx.conformance.cases;
+
+import java.util.function.Supplier;
+import jx.*;
+import jx.conformance.Bench;
+
+/** Ordinary Java lifecycle declarations connected to a generated native Pure descriptor. */
+@Component
+public final class AuthoredLifecycle extends PureComponent<AuthoredLifecycle.Props, AuthoredLifecycle.Model, Void> {
+    public record Props(int revision, boolean fail) {}
+    public record Model(int revision, int count, String note, boolean failed, Throwable error) {}
+    public static final Context<String> contextType = new Context<>("default");
+    private final Supplier<String> theme;
+    private final DomRef fallback = new DomRef();
+
+    public AuthoredLifecycle(Props props, Supplier<String> theme) {
+        super(props, new Model(-1, -1, "ready", false, null));
+        this.theme = theme;
+    }
+
+    public static StatePatch<Model> getDerivedStateFromProps(Props next, Model pending) {
+        if (next.revision() == pending.revision()) return null;
+        return statePatch().withRevision(next.revision()).withCount(next.revision() * 10)
+                .withNote(next.revision() == 0 ? "ready" : null).build();
+    }
+
+    public static StatePatch<Model> getDerivedStateFromError(Throwable error) {
+        return statePatch().withFailed(true).withError(error).build();
+    }
+
+    @Override protected void componentDidCatch(Throwable error, ComponentErrorInfo info) {
+        Bench.log("authored-lifecycle:caught:same=" + (error == state().error())
+                + ":original=" + (error == AuthoredLifecycleChild.FAILURE)
+                + ":committed=" + (fallback.current() != null && fallback.current().textContent().equals(summary()))
+                + ":stack=" + !info.componentStack().isEmpty());
+    }
+
+    public void recover() { setState(statePatch().withFailed(false).withError(null).build()); }
+    private String summary() {
+        return (theme.get() == null ? "<null>" : theme.get()) + ":" + state().count()
+                + ":" + (state().note() == null ? "<null>" : state().note());
+    }
+
+    @Override public View render() {
+        Bench.log("authored-lifecycle:render");
+        return <section data-testid="authored-lifecycle-boundary">
+            <output data-testid="authored-lifecycle-value">{summary()}</output>
+            <button onClick={event -> setState((pending, next) -> statePatch().withCount(pending.count() + 1).build())}>Increment lifecycle boundary</button>
+            {state().failed()
+                ? <output ref={fallback} data-testid="authored-lifecycle-fallback">{summary()}</output>
+                : <AuthoredLifecycleChild fail={props().fail()} />}
+        </section>;
+    }
+}
