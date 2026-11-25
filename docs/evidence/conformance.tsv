@@ -63,15 +63,15 @@ react-dom:version	constant	supported	runtime-utilities,server-runtime-versions	R
 react-dom/client:createRoot	api	supported	state-counter,unknown-case,root-options	React.mount, React.mountStrict, React.RootOptions		The three error callbacks and identifierPrefix; onDefaultTransitionIndicator is not offered
 react-dom/client:hydrateRoot	api	supported	hydrate-root,hydrate-server,combined-resource-hydration	React.hydrate, React.hydrateStrict		Takes the same RootOptions as mount
 react-dom/client:version	constant	supported	runtime-utilities,server-runtime-versions	React.clientVersion		Reads loaded export; browser and Node checks pass
-react-dom/server:renderToPipeableStream	server	supported	server-pipeable-stream,server-stream-suspense,combined-server-stream,server-fatal-readiness,server-sink-completion	ReactServer.renderToPipeableStream		Shell and all-ready are promises; Java sink delivery promise preserves write/end failure; native Node Writable lifecycle remains host-owned
-react-dom/server:renderToReadableStream	server	supported	server-readable-stream	ReactServer.renderToReadableStream		Options: identifier prefix, bootstrap scripts and modules, onError
+react-dom/server:renderToPipeableStream	server	supported	server-pipeable-stream,server-stream-suspense,combined-server-stream,server-fatal-readiness,server-sink-completion,server-bootstrap	ReactServer.renderToPipeableStream		Shell and all-ready are promises; Java sink delivery promise preserves write/end failure; native Node Writable lifecycle remains host-owned; trusted inline bootstrap exercised; request-time script/style nonces, static rejects nonce options
+react-dom/server:renderToReadableStream	server	supported	server-readable-stream,server-bootstrap	ReactServer.renderToReadableStream		Options: identifier prefix, bootstrap scripts and modules, onError; trusted inline bootstrap exercised; request-time script/style nonces, static rejects nonce options
 react-dom/server:renderToStaticMarkup	server	supported	server-render-to-static-markup	ReactServer.renderToStaticMarkup		Runs in a Node host
 react-dom/server:renderToString	server	supported	server-render-to-string,combined-resource-hydration	ReactServer.renderToString		Runs in a Node host; the options other than identifierPrefix are not offered
 react-dom/server:resume	server	supported	server-resume	ReactServer.resume		
 react-dom/server:resumeToPipeableStream	server	supported	server-resume-pipeable	ReactServer.resumeToPipeableStream		
 react-dom/server:version	constant	supported	server-runtime-versions	ReactServer.version		Reads server export; Node check passes
-react-dom/static:prerender	server	supported	static-prerender,server-resume	ReactStatic.prerender		Abort and the postponed state are exercised by the resume cases
-react-dom/static:prerenderToNodeStream	server	supported	static-prerender-node	ReactStatic.prerenderToNodeStream		
+react-dom/static:prerender	server	supported	static-prerender,server-resume,server-bootstrap	ReactStatic.prerender		Abort and the postponed state are exercised by the resume cases; trusted inline bootstrap exercised; request-time script/style nonces, static rejects nonce options
+react-dom/static:prerenderToNodeStream	server	supported	static-prerender-node,server-bootstrap	ReactStatic.prerenderToNodeStream		; trusted inline bootstrap exercised; request-time script/style nonces, static rejects nonce options
 react-dom/static:resumeAndPrerender	server	supported	static-resume-prerender	ReactStatic.resumeAndPrerender		
 react-dom/static:resumeAndPrerenderToNodeStream	server	supported	static-resume-prerender-node	ReactStatic.resumeAndPrerenderToNodeStream		
 react-dom/static:version	constant	supported	server-runtime-versions	ReactStatic.version		Reads static-renderer export; Node check passes

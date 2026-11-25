@@ -6,6 +6,22 @@ Java view descriptions and contracts; `jx-react` converts those descriptions to
 actual React elements. React invokes components, owns hook slots, reconciles keys,
 commits DOM updates, and schedules effects. There is no alternate renderer.
 
+## Server bootstrap and CSP
+
+For request-time rendering, `ReactServer.StreamOptions.withNonce(String)` sets
+the script nonce; `withNonces(new ReactServer.Nonces(scriptNonce, styleNonce))`
+selects React's separate script/style contract. The HTTP host generates fresh
+nonces and sends the matching CSP header. Managed style elements must also carry
+the matching style nonce in their props. These options do not rewrite arbitrary
+element props. `withBootstrapScriptContent(String)` accepts trusted framework
+bootstrap source; it must not contain concatenated untrusted request data.
+
+The original four-argument options constructor remains supported; the record
+shape has expanded. All `ReactStatic` prerender methods reject nonce-bearing
+options because their HTML can be reused. See the [bootstrap evidence](evidence/server-bootstrap.md)
+for the tested Node/Chrome contract, the upstream classic-preload nonce defect,
+and the remaining streaming/resume/production qualification.
+
 ## Components and ownership
 
 Declare a `ComponentType<Props>` once, normally as a static final descriptor. Compose

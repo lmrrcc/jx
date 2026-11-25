@@ -181,7 +181,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-29 | M7 | Remaining small surface; split into R-29-01 through R-29-04 below | 9 | 🟡 partial: eight rows merged in PR52 after green local gate and both Verify checks; four scoped mutants killed; cache refresh and deep owner diagnostics remain open |
 | R-29-01 | M7 | Runtime version getters, development owner stacks and the legacy batching callback/return contract | 7 | ✅ done for the bounded utility contract: PR52 merged as 8fdbed0 with green gate/Verify; deep Java diagnostic chains remain explicitly assigned to R-29-04 |
 | R-29-02 | M7 | Awaited asynchronous `act` for Java test consumers, including flushing, nesting, failure recovery and real production-build rejection | 1 | ✅ done for the asynchronous contract: PR52 merged with green gate/Verify; flush-bypass mutant killed after baseline passed; no synchronous or overlapping-scope parity claim |
-| R-29-02b | M7 | Synchronous Runnable act scopes with immediate flush observation, awaited completion, original Java errors and production rejection before callback invocation | refines act | 🟡 implemented locally: package 40 core/48 compiler/15 plugin; four differential development/production checks pass with 12 inapplicable mode cells; existing async/nested/error paths retained; sync-to-async mutant killed after passing baseline in5/5 candidatee63ea76 campaign,0survived/unusable; integrated905pass175skip/135cases, five byte-identical act files; final gate/Verify pending |
+| R-29-02b | M7 | Synchronous Runnable act scopes with immediate flush observation, awaited completion, original Java errors and production rejection before callback invocation | refines act | ✅ done in PR [#65](https://github.com/lmrrcc/jx/pull/65): package 40 core/48 compiler/15 plugin; four differential development/production checks pass with 12 inapplicable mode cells; existing async/nested/error paths retained; sync-to-async mutant killed after passing baseline in5/5 candidatee63ea76 campaign,0survived/unusable; integrated905pass175skip/135cases, five byte-identical act files; PR65 merged as 65372bc after the 15-step gate passed in 313s and both Verify checks passed on 0d9e7e8; final integrated 929 passed/175 skipped/138 cases, unchanged 54/6328 pairs |
 | R-29-03 | M8–M10 | `unstable_useCacheRefresh` with an exercised server cache owner and invalidation contract; depends on R-30 | 1 | ⬜ planned; cache/signal proof merged in PR51, but refresh ownership and invalidation still need implementation and evidence |
 | R-29-04 | M7 | Preserve useful development owner chains through deep Java/TeaVM element conversion without React-private stack mutation or global Error hooks; accepted limit or implementation required by R-31 | diagnostic depth | ⬜ planned: first R-29 run exposed truncated pure-Java owner chains |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | 🟡 partial — Flight PR49 and typed cache/signal/Java continuation context PR51 are merged with green local gates and both Verify checks; combined proof 28 Node + 4 Chrome. [ADR 0007](decisions/0007-react-server-components.md) tracks open directives, general references, server functions and production qualification |
@@ -241,6 +241,24 @@ static 107 and lazy 112 per side. Its five sink implementation/consumer files
 remain byte-identical to the successful mutation candidate `e63ea76`.
 All 54/6328 registered interaction pairs remain unchanged. This is the earlier
 integration candidate; the final merged qualification is recorded above.
+
+R-31-SERVER-BOOTSTRAP, 25 November 2026: 🟡 implemented locally at `8682f3d`.
+Typed string/separate CSP nonces and trusted inline bootstrap source work through
+the native pipeable/readable renderers; both static prerender variants emit
+bootstrap source and all four static entry points reject request-specific nonces.
+Two JVM option tests and two differential Node-to-Chrome CSP checks pass; the
+related SSR suite passes 36 checks with 108 inapplicable mode cells. Exact HTML,
+two-response isolation, allowed execution/styles and denial under a mismatched
+policy are asserted. A React classic-preload object-nonce defect is explicitly
+tested and retained as an upstream limitation. Integrated source `0da2b25`
+passes 47 core/4 React/52 compiler/15 Maven-plugin checks and the complete bench:
+907 passed, 181 skipped, 136 cases, unchanged 54/6328 interaction pairs. The three
+scoped bootstrap mutants are now killed by `server-bootstrap` after a passing
+baseline in joint candidate `f49b48f`/source `193181f`: seven total mutants killed,
+zero survived/unusable, with 931 passed/181 skipped/139 cases and the same pair
+evidence. This branch's bootstrap source is byte-identical. Final publication onto
+merged main, the gate and Verify remain pending; no pair credit is added.
+See the [bootstrap contract and evidence](evidence/server-bootstrap.md).
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven
