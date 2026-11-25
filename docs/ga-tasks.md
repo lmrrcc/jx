@@ -175,6 +175,18 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | 🟡 partial — Flight PR49 and typed cache/signal/Java continuation context PR51 are merged with green local gates and both Verify checks; combined proof 28 Node + 4 Chrome. [ADR 0007](decisions/0007-react-server-components.md) tracks open directives, general references, server functions and production qualification |
 | R-31 | M10 | Parity gate: zero `unsupported`, zero `untested`, only approved exclusions, mutation survivors zero, every case green in every applicable mode; all option-level limits implemented or explicitly accepted | closes the track | ⬜ planned |
 
+R-31 functional component contract repair, 25 November 2026: 🟡 implemented
+locally, integration pending. `ComponentType.render` now permits intentional null
+output while React retains the mounted hook/effect owner; thrown errors still
+propagate. Default memo comparison now agrees with native scalar values across
+compatible Java boxed types, retains signed-zero distinctions and keeps opaque
+objects by identity. Inexact native longs retain exact Java Long equality. The
+new JVM regressions first reproduced both defects (one failure, one error, one
+pass), then all three passed. The reactor package and 16 focused differential
+checks pass across client/hydrate/static/lazy. Two mutants are registered but
+**not run**. Integrated full regression, mutation checks and Verify remain open;
+no interaction-pair credit or general R-31 completion is claimed.
+
 R-28-SCALAR prerequisite, 25 November 2026: ✅ merged in
 [PR #46](https://github.com/lmrrcc/jx/pull/46) as `03d9190`. Class-runtime work
 exposed an existing numeric bridge defect: TeaVM's Java-object conversion can
