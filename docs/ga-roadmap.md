@@ -5,6 +5,14 @@ Original evidence baseline: repository commit `78c9836`; IntelliJ 0.3.2, VS Code
 Java 25, TeaVM 0.16.0, React/React DOM 19.3.1. These are observed pins, not a
 promise to freeze upstream dependencies for a year.
 
+Product requirement added 24 November 2026: the
+[starter and fast development plan](ga-developer-experience.md) requires a small
+React-style first example, a Maven `create` goal for an independent Java/.jx and
+Spring application, one-command development startup and rapid state-preserving
+updates. ST-01–ST-06 and HR-01–HR-10 in the [task list](ga-tasks.md) are all planned.
+The compiler/service topology and subsecond targets are proposals to validate,
+not delivered functionality or measured performance.
+
 ## Progress flags — 25 November 2026
 
 **✅ Done · 🟡 Partial · ⬜ Planned / to do · ➡️ Next · ⛔ Blocked.**
@@ -103,6 +111,8 @@ Pure custom policies and the remaining class options are still separate work.
 | TT-01 Cherry Test orchestration | 🟡 Partial | Unit coverage/CRAP delivered; integration and browser kinds still open. |
 | TT-04 PIT through Cherry Test | ⛔ Blocked | Installed Cherry Test update and first verified PIT run. |
 | Production pilots and GA release | ⬜ To do | Complete platform gates, qualify pilots, then pass RC/release evidence gates. |
+| React-style welcome and full-stack Maven creation | ⬜ To do | ST-01–ST-06: canonical example, one shared API contract, independent generated app, one dev command, standalone Boot JAR and clean-consumer onboarding. |
+| Fast compiler service and live editor buffers | ⬜ To do | HR-01–HR-10: measure the loop, retain compiler state, incremental TeaVM/bundling, CSS fast path and shared IntelliJ/VS Code/TurboJ integration. Existing checkpoint hot reload is the baseline. |
 
 Execution order confirmed by Luca on 24 November: continue through complete React
 parity and G0, then the JX/Spring starter and faster hot reload. R-27-01 and
@@ -417,8 +427,13 @@ Spring integration must support:
 - An existing Boot application adding JX without replacing its authentication,
   controllers, transactions, logging or existing build structure; one dependency/BOM and
   documented plugin configuration rather than copied integration scripts.
-- A new application generated from a maintained template, with shared contracts,
-  a client, server, tests and useful defaults. A monorepo is convenient, not required.
+- A new application created through the Maven plugin from a maintained template,
+  with a simple React-style welcome example, shared contracts, client, Spring
+  server, tests and useful defaults. At most three commands must reach a working
+  UI/API after declared prerequisites, without cloning/building JX or manually
+  wiring ports/proxies. One root dev command owns both sides. See
+  [the starter plan](ga-developer-experience.md) for distribution prerequisites,
+  cold/warm timing and independent-consumer acceptance.
 - Existing Gradle/Kotlin Boot backends consuming Maven-built JX contracts and web
   assets, with a tested CI/IDE recipe or separately qualified Gradle adapter. No
   mandatory backend build-tool migration; JX's own application baseline stays Maven.
@@ -434,6 +449,24 @@ Spring integration must support:
   Servlet MVC is the first supported profile. WebFlux gets a separate test matrix,
   never an inference from MVC success; target both for GA if migration demand
   confirms it at the first-month scope review.
+
+### Fast development feedback
+
+Preserving state is necessary but insufficient: normal Java/.jx edits should
+reach the browser rapidly. Measure detection, compilation, TeaVM, bundling,
+publication and React commit separately. The proposed service resolves Maven
+once, retains compiler state and consumes versioned editor/file snapshots; normal
+UI source edits must not start another Maven process or restart Spring. IntelliJ,
+VS Code, TurboJ and the CLI share this engine while native Java editing remains
+owned by each editor.
+
+The [technical plan](ga-developer-experience.md) proposes starter p95 targets of
+200 ms for CSS and one second for Java/.jx, to be validated on a named reference
+machine. It preserves typed checkpoint transfer, clean Maven validation and
+explicit cache invalidation. The execution order confirmed on 25 November first
+completes React parity and G0, then implements the starter and fast development
+service. M7 broadens editor and long-session qualification; milestone labels do
+not override that dependency order.
 
 ### Browser Java standard library
 
@@ -550,7 +583,7 @@ take priority over calendar position.
 | M4 · Feb 19–Mar 18 | Alpha 2: complete application workflow | Nested routes, forms/validation, resource lifecycle, optimistic failures, auth recovery, uploads and streaming; authenticated project/workflow reference app beyond Todo |
 | M5 · Mar 19–Apr 18 | Alpha 3: React ecosystem and rich input | Advanced React parity tranche, modal/portal, editor/chart/grid/media bindings, accessible widgets; Stack Sensei-like streaming/media slice and Medusa-like live table slice |
 | M6 · Apr 19–May 18 | G2: website and rendering alpha | SSG and qualified SSR host, hydration and route chunks; internationalized content site; meaningful HTML with JS disabled; performance budgets evaluated |
-| M7 · May 19–Jun 18 | Beta 1: daily developer platform | Installed editor matrix, `.jx` debugging, hot-update soak, project scaffolding and observability; one low-risk pilot operating with rollback |
+| M7 · May 19–Jun 18 | Beta 1: daily developer platform | Installed editor matrix, `.jx` debugging, broader hot-update soak, qualification of the M2 starter and observability; one low-risk pilot operating with rollback |
 | M8 · Jun 19–Jul 18 | Beta 2: production pilots | Authenticated Medusa/Stack Sensei read-oriented routes plus website pilot; old/new frontends coexist; real operator incidents and upgrade feedback incorporated |
 | M9 · Jul 19–Aug 18 | Beta 3: portfolio edge cases | Finance precision, media permissions, Rust/WASM and extension-host qualification; Gandalf read-only pilot; reconnect, background lifecycle and offline tests |
 | M10 · Aug 19–Sep 18 | RC entry: feature/API freeze | Mandatory parity ledger complete; security/performance/a11y review; framework/wire compatibility freeze; independent consumer and migration rehearsals |
