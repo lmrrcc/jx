@@ -351,6 +351,20 @@ feature-pair claim. The original
 three-argument constructor remains available; record patterns/equality now include
 the two new action alternatives, as documented in [the language guide](language.md).
 
+R-31-01 — responsive image preloads (implemented, focused verification green): extend `Resources.Options` with
+`imageSrcSet`, `imageSizes` and `referrerPolicy`, retaining its seven-argument
+constructor. The new options are immutable copies; image-specific settings require
+`as="image"`. Candidate selection, resource equivalence and request behavior remain
+owned by React and the browser. The `image-preload` Java consumer and differential
+case must prove actual candidate requests, no-referrer behavior, source-set/sizes
+deduplication, the legacy constructor, static HTML and hydration. On 25 November,
+the case passed all eight React/JX mode combinations and both option-contract JVM
+tests passed. Full regression, mutation runs and Verify remain pending; no blanket
+preload or browser qualification follows from this slice. See the
+[focused evidence](evidence/responsive-preload.md).
+Adding record components preserves the old constructor and accessors but extends
+the record's structural equality and textual representation.
+
 R-01 result, 21 November 2026: all four cases passed on JX without a defect; the
 rows are now `supported` (three) and `equivalent` (dotted names).
 

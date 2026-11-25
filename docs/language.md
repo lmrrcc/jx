@@ -413,9 +413,22 @@ animation classes, and `React.addTransitionType(type)` labels the running
 transition. The event callbacks of `ViewTransition` are not offered.
 
 `Resources` in `jx.react` offers React DOM's resource hints: `preconnect`,
-`prefetchDNS`, `preload`, `preinit`, `preloadModule` and `preinitModule`. Each adds
-its element to the document head once per URL; `Resources.Options` carries the
-optional settings.
+`prefetchDNS`, `preload`, `preinit`, `preloadModule` and `preinitModule`. React
+deduplicates equivalent hints and includes server-rendered hints in its HTML.
+`Resources.Options` carries the optional settings. Responsive image preloads use
+the source set and sizes to choose a browser candidate and identify an equivalent
+hint:
+
+```java
+Resources.preload("/images/hero.jpg", Resources.Options.as("image")
+        .withImageSources("/images/hero-small.jpg 640w, /images/hero-large.jpg 1280w", "100vw")
+        .withReferrerPolicy("no-referrer"));
+```
+
+These methods return new immutable options. Null omits a setting; image-specific
+settings require `as="image"`. The browser interprets the candidate syntax and
+referrer policy. The existing seven-argument `Options` constructor continues to
+work and omits the three new settings. See [React's preload contract](https://react.dev/reference/react-dom/preload).
 
 `React.mount` and `React.mountStrict` take an optional `React.RootOptions`:
 `withIdentifierPrefix` for the ids of `useId`, and `withCaughtError`,

@@ -75,6 +75,8 @@ raw-html-as-text	jx-react/src/main/java/jx/react/React.java	script = "return {__
 hint-preconnect-dropped	jx-react/src/main/java/jx/react/Resources.java	if (crossOrigin === null) ReactDOM.preconnect(href);	if (crossOrigin === null) {}	preconnect adds nothing
 hint-prefetchDNS-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.prefetchDNS(href);"	script = ""	prefetchDNS adds nothing
 hint-preload-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.preload(href, options);"	script = ""	preload adds nothing
+hint-image-sizes-dropped	jx-react/src/main/java/jx/react/Resources.java	if (options.imageSizes() != null) set(result, "imageSizes", options.imageSizes());	if (options.imageSizes() != null) set(result, "ignoredImageSizes", options.imageSizes());	responsive image preload loses candidate sizing and resource identity
+hint-referrer-policy-dropped	jx-react/src/main/java/jx/react/Resources.java	if (options.referrerPolicy() != null) set(result, "referrerPolicy", options.referrerPolicy());	if (options.referrerPolicy() != null) set(result, "ignoredReferrerPolicy", options.referrerPolicy());	preload ignores the explicit request referrer policy
 hint-preinit-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.preinit(href, options);"	script = ""	preinit adds nothing
 hint-preloadModule-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.preloadModule(href, options);"	script = ""	preloadModule adds nothing
 hint-preinitModule-dropped	jx-react/src/main/java/jx/react/Resources.java	script = "ReactDOM.preinitModule(href, options);"	script = ""	preinitModule adds nothing

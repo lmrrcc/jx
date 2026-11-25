@@ -105,6 +105,7 @@ import jx.conformance.cases.FormActions;
 import jx.conformance.cases.FormReset;
 import jx.conformance.cases.RawHtmlCase;
 import jx.conformance.cases.ResourceHints;
+import jx.conformance.cases.ImagePreload;
 import jx.conformance.cases.FormStateCase;
 import jx.conformance.cases.RootOptionsCase;
 import jx.conformance.cases.HydrateRoot;
@@ -211,6 +212,7 @@ public final class Main {
             case "form-reset" -> FormReset.JX;
             case "raw-html" -> RawHtmlCase.JX;
             case "resource-hints" -> ResourceHints.JX;
+            case "image-preload" -> ImagePreload.JX;
             case "form-state" -> FormStateCase.JX;
             case "dom-elements" -> DomElements.JX;
             case "dom-attributes" -> DomAttributes.JX;
