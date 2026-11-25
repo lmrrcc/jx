@@ -1,5 +1,9 @@
 # Java class components on the React runtime
 
+The later [R-28-04a checkpoint journal evidence](../evidence/class-checkpoint-journal.md)
+qualifies a conservative opt-in foundation for visible committed state only.
+It does not supersede the full hidden/concurrent class checkpoint requirement.
+
 Date: 24 November 2026. Status: R-28-01 merged in PR #48 on 25 November after
 local verification, scoped mutation, push gate and Verify passed. R-28-02a merged
 in PR #50 as `3e1db97` after the 15-step gate and both Verify checks passed;
