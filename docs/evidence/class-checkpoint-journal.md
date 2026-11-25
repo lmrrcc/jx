@@ -114,8 +114,9 @@ env RUNTIME_PORT=59190 node_modules/.bin/playwright test \
   tests/runtime-browser/tests/hot.spec.js --workers=1
 ```
 
-No full runtime/conformance matrix, mutation campaign, push gate, Verify or new
-interaction-pair credit is claimed. This branch starts at integration `e63ea76`;
+That original run did not include the full runtime/conformance matrix, mutation
+campaign, push gate, Verify or new interaction-pair credit. The corrected source's
+later qualification follows below. This branch starts at integration `e63ea76`;
 later nextContext/Pure modifiers must preserve checkpoint metadata when integrated.
 
 ### Review corrections — local verification passed
@@ -157,9 +158,66 @@ env RUNTIME_PORT=59190 node_modules/.bin/playwright test \
 env HOT_COUNTER_PORT=59192 HOT_TODO_PORT=59189 npm run test:hot
 ```
 
-These checks establish local runtime and development-workflow behavior only.
-No full conformance matrix, scoped journal mutation, publication gate, Verify,
-new interaction credit or complete R-28-04 support is claimed.
+The complete conformance run on clean `45ca7af` (production source `a3e4e26`)
+then passes **905 checks, with 175 mode skips across 135 cases**. Client is
+133/133 reference and 132/132 JX; hydration is 101/101 per side, static HTML
+107/107 and lazy routes 112/112. Both result tables match their checked-in
+baselines without regeneration. The pair ledger remains **54/6,328**, with
+6,274 active candidate pairs still lacking complete witnesses. This verifies the
+preserved `e63ea76` integration base plus the journal; it is not a claim that the
+later class slices on main are already integrated into this branch.
+
+```sh
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository \
+  -pl tests/conformance -am package
+env BENCH_PORT=59191 npm run test:bench
+```
+
+The package and full comparison logs are
+`/private/tmp/jx-class-journal-conformance-package.log` and
+`/private/tmp/jx-class-journal-conformance.log`. No scoped journal mutation,
+publication gate, Verify, new interaction credit or complete R-28-04 support is
+claimed.
+
+### Prepared mutation checks — not yet executed
+
+Two single-target source patches are prepared separately from the
+conformance-only `MutateBench` catalog. Their patch application checks pass; no
+killed/survived result is claimed. Run them only in a clean scratch copy with its
+own physical Maven repository and an exclusive test window, after the same focused
+commands pass unmutated. A build/infrastructure failure is not a behavioral kill.
+
+| Mutation | Actual subject and required regression |
+| --- | --- |
+| `class-root-membership-lost` | Remove the registered-root identity guard from capture. The external-root browser case must detect accepted foreign ownership; the portal control must still pass. |
+| `compiled-runtime-attestation-lost` | Replace the generated Maven bootstrap's compiled runtime marker with constant 2. The real protocol-drift development journey must detect capture/dispose or destruction of the old application before rejection. |
+
+The first runs the external-root and portal cases in the runtime browser suite.
+The second runs `compiled runtime drift` in the real Maven hot workflow; the
+mutated Maven plugin must be installed only in the scratch repository. These
+probes do not belong in conformance mutation totals.
+
+### Nullable/sparse integration audit — required before composition
+
+The separate R-28-03h1 source `bf3dfa4` permits null aggregate state and explicit
+`Presence.Absent`, own `Presence.Undefined`, and `Presence.Present` values. It is
+not integrated into this journal branch. Its state bridge preserves those
+distinctions; it does not supply a portable checkpoint codec.
+
+Combining the current modifiers without another contract would be unsafe:
+`ClassCheckpoints.restore` validates decoded state through `ClassSchema.validate`,
+which rejects null aggregates. A codec could therefore capture null successfully
+and fail restoration only after teardown. Optional fields also need codecs whose
+qualification distinguishes absence, own undefined, defined null and values;
+default values or ordinary JSON omission must not silently collapse them.
+
+The conservative integration boundary is to reject checkpoint descriptors with
+nullable aggregate state or optional state fields, in either modifier order,
+before a running application can request replacement. That guard and its JVM and
+browser regressions remain to be implemented when the branches are combined.
+Future support must prove cross-generation round trips for all these states and
+retain the existing own-commit proof. This is pending work, not an accepted
+exclusion or a reason to mark R-28-04 complete.
 
 ## Remaining design requirement
 
