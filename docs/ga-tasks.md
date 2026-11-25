@@ -331,7 +331,9 @@ back unchanged. `actionUrl()` preserves the URL alternative observed in the pinn
 runtime during an `onSubmit` transition. The expanded existing `form-status` case
 passes all eight React/JX projects, including repeated submissions after a parent
 render, native React interoperability/replay, no parent form and the URL path with
-no navigation or automatic reset. The package and structural checks pass. Two
+no navigation or automatic reset. The related actions/queues/reset/optimistic
+regression run also passes **64/64** checks across eight cases and four modes.
+The package and structural checks pass. Two
 targeted mutants are registered but not yet run; integrated full bench, push gate
 and Verify remain pending. This adds no case ID or feature-pair claim. The original
 three-argument constructor remains available; record patterns/equality now include
