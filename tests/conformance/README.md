@@ -215,6 +215,20 @@ java tools/MutateBench.java --only class-error-report-dropped --keep
 The catalog has 127 entries; the historical full campaign remains 100. Final
 gate and Verify remain pending.
 
+`class-lifecycle-authoring` exercises a direct `.jx` Pure class whose generated
+descriptor composes typed context, static prop/error derivation and committed
+didCatch. All eight focused projects and 48 existing class checks pass. Provider
+and null context updates retain local state, derived partial patches preserve
+unmentioned fields, and the callback observes the committed fallback and original
+Java error. Recovery retains the actual class-ref identity and independent local
+state while replacing the failed rendered subtree and recreating its child;
+Playwright DOM handles distinguish those operations. Static compares initial
+HTML only. Real-core javac and LSP tests cover signatures, typed source projection
+and original-source error mapping, without claiming native IDE qualification.
+The compiler mutant `class-authoring-error-derive-lost` is registered but unrun;
+no aggregate result or new pair witness is recorded.
+
+
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
 combine optimistic state with external-store snapshots, transitions and Java async
 functions. A remote publication rebases the pending overlay; rejection removes
