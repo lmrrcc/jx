@@ -50,6 +50,7 @@ dynamic-component	pass	pass	pass	pass	pass	pass	pass	pass
 effect-cleanup	pass	pass	pass	pass	pass	pass	pass	pass
 effect-dependencies	pass	pass	pass	pass	pass	pass	pass	pass
 effect-event	pass	pass	pass	pass	pass	pass	pass	pass
+empty-render	pass	pass	pass	pass	pass	pass	pass	pass
 error-boundary	pass	pass	pass	pass	pass	pass	pass	pass
 error-reporting	pass	pass	pass	pass	pass	pass	pass	pass
 event-payload	pass	pass	pass	pass	pass	pass	pass	pass
@@ -77,6 +78,7 @@ lazy-route-loading	n/a	n/a	n/a	n/a	n/a	n/a	pass	pass
 lazy-route-retry	n/a	n/a	n/a	n/a	n/a	n/a	pass	pass
 media-events	pass	pass	n/a	n/a	pass	pass	pass	pass
 memo-recompute	pass	pass	pass	pass	pass	pass	pass	pass
+memo-scalars	pass	pass	pass	pass	pass	pass	pass	pass
 memo-skip	pass	pass	pass	pass	pass	pass	pass	pass
 namespace-components	pass	pass	pass	pass	pass	pass	pass	pass
 optimistic	pass	pass	pass	pass	pass	pass	pass	pass

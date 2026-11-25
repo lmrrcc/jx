@@ -8,6 +8,8 @@ import jx.conformance.cases.CheckboxCase;
 import jx.conformance.cases.ChildValues;
 import jx.conformance.cases.ChildrenProp;
 import jx.conformance.cases.Conditional;
+import jx.conformance.cases.EmptyRender;
+import jx.conformance.cases.MemoScalars;
 import jx.conformance.cases.CombinedKeyedContext;
 import jx.conformance.cases.CombinedActivityStore;
 import jx.conformance.cases.CombinedChildrenMap;
@@ -145,6 +147,8 @@ public final class Main {
             case "remount-by-key" -> RemountByKey.JX;
             case "props-update" -> PropsUpdate.JX;
             case "conditional" -> Conditional.JX;
+            case "empty-render" -> EmptyRender.JX;
+            case "memo-scalars" -> MemoScalars.JX;
             case "fragment" -> FragmentCase.JX;
             case "children-prop" -> ChildrenProp.JX;
             case "text-escaping" -> TextEscaping.JX;

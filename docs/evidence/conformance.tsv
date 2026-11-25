@@ -28,7 +28,7 @@ react:Profiler	component	supported	profiler	React.profiler		A view factory, not 
 react:ViewTransition	component	supported	view-transition	React.viewTransition		Name and classes only; the event callbacks are not offered
 react:addTransitionType	api	supported	view-transition	React.addTransitionType		
 react:lazy	api	equivalent	lazy-component,lazy-route-loading,lazy-route-retry	ComponentType.lazy, LazyModules.load		The bench loads a separately compiled route; ordinary application splitting still needs Maven plugin wiring
-react:memo	api	supported	memo-skip,combined-keyed-context,combined-activity-store	@Memo, ComponentType.memo		Declared on the component with @Memo; a custom comparison is a static arePropsEqual method
+react:memo	api	supported	memo-skip,memo-scalars,combined-keyed-context,combined-activity-store	@Memo, ComponentType.memo		Declared on the component with @Memo; a custom comparison is a static arePropsEqual method; native primitive values compare across boxed Java types; inexact native longs retain Java Long equality
 react:forwardRef	api	equivalent	forward-ref	ref as a Props field		Deprecated in React 19; a JX component receives ref as an ordinary prop
 react:createElement	api	equivalent	attributes,children-prop	Markup, Views.element, Views.component		
 react:cloneElement	legacy	equivalent	clone-element	Views.cloneElement		DOM element views only; a component view is rebuilt from a new Props record
@@ -77,7 +77,7 @@ react-dom/static:resumeAndPrerenderToNodeStream	server	supported	static-resume-p
 react-dom/static:version	constant	supported	server-runtime-versions	ReactStatic.version		Reads static-renderer export; Node check passes
 jsx:key	markup	supported	keyed-list,remount-by-key,combined-keyed-context,combined-children-map,combined-keyed-refs,combined-imperative-handles,class-keyed	key attribute, Views.component key		Combined scenarios retain state, drafts, DOM refs, handles and native PureComponent peers while reordering
 jsx:children	markup	supported	children-prop,combined-children-contract	children property of type View		Scalar children and arrays remain distinct from explicit fragments
-jsx:conditional-rendering	markup	supported	conditional	Java ternary and null		
+jsx:conditional-rendering	markup	supported	conditional,empty-render	Java ternary and null		A functional render may return null while retaining its mounted hook/effect owner
 jsx:list-rendering	markup	supported	keyed-list,child-values,combined-children-list	Iterable and array children		Flattened nested collections retain independent key namespaces
 jsx:child-values	markup	supported	child-values,combined-children-contract	Views child normalization		Children traversal preserves empty positions and rejects non-elements in only
 jsx:child-slot-identity	markup	supported	child-slots	View.Empty, View.Items		A null or boolean child and a collection child each keep one position
