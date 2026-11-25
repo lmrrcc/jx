@@ -28,8 +28,8 @@ That makes 27 complete React tasks. R-27-01 and R-27-02a–02c merged with green
 Verify, establishing 38 executed pair witnesses. The Promise prerequisite also
 merged in [PR #42](https://github.com/lmrrcc/jx/pull/42) with green Verify.
 R-27-03a merged in [PR #43](https://github.com/lmrrcc/jx/pull/43) as `1ba8c1d`,
-with both Verify checks green. The native class-error candidate over merged
-derived-props PR #55 passes 887 local bench checks
+with both Verify checks green. The lifecycle-authoring candidate over the
+class-error integration branch passes 895 local bench checks
 with 54 witnessed pairs among 6,328 active candidates; 6,274 remain without
 complete evidence. The optimistic/store, transition and SSR scoped mutants were killed
 after their unmutated baselines passed. R-27-03b merged as `3e24edb` in
@@ -416,7 +416,7 @@ lifecycle parity or preserved class state across hot replacement.
 | R-28-03a | Native contextType through additive typed factories; constructor/current context, Pure/SCU bypass, defaults/null, retained state and Activity lifecycle | ✅ done: PR [#53](https://github.com/lmrrcc/jx/pull/53), merged `198c0b8`; package 37 core/48 compiler/15 Maven tests; 855 checks/169 skipped/128 cases, unchanged 54/6328 pairs; captured-context mutant killed after baseline passed, zero survived/unusable; local gate 15/15 in 308 s and both Verify checks passed on `30a8911`; native instance retention preserved, no disposal guarantee |
 | R-28-03b | Pure derived-state-from-props with typed partial patches, null updates and native render timing | ✅ done: PR [#55](https://github.com/lmrrcc/jx/pull/55), merged `84eb8cd`; package 42 core/48 compiler/15 Maven tests; 879 checks/169 skipped/131 cases, all 40 class cells pass, unchanged 54/6328 pairs; dropped-derivation mutant killed after passing baseline, zero survived/unusable; local gate 15/15 in 377 s and both Verify checks green on `021bc02` |
 | R-28-03c | Derived error state plus committed didCatch, checked Java error/component-stack information and recovery | 🟡 review: integrated package 47 core/48 compiler/15 Maven tests; full bench 887 checks/169 skipped/132 cases, all 48 class cells pass; tightened error-report assertions pass 8/8 focused projects; Java/foreign error identity, recovery and own-render/event exclusions tested; native diagnostic limits explicit; scoped reporting mutant killed after a passing baseline, zero survived/unusable, final gate/Verify pending |
-| R-28-03d | Direct `.jx` context/derived-state/error declarations, checked signatures, generated descriptors and editor projections, with a composed browser consumer | 🟡 review: 43 core/52 compiler/15 Maven/10 LSP tests pass; eight new and 48 existing class browser checks pass; real-core javac and source-mapped editor projections verified; native IDE qualification, integrated bench/mutant/gate/Verify pending |
+| R-28-03d | Direct `.jx` context/derived-state/error declarations, checked signatures, generated descriptors and editor projections, with a composed browser consumer | 🟡 review: integrated 47 core/52 compiler/15 Maven/10 LSP tests; full bench 895 checks/169 skipped/133 cases, all 56 class cells and unchanged 54/6328 pairs; strengthened expected-error assertions pass 8/8; real-core javac and source-mapped editor projections verified; native IDE qualification, scoped compiler mutant and final gate/Verify pending |
 | R-28-03e | Typed third nextContext argument for should-update through an additive context-aware descriptor policy, then `.jx` overload support | ⬜ planned: preserve the existing two-argument override and specify policy precedence |
 | R-28-03f | Remaining class option qualification, including null initial state, direct null updates and compatibility limits | ⬜ planned |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |

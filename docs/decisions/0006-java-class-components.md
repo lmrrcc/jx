@@ -430,15 +430,18 @@ both are configured. Compiler overload support follows runtime evidence. This
 slice does not change class generic parameters, null initial state, direct null
 updates or class hot checkpoints.
 
-Package verification passes 43 core, 52 compiler, 15 Maven-plugin and 10 LSP
+Integrated package verification passes 47 core, 52 compiler, 15 Maven-plugin and 10 LSP
 tests. Real-core javac consumers cover normal and Pure factories, both chained
 derivations, typed context readers, import shadowing, fully qualified types and
 checked constructor/callback exceptions. Both generated code and editor
 projections type-check; invalid patch arguments map back to the authored method
 body, and the LSP retains class tag/ref metadata and editable Java mappings.
 
-The new browser consumer and all six existing class cases pass 56/56 focused
-projects. Context changes bypass Pure comparison without resetting local state;
+The new browser consumer passes all eight focused projects with exactly one
+expected caught-error report and no unrelated console/page errors. The complete
+integrated bench then passes **895 checks, 169 skipped, across 133 cases**:
+client 131 React / 130 JX, hydrate 100, static 106 and lazy 111 per side. All seven
+class cases pass eight projects each. Context changes bypass Pure comparison without resetting local state;
 derived props update only their named fields; error derivation and committed
 reporting preserve the original Java failure. The initial test incorrectly
 expected the boundary's original host section to survive a descendant error.
@@ -447,8 +450,9 @@ checks pre-error DOM stability, old-subtree detachment, independently edited loc
 state and the actual class-ref identity retained across recovery, and a fresh
 child instance. Production runtime code was unchanged.
 
-Static mode compares initial HTML only. This is focused Chrome evidence on the
-preserved prerequisite branch, without new pair or aggregate result-table credit.
-`CheckBaseline` and `git diff --check` pass. The compiler mutant
-`class-authoring-error-derive-lost` is registered but unrun. Integrated bench,
-mutation, push gate and Verify remain pending.
+Static mode compares initial HTML only. This is Chrome evidence on the integrated
+class-error branch. Recorded case evidence adds only `class-lifecycle-authoring`;
+all 54 pair witnesses remain green among 6,328 active candidates, with no new pair
+credit. The catalog has 126 mutants; the historical full campaign remains 100.
+The compiler mutant `class-authoring-error-derive-lost` is registered but unrun.
+Mutation, final push gate and Verify remain pending.

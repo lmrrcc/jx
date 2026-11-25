@@ -102,10 +102,23 @@ and authoring constraints use `JX110`; hook-looking calls in native classes use
 `JX201`. Hooks belong to function components. Reserved native field names and
 generated members (`JX`, `StateUpdate`, `statePatch`, `__JxMetadata`) are rejected.
 
+Direct class declarations can also compose native context and error lifecycles.
+A `public static final Context<T> contextType` requires a public constructor
+`ComponentName(Props props, Supplier<T> context)`; the supplier reads the current
+native context. Public static `getDerivedStateFromProps(Props, Model)` and
+`getDerivedStateFromError(Throwable)` return `StatePatch<Model>`, or null for no
+derived update. They are pure render-phase calculations. A public/protected
+`componentDidCatch(Throwable, ComponentErrorInfo)` override reports errors after
+React commits the fallback. The compiler validates these signatures and composes
+the existing typed runtime descriptor; it does not add another rendering system.
+See the compiling
+[AuthoredLifecycle.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredLifecycle.jx)
+consumer for context, partial derivation and error recovery together.
+
 [AuthoredCounter.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredCounter.jx),
 [AuthoredPure.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredPure.jx)
 and their [parent](../tests/conformance/src/main/jx/jx/conformance/cases/ClassAuthoring.jx)
-are compiling consumers. Native editor qualification, advanced class lifecycles
+are compiling consumers. Native editor qualification, remaining class options
 and state-preserving class hot replacement remain separate roadmap work; hot
 replacement currently resets class state. See the
 [authoring decision](decisions/0006-java-class-components.md#r-28-02a-authoring-decision--25-november-2026).
