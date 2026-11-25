@@ -88,7 +88,8 @@ witnesses bring this branch's evidence to 54 / 5,460 active pairs; activating
 `PureComponent` expands the candidate universe. This count follows this branch's
 feature and case inventory. All three scoped mutants were killed after the
 unmutated scratch baseline passed, with zero survivors or unusable mutants.
-Push-gate and Verify acceptance remain pending. These Chrome checks do not close
+The full local gate and both Verify checks passed before PR #48 merged as
+`ccfcb2d`. These Chrome checks do not close
 R-28: compiler-generated `.jx` class descriptors and editor support, advanced
 lifecycles, class context, the remaining option matrix and class checkpoints are
 not yet qualified.

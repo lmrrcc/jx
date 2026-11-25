@@ -1,7 +1,8 @@
 # Java class components on the React runtime
 
-Date: 24 November 2026. Status: R-28-01 local verification and scoped mutation passed;
-push gate and Verify pending. The broader R-28 task remains incomplete.
+Date: 24 November 2026. Status: R-28-01 merged in PR #48 at `ccfcb2d`, with local
+verification, scoped mutation, push gate and both Verify checks passed.
+The broader R-28 task remains incomplete.
 
 Java classes may own React component identity through a descriptor separate from
 the existing functional `ComponentType`. The browser creates an actual subclass
@@ -93,8 +94,8 @@ The unmutated scratch baseline passed, then all three targeted mutants were
 killed: `class-pure-renders` by `class-keyed` and `class-runtime`, and
 `class-snapshot-lost` / `class-ref-detach-lost` by `class-runtime`. The result is
 3 killed, 0 survived, 0 unusable. This scoped run does not replace the historical
-100-entry full campaign; the catalog now contains 115 entries. Push gate and
-Verify remain pending.
+100-entry full campaign; the catalog now contains 115 entries. The full local
+push gate and both Verify checks passed before PR #48 merged.
 
 The first run exposed an existing signed-zero defect in the general scalar
 bridge. A separate prerequisite reproduces three independent hook/dependency/

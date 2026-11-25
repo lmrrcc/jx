@@ -1,0 +1,32 @@
+package jx.fixture.rsc.server;
+
+import jx.Component;
+import jx.ComponentType;
+import jx.View;
+import jx.Views;
+import jx.Hooks;
+import jx.Promise;
+import jx.fixture.rsc.CounterProps;
+
+/** This class is compiled only into the server artifact. */
+@Component
+public final class ServerPage {
+    public record Props(String request, ComponentType<CounterProps> counter, Promise<String> data) {
+        public Props {
+            if (request == null || !request.matches("[a-z]{1,32}")) {
+                throw new IllegalArgumentException("Invalid proof request");
+            }
+        }
+    }
+    public static View render(Props props) {
+        String data = props.data() == null ? "immediate" : Hooks.use(props.data());
+        return (
+            <main>
+                <h1>Java Server Component</h1>
+                <p role="status">{props.request()}</p>
+                <p data-testid="server-data">{data}</p>
+                {props.counter() == null ? null : Views.component(props.counter(), new CounterProps(5, props.request()))}
+            </main>
+        );
+    }
+}
