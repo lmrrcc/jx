@@ -70,4 +70,14 @@ public final class Async {
         if (runtime == null) throw new IllegalStateException("Promises require the browser runtime; mount a React root first");
         return runtime;
     }
+
+    /** Preserve pending subscriptions made before renderer bootstrap. Such a
+     * subscription has no configured host context to capture; it uses the runtime
+     * installed before settlement, as it did before context-aware reactions existed.
+     */
+    static Runnable reaction(Runnable task) {
+        AsyncRuntime configured = runtime;
+        return configured == null ? () -> runtime().defer(task)
+                : Objects.requireNonNull(configured.reaction(task), "Async runtime returned null reaction");
+    }
 }

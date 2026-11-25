@@ -10,6 +10,15 @@ public interface AsyncRuntime {
     @FunctionalInterface interface Coroutine { void run(); }
     /** Runs {@code task} after the current JavaScript job, in order, like a promise reaction. */
     void defer(Runnable task);
+    /** Captures the current host asynchronous context and returns a scheduling
+     * operation for one promise reaction. Invoking it must enqueue {@code task},
+     * never run it synchronously. The promise owner invokes it once at settlement.
+     * Runtimes without context propagation retain the original {@link #defer} behavior.
+     */
+    default Runnable reaction(Runnable task) {
+        java.util.Objects.requireNonNull(task, "task");
+        return () -> defer(task);
+    }
     /** Runs {@code body} where {@link #await} may suspend it. It starts at once when no other
      * suspendable code is running, otherwise after the current JavaScript job. */
     void start(Coroutine body);
