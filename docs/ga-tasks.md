@@ -183,9 +183,17 @@ compatible Java boxed types, retains signed-zero distinctions and keeps opaque
 objects by identity. Inexact native longs retain exact Java Long equality. The
 new JVM regressions first reproduced both defects (one failure, one error, one
 pass), then all three passed. The reactor package and 16 focused differential
-checks pass across client/hydrate/static/lazy. Two mutants are registered but
-**not run**. Integrated full regression, mutation checks and Verify remain open;
-no interaction-pair credit or general R-31 completion is claimed.
+checks pass across client/hydrate/static/lazy. Integrated over main `a7a3f62`, the
+package passes in 21.820 seconds and the complete bench passes 849 checks with
+151 inapplicable cells across 125 cases: client 123 React / 122 JX, hydration 95,
+static HTML 101 and lazy 106 per side. Only the two new case rows are added to the
+recorded results; interaction evidence stays 54/5460.
+Both scoped mutants are killed after the unmutated baseline passes:
+`component-null-rejected` by `empty-render`, and `memo-boxed-type-equality` by
+`memo-scalars`; zero survivors or unusable mutations. The scratch evidence is
+`jx-mutation-14936589724776533921`, with source `bab19c3`. Final integration onto
+the subsequent parity slices, push gate and Verify remain open. No interaction-
+pair credit or general R-31 completion is claimed.
 
 R-28-SCALAR prerequisite, 25 November 2026: ✅ merged in
 [PR #46](https://github.com/lmrrcc/jx/pull/46) as `03d9190`. Class-runtime work
