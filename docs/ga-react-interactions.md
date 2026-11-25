@@ -48,8 +48,11 @@ The passing counts below include the complete R-28-01 run integrated over SSR
 merge `7759933`. Two native class witnesses extend the merged server/resource
 baseline's 52 to **54 / 5,460**, with **5,406** remaining. Native PureComponent
 activates one previously deferred feature, expanding the candidate universe.
-R-28-01 remains under review; all three scoped mutants were killed after the
-scratch baseline passed, with push gate and Verify still pending.
+R-28-01 merged as `ccfcb2d` in [PR #48](https://github.com/lmrrcc/jx/pull/48),
+after all three scoped mutants were killed, the full local gate passed, and
+both Verify checks were green:
+[push CI](https://github.com/lmrrcc/jx/actions/runs/45560759038) and
+[PR CI](https://github.com/lmrrcc/jx/actions/runs/45560907924).
 This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
@@ -618,7 +621,8 @@ mutant and both Verify checks green.
 Staged fixtures are preparation, not completed evidence.
 R-27-04 has local evidence for early streaming, request-context isolation,
 resource deduplication and retained hydration nodes; fatal shell errors reject both
-readiness consumers. Its three scoped mutants were killed; Verify remains pending. Each slice selects explicit
+readiness consumers. Its three scoped mutants were killed and PR #47 merged with
+both Verify checks green. Each slice selects explicit
 remaining pair IDs. R-27-05 follows R-28–R-30, exercises the deferred features and
 reviews the remaining applicability decisions. The parent R-27 stays open until
 every eventual application-feature pair has evidence or an explicitly accepted

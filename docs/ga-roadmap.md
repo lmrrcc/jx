@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27 slices through SSR R-27-04 and the Promise/scalar prerequisites merged with green Verify. R-28-01's native class runtime locally evidences 54 / 5,460 active pairs, with 5,406 open; three class mutants killed after the baseline passed, push gate and Verify pending. Complete class authoring, remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27 slices through SSR R-27-04, the Promise/scalar prerequisites and R-28-01's native class runtime merged with green Verify. Evidence covers 54 / 5,460 active pairs, with 5,406 open; three class mutants killed after the baseline passed. Complete class authoring, remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -116,8 +116,8 @@ It uses typed explicit descriptors and ordinary Java `Views`; `.jx` class author
 native editor semantics and advanced lifecycle/context options remain later
 slices. Hot replacement resets class state, with typed class checkpoints still
 open. All three targeted class mutants were killed after the baseline passed,
-with no survivors or unusable mutants; the full push gate and Verify
-are pending. The catalog has 115 entries, while the historical full campaign
+with no survivors or unusable mutants; the full push gate and both Verify checks
+passed before PR #48 merged as `ccfcb2d`. The catalog has 115 entries, while the historical full campaign
 remains 100. See [ADR 0006](decisions/0006-java-class-components.md).
 
 Progress, 21 November 2026: [GA-01](ga-01-baseline.md) is done, with CI green at

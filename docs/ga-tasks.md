@@ -36,7 +36,10 @@ after their unmutated baselines passed. R-27-03b merged as `3e24edb` in
 [PR #45](https://github.com/lmrrcc/jx/pull/45), with both Verify checks green.
 R-27-04 merged in [PR #47](https://github.com/lmrrcc/jx/pull/47) as `7759933`,
 with [green push Verify](https://github.com/lmrrcc/jx/actions/runs/45555926188)
-and [green PR Verify](https://github.com/lmrrcc/jx/actions/runs/45556004135). R-27 remains
+and [green PR Verify](https://github.com/lmrrcc/jx/actions/runs/45556004135).
+R-28-01 merged as `ccfcb2d` in [PR #48](https://github.com/lmrrcc/jx/pull/48), with
+[green push Verify](https://github.com/lmrrcc/jx/actions/runs/45560759038) and
+[green PR Verify](https://github.com/lmrrcc/jx/actions/runs/45560907924). R-27 remains
 partial; its slice status and the
 [interaction evidence record](ga-react-interactions.md) distinguish local results
 from outstanding acceptance.
@@ -151,7 +154,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ✅ done |
 | R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | ✅ done: Luca's try-it confirms 715 passes and 133 inapplicable cells; Verify green at eb5a18a, 24 November |
 | R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-28-01 adds two class witnesses over merged R-27-04; 54 / 5,460 active pairs have local evidence; 5,406 remain open, plus deferred-feature pairs |
-| R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | 🟡 in progress: runtime slice R-28-01; no completion credit yet |
+| R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | 🟡 partial: runtime slice R-28-01 merged; class authoring and remaining lifecycle/context/options still open |
 | R-29 | M7 | Remaining small surface: `act` for JX tests, `captureOwnerStack`, version constants, `unstable_batchedUpdates`, `unstable_useCacheRefresh` | 9 | ⬜ planned |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | 🟨 partial — [ADR 0007](decisions/0007-react-server-components.md) and real Flight proof: 7 Node + 4 Chrome checks; Verify pending. Cache, directives, general references and server functions remain open |
 | R-31 | M10 | Parity gate: zero `unsupported`, zero `untested`, only approved exclusions, mutation survivors zero, every case green in every applicable mode; all option-level limits implemented or explicitly accepted | closes the track | ⬜ planned |
@@ -240,7 +243,7 @@ lifecycle parity or preserved class state across hot replacement.
 
 | Task | Deliverable | Status |
 | --- | --- | --- |
-| R-28-01 | Explicit Java descriptors and schemas; actual React Component/PureComponent; typed partial updates, basic lifecycle/snapshots/refs and compiling consumer with browser comparison | 🟡 review: 34 core, 41 compiler, 15 Maven tests and 825 integrated bench checks pass; both class cases pass all eight projects; three scoped mutants killed after the baseline passed, push gate and Verify pending |
+| R-28-01 | Explicit Java descriptors and schemas; actual React Component/PureComponent; typed partial updates, basic lifecycle/snapshots/refs and compiling consumer with browser comparison | ✅ merged PR #48 at ccfcb2d: 34 core, 41 compiler, 15 Maven tests and 825 integrated bench checks; both class cases pass all eight projects; three scoped mutants killed after the baseline passed; local gate and Verify passed |
 | R-28-02 | `.jx` class authoring, generated field projections and patches, diagnostics and native editor projections | ⬜ planned |
 | R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options | ⬜ planned |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |

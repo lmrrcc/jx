@@ -207,8 +207,9 @@ hydrate and lazy modes. This slice uses explicit descriptors and Java `Views`;
 `.jx` class authoring, native editor semantics and advanced lifecycle/context
 options remain open. Hot replacement resets class state; compatible typed class
 checkpoints are deferred. Three class mutants were killed after the isolated
-baseline passed, and the full push gate
-and Verify are pending. See [ADR 0006](../../docs/decisions/0006-java-class-components.md).
+baseline passed. [PR #48](https://github.com/lmrrcc/jx/pull/48) merged as `ccfcb2d`
+after the full local gate and both Verify checks passed. See
+[ADR 0006](../../docs/decisions/0006-java-class-components.md).
 
 Static HTML equality does not execute interactive assertion blocks, so it does
 not credit those witnesses. Hydration-owned and Node-only scenarios can carry

@@ -97,7 +97,8 @@ pairs. This runtime slice uses explicit descriptors and ordinary Java `Views`.
 options remain open. Hot replacement resets class state; compatible class
 checkpoints are not implemented. All three targeted mutants were killed after
 the unmutated baseline passed, with zero survivors or unusable mutants; the
-full push gate and Verify are pending. The 115-entry catalog is separate from
+full push gate and both Verify checks passed before PR #48 merged as `ccfcb2d`.
+The 115-entry catalog is separate from
 the historical full campaign of 100. See the
 [class-runtime decision](decisions/0006-java-class-components.md) and the
 [interaction evidence record](ga-react-interactions.md) for the unchanged eventual
@@ -151,7 +152,7 @@ exists, not when its document or skeleton module lands.
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
 | GA-17 | Forms, validation, i18n and accessible primitives / A | GA-10, GA-15 | M3–M5 / L | Complex form, arrays/errors, locale/RTL, keyboard/reader, shared pure rules and server errors | ⬜ planned |
-| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02b and PR #41–#47 prerequisites through SSR merged; R-28-01 locally evidences 54 / 5,460 active pairs, with 5,406 open plus 1,443 deferred-feature pairs; native class runtime implemented, class authoring and remaining options open; three class mutants killed, push gate and Verify pending | 🟡 partial |
+| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger; concurrency/actions/refs/portals/lazy/Suspense differential fixtures. R-27-02b and PR #41–#48 through native class runtime merged; 54 / 5,460 active pairs evidenced, with 5,406 open plus 1,443 deferred-feature pairs; class authoring and remaining options open; three class mutants killed, local gate and Verify passed | 🟡 partial |
 | GA-19 | HTTP headers/binary/upload/stream capabilities / C | GA-03, GA-10, GA-13 | M3–M5 / L | Auth/CSRF headers, upload progress, download, SSE/WS lifecycle, bounds/reconnect tested | ⬜ planned |
 | GA-20 | Real ecosystem binding SDK and catalog / R | GA-15, GA-18 | M4–M7 / L | Selected grid/editor/chart/headless/media bindings with refs/assets/cleanup; Java consumer examples | ⬜ planned |
 | GA-21 | Complex authenticated reference product / A | GA-12, GA-13, GA-16, GA-17, GA-19 | M4–M6 / L | Workspace/project workflow with roles, search/table/detail, forms/files/activity and two-tenant tests | ⬜ planned |
