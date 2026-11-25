@@ -104,6 +104,82 @@ class LanguageServerTest {
         assertEquals(List.of("Own.jx"), snapshot.sources().stream().map(source -> source.path().getFileName().toString()).toList());
     }
 
+    @Test void nativeClassTagsNavigateAcrossFilesAndOfferCheckedClassRefsWithoutChangingFunctionalRefs() throws Exception {
+        Path counter = directory.resolve("cards/NativeCounter.jx");
+        Path forwarded = directory.resolve("cards/Forward.jx");
+        Path app = directory.resolve("demo/App.jx");
+        Files.createDirectories(counter.getParent());
+        Files.createDirectories(app.getParent());
+        String counterText = """
+                package cards;
+                import jx.*;
+                @Component public final class NativeCounter extends ClassComponent<NativeCounter.Props, NativeCounter.Model, Void> {
+                    public record Props(int initial) {}
+                    public record Model(int count) {}
+                    public NativeCounter(Props props) { super(props, new Model(props.initial())); }
+                    @Override public View render() { return <button>{state().count()}</button>; }
+                }
+                """;
+        Files.writeString(counter, counterText);
+        Files.writeString(forwarded, """
+                package cards;
+                import jx.*;
+                @Component public final class Forward {
+                    public record Props(Ref<String> ref) {}
+                    public static View render(Props props) { return <span/>; }
+                }
+                """);
+        String valid = """
+                package demo;
+                import cards.NativeCounter;
+                import cards.Forward;
+                import jx.*;
+                @Component public final class App {
+                    public static View render() { return <NativeCounter initial={2} />; }
+                }
+                """;
+        Files.writeString(app, valid);
+        try (var session = new Session()) {
+            var init = new InitializeParams();
+            init.setWorkspaceFolders(List.of(new WorkspaceFolder(directory.toUri().toString(), "fixture")));
+            session.remote.initialize(init).get(5, TimeUnit.SECONDS);
+            String uri = app.toUri().toString();
+            var identifier = new TextDocumentIdentifier(uri);
+            session.remote.getTextDocumentService().didOpen(new DidOpenTextDocumentParams(new TextDocumentItem(uri, "jx", 1, valid)));
+            assertEquals(List.of(), session.client.await(value -> uri.equals(value.getUri()) && Integer.valueOf(1).equals(value.getVersion())).getDiagnostics());
+            var definition = session.remote.getTextDocumentService().definition(new DefinitionParams(identifier,
+                    Positions.position(valid, valid.indexOf("<NativeCounter") + 2))).get(5, TimeUnit.SECONDS);
+            assertEquals(counter.toUri().toString(), definition.getLeft().getFirst().getUri());
+            var property = session.remote.getTextDocumentService().definition(new DefinitionParams(identifier,
+                    Positions.position(valid, valid.indexOf("initial=")))).get(5, TimeUnit.SECONDS);
+            assertEquals(counter.toUri().toString(), property.getLeft().getFirst().getUri());
+            assertEquals(Positions.position(counterText, counterText.indexOf("int initial")), property.getLeft().getFirst().getRange().getStart());
+            var hover = session.remote.getTextDocumentService().hover(new HoverParams(identifier,
+                    Positions.position(valid, valid.indexOf("initial=")))).get(5, TimeUnit.SECONDS);
+            assertTrue(hover.getContents().getRight().getValue().contains("int initial"));
+
+            String prefix = valid.substring(0, valid.indexOf("<NativeCounter"));
+            String incomplete = prefix + "<NativeCounter ";
+            session.change(uri, 2, incomplete);
+            var items = session.remote.getTextDocumentService().completion(new CompletionParams(identifier,
+                    Positions.position(incomplete, incomplete.length()))).get(5, TimeUnit.SECONDS).getLeft();
+            assertTrue(items.stream().anyMatch(item -> item.getLabel().equals("initial") && item.getDetail().equals("int")));
+            assertEquals(1, items.stream().filter(item -> item.getLabel().equals("key")).count());
+            var refs = items.stream().filter(item -> item.getLabel().equals("ref")).toList();
+            assertEquals(1, refs.size());
+            assertEquals("ClassRef<cards.NativeCounter>", refs.getFirst().getDetail());
+            assertEquals("ref={}", refs.getFirst().getInsertText());
+
+            String functional = prefix + "<Forward ";
+            session.change(uri, 3, functional);
+            var functionalItems = session.remote.getTextDocumentService().completion(new CompletionParams(identifier,
+                    Positions.position(functional, functional.length()))).get(5, TimeUnit.SECONDS).getLeft();
+            var functionalRefs = functionalItems.stream().filter(item -> item.getLabel().equals("ref")).toList();
+            assertEquals(1, functionalRefs.size());
+            assertEquals("Ref<String>", functionalRefs.getFirst().getDetail());
+        }
+    }
+
     @Test void nativeJavaProjectionProtocolUsesUnsavedVersionsAndExactEditableMappings() throws Exception {
         Path app = directory.resolve("App.jx");
         Path sibling = directory.resolve("Other.jx");

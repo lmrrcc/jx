@@ -16,6 +16,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
 | React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27 slices through SSR R-27-04, the Promise/scalar prerequisites and R-28-01's native class runtime merged with green Verify. Evidence covers 54 / 5,460 active pairs, with 5,406 open; three class mutants killed after the baseline passed. Complete class authoring, remaining APIs, options and combined scenarios. |
+| R-28 Java class runtime | 🟡 Partial | R-28-01 merged as `ccfcb2d` after the local gate and both Verify checks passed. R-28-02a adds generated `.jx` class descriptors and typed patches with 8/8 focused browser projects and 819/133 checks on its original branch; integrated evidence/mutation/gate/Verify remain pending. Native editor qualification, advanced lifecycle/context options and class hot checkpoints remain open. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |

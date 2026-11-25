@@ -243,8 +243,10 @@ lifecycle parity or preserved class state across hot replacement.
 
 | Task | Deliverable | Status |
 | --- | --- | --- |
-| R-28-01 | Explicit Java descriptors and schemas; actual React Component/PureComponent; typed partial updates, basic lifecycle/snapshots/refs and compiling consumer with browser comparison | ✅ merged PR #48 at ccfcb2d: 34 core, 41 compiler, 15 Maven tests and 825 integrated bench checks; both class cases pass all eight projects; three scoped mutants killed after the baseline passed; local gate and Verify passed |
-| R-28-02 | `.jx` class authoring, generated field projections and patches, diagnostics and native editor projections | ⬜ planned |
+| R-28-01 | Explicit Java descriptors and schemas; actual React Component/PureComponent; typed partial updates, basic lifecycle/snapshots/refs and compiling consumer with browser comparison | ✅ done: PR [#48](https://github.com/lmrrcc/jx/pull/48), merged `ccfcb2d`; 34 core, 41 compiler, 15 Maven tests and 825 integrated bench checks; three scoped mutants killed; local gate 14/14 and both Verify checks passed. Native IDE and broader class qualification remain separate tasks |
+| R-28-02 | `.jx` class authoring, generated field projections and patches, diagnostics and native editor projections | 🟡 in progress: split into compiler/consumer slice 02a and editor qualification 02b; no completion credit yet |
+| R-28-02a | Direct native class declarations in `.jx`, generated typed schemas and immutable state-patch builder, class tags/refs, mapped diagnostics and compiling/browser consumers | 🟡 review: 34 core, 48 compiler, 15 Maven and 10 LSP tests pass; generated class consumer passes 8/8 React/JX projects; full branch bench 819 passed/133 skipped/119 cases; compiler snapshot mutant registered but unrun; integrated evidence/gate/Verify pending |
+| R-28-02b | Qualify class-aware Java completion, navigation, rename and inspections in both native IDE adapters, including incomplete editor source | ⬜ planned |
 | R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options | ⬜ planned |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |
 

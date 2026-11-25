@@ -297,6 +297,9 @@ public final class JxLanguageServer implements LanguageServer, TextDocumentServi
                     for (var prop : component.props()) items.add(completion(prop.name(), CompletionItemKind.Property, prop.javaType(), prop.name() + "={}"
                     ));
                     items.add(completion("key", CompletionItemKind.Property, "React component identity", "key={}"));
+                    if (component.classSpec() != null)
+                        items.add(completion("ref", CompletionItemKind.Property,
+                                "ClassRef<" + component.qualifiedName() + ">", "ref={}"));
                 } else for (String attribute : ATTRIBUTES) items.add(completion(attribute, CompletionItemKind.Property, "React DOM attribute", attribute + "="));
             } else if (tag != null) {
                 for (String name : HTML) items.add(completion(name, CompletionItemKind.Keyword, "HTML/SVG", name));

@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 /** Stable identity and checked schemas of a Java-authored React class. Declare once. This
- * explicit descriptor API precedes compiler-generated class markup support. */
+ * explicit descriptor API also underlies compiler-generated native class markup. */
 public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     public enum Lifecycle { MOUNT, UPDATE, UNMOUNT, SNAPSHOT, SHOULD_UPDATE }
     private final String name;

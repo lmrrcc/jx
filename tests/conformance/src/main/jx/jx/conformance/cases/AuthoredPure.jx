@@ -1,0 +1,21 @@
+package jx.conformance.cases;
+
+import jx.*;
+import jx.conformance.Bench;
+
+@Component
+public final class AuthoredPure extends PureComponent<AuthoredPure.Props, AuthoredPure.Model, Void> {
+    public record Props(String label) {}
+    public record Model(int count) {}
+    public AuthoredPure(Props props) { super(props, new Model(0)); }
+
+    @Override public View render() {
+        Bench.log("authored-pure:render");
+        return <section>
+            <output data-testid="authored-pure-value">{props().label() + ":" + state().count()}</output>
+            <button onClick={event -> setState((pending, next) -> statePatch().withCount(pending.count() + 1).build())}>Authored pure add</button>
+        </section>;
+    }
+    @Override protected void componentDidMount() { Bench.log("authored-pure:mount"); }
+    @Override protected void componentWillUnmount() { Bench.log("authored-pure:unmount"); }
+}

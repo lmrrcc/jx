@@ -44,6 +44,13 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
                 boolean memoized = type.getModifiers().getAnnotations().stream().anyMatch(annotation ->
                         isJxAnnotation("Memo", annotation.getAnnotationType().toString(), packageName, imports, unit));
                 SourceSpan declarationSpan = span(positions, unit, type, shadow.length());
+                ComponentMetadata.ClassKind classKind = ClassModel.kind(type, packageName, imports, unit);
+                if (classKind != null) {
+                    ComponentMetadata component = ClassModel.read(parsed, type, classKind, memoized,
+                            packageName, imports, unit, positions, shadow, diagnostics);
+                    if (component != null) components.add(component);
+                    continue;
+                }
                 List<MethodTree> renders = type.getMembers().stream().filter(MethodTree.class::isInstance)
                         .map(MethodTree.class::cast).filter(m -> m.getName().contentEquals("render")).toList();
                 if (renders.size() != 1 || !renders.getFirst().getModifiers().getFlags().containsAll(Set.of(Modifier.PUBLIC, Modifier.STATIC))
@@ -131,7 +138,7 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
     /** Resolve supported annotation spellings from authored imports, without treating Spring or other
      * same-named component annotations as JX. Full javac attribution still validates ambiguous Java. */
     /** The same import resolution for another annotation of the jx package, such as Memo. */
-    private static boolean isJxAnnotation(String simpleName, String annotation, String packageName, List<String> imports, CompilationUnitTree unit) {
+    static boolean isJxAnnotation(String simpleName, String annotation, String packageName, List<String> imports, CompilationUnitTree unit) {
         if (annotation.equals("jx." + simpleName)) return true;
         if (!annotation.equals(simpleName)) return false;
         List<String> explicit = imports.stream().filter(name -> name.endsWith("." + simpleName)).toList();
@@ -154,7 +161,7 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
         return imports.contains("jx.*");
     }
 
-    private static SourceSpan span(SourcePositions positions, CompilationUnitTree unit, Tree tree, int length) {
+    static SourceSpan span(SourcePositions positions, CompilationUnitTree unit, Tree tree, int length) {
         int start = (int) Math.clamp(positions.getStartPosition(unit, tree), 0, length);
         int end = (int) Math.clamp(positions.getEndPosition(unit, tree), start, length);
         return new SourceSpan(start, end);

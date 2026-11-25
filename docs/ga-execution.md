@@ -121,6 +121,18 @@ Chrome checks pass locally, including suspension, rejection, abort and server-co
 exclusion from browser chunks/maps. Verify is pending. The broad R-30 package,
 its capability-ledger rows and authenticated G0 acceptance remain open.
 
+The separate R-28 branch now contains the native class runtime (R-28-01) and the
+direct `.jx` authoring slice (R-28-02a). The latter generates typed schemas,
+immutable partial patches and native descriptors, with checked class refs in
+tags. Its package checks pass 34 core, 48 compiler and 15 Maven-plugin tests;
+the language-server reactor passes 10 tests and the new consumer passes all eight
+focused React/JX browser projects. Its complete branch bench passes 819 checks
+with 133 skipped across 119 cases; the recorded TSVs await an integrated rerun.
+These are branch results awaiting integration, mutation qualification, gate and
+Verify; native IDE qualification remains R-28-02b. Advanced lifecycle/context
+options and class state preservation remain R-28-03/04. The scope and acceptance
+are recorded in [the R-28 slice table](ga-tasks.md#r-28-implementation-slices).
+
 ## Work package register
 
 The order of implementation is the [implementation sequence](ga-tasks.md): tasks

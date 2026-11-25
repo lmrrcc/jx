@@ -64,7 +64,7 @@ public final class JxCompiler {
             if (outputs.putIfAbsent(source.relativePath(), source) != null)
                 diagnostics.add(Diagnostic.error(source.source(), "JX106", "Duplicate generated path " + source.relativePath(), new SourceSpan(0, 0)));
             generated.add(source);
-            HookRules.check(source, diagnostics);
+            HookRules.check(source, components, diagnostics);
         }
         Map<String, String> signatures = HookSignatures.compute(generated, components);
         List<GeneratedSource> finalSources = models.stream()

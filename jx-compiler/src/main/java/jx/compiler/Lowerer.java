@@ -67,6 +67,11 @@ final class Lowerer {
             int offset = component.descriptorOffset();
             if (offset < start || offset >= span.end() || !inserted.add(offset)) continue;
             out.copy(start, offset);
+            if (component.classSpec() != null) {
+                out.synthetic(ClassDescriptorSource.members(component), component.declaration().start());
+                start = offset;
+                continue;
+            }
             String type = component.hasProps() ? component.propsType() : "Void";
             String function = !component.hasProps() ? "ignored -> " + component.simpleName() + ".render()"
                     : component.propsTypeParameters() == 0 ? component.simpleName() + "::render"
@@ -156,22 +161,24 @@ final class Lowerer {
         Attribute spread = element.attributes().stream().filter(attribute -> attribute.name().equals(MarkupParser.SPREAD)).findFirst().orElse(null);
         if (spread != null) {
             // Typed prop forwarding: the spread value is the whole Props record.
-            boolean alone = element.attributes().stream().allMatch(attribute -> attribute == spread || attribute.name().equals("key"))
+            boolean alone = element.attributes().stream().allMatch(attribute -> attribute == spread || attribute.name().equals("key")
+                    || component.classSpec() != null && attribute.name().equals("ref"))
                     && meaningfulChildren(element.children()).isEmpty();
             if (!component.hasProps()) error("JX105", component.simpleName() + " has no props to spread", spread.nameSpan());
-            else if (!alone) error("JX105", "A spread on a component must be its only property besides key; build the "
+            else if (!alone) error("JX105", "A spread on a component must be its only property besides key"
+                    + (component.classSpec() == null ? "" : " and class ref") + "; build the "
                     + component.simpleName() + ".Props value in Java", spread.nameSpan());
             out.synthetic("jx.Views.component(" + element.name() + ".JX, ", anchor);
             value(spread);
-            Attribute spreadKey = attributes.get("key");
-            if (spreadKey != null) { out.synthetic(", ", spreadKey.nameSpan().start()); value(spreadKey); }
+            identityArguments(component, attributes.get("key"), attributes.get("ref"), anchor);
             out.synthetic(")", anchor);
             return;
         }
         Set<String> declared = new HashSet<>();
         for (ComponentMetadata.Prop prop : component.props()) declared.add(prop.name());
         for (Attribute attribute : attributes.values())
-            if (!declared.contains(attribute.name()) && !attribute.name().equals("key"))
+            if (!declared.contains(attribute.name()) && !attribute.name().equals("key")
+                    && !(component.classSpec() != null && attribute.name().equals("ref")))
                 error("JX102", "Unknown property '" + attribute.name() + "' on " + component.simpleName(), attribute.nameSpan());
         List<Node> children = meaningfulChildren(element.children());
         if (!children.isEmpty() && !declared.contains("children"))
@@ -200,9 +207,21 @@ final class Lowerer {
             }
             out.synthetic(")", anchor);
         }
-        Attribute key = attributes.get("key");
-        if (key != null) { out.synthetic(", ", key.nameSpan().start()); value(key); }
+        identityArguments(component, attributes.get("key"), attributes.get("ref"), anchor);
         out.synthetic(")", anchor);
+    }
+
+    private void identityArguments(ComponentMetadata component, Attribute key, Attribute ref, int anchor) {
+        if (component.classSpec() != null) {
+            // Native class views have an explicit key/ref pair. The ref remains a checked
+            // ClassRef<C>; it is not a field of the generated Props record.
+            out.synthetic(", ", anchor);
+            if (key == null) out.synthetic("null", anchor); else value(key);
+            out.synthetic(", ", anchor);
+            if (ref == null) out.synthetic("null", anchor); else value(ref);
+        } else if (key != null) {
+            out.synthetic(", ", key.nameSpan().start()); value(key);
+        }
     }
 
     /** Native IDE injection edits require monotonically ordered authored slices. Build lowering
@@ -229,7 +248,8 @@ final class Lowerer {
                 out.synthetic(")", attribute.span().end());
                 continue;
             }
-            if (!declared && !attribute.name().equals("key")) {
+            if (!declared && !attribute.name().equals("key")
+                    && !(component.classSpec() != null && attribute.name().equals("ref"))) {
                 // Keep invalid-property expressions available to Java editing; the shared JX
                 // diagnostics still report the unknown property against the authored tag.
                 out.synthetic("jx.Views.fragment(", attribute.nameSpan().start());
@@ -274,9 +294,8 @@ final class Lowerer {
             }
             out.synthetic(")", anchor);
         }
-        if (active != null && active.name().equals("key")) {
-            out.synthetic(", ", active.nameSpan().start()); value(active);
-        }
+        identityArguments(component, active != null && active.name().equals("key") ? active : null,
+                active != null && active.name().equals("ref") ? active : null, anchor);
         out.synthetic(")", anchor);
     }
 
