@@ -273,10 +273,13 @@ real Chrome CSP allow/deny behavior. Two focused checks pass with six inapplicab
 mode cells; package passes 47 core/4 React/52 compiler/15 plugin. Static fixture
 scripts receive only pre-asserted hashes; no general CSP host policy is claimed.
 The shared server-option candidate `eb536cd` passes 943 checks/217 skipped/145
-cases, including this case, with byte-identical consumer/reference/spec files.
-That recorded row is retained; the final main publication gate and Verify remain
-pending. No added pair or mutant credit. Details are in the bootstrap evidence
-record above.
+cases, including this case, with byte-identical consumer/reference files. Its row
+is retained; the later main integration passes 933 checks/187 skipped/140 cases
+and the 15-step gate in 353 seconds on `df76df8`. The spec has since been strengthened
+to reject an empty second continuation and compare both responses against React;
+that assertion-only change awaits a focused run and new exact-head gate.
+Publication and Verify remain pending, with no added pair or mutant credit.
+Details are in the bootstrap evidence record above.
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven

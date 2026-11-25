@@ -12,13 +12,19 @@ test('server-resume-nonce: fresh request nonces authorize resumed instructions a
   for (const kind of ['readable', 'pipeable']) {
     errors.length = 0;
     const [first, second] = await Promise.all([server.resumeBootstrap(kind, 'first'), server.resumeBootstrap(kind, 'second')]);
-    if (sideOf(info) === 'jx') expect(first).toEqual(await reference.resumeBootstrap(kind, 'first'));
+    if (sideOf(info) === 'jx') {
+      expect(first).toEqual(await reference.resumeBootstrap(kind, 'first'));
+      expect(second).toEqual(await reference.resumeBootstrap(kind, 'second'));
+    }
     expect(first.shell).toBe(second.shell);
     expect(first.shell).toContain('waiting');
     expect(first.shell).not.toContain('nonce=');
     expect(first.rest).toContain('nonce="first-script"');
     expect(first.rest).toContain('nonce="first-style"');
     expect(first.rest).not.toContain('second-');
+    expect(second.rest).toContain('nonce="second-script"');
+    expect(second.rest).toContain('nonce="second-style"');
+    expect(second.rest).toContain('arrived');
     expect(second.rest).not.toContain('first-');
     expect(first.rest).not.toContain('resume must not replace');
     expect(first.rest).not.toContain('<h1>shell</h1>');

@@ -138,8 +138,16 @@ Logs: `/private/tmp/jx-resume-nonce-build.log` and
 
 The later shared server-option integration `eb536cd` passes **943 checks /217
 inapplicable cells /145 cases**, including this case's two passing client cells
-and six mode exclusions. The Java consumer, native reference and shared spec
-are byte-identical to the current resume slice. Its recorded row is retained
-from that actual run; the final publication gate will verify the narrower slice
-on merged main. No new pair coverage or mutation qualification is attributed
-to the resume case. Final publication gate and Verify remain pending.
+and six mode exclusions. The Java consumer and native reference are byte-identical
+to the current resume slice. Its recorded row is retained from that actual run.
+The subsequent local gate passed all 15 steps in 353 seconds at `df76df8`, including
+933 checks /187 skipped /140 cases on merged bootstrap main. Both native/JX result
+tables match and the 54/6328 existing pair witnesses remain unchanged.
+
+A final assertion review found that an empty second continuation could satisfy
+the original negative isolation check. The shared spec now also requires the
+second response's script/style nonces and resolved content and compares both
+responses against native React. This assertion-only change requires a new focused
+run and exact-head publication gate; the earlier shared qualification does not
+claim to have executed it. No new pair coverage or mutation qualification is
+attributed to the resume case. Publication and Verify remain pending.
