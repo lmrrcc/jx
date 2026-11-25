@@ -252,9 +252,12 @@ two-response isolation, allowed execution/styles and denial under a mismatched
 policy are asserted. A React classic-preload object-nonce defect is explicitly
 tested and retained as an upstream limitation. Integrated source `0da2b25`
 passes 47 core/4 React/52 compiler/15 Maven-plugin checks and the complete bench:
-907 passed, 181 skipped, 136 cases, unchanged 54/6328 interaction pairs. Three
-scoped mutants, final publication onto merged main, the gate and Verify remain
-pending; no pair credit is added.
+907 passed, 181 skipped, 136 cases, unchanged 54/6328 interaction pairs. The three
+scoped bootstrap mutants are now killed by `server-bootstrap` after a passing
+baseline in joint candidate `f49b48f`/source `193181f`: seven total mutants killed,
+zero survived/unusable, with 931 passed/181 skipped/139 cases and the same pair
+evidence. This branch's bootstrap source is byte-identical. Final publication onto
+merged main, the gate and Verify remain pending; no pair credit is added.
 See the [bootstrap contract and evidence](evidence/server-bootstrap.md).
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source

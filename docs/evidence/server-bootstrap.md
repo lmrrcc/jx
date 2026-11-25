@@ -49,8 +49,14 @@ remains Java; this is an explicit bootstrap/interop boundary.
   **907 passed /181 skipped /136 cases** in 4.4 minutes; client 134 reference /133
   JX, hydrate 101, static 107 and lazy 112 per side. The 54/6328 pair register is
   unchanged. The bootstrap implementation and consumer files match `8682f3d`.
-- Three scoped mutants are registered but **not yet run**. Final publication
-  onto merged main, local gate and Verify remain pending.
+- All **three scoped bootstrap mutants were killed** by `server-bootstrap` after
+  the unmutated scratch baseline passed. The joint campaign also qualified four
+  class mutants: **7 killed, 0 survived, 0 unusable**, candidate `f49b48f`, source
+  `193181f`. Its integrated package passes 56 core/4 React/54 compiler/15 plugin/
+  10 language-server checks; the full bench passes **931/181/139 cases** with
+  unchanged 54/6328 pair evidence. Bootstrap source and consumer files are
+  byte-identical to this branch. This is a scoped campaign, not a new full-catalog
+  result. Final publication onto merged main, local gate and Verify remain pending.
 
 Logs: `/private/tmp/jx-server-bootstrap-build.log`,
 `/private/tmp/jx-server-bootstrap-focused.log`, and
@@ -62,6 +68,11 @@ Integrated logs are `/private/tmp/jx-bootstrap-integrated-build.log` and
 `/private/tmp/jx-bootstrap-integrated-bench.log`. Independent source review found
 no blocking contract/security defect; the record-shape and unqualified resume
 limits above remain explicit.
+
+The completed mutation log is `/private/tmp/jx-class-bootstrap-mutations.log`;
+scratch `jx-mutation-2296619748002841958` is retained under the macOS temporary
+directory. `/private/tmp/VerifyClassBootstrapSources.java` checked 27 class files
+and 23 parent-capability files against their qualified branches before execution.
 
 ## Observed upstream limitation
 
