@@ -1,9 +1,14 @@
 # Native class default props and typed input
 
 R-28/R-31 work, 25 November 2026. Runtime/schema and ordinary `.jx` authoring
-are implemented locally. Package and focused checks are being qualified;
-full-bench, scoped mutation and publication gates remain open. This does not
-close all class-component or hot-reload qualifications.
+are implemented locally on source `7195939`. The final package passes **164 JVM
+tests** (72 core, 11 React, 7 Elm, 59 compiler and 15 Maven), including three new
+core contracts and five compiler tests. All **16 focused mode checks** and
+**32 runtime browser checks** pass. The full bench passes **969 checks, 199
+inapplicable cells, 146 cases**: client 144 reference /143 JX, hydration 108,
+static HTML 114 and lazy mode 119 per side. Existing **62/6328** pair witnesses
+remain unchanged. Three scoped mutants and publication gates remain open.
+This does not close all class-component or hot-reload qualifications.
 
 ## Authoring
 
@@ -104,6 +109,23 @@ render, source-authored defaults, children and record forwarding. They run in
 client, hydration, static HTML and lazy modes. No interaction-pair credit is
 claimed merely from these combinations. Curated mutations target missing native
 defaults, omitted explicit null and premature clone-default resolution.
+
+The full result table adds the two default cases plus the parent's two nullable
+cases, already independently qualified in its 953-check run; no prior result
+changes. This candidate is based on the import-map/nullable/checkpoint stack,
+not the separate native-Writable/component-copy candidate. Results from different
+branches are not added together. Source-only independent review found no blocker
+in raw-input/default/clone ordering or the core ownership contract.
+
+Logs: `/private/tmp/jx-class-default-props-final-build.log` (41.749 seconds),
+`/private/tmp/jx-class-default-props-authoring-focused.log` (26.9 seconds),
+`/private/tmp/jx-class-default-props-runtime.log` (8.0 seconds), and
+`/private/tmp/jx-class-default-props-full.log` (3.6 minutes). The initial runtime
+package reported a Java parameter/lambda name collision; the parameter was
+renamed before the successful builds. Later source checks add preservation of
+ordinary application member names on classes that do not generate input builders;
+the final package includes those regressions and invalid-ref source diagnostics.
+Validation durations are not performance claims.
 
 Primary contracts: [React class defaultProps](https://react.dev/reference/react/Component#static-defaultprops)
 and [React cloneElement](https://react.dev/reference/react/cloneElement). The
