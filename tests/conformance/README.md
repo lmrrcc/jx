@@ -403,6 +403,15 @@ checks pass 54 core/2 React/53 compiler/15 Maven/10 LSP and the null-patch/prelo
 focused comparison passes 16 projects. This partial run leaves the complete
 tables unchanged; the final publication gate supplies full integrated evidence.
 
+`class-pure-policy` compares ordinary and context-aware custom policies on actual
+native Pure classes. The runtime/compiler guard regressions first failed, then
+passed after removing those guards. Integration passes 56 core, 54 compiler,
+15 Maven and 10 LSP tests, plus 919 browser checks/169 skipped/136 cases,
+including all 80 class cells. Equal-props rendering, false-policy skips with fresh
+instance state, callback timing, force/context bypass, DOM identity and the native
+development warning are asserted. Static compares initial HTML only. Pair evidence
+remains 54/6328; the policy-omission mutant and final gate/Verify remain pending.
+
 ## Mutation check
 
 `tests/conformance/mutants.tsv` lists deliberate defects: a file, the exact text to

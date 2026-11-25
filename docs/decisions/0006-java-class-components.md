@@ -665,6 +665,11 @@ derivation/error lifecycles, authored snapshots and typed null patches.
 An initial fixture bundle was attempted before the Maven browser output existed;
 that incomplete-asset run is not qualification. After Maven completed, all bundles
 were rebuilt and all eight projects passed. Static projects compare initial HTML
-only. A policy-omission mutant is registered but unrun. Full integrated bench,
-mutation, push gate, Verify and native IDE qualification remain pending. No new
-feature-pair or aggregate result-table credit is claimed.
+only. Integration over final authoring head `0011c1d` then passes 56 core,
+54 compiler, 15 Maven-plugin and 10 LSP tests. The complete bench passes
+**919 checks, 169 skipped, across 136 cases**: client 134 React / 133 JX,
+hydrate 103, static 109 and lazy 114 per side. All 80 class cells pass; the
+recorded case table includes `class-pure-policy` and pair evidence stays 54/6328.
+The policy-omission mutant remains unrun. Mutation, final push gate, Verify and
+native IDE qualification remain pending. The catalog has 132 entries, without
+a new full-catalog run beyond the historical 100.
