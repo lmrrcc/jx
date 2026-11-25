@@ -15,7 +15,7 @@ in the [execution register](ga-execution.md) has an explicit status.
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01, R-27-02a–02c, the Promise prerequisite and R-27-03a–03b merged with green Verify. R-27-03c locally evidences 48 / 5,356 active pairs, with 5,308 open; its scoped mutant was killed and Verify is pending. Complete remaining APIs, options and combined scenarios. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27-01, R-27-02a–02c, the Promise prerequisite and R-27-03a–03c merged with green Verify. R-27-04 locally evidences 52 / 5,356 active pairs, with 5,304 open; four transition/SSR scoped mutants were killed and Verify is pending. Complete remaining APIs, options and combined scenarios. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
@@ -79,8 +79,15 @@ baseline passed, `combined-transition-cancel` killed `transition-owner-guard-los
 `d89e23f`. Verify is pending. This slice's catalog has 110 entries; the shared
 run's 112 includes later SSR cases. The historical full campaign remains 100.
 The [interaction evidence record](ga-react-interactions.md)
-keeps the 48 locally witnessed pairs separate from the 5,308 remaining active
-pairs. R-27-03b is merged; R-27-03c remains in review in this baseline.
+keeps the 52 locally witnessed pairs separate from the 5,304 remaining active
+pairs. R-27-03b and R-27-03c are merged; R-27-04 remains in review.
+R-27-04 passes 809 checks with 151 skipped across 120 case IDs: client 118
+reference / 117 JX, hydrate 90, static 96 and lazy 101 per side. Its four new
+witnesses prove early bytes in actual Node Writables, isolation while one request
+aborts, deduplicated preload hints and retained server nodes after hydration.
+A reproduced fatal-shell defect now rejects both readiness consumers instead of
+leaving `allReady()` pending. Scoped mutations and Verify remain pending. These
+proofs do not complete authenticated SSR G0 M1-26 or arbitrary loader cancellation.
 The Promise prerequisite merged as `f2b64cb` in
 [PR #42](https://github.com/lmrrcc/jx/pull/42), with
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45467245368) and

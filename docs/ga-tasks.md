@@ -28,12 +28,13 @@ That makes 27 complete React tasks. R-27-01 and R-27-02a–02c merged with green
 Verify, establishing 38 executed pair witnesses. The Promise prerequisite also
 merged in [PR #42](https://github.com/lmrrcc/jx/pull/42) with green Verify.
 R-27-03a merged in [PR #43](https://github.com/lmrrcc/jx/pull/43) as `1ba8c1d`,
-with both Verify checks green. R-27-03c's complete local bench passes 803 checks
-with 48 witnessed pairs, while 5,308 current pairs remain without complete
-evidence. Both slices' scoped mutants were killed after their unmutated baselines
-passed. R-27-03b merged as `3e24edb` in
-[PR #44](https://github.com/lmrrcc/jx/pull/44), with both Verify checks green;
-R-27-03c's Verify is pending. R-27 remains
+with both Verify checks green. R-27-04's complete local bench passes 809 checks
+with 52 witnessed pairs, while 5,304 current pairs remain without complete
+evidence. The optimistic/store, transition and SSR scoped mutants were killed
+after their unmutated baselines passed. R-27-03b merged as `3e24edb` in
+[PR #44](https://github.com/lmrrcc/jx/pull/44), and R-27-03c as `812a27a` in
+[PR #45](https://github.com/lmrrcc/jx/pull/45), with both Verify checks green.
+R-27-04's Verify is pending. R-27 remains
 partial; its slice status and the
 [interaction evidence record](ga-react-interactions.md) distinguish local results
 from outstanding acceptance.
@@ -147,7 +148,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-24 | M6 | Resume: `resume`, `resumeToPipeableStream`, `resumeAndPrerender`, `resumeAndPrerenderToNodeStream` | 4 | ✅ done |
 | R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ✅ done |
 | R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | ✅ done: Luca's try-it confirms 715 passes and 133 inapplicable cells; Verify green at eb5a18a, 24 November |
-| R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-27-03c has local evidence for 48 / 5,356 active pairs; 5,308 remain open, plus deferred-feature pairs |
+| R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-27-04 has local evidence for 52 / 5,356 active pairs; 5,304 remain open, plus deferred-feature pairs |
 | R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | ⬜ planned |
 | R-29 | M7 | Remaining small surface: `act` for JX tests, `captureOwnerStack`, version constants, `unstable_batchedUpdates`, `unstable_useCacheRefresh` | 9 | ⬜ planned |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | ⬜ planned |
@@ -252,7 +253,7 @@ No broad area-level exclusion or reduction to feature families closes this task.
 | R-27-03a | Combined form actions with submission state, reset and controlled failure/recovery | ✅ merged PR #43 at 1ba8c1d: 787 full bench and 8 focused checks; four new pairs; scoped mutant killed; local gate and Verify passed |
 | R-27-03b | Optimistic state over immutable external snapshots: remote rebase, rejected-request rollback and retry without duplicate commits | ✅ merged PR #44 at 3e24edb: 795 full bench and 8 focused checks; three new pairs; explicit close during both awaits releases requests and subscriptions; scoped mutant killed; local gate and Verify passed |
 | R-27-03c | Transition interactions with independent updates and controlled asynchronous completion | 🟡 review: 803 full bench and 8 focused checks pass; three new pairs; completed-result owner race and unmount isolation proved; scoped mutant killed after baseline passed, Verify pending |
-| R-27-04 | Extend SSR, hydration, streaming and resource interactions with mode-specific assertions | ⬜ planned |
+| R-27-04 | Extend SSR, hydration, streaming and resource interactions with mode-specific assertions | 🟡 review: 809 full bench checks pass; four new pairs, real early Writable bytes and retained hydration nodes; fatal-shell readiness regression corrected; three scoped mutants killed after baseline passed; Verify pending |
 | R-27-05 | Add deferred-feature interactions after R-28–R-30; review every remaining pair's applicability and close coverage gaps | ⬜ planned |
 
 These are delivery slices, not a disjoint assignment of every pair. Each follow-up

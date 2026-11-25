@@ -32,23 +32,25 @@ R-27-03b merged as `3e24edb1b9ce74575b4ab4bb5ac873147d8b773b` in
 [green CI](https://github.com/lmrrcc/jx/actions/runs/45548370606).
 R-27-03c also passes its focused and complete local bench; its scoped mutant was
 killed after the shared scratch baseline passed. Its Verify is pending.
+R-27-04 has complete local bench evidence for four server/resource pairs and a
+fatal-shell readiness correction. Its three scoped mutants were killed; Verify is pending.
 No additional human or cross-browser
 qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
 
-The passing counts below include the complete R-27-03c local run. Its three
-transition pairs extend the optimistic/store slice's 45 to **48 / 5,356**, with
-**5,308** remaining. The transition slice remains under review; the merged
-R-27-03b baseline has 45 complete pair witnesses.
+The passing counts below include the complete R-27-04 local run. Its four
+server/resource pairs extend the transition slice's 48 to **52 / 5,356**, with
+**5,304** remaining. This server slice remains under review; the merged R-27-03c
+baseline has 48 complete pair witnesses.
 This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
 | --- | --- |
 | Currently supported/equivalent feature IDs | 104 |
 | Candidate unordered pairs among those IDs | 5,356 |
-| Pairs with a passing witness in every declared mode, on both React and JX | 48 |
-| Current candidate pairs without complete evidence | 5,308 |
+| Pairs with a passing witness in every declared mode, on both React and JX | 52 |
+| Current candidate pairs without complete evidence | 5,304 |
 | Eventual application-feature IDs | 118 |
 | Eventual candidate pairs | 6,903 |
 | Additional pairs involving the 14 deferred feature IDs | 1,547 |
@@ -114,9 +116,11 @@ golden-file comparison but retain checks on the assertions they execute.
 | R-27-03b optimistic/store case | Three pairs: optimistic state with immutable external-store snapshots, transitions and Java async functions. Remote publications rebase the overlay; rejection removes only the optimistic item; retry commits one item while a second await keeps the transition pending; explicit owner close settles both gates and releases requests and subscriptions. |
 | R-27-03c transition case | Three pairs: transition with urgent controlled input and ref-owned operations; Java async functions with effect disposal. Replaced and canceled consumers settle without waiting for transport; an already completed result cannot publish after owner replacement; unmount/remount isolates old work from the new instance. |
 
-The combined scenarios run their assertions in client, hydrate and lazy modes.
+The interactive component scenarios run their assertions in client, hydrate and lazy modes.
+R-27-04 owns its Node streaming and SSR-to-hydration lifecycle inside client-labelled
+projects, as explained below.
 Static mode renders the combined scenarios and compares HTML, but does not execute their
-interactive assertion blocks and therefore earns no pair credit. None of the 48
+interactive assertion blocks and therefore earns no pair credit. None of the 52
 current witnesses claims static interaction coverage.
 
 The register explicitly limits lazy/Suspense and portal/events to client/lazy.
@@ -126,9 +130,9 @@ uses client projects but executes in Node, not a browser page. These project nam
 must not be mistaken for extra browser-mode coverage. Existing case exclusions
 remain recorded in [`modes.tsv`](../tests/conformance/modes.tsv).
 
-The streaming witness checks shell/fallback/delayed-content ordering in the
-collected HTML. It does not measure early network delivery; that requires a
-separate controlled streaming assertion in R-27-04.
+The original streaming witness checks shell/fallback/delayed-content ordering in
+collected HTML. R-27-04 separately observes early bytes in a real Node Writable;
+an HTTP streaming deployment remains unqualified.
 
 ## R-27-03c: urgent updates, operation ownership and completion races
 
@@ -577,7 +581,9 @@ snapshots) also merged with bench, mutation and green Verify evidence.
 R-27-03c (transition interactions) has local bench evidence and a killed scoped
 mutant, and remains in review pending Verify.
 Staged fixtures are preparation, not completed evidence.
-R-27-04 extends server/resource interactions. Each selects explicit
+R-27-04 has local evidence for early streaming, request-context isolation,
+resource deduplication and retained hydration nodes; fatal shell errors reject both
+readiness consumers. Its mutation checks and Verify remain pending. Each slice selects explicit
 remaining pair IDs. R-27-05 follows R-28–R-30, exercises the deferred features and
 reviews the remaining applicability decisions. The parent R-27 stays open until
 every eventual application-feature pair has evidence or an explicitly accepted
