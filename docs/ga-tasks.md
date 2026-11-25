@@ -333,14 +333,16 @@ passes all eight React/JX projects, including repeated submissions after a paren
 render, native React interoperability/replay, no parent form and the URL path with
 no navigation or automatic reset. The related actions/queues/reset/optimistic
 regression run also passes **64/64** checks across eight cases and four modes.
-Integrated over `8fdbed0`, the package passes 35 core, 48 compiler and 15 Maven
-tests. The full bench passes 847 checks with 169 inapplicable cells across 127
-cases and matches both recorded result tables; interaction evidence remains
-54/6328. Source `29f2914` retains the earlier focused behavior. Both targeted
+Integrated over derived-state candidate `021bc02` on merged PR54 (`adcf22b`),
+the package passes 42 core, 48 compiler and 15 Maven tests. The full bench passes
+879 checks with 169 inapplicable cells across 131 cases: client 129 reference /
+128 JX, hydrate 98, static 104 and lazy 109 on each side. Both recorded result
+tables match; interaction evidence remains 54/6328. Source `e79d0ac` and the
+qualified mutation source `29f2914` are byte-identical for this capability. Both targeted
 mutants are killed by `form-status` after the unmutated baseline passes, with zero
 survivors or unusable mutations: dropped submitted action and recreated native
 action identity. The scratch run is `jx-mutation-15150223461760006907`. Final
-integration, push gate and Verify remain pending. This adds no case ID or
+publication gate and Verify remain pending. This adds no case ID or
 feature-pair claim. The original
 three-argument constructor remains available; record patterns/equality now include
 the two new action alternatives, as documented in [the language guide](language.md).
