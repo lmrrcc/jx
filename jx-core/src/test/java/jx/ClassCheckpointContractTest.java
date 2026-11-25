@@ -74,8 +74,10 @@ class ClassCheckpointContractTest {
             calculations.incrementAndGet(); return MODEL.patch().set(COUNT, -1);
         };
         var first = base.withStateCheckpoint("counter", CODEC)
-                .withDerivedStateFromProps(props).withDerivedStateFromError(error);
+                .withDerivedStateFromProps(props).withDerivedStateFromError(error)
+                .withContextShouldUpdate(theme, (peer, next, pending, current) -> current.equals("night"));
         var last = base.withDerivedStateFromError(error).withDerivedStateFromProps(props)
+                .withContextShouldUpdate(theme, (peer, next, pending, current) -> current.equals("night"))
                 .withStateCheckpoint("counter", CODEC);
         assertNull(base.checkpoint());
         assertFalse(base.hasDerivedStateFromProps()); assertFalse(base.hasDerivedStateFromError());
@@ -87,10 +89,12 @@ class ClassCheckpointContractTest {
             assertSame(MODEL, configured.propsSchema()); assertSame(MODEL, configured.stateSchema());
             assertTrue(configured.lifecycle(ClassComponentType.Lifecycle.MOUNT));
             assertTrue(configured.lifecycle(ClassComponentType.Lifecycle.CATCH));
+            assertTrue(configured.hasContextShouldUpdate());
             Model value = new Model(7);
             Peer peer = configured.create(value, DEFAULTS);
             assertSame(value, peer.props()); assertSame(value, peer.initialState());
             assertEquals("night", peer.theme);
+            assertTrue(configured.shouldUpdate(peer, value, value, DEFAULTS));
             assertEquals(7, configured.deriveStateFromProps(value, new Model(2)).entries().getFirst().value());
             assertEquals(-1, configured.deriveStateFromError(new IllegalStateException()).entries().getFirst().value());
         }
@@ -127,5 +131,45 @@ class ClassCheckpointContractTest {
         var pure = ClassComponentType.pure("Pure", MODEL, MODEL, PurePeer::new, Set.of());
         assertThrows(IllegalArgumentException.class, () -> pure.withStateCheckpoint("pure", CODEC));
         assertNull(pure.checkpoint()); assertTrue(pure.pure());
+    }
+
+    @Test void nullableCheckpointCombinationsRejectInBothOrdersBeforeCodecOrFactoryWork() {
+        var strict = plain();
+        var nullable = strict.withNullableState();
+        var checkpointed = strict.withStateCheckpoint("counter", CODEC);
+        var first = assertThrows(IllegalArgumentException.class,
+                () -> nullable.withStateCheckpoint("counter", CODEC));
+        var last = assertThrows(IllegalArgumentException.class, checkpointed::withNullableState);
+        assertTrue(first.getMessage().contains("nullable"));
+        assertTrue(last.getMessage().contains("nullable"));
+        assertTrue(nullable.nullableState()); assertNull(nullable.checkpoint());
+        assertFalse(checkpointed.nullableState()); assertSame(CODEC, checkpointed.checkpoint().codec());
+        assertEquals(new Model(3), checkpointed.create(new Model(3)).initialState());
+    }
+
+    private record Sparse(Presence<Integer> count) {}
+    private static final class SparsePeer extends ClassComponent<Model,Sparse,Void> {
+        SparsePeer(Model props) { super(props, new Sparse(Presence.present(props.count()))); }
+        @Override public View render() { return null; }
+    }
+
+    @Test void optionalStateSchemaRejectsCheckpointEvenWhenAllCurrentFieldsArePresent() {
+        var count = ClassSchema.optionalField("count", ClassSchema.INTEGER, Sparse::count);
+        var sparse = new ClassSchema<Sparse>(List.of(count), reader -> new Sparse(reader.find(count)));
+        AtomicInteger calls = new AtomicInteger();
+        var type = ClassComponentType.normal("Sparse", MODEL, sparse, (Model props) -> {
+            calls.incrementAndGet(); return new SparsePeer(props);
+        }, Set.of());
+        StateCodec<Sparse> codec = new StateCodec<>() {
+            public String schema() { return "sparse-v1"; }
+            public String encode(Sparse value) { calls.incrementAndGet(); return ""; }
+            public Sparse decode(String value) { calls.incrementAndGet(); return new Sparse(Presence.absent()); }
+        };
+        var failure = assertThrows(IllegalArgumentException.class,
+                () -> type.withStateCheckpoint("sparse", codec));
+        assertTrue(failure.getMessage().contains("optional"));
+        assertEquals(0, calls.get());
+        assertNull(type.checkpoint());
+        assertEquals(new Sparse(Presence.present(3)), type.create(new Model(3)).initialState());
     }
 }

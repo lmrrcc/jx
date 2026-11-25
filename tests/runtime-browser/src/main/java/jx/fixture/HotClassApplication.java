@@ -86,6 +86,7 @@ public final class HotClassApplication {
     });
     public static void main() {
         ClassCheckpointNativeProbe.install();
+        ClassCheckpointAdmissionProbe.install();
         installExternal(React.exportComponent(EXTERNAL, ignored -> null), nativeReact(), nativeCreateRoot());
         export(action -> React.thenable(ReactTesting.act((Runnable) () -> {
             if (!action.equals("increment-retained") || retained == null) throw new IllegalArgumentException("No retained class action");

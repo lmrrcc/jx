@@ -27,6 +27,36 @@ const captured = page => page.evaluate(() => {
   catch (error) { return {error: error.message}; }
 });
 
+test('nullable and sparse checkpoint descriptors reject before touching the live root', async ({page}) => {
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  await open(page);
+  await page.locator('#class-add').click();
+  await expect(page.locator('#class-value')).toHaveText('1');
+  const original = await page.locator('#class-value').elementHandle();
+  const attempts = await page.evaluate(() => {
+    const calls = [], hot = globalThis.__JX_HOT__;
+    const capture = hot.capture, dispose = hot.dispose;
+    hot.capture = (...args) => { calls.push('capture'); return capture(...args); };
+    hot.dispose = (...args) => { calls.push('dispose'); return dispose(...args); };
+    try {
+      return {calls, nullableFirst: globalThis.hotClassAdmission('nullable-first'),
+        checkpointFirst: globalThis.hotClassAdmission('checkpoint-first'),
+        optional: globalThis.hotClassAdmission('optional-state')};
+    } finally { hot.capture = capture; hot.dispose = dispose; }
+  });
+  expect(attempts.nullableFirst).toContain('nullable');
+  expect(attempts.checkpointFirst).toContain('nullable');
+  expect(attempts.optional).toContain('optional');
+  expect(attempts.calls).toEqual([]);
+  expect(await page.locator('#class-value').evaluate((node, old) => node === old, original)).toBe(true);
+  await original.dispose();
+  await page.locator('#class-add').click();
+  await expect(page.locator('#class-value')).toHaveText('2');
+  expect((await captured(page)).snapshot.classes[0].payload).toBe('2');
+  expect(errors).toEqual([]);
+});
+
 test('visible class commits restore through typed strings into an independent TeaVM generation', async ({page}) => {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   await open(page);
