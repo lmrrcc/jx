@@ -113,8 +113,31 @@ side, static 99 per side and lazy 104 per side. Both recorded TSVs come from tha
 complete run. Pair evidence stays 54 / 5,460; this compiler consumer adds no pair
 witnesses. The `class-authoring-snapshot-lost` mutant was killed by the authored
 class case after the unmutated scratch baseline passed: 1 killed, 0 survived,
-0 unusable. The three runtime mutants already passed in R-28-01. Authoring push
-gate and Verify remain pending. No native IDE or human qualification is implied.
+0 unusable. The three runtime mutants already passed in R-28-01. Authoring
+[PR #50](https://github.com/lmrrcc/jx/pull/50) merged as `3e1db97` after the local
+15-step gate and both Verify checks passed. No native IDE or human qualification
+is implied.
+
+Explicit class descriptors can select one native React context with
+`ClassComponentType.normalWithContext` or `pureWithContext`. The factory receives
+the initial props and a typed `Supplier<T>` reading the instance's current
+context. It can read that value in the constructor, rendering, lifecycle callbacks
+and event handlers. React's actual `contextType` owns updates, including changes
+that bypass Pure or false should-update bailouts. Missing providers use the
+context default; explicit null and Java reference identity are preserved.
+
+The compiling [`ClassContextCase`](../tests/conformance/src/main/java/jx/conformance/cases/ClassContextCase.java)
+checks those contracts, Activity hide/show with state updated while hidden, and
+context during cleanup. Retaining a peer or its reader retains the native
+instance and its last context after unmount; this API makes no disposal promise.
+Package tests pass 36 core, 48 compiler and 15 Maven-plugin checks. The complete
+integrated bench over authoring merge `3e1db97` passes 841 checks, with 151 skipped
+across 124 cases: client 122 reference / 121 JX, hydrate 94, static 100 and lazy
+105 per side. The context and three existing class cases pass all eight projects.
+No new pair witness is claimed. The captured-context mutant, gate and Verify are
+pending. Compiler context syntax,
+the third next-context should-update argument and preserved class hot state remain
+separate tasks.
 
 ## Hook behavior
 
