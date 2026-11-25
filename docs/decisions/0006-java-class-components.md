@@ -453,6 +453,7 @@ child instance. Production runtime code was unchanged.
 Static mode compares initial HTML only. This is Chrome evidence on the integrated
 class-error branch. Recorded case evidence adds only `class-lifecycle-authoring`;
 all 54 pair witnesses remain green among 6,328 active candidates, with no new pair
-credit. The catalog has 126 mutants; the historical full campaign remains 100.
+credit. After the source-preserving rebase onto PR #57's Forms-integrated head,
+the catalog has 128 mutants; the historical full campaign remains 100.
 The compiler mutant `class-authoring-error-derive-lost` is registered but unrun.
 Mutation, final push gate and Verify remain pending.

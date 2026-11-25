@@ -230,8 +230,9 @@ HTML only. Real-core javac and LSP tests cover signatures, typed source projecti
 and original-source error mapping, without claiming native IDE qualification.
 The compiler mutant `class-authoring-error-derive-lost` is registered but unrun.
 Case evidence adds only this case; pair evidence stays 54/6328. The catalog has
-126 mutants, with no new full-catalog run beyond the historical 100. Mutation,
-final gate and Verify remain pending.
+128 mutants after the source-preserving rebase onto the Forms-integrated error
+lifecycle head, with no new full-catalog run beyond the historical 100. Mutation,
+final combined gate and Verify remain pending.
 
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses

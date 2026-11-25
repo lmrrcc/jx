@@ -170,7 +170,8 @@ complete bench passes **895 checks, 169 skipped, across 133 cases**: client 131
 reference / 130 JX, hydrate 100, static 106 and lazy 111 per side. All 56 class
 cells pass, as do eight focused checks with strict expected-error assertions.
 Case evidence adds one consumer; pair evidence stays **54 / 6,328**. The compiler
-mutant is unrun, final gate/Verify pending. The catalog has 126 entries; the
+mutant is unrun, final gate/Verify pending. Following the source-preserving rebase
+onto the Forms-integrated error-lifecycle head, the catalog has 128 entries; the
 historical full campaign remains 100. Native IDE qualification is separate.
 
 R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
