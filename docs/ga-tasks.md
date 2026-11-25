@@ -242,6 +242,18 @@ remain byte-identical to the successful mutation candidate `e63ea76`.
 All 54/6328 registered interaction pairs remain unchanged. This is the earlier
 integration candidate; the final merged qualification is recorded above.
 
+R-31-SERVER-BOOTSTRAP, 25 November 2026: 🟡 implemented locally at `8682f3d`.
+Typed string/separate CSP nonces and trusted inline bootstrap source work through
+the native pipeable/readable renderers; both static prerender variants emit
+bootstrap source and all four static entry points reject request-specific nonces.
+Two JVM option tests and two differential Node-to-Chrome CSP checks pass; the
+related SSR suite passes 36 checks with 108 inapplicable mode cells. Exact HTML,
+two-response isolation, allowed execution/styles and denial under a mismatched
+policy are asserted. A React classic-preload object-nonce defect is explicitly
+tested and retained as an upstream limitation. Three scoped mutants, complete
+bench, publication gate and Verify remain pending; no pair credit is added.
+See the [bootstrap contract and evidence](evidence/server-bootstrap.md).
+
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven
 tests. The complete bench passes 871 checks with 169 inapplicable cells across
