@@ -293,8 +293,11 @@ the focused run passes two checks with six inapplicable cells, including all
 eight marked R-27 header/resource witnesses on both sides. Full bench passes
 911 checks, 193 skipped, 138 cases: client 136/135, hydrate 101, static 107, lazy 112.
 All eight new witnesses and the 54 prior ones pass, bringing recorded evidence to
-62/6328 pairs (6266 open). Mutation, gate and Verify remain pending; production
-HTTP/103 integration is not qualified. See the [header contract](evidence/server-resource-headers.md).
+62/6328 pairs (6266 open). Both header mutants were killed by this case after a
+passing baseline in the five-mutant `eb536cd` campaign, with zero survivors or
+unusable mutants. This is the header quota of two, not a full-catalog run.
+Final gate and Verify remain pending; production HTTP/103 integration is not
+qualified. See the [header contract](evidence/server-resource-headers.md).
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven

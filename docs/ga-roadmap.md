@@ -35,8 +35,8 @@ Latest local qualification, resource-header slice: **🟡 partial**, with packag
 47 core/7 React/52 compiler/15 plugin and **911 full-bench checks, 193 skipped,
 138 cases** passing. Eight explicitly asserted header/resource pairs bring this
 candidate's evidence to **62/6328**, leaving **6266** active pairs open. This run
-also includes the fresh resume-nonce consumer. Mutation and publication gates
-for headers remain pending. This result precedes the subsequent class-policy
+also includes the fresh resume-nonce consumer. Both scoped header mutants were
+killed after a passing baseline; publication gates remain pending. This result precedes the subsequent class-policy
 integration; the combined tree awaits qualification. Earlier slice measurements
 below remain historical.
 

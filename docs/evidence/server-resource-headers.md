@@ -1,7 +1,7 @@
 # Server resource hint headers
 
 R-31 option-level work, 25 November 2026. Implementation, focused differential
-consumer and full bench pass; mutation and release gates remain pending. This is
+consumer and full bench pass; both scoped mutants are killed, while release gates remain pending. This is
 not a completed parity gate.
 
 `ReactServer.StreamOptions.withHeaders` exposes an immutable `ResourceHeaders`
@@ -55,7 +55,18 @@ successfully on both React and JX. Production HTTP/103 adapter qualification
 remains separate work.
 
 Two curated mutants target dropped Link values and ignored explicit budgets.
-They are registered but have not been executed; no mutation credit is claimed.
+Both were killed by `server-resource-headers` after a passing unmutated baseline
+on the combined server-option candidate `eb536cd`. The exclusive campaign killed
+five mutants total, with zero survivors or unusable mutants; this slice receives
+credit for its two mutations only. The mutated header helpers and focused
+consumer/spec are unchanged; later import-map options elsewhere in
+`ReactServer.java` are outside this slice. This is not a fresh full-catalog run.
+Scratch: `jx-mutation-11888686568552705847`; log:
+`/private/tmp/jx-server-options-mutations.log`. Repeat only in an exclusive slot:
+
+```sh
+java tools/MutateBench.java --only server-hint-header-empty,server-hint-budget-ignored --keep
+```
 
 ## Executed evidence
 
