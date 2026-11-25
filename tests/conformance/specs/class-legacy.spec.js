@@ -1,4 +1,4 @@
-import {test, server, expect, log} from './bench.js';
+import {test, server as onServer, expect, log} from './bench.js';
 
 test('class-legacy: both native spellings queue updates and observe pending context before Pure and SCU decisions', async ({page, open}) => {
   const warnings = [];
@@ -108,7 +108,7 @@ test('class-legacy-interrupted: abandoning a suspended mount discards its queued
   expect(warnings[0]).toMatch(/^componentWillMount has been renamed/);
 });
 
-server('class-legacy-server: server rendering processes legacy mount updates without committed lifecycle callbacks', async server => {
+onServer('class-legacy-server: server rendering processes legacy mount updates without committed lifecycle callbacks', async server => {
   const ordinary = await server.renderLegacy('class-legacy');
   for (const id of ['normal', 'pure']) {
     expect(ordinary.html).toContain(`<output data-testid="${id}">0/11/day</output>`);
