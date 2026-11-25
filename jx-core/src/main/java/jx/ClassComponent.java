@@ -17,7 +17,9 @@ public abstract class ClassComponent<P,S,X> {
     private P initialProps;
     private S initialState;
     private Host<P,S> host;
-    protected ClassComponent(P props, S state) { initialProps = Objects.requireNonNull(props); initialState = Objects.requireNonNull(state); }
+    /** Constructs a peer. Null initial state requires the descriptor's withNullableState
+     * opt-in; the renderer checks this at construction before mounting. Props remain non-null. */
+    protected ClassComponent(P props, S state) { initialProps = Objects.requireNonNull(props); initialState = state; }
     /** Current native instance values, including updates whose render was skipped. Repeated
      * reads of the same current native snapshot reuse the decoded record. Historical snapshot
      * identity after disposal/concurrent discard is not guaranteed. Declared reference fields
@@ -43,7 +45,7 @@ public abstract class ClassComponent<P,S,X> {
     /** Queues a partial state patch. A null patch preserves pending state; an empty patch
      * still produces a merged state object. Java's overload resolution requires a typed
      * null (for example a {@code StatePatch<S>} variable), because an updater overload also
-     * exists. A null patch does not permit null initial state or bypass field validation. */
+     * exists. A null patch does not enable nullable state or bypass field validation. */
     public final void setState(StatePatch<S> patch) { setState(patch, null); }
     /** Queues a nullable partial patch and an optional callback. React commits the callback
      * even when the patch is null and no render is needed; it never runs synchronously here.

@@ -8,6 +8,7 @@ import jx.ClassRef;
 import jx.ClassSchema;
 import jx.Context;
 import jx.ComponentErrorInfo;
+import jx.Presence;
 import jx.StatePatch;
 import jx.View;
 import org.teavm.jso.JSBody;
@@ -35,14 +36,17 @@ final class ReactClasses {
     /** One current decoded value per native instance and schema, never a history of snapshots. */
     private static final class Current<T> {
         private final ClassSchema<T> schema;
+        private final boolean nullable;
         private JSObject source;
         private T value;
-        Current(ClassSchema<T> schema, JSObject source, T value) { this.schema = schema; this.source = source; this.value = value; }
+        Current(ClassSchema<T> schema, boolean nullable, JSObject source, T value) {
+            this.schema = schema; this.nullable = nullable; this.source = source; this.value = value;
+        }
         T read(JSObject next) {
-            if (source != next) observe(next, decode(schema, next));
+            if (source != next) observe(next, decode(schema, next, nullable));
             return value;
         }
-        T pending(JSObject next) { return source == next ? value : decode(schema, next); }
+        T pending(JSObject next) { return source == next ? value : decode(schema, next, nullable); }
         void observe(JSObject next, T decoded) { if (source != next) { source = next; value = decoded; } }
         void clear() { source = null; value = null; }
     }
@@ -52,15 +56,17 @@ final class ReactClasses {
     private static final class InstanceHost<P,S> implements ClassComponent.Host<P,S>, ClassComponentType.ContextAccess {
         private final JSObject instance;
         private final ClassSchema<S> stateSchema;
+        private final boolean nullableState;
         private final Context<?> context;
         private final Current<P> propsValue;
         private Current<S> stateValue;
 
         InstanceHost(JSObject instance, ClassComponentType<P,S,?> type, JSObject initialProps, P initial) {
             this.instance = instance; this.stateSchema = type.stateSchema(); this.context = type.contextType();
-            this.propsValue = new Current<>(type.propsSchema(), initialProps, initial);
+            this.nullableState = type.nullableState();
+            this.propsValue = new Current<>(type.propsSchema(), false, initialProps, initial);
         }
-        void initializeState(JSObject initialState, S value) { stateValue = new Current<>(stateSchema, initialState, value); }
+        void initializeState(JSObject initialState, S value) { stateValue = new Current<>(stateSchema, nullableState, initialState, value); }
         @Override public P props() { return propsValue.read(propsOf(instance)); }
         @Override public S state() { return stateValue.read(stateOf(instance)); }
         @Override public void update(BiFunction<S,P,StatePatch<S>> updater, Runnable committed) {
@@ -88,7 +94,7 @@ final class ReactClasses {
         ClassComponentType<P,S,C> type = view.component();
         Factory create = (instance, props) -> create(type, instance, props);
         DerivedState derive = !type.hasDerivedStateFromProps() ? null : (props, state) -> patch(type.stateSchema(),
-                type.deriveStateFromProps(decode(type.propsSchema(), props), decode(type.stateSchema(), state)));
+                type.deriveStateFromProps(decode(type.propsSchema(), props), decode(type.stateSchema(), state, type.nullableState())));
         DerivedError deriveError = !type.hasDerivedStateFromError() ? null : error ->
                 patch(type.stateSchema(), type.deriveStateFromError(ReactError.fromNative(error)));
         JSObject constructor = constructor(TYPES, type, create, type.name(), type.pure(),
@@ -110,7 +116,7 @@ final class ReactClasses {
         InstanceHost<P,S> host = new InstanceHost<>(instance, type, initialProps, initial);
         C peer = type.create(initial, host);
         S state = peer.initialState();
-        JSObject initialState = encode(type.stateSchema(), state);
+        JSObject initialState = state == null && type.nullableState() ? null : encode(type.stateSchema(), state);
         host.initializeState(initialState, state);
         Current<P> propsValue = host.propsValue;
         Current<S> stateValue = host.stateValue;
@@ -126,9 +132,9 @@ final class ReactClasses {
             try { return React.element(peer.render()); }
             finally { HotReload.end(frame); }
         };
-        Updated updated = (props, previousState) -> peer.updated(decode(type.propsSchema(), props), decode(type.stateSchema(), previousState));
+        Updated updated = (props, previousState) -> peer.updated(decode(type.propsSchema(), props), decode(type.stateSchema(), previousState, type.nullableState()));
         Snapshot snapshot = (props, previousState) -> {
-            Runnable committed = peer.snapshot(decode(type.propsSchema(), props), decode(type.stateSchema(), previousState));
+            Runnable committed = peer.snapshot(decode(type.propsSchema(), props), decode(type.stateSchema(), previousState, type.nullableState()));
             return committed::run;
         };
         ShouldUpdate should = (props, nextState, nextContext) -> {
@@ -156,23 +162,39 @@ final class ReactClasses {
     private static <T> JSObject encode(ClassSchema<T> schema, T value) {
         schema.validate(value);
         JSObject object = object();
-        for (ClassSchema.Field<T,?> field : schema.fields()) set(object, field.name(),
-                nativeValue(field.type(), field.value(value)));
+        for (ClassSchema.Field<T,?> field : schema.fields()) {
+            switch (field.presence(value)) {
+                case Presence.Absent<?> ignored -> { }
+                case Presence.Undefined<?> ignored -> setUndefined(object, field.name());
+                case Presence.Present<?> present -> set(object, field.name(), nativeValue(field.type(), present.value()));
+            }
+        }
         return object;
     }
     private static <S> JSObject patch(ClassSchema<S> schema, StatePatch<S> patch) {
         if (patch == null) return null;
         if (patch.schema() != schema) throw new IllegalArgumentException("State patch belongs to another class schema");
         JSObject object = object();
-        for (StatePatch.Entry<S,?> entry : patch.entries()) set(object, entry.field().name(),
-                nativeValue(entry.field().type(), entry.value()));
+        for (StatePatch.Entry<S,?> entry : patch.entries()) {
+            if (entry.undefined()) setUndefined(object, entry.field().name());
+            else set(object, entry.field().name(), nativeValue(entry.field().type(), entry.value()));
+        }
         return object;
     }
     private static JSObject nativeValue(ClassSchema.ValueType<?> type, Object value) {
         return type.kind() == ClassSchema.Kind.REFERENCE ? Interop.opaque(value) : Interop.scalar(value);
     }
     private static <T> T decode(ClassSchema<T> schema, JSObject object) {
-        return schema.read(field -> read(object, field.name(), field.type().kind()));
+        return decode(schema, object, false);
+    }
+    private static <T> T decode(ClassSchema<T> schema, JSObject object, boolean nullable) {
+        if (isNullValue(object) && nullable) return null;
+        requireObject(object);
+        return schema.readPresence(field -> switch (presence(object, field.name())) {
+            case 0 -> Presence.absent();
+            case 1 -> Presence.undefined();
+            default -> Presence.present(read(object, field.name(), field.type().kind()));
+        });
     }
     private static Object read(JSObject object, String field, ClassSchema.Kind kind) {
         if (isNull(object, field)) return null;
@@ -190,6 +212,10 @@ final class ReactClasses {
     @JSBody(script = "return new WeakMap();") private static native JSObject weakMap();
     @JSBody(script = "return {};") private static native JSObject object();
     @JSBody(params = {"object", "field", "value"}, script = "object[field] = value;") private static native void set(JSObject object, String field, JSObject value);
+    @JSBody(params = {"object", "field"}, script = "object[field] = undefined;") private static native void setUndefined(JSObject object, String field);
+    @JSBody(params = "value", script = "return value === null;") private static native boolean isNullValue(JSObject value);
+    @JSBody(params = "value", script = "if (value === null || typeof value !== 'object' || Array.isArray(value)) throw new Error('Class props/state must be an object');") private static native void requireObject(JSObject value);
+    @JSBody(params = {"object", "field"}, script = "return !Object.prototype.hasOwnProperty.call(object, field) ? 0 : object[field] === undefined ? 1 : 2;") private static native int presence(JSObject object, String field);
     @JSBody(params = {"object", "field"}, script = "if (!Object.prototype.hasOwnProperty.call(object, field) || object[field] === undefined) throw new Error('Missing class field: ' + field); return object[field] === null;") private static native boolean isNull(JSObject object, String field);
     @JSBody(params = {"object", "field"}, script = "var n = object[field]; if (!Number.isInteger(n) || n < -2147483648 || n > 2147483647) throw new Error('Invalid integer class field: ' + field); return n;") private static native int integer(JSObject object, String field);
     @JSBody(params = {"object", "field"}, script = "var n = object[field]; if (!Number.isSafeInteger(n)) throw new Error('Invalid exact long class field: ' + field); return n;") private static native double exactLong(JSObject object, String field);

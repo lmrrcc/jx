@@ -67,29 +67,69 @@ public final class ClassSchema<T> {
     public static final class Field<T, V> {
         private final String name;
         private final ValueType<V> type;
-        private final Function<T, V> getter;
-        private Field(String name, ValueType<V> type, Function<T, V> getter) {
+        private final Function<T, Presence<V>> getter;
+        private final boolean optional;
+        private Field(String name, ValueType<V> type, Function<T, Presence<V>> getter, boolean optional) {
             if (!Objects.requireNonNull(name).matches("[A-Za-z_$][A-Za-z0-9_$]*")
                     || List.of("key", "ref", "__self", "__source", "__proto__", "prototype", "constructor").contains(name)
                     || name.startsWith("__jx")) throw new IllegalArgumentException("Reserved or invalid class field: " + name);
             this.name = name; this.type = Objects.requireNonNull(type); this.getter = Objects.requireNonNull(getter);
+            this.optional = optional;
         }
         public String name() { return name; }
         public ValueType<V> type() { return type; }
-        public V value(T record) { return type.decode(getter.apply(Objects.requireNonNull(record))); }
+        /** Whether this field can be absent or own-undefined. Null values are governed
+         * independently by its ValueType. */
+        public boolean optional() { return optional; }
+        /** Validated presence in a non-null record; does not synthesize a default value. */
+        public Presence<V> presence(T record) { return decodePresence(getter.apply(Objects.requireNonNull(record))); }
+        /** Reads an own, defined value; absent and undefined optional properties fail
+         * explicitly. Use presence when these states belong to the application contract. */
+        public V value(T record) { return defined(presence(record)); }
+        private Presence<V> decodePresence(Presence<?> presence) {
+            Objects.requireNonNull(presence, "Field presence must be non-null");
+            return switch (presence) {
+                case Presence.Present<?> present -> Presence.present(type.decode(present.value()));
+                case Presence.Absent<?> ignored -> {
+                    if (!optional) throw new IllegalArgumentException("Missing required class field: " + name);
+                    yield Presence.absent();
+                }
+                case Presence.Undefined<?> ignored -> {
+                    if (!optional) throw new IllegalArgumentException("Undefined required class field: " + name);
+                    yield Presence.undefined();
+                }
+            };
+        }
+        private V defined(Presence<V> presence) {
+            if (presence instanceof Presence.Present<V> present) return present.value();
+            throw new IllegalArgumentException("Class field has no defined value: " + name);
+        }
     }
     public static <T,V> Field<T,V> field(String name, ValueType<V> type, Function<T,V> getter) {
-        return new Field<>(name, type, getter);
+        Objects.requireNonNull(getter, "getter");
+        return new Field<>(name, type, record -> Presence.present(getter.apply(record)), false);
+    }
+    /** Declares a sparse property whose immutable record stores presence explicitly. The
+     * getter must return a non-null presence. Absent properties are omitted on encoding;
+     * Undefined properties remain own properties. Neither becomes a Java default value.
+     * Present values retain the ordinary type/nullability/reference-identity checks. */
+    public static <T,V> Field<T,V> optionalField(String name, ValueType<V> type, Function<T,Presence<V>> getter) {
+        return new Field<>(name, type, getter, true);
     }
 
     /** Typed constructor input. Reading a field from another schema fails explicitly. */
     public static final class Reader {
         private final ClassSchema<?> schema;
-        private final Function<Field<?,?>, Object> source;
-        private Reader(ClassSchema<?> schema, Function<Field<?,?>, Object> source) { this.schema = schema; this.source = source; }
+        private final Function<Field<?,?>, Presence<?>> source;
+        private Reader(ClassSchema<?> schema, Function<Field<?,?>, Presence<?>> source) { this.schema = schema; this.source = source; }
         public <V> V get(Field<?,V> field) {
+            return field.defined(find(field));
+        }
+        /** Reads validated property presence. Required fields still reject absence and
+         * undefined; requesting a field from another schema fails explicitly. */
+        public <V> Presence<V> find(Field<?,V> field) {
             schema.requireField(field);
-            return field.type().decode(source.apply(field));
+            return field.decodePresence(source.apply(field));
         }
     }
     private final List<Field<T,?>> fields;
@@ -102,13 +142,20 @@ public final class ClassSchema<T> {
     }
     public List<Field<T,?>> fields() { return fields; }
     public T read(Function<Field<?,?>,Object> source) {
+        Objects.requireNonNull(source, "source");
+        return readPresence(field -> Presence.present(source.apply(field)));
+    }
+    /** Constructs a non-null record from explicitly typed property presence. The constructor
+     * and source must be pure; field values are validated without filling missing properties.
+     * Null aggregate state is a separate ClassComponentType opt-in, not a nullable schema. */
+    public T readPresence(Function<Field<?,?>,Presence<?>> source) {
         T value = Objects.requireNonNull(construct.apply(new Reader(this, Objects.requireNonNull(source))), "Schema constructor returned null");
         validate(value);
         return value;
     }
     public void validate(T value) {
         Objects.requireNonNull(value, "Class props/state must be non-null");
-        for (Field<T,?> field : fields) field.value(value);
+        for (Field<T,?> field : fields) field.presence(value);
     }
     void requireField(Field<?,?> field) {
         if (!fields.contains(Objects.requireNonNull(field))) throw new IllegalArgumentException("Field does not belong to this class schema: " + field.name());
