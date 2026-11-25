@@ -18,6 +18,9 @@ import org.teavm.jso.JSObject;
  * requests: everything a request needs is passed in through props or context. */
 public final class ReactServer {
     private ReactServer() {}
+    /** The version exported by the loaded {@code react-dom/server} entry point. */
+    @JSBody(script = "return ReactDOMServer.version;", imports = @JSBodyImport(alias = "ReactDOMServer", fromModule = "react-dom/server"))
+    public static native String version();
 
     /** React's {@code renderToString}: HTML with the markers hydration needs. */
     public static String renderToString(View view) { return renderToString(view, null); }

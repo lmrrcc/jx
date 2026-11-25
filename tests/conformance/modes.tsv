@@ -1,4 +1,10 @@
 case	mode	reason
+act-utilities	hydrate	the test utility owns its root and asynchronous test scope; it is not a hydratable application component
+act-utilities	static	the test utility exercises live DOM updates and effects rather than producing static HTML
+act-utilities	lazy	the test utility creates and disposes its own root rather than rendering a lazy route
+runtime-utilities-production	hydrate	this case explicitly loads a production client bundle; hydration is covered by the ordinary runtime-utilities case
+runtime-utilities-production	static	production diagnostics and act availability are live runtime contracts
+runtime-utilities-production	lazy	this case explicitly loads a production client bundle rather than the development lazy route fixture
 hydrate-root	hydrate	the case is itself a hydration scenario with its own root
 hydrate-server	hydrate	the case is itself a hydration scenario with its own root
 root-options	hydrate	the case mounts its own root with options

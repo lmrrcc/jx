@@ -1,0 +1,24 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.react.ReactDiagnostics;
+
+@Component
+public final class DiagnosticOwner {
+    public record Props(String id) {}
+    public static View render(Props props) {
+        State<String> captured = Hooks.useState("pending");
+        Hooks.useLayoutEffect(() -> {
+            String stack = ReactDiagnostics.captureOwnerStack();
+            captured.set(stack);
+            return null;
+        }, Dependencies.none());
+        return (<output data-testid={props.id()} title={captured.value() == null || "pending".equals(captured.value()) ? "" : captured.value()}>
+            {"pending".equals(captured.value()) ? "pending" : captured.value() == null ? "absent" : "present"}
+        </output>);
+    }
+}

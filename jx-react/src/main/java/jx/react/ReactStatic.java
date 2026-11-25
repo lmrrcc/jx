@@ -14,6 +14,9 @@ import org.teavm.jso.JSObject;
  * It runs in a Node host, like {@link ReactServer}. */
 public final class ReactStatic {
     private ReactStatic() {}
+    /** The version exported by the loaded {@code react-dom/static} entry point. */
+    @JSBody(script = "return ReactDOMStatic.version;", imports = @JSBodyImport(alias = "ReactDOMStatic", fromModule = "react-dom/static"))
+    public static native String version();
 
     /** A prerender that is still running. */
     public interface Prerendering {

@@ -466,3 +466,41 @@ behavior. See the [dated progress review](status.md#progress-review--23-november
 Source maps are generated for the TeaVM output; compiler/editor source mapping is
 a separate contract. No payload-size or speed claim is made from the development
 fixture's unminified bundle.
+
+## Runtime metadata and test scopes
+
+The R-29 APIs below have compiling consumers and differential evidence:
+14 focused checks pass, with 18 inapplicable cells, on 25 November 2026. The
+subsequent full bench passes 801 checks with 151 inapplicable cells on base
+`1ba8c1d`. Mutation qualification, the local push gate and Verify are still pending;
+these results do not qualify every diagnostic depth, synchronous test API or
+browser engine.
+
+`React.version()`, `React.domVersion()` and `React.clientVersion()` read the loaded
+browser runtime exports. `ReactServer.version()` and `ReactStatic.version()` read
+the corresponding server entry points. They do not duplicate pinned version text
+in the Java framework. `ReactDiagnostics.captureOwnerStack()` returns React's
+development owner stack, or null when it is unavailable, including production
+builds. An empty string is a valid distinct result. React's bounded ten-frame
+element creation stack can truncate deep TeaVM conversion chains, so an active
+Java component may have no printable owner frames. The raw result is preserved;
+full Java owner-chain diagnostics remains an R-29-04/R-31 gap. This diagnostic
+text is not a stable application protocol or a Java stack.
+
+`React.unstableBatchedUpdates(() -> result)` delegates to React DOM's legacy
+export, retaining the callback's Java result and propagating failures. Modern
+roots already batch automatically; this API does not promise immediate DOM reads.
+
+`ReactTesting.act(() -> promise)` is an asynchronous test scope. Await its result
+before checking rendered output or starting another scope. It resolves after
+React flushes scheduled updates/effects and retains the Java callback result;
+callback and flush failures reject it. Nested scopes must also be awaited. There
+is no synchronous overload, cancellation or support for overlapping independent
+scopes. Production React does not implement `act`, so the returned promise rejects.
+The JavaScript test host owns `globalThis.IS_REACT_ACT_ENVIRONMENT = true` and its
+restoration; the library never changes that global setting.
+
+The compiling consumer in `tests/conformance/src/main/java/jx/conformance/UtilitiesExports.java`
+mounts and disposes a root with `act`, releases an asynchronous gate, verifies an
+effect that schedules another state change, and exercises rejected and nested
+scopes. `ReactTesting` is intended for development tests, not application handlers.

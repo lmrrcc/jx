@@ -1,0 +1,41 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.Views;
+import jx.conformance.OwnerStackInterop;
+import jx.react.React;
+
+@Component
+public final class RuntimeUtilities {
+    public static View render() {
+        State<Integer> count = Hooks.useState(0);
+        State<String> result = Hooks.useState("ready");
+        return (<main>
+            <output data-testid="react-version">{React.version()}</output>
+            <output data-testid="dom-version">{React.domVersion()}</output>
+            <output data-testid="client-version">{React.clientVersion()}</output>
+            <DiagnosticOwner id="owner-stack" />
+            {Views.component(OwnerStackInterop.COMPONENT, null)}
+            <p role="status" data-testid="batch-result">{count.value() + ":" + result.value()}</p>
+            <button onClick={event -> {
+                Object token = new Object();
+                Object returned = React.unstableBatchedUpdates(() -> {
+                    count.update(value -> value + 1);
+                    count.update(value -> value + 1);
+                    return token;
+                });
+                Object empty = React.unstableBatchedUpdates(() -> null);
+                result.set(returned == token && empty == null ? "same" : "wrong");
+            }}>Batch</button>
+            <button onClick={event -> {
+                try {
+                    React.unstableBatchedUpdates(() -> { throw new IllegalStateException("batch failed"); });
+                    result.set("failure swallowed");
+                } catch (IllegalStateException expected) { result.set(expected.getMessage()); }
+            }}>Fail batch</button>
+        </main>);
+    }
+}

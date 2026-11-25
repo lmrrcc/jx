@@ -33,6 +33,23 @@ Run from the repository root after the Maven build:
 npm run test:bench
 ```
 
+R-29 adds `runtime-utilities` (loaded version exports, owner stacks, legacy batching),
+`server-runtime-versions` and the root-owning `act-utilities` Java consumer.
+`runtime-utilities-production` loads separately bundled production React packages;
+it does not replace exports or simulate production. `npm run build:bench-production`
+builds those assets and is included in the full bench command. The `act` host sets
+and restores `IS_REACT_ACT_ENVIRONMENT` explicitly. Its assertions inspect snapshots
+taken when `act` resolves, including a second update scheduled by an effect, so
+browser polling cannot mask an early completion. The focused run on 25 November
+passes 14 checks with 18 inapplicable cells: client 4/4 per side and one case per
+side in each other mode. The subsequent full run records 801 passes and 151
+inapplicable cells across 119 case IDs: client 117 reference / 116 JX, hydrate 89,
+static 95 and lazy 100 per side on base `1ba8c1d`. The production case checks the
+esbuild input manifests for actual production React modules and no development
+modules, as well as the browser's version values. Deep pure-Java
+owner chains remain an explicit R-29-04/R-31 diagnostic gap; the owner-name witness
+uses a real native React owner creating the Java consumer.
+
 ## Rendering modes
 
 | Mode | Playwright projects | Check |

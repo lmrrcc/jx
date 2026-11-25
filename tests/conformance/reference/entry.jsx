@@ -5,11 +5,14 @@ import { renderToString } from 'react-dom/server';
 import { caseId, mode, unknown } from './bench.js';
 import { cases } from './cases.jsx';
 import { rootOptions } from './cases/root-options.jsx';
+import { startActUtilities } from './act-utilities.jsx';
 
 
 const id = caseId();
 const Case = Object.hasOwn(cases, id) ? cases[id] : null;
-if (id === 'hydrate-root') {
+if (id === 'act-utilities') {
+  startActUtilities();
+} else if (id === 'hydrate-root') {
   // Server markup first, then hydration over the same nodes.
   const container = document.getElementById('app');
   container.innerHTML = renderToString(<StrictMode><Case /></StrictMode>);

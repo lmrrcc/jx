@@ -1,4 +1,5 @@
 case	reference	jx	reference-hydrate	jx-hydrate	reference-static	jx-static	reference-lazy	jx-lazy
+act-utilities	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 action-state	pass	pass	pass	pass	pass	pass	pass	pass
 activity	pass	pass	pass	pass	pass	pass	pass	pass
 async-function	pass	pass	pass	pass	pass	pass	pass	pass
@@ -94,6 +95,8 @@ remount-by-key	pass	pass	pass	pass	pass	pass	pass	pass
 resource-elements	pass	pass	n/a	n/a	pass	pass	pass	pass
 resource-hints	pass	pass	n/a	n/a	pass	pass	pass	pass
 root-options	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+runtime-utilities	pass	pass	pass	pass	pass	pass	pass	pass
+runtime-utilities-production	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-fatal-readiness	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-pipeable-stream	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-readable-stream	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
@@ -101,6 +104,7 @@ server-render-to-static-markup	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-render-to-string	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-resume	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-resume-pipeable	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+server-runtime-versions	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 server-stream-suspense	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 spread-props	pass	pass	pass	pass	pass	pass	pass	pass
 start-transition	pass	pass	pass	pass	pass	pass	pass	pass

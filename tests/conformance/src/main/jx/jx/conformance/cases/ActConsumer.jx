@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.View;
+import jx.conformance.Bench;
+import jx.conformance.UtilitiesExports;
+
+@Component
+public final class ActConsumer {
+    public record Props(UtilitiesExports.Store store) {}
+    public static View render(Props props) {
+        int value = Hooks.useSyncExternalStore(props.store());
+        Hooks.useEffect(() -> {
+            Bench.log("effect:" + value);
+            if (value == 1) props.store().publish(2);
+            return () -> Bench.log("cleanup:" + value);
+        }, Dependencies.of(value));
+        return (<p id="act-count">{value}</p>);
+    }
+}

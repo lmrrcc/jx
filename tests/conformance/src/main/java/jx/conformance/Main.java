@@ -107,6 +107,7 @@ import jx.conformance.cases.DomElements;
 import jx.conformance.cases.DomAttributes;
 import jx.conformance.cases.DomEvents;
 import jx.react.React;
+import jx.conformance.cases.RuntimeUtilities;
 
 /** Mounts exactly one bench case, chosen by the {@code case} query parameter, under Strict Mode. */
 public final class Main {
@@ -116,6 +117,7 @@ public final class Main {
      * their own are handled in {@link #main}. */
     static jx.ComponentType<?> component(String id) {
         return switch (id) {
+            case "runtime-utilities" -> RuntimeUtilities.JX;
             case "combined-portal-lifecycle" -> CombinedPortalLifecycle.JX;
             case "state-counter" -> StateCounter.JX;
             case "state-lazy-init" -> StateLazyInit.JX;
@@ -237,6 +239,7 @@ public final class Main {
         if (Server.active()) { Server.install(); return; }
         String id = Bench.caseId();
         switch (id) {
+            case "act-utilities" -> UtilitiesExports.start();
             case "strict-nested" -> React.mount("app", StrictNested.JX, null);
             case "root-options" -> React.mountStrict("app", RootOptionsCase.JX, null, RootOptionsCase.OPTIONS);
             case "hydrate-root" -> {

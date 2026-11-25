@@ -187,7 +187,8 @@ public final class MutateBench {
                 "-DskipTests", "-pl", String.join(",", MODULES), "install")
                 // Both bundles wrap compiled applications, so they follow every mutated build.
                 && step("server bundle", "npm", "run", "build:bench-server")
-                && step("lazy bundle", "npm", "run", "build:bench-lazy");
+                && step("lazy bundle", "npm", "run", "build:bench-lazy")
+                && step("production bundles", "npm", "run", "build:bench-production");
     }
 
     private boolean bench() throws Exception {
