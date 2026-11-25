@@ -471,10 +471,11 @@ fixture's unminified bundle.
 
 The R-29 APIs below have compiling consumers and differential evidence:
 14 focused checks pass, with 18 inapplicable cells, on 25 November 2026. The
-integrated full bench passes 839 checks with 169 inapplicable cells across 126
-cases, on merged Flight base `5fa53c0` (code `ab30bef`). Client 124 reference /
-123 JX, hydrate 93, static 99 and lazy 104 per side pass. Mutation qualification,
-the local push gate and Verify are still pending;
+integrated full bench passes 847 checks with 169 inapplicable cells across 127
+cases, on merged class-authoring base `3e1db97` (code `52eb29e`). Client 125 reference /
+124 JX, hydrate 94, static 100 and lazy 105 per side pass. All four scoped utility
+mutants were killed after the unmutated baseline passed, with zero survivors or
+unusable mutants. The local push gate and Verify are still pending;
 these results do not qualify every diagnostic depth, synchronous test API or
 browser engine.
 

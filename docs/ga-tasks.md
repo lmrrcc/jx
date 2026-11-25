@@ -47,6 +47,15 @@ M1-26 (protected data route) is the
 remaining server-render proof. See the [dated status review](status.md#progress-review--23-november-2026)
 for remaining platform work and evidence limits. G0 has not passed.
 
+The Flight proof merged in [PR #49](https://github.com/lmrrcc/jx/pull/49) as
+`5fa53c0`, after the 15-step gate and both Verify checks passed. Direct `.jx`
+class authoring merged in [PR #50](https://github.com/lmrrcc/jx/pull/50) as
+`3e1db97`, after its 15-step gate and both Verify checks passed. R-29's eight
+utility rows are implemented with local evidence; all four scoped mutants were
+killed after the baseline passed, and the publication gate remains pending. Its active feature universe
+has 113 features and 6,328 candidate pairs, with 54 witnessed and 6,274 open.
+The five deferred features contribute a further 575 eventual candidate pairs.
+
 ## Rules
 
 1. **One task is one isolated change**: one commit (or pull request) that builds and
@@ -153,11 +162,11 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-24 | M6 | Resume: `resume`, `resumeToPipeableStream`, `resumeAndPrerender`, `resumeAndPrerenderToNodeStream` | 4 | ✅ done |
 | R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ✅ done |
 | R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | ✅ done: Luca's try-it confirms 715 passes and 133 inapplicable cells; Verify green at eb5a18a, 24 November |
-| R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: R-28-01 adds two class witnesses over merged R-27-04; 54 / 5,460 active pairs have local evidence; 5,406 remain open, plus deferred-feature pairs |
+| R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: 54 / 6,328 active pairs have local evidence after R-29 utility activation; 6,274 remain open, plus 575 deferred-feature pairs; utility cases add no pair credit |
 | R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | 🟡 partial: runtime slice R-28-01 merged; class authoring and remaining lifecycle/context/options still open |
-| R-29 | M7 | Remaining small surface; split into R-29-01 through R-29-04 below | 9 | 🟡 partial: 8 rows have full bench evidence; mutation/push gate/Verify pending, cache refresh and deep owner diagnostics remain open |
+| R-29 | M7 | Remaining small surface; split into R-29-01 through R-29-04 below | 9 | 🟡 partial: 8 rows have full bench evidence; four scoped mutants killed after baseline passed; push gate/Verify pending, cache refresh and deep owner diagnostics remain open |
 | R-29-01 | M7 | Runtime version getters, development owner stacks and the legacy batching callback/return contract | 7 | 🟡 implemented with full bench evidence; R-29-04 diagnostic depth and publication gates remain open |
-| R-29-02 | M7 | Awaited asynchronous `act` for Java test consumers, including flushing, nesting, failure recovery and real production-build rejection | 1 | 🟡 implemented with full bench evidence; mutation/push gate/Verify pending; async-only contract |
+| R-29-02 | M7 | Awaited asynchronous `act` for Java test consumers, including flushing, nesting, failure recovery and real production-build rejection | 1 | 🟡 implemented with full bench evidence; flush-bypass mutant killed after baseline passed; push gate/Verify pending; async-only contract |
 | R-29-03 | M8–M10 | `unstable_useCacheRefresh` with an exercised server cache owner and invalidation contract; depends on R-30 | 1 | ⬜ planned; blocked by the server-component/cache feasibility work |
 | R-29-04 | M7 | Preserve useful development owner chains through deep Java/TeaVM element conversion without React-private stack mutation or global Error hooks; accepted limit or implementation required by R-31 | diagnostic depth | ⬜ planned: first R-29 run exposed truncated pure-Java owner chains |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | 🟨 partial — Flight proof merged PR #49 with green Verify; typed cache/signal and Java continuation context have 28 Node + 4 Chrome checks passing locally, integrated Verify pending. [ADR 0007](decisions/0007-react-server-components.md) tracks open directives, general references, server functions and production qualification |
@@ -237,8 +246,24 @@ checks, 169 skipped, across 126 case IDs** (4.5 minutes): client 124 reference /
 witnesses pass; the eight utility rows expand the active universe to 113 features
 and 6,328 candidate pairs, leaving 6,274 without complete evidence. No new pair
 is credited from merely sharing a utility fixture. The four scoped utility
-mutants and publication gates remain pending; the historical 100-mutant campaign
-does not qualify them.
+mutants subsequently passed their own qualification: the unmutated scratch bench
+passed, then **4 killed, 0 survived, 0 unusable**. `act-utilities` killed
+`act-flush-bypassed`; `runtime-utilities` killed `owner-stack-dropped`;
+`runtime-utilities` and its production case killed `batch-return-dropped`;
+those two plus `server-runtime-versions` killed `runtime-version-stale`.
+The source revision was `c65598a` (`ab30bef` utility code), retained in scratch
+`jx-mutation-3915892923157282960`; the rebased utility source `52eb29e` is
+equivalent. The catalog has 120 entries after including merged class authoring;
+the historical full campaign remains 100 and is not rerun or extended by this
+scoped campaign. Publication gates remain pending.
+
+After integrating merged `.jx` class authoring (`3e1db97`), the complete R-29
+bench passes **847 checks, 169 skipped, across 127 case IDs** (3.9 minutes):
+client 125 reference / 124 JX, hydrate 94, static 100 and lazy 105 per side.
+Maven package passes 34 core, 48 compiler and 15 Maven-plugin tests in 22.539
+seconds. All 54 interaction witnesses remain green among 6,328 active candidate
+pairs. This is source `52eb29e`; scoped mutation source equivalence is recorded
+above. These checks precede the full push gate and Verify; R-29 remains partial.
 
 Audit, 23 November 2026: R-16's primary action APIs and browser cases are delivered,
 but `useFormState` has no Java API or case and remains excluded in the feature

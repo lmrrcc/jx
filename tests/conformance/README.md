@@ -42,11 +42,13 @@ and restores `IS_REACT_ACT_ENVIRONMENT` explicitly. Its assertions inspect snaps
 taken when `act` resolves, including a second update scheduled by an effect, so
 browser polling cannot mask an early completion. The focused run on 25 November
 passes 14 checks with 18 inapplicable cells: client 4/4 per side and one case per
-side in each other mode. The integrated full run records 839 passes and 169
-inapplicable cells across 126 case IDs: client 124 reference / 123 JX, hydrate 93,
-static 99 and lazy 104 per side on merged Flight base `5fa53c0` (code `ab30bef`).
+side in each other mode. The integrated full run records 847 passes and 169
+inapplicable cells across 127 case IDs: client 125 reference / 124 JX, hydrate 94,
+static 100 and lazy 105 per side on merged class-authoring base `3e1db97` (code `52eb29e`).
 All 54 interaction witnesses pass among 6,328 active candidate pairs; utility
-cases add no automatic pair credit. The production case checks the
+cases add no automatic pair credit. Four scoped utility mutants were killed after
+the unmutated baseline passed, with no survivors or unusable mutants; publication
+checks remain pending. The production case checks the
 esbuild input manifests for actual production React modules and no development
 modules, as well as the browser's version values. Deep pure-Java
 owner chains remain an explicit R-29-04/R-31 diagnostic gap; the owner-name witness
@@ -136,13 +138,13 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The integrated R-28-02a local run passes 833 checks, with 151 skipped
-cells across 123 case IDs: client 121 reference / 120 JX, hydrate 93 per side,
-static 99 per side and lazy 104 per side. Fifty-four pairs have complete local
-evidence in their declared modes; 5,406 of the 5,460 current candidates remain
-open. The active universe now includes 105 features after `PureComponent` becomes
+The integrated R-29 local run passes 847 checks, with 169 skipped
+cells across 127 case IDs: client 125 reference / 124 JX, hydrate 94 per side,
+static 100 per side and lazy 105 per side. Fifty-four pairs have complete local
+evidence in their declared modes; 6,274 of the 6,328 current candidates remain
+open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate
-pairs, including 1,443 deferred-feature pairs. **R-27 remains partial.** See the
+pairs, including 575 deferred-feature pairs. **R-27 remains partial.** See the
 [interaction evidence record](../../docs/ga-react-interactions.md) for the two
 initial combined scenarios, children-composition regressions, seven ref pairs,
 six portal pairs, four action pairs, three optimistic/store pairs, three transition

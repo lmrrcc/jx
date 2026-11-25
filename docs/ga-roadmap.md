@@ -12,11 +12,23 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
+R-29's runtime utilities add eight implemented feature rows: awaited asynchronous
+`act`, loaded runtime versions, raw development owner stacks and legacy batching.
+The integrated run over class authoring `3e1db97` passes 847 checks with 169 inapplicable
+cells; its eight rows expand the active universe to 113 features and 6,328 pairs.
+The same 54 witnessed pairs leave 6,274 open, plus 575 deferred-feature pairs in
+the unchanged eventual 6,903-pair universe. These utility cases grant no automatic
+interaction credit. Deep Java owner-stack diagnostics and server-cache refresh
+remain explicit open tasks. All four scoped utility mutants were killed after
+the baseline passed, with zero survivors or unusable mutants; publication
+qualification is pending. The `.jx` class-authoring PR #50 is merged as `3e1db97`;
+the combined branch still needs its publication checks.
+
 | Work | Flag | Remaining acceptance |
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
-| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; R-27 slices through SSR R-27-04, the Promise/scalar prerequisites and R-28-01 merged with green Verify. The native class runtime evidences 54 / 5,460 active pairs, with 5,406 open; three class mutants killed after the baseline passed. Complete class authoring, remaining APIs, options and combined scenarios. |
-| R-28 Java class runtime | 🟡 Partial | R-28-01 merged as `ccfcb2d`; R-28-02a merged as `3e1db97` with green 15-step gate and both Verify checks. Generated `.jx` class descriptors and typed patches pass 8/8 focused projects and the integrated bench of 833 passed/151 skipped/123 cases; the compiler mutant was killed after a passing baseline. Native editor qualification, advanced lifecycle/context options and class hot checkpoints remain open. |
+| React parity track / GA-18 | 🟡 Partial | 27 tasks done through R-26 and R-32; interaction slices, native classes, Flight proof and direct class authoring merged with green Verify. R-29 utility activation expands the universe to 54 / 6,328 witnessed active pairs, with 6,274 open and 575 deferred-feature pairs. Four scoped utility mutants killed; publication checks pending. Complete remaining APIs, options and combined scenarios. |
+| R-28 Java class runtime | 🟡 Partial | R-28-01 merged as `ccfcb2d` and R-28-02a as `3e1db97`, after green local gates and both Verify checks. Direct `.jx` class descriptors/patches pass 8/8 focused projects and 833 integrated checks; the compiler mutant was killed after a passing baseline. Native editor qualification, advanced lifecycle/context options and class hot checkpoints remain open. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |

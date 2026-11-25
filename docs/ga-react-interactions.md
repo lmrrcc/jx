@@ -44,7 +44,19 @@ qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
 
-The passing counts below include R-28-02a's complete authoring run integrated
+R-29 adds eight supported/equivalent utility rows without adding pair witnesses.
+On its integrated class-authoring baseline `3e1db97`, all 54 existing witnesses pass among
+6,328 active candidates: 113 active features, 6,274 pairs without complete
+evidence. Five deferred features account for 575 further pairs in the unchanged
+118-feature / 6,903-pair eventual universe. The complete run passes 847 checks,
+with 169 inapplicable cells across 127 case IDs; client 125 React / 124 JX,
+hydrate 94, static 100 and lazy 105 per side. All four scoped utility mutants
+were killed after the unmutated baseline passed, with no survivors or unusable
+mutants. Class authoring merged as PR #50 (`3e1db97`); the combined branch's publication checks are
+pending. The dated R-28 evidence below remains separate from the current utility
+candidate denominator.
+
+The R-28 baseline includes R-28-02a's complete authoring run integrated
 over PR #48's merge `ccfcb2d`. Two native class runtime witnesses extend the merged server/resource
 baseline's 52 to **54 / 5,460**, with **5,406** remaining. Native PureComponent
 activates one previously deferred feature, expanding the candidate universe.
@@ -57,23 +69,24 @@ This is assertion evidence, not credit earned by registration alone.
 
 | Measure | Result |
 | --- | --- |
-| Currently supported/equivalent feature IDs | 105 |
-| Candidate unordered pairs among those IDs | 5,460 |
+| Currently supported/equivalent feature IDs | 113 |
+| Candidate unordered pairs among those IDs | 6,328 |
 | Pairs with a passing witness in every declared mode, on both React and JX | 54 |
-| Current candidate pairs without complete evidence | 5,406 |
+| Current candidate pairs without complete evidence | 6,274 |
 | Eventual application-feature IDs | 118 |
 | Eventual candidate pairs | 6,903 |
-| Additional pairs involving the 13 deferred feature IDs | 1,443 |
+| Additional pairs involving the 5 deferred feature IDs | 575 |
 
 The candidate universe comes from the [feature ledger](evidence/conformance.tsv).
 Only `react-dom:browser` and `framework:react-compiler`, whose task is `none`, are
 outside the eventual application-feature universe. Alias rows remain distinct.
-R-28-01 activates `PureComponent`; R-29 and R-30 retain 13 deferred rows.
+R-28-01 activates `PureComponent`; R-29 activates eight utility rows. Cache refresh
+and R-30 retain five deferred rows.
 `Component` already counted as active through its previous error-boundary
 equivalent. Both class rows now describe actual native runtime support, with
 explicit remaining authoring, lifecycle, context and hot-checkpoint limits.
 
-The integrated run passes 833 checks with 151 inapplicable cells across 123
+The R-28-02a integrated run passes 833 checks with 151 inapplicable cells across 123
 cases: client 121 React / 120 JX, hydration 93 per side, static HTML 99 per side
 and lazy 104 per side. `class-runtime` checks native queued partial state,
 omission versus null, commit snapshots/callbacks, skipped-render current state,
@@ -84,8 +97,8 @@ markers execute in client, hydration and lazy modes; static HTML earns no
 interaction credit. Those two consumers use explicit typed descriptors.
 `class-authoring` separately compiles the same native class contract from `.jx`;
 its eight passing cells add no feature-pair witnesses. The authoring snapshot
-mutant was killed after the unmutated baseline passed. Authoring push gate and
-Verify acceptance remain pending; native IDE qualification is
+mutant was killed after the unmutated baseline passed. PR #50 merged as `3e1db97`
+after the 15-step gate and both Verify checks passed; native IDE qualification is
 outside this compiler slice.
 
 Unlisted pairs are uncovered, not implicitly inapplicable. A pair may lack a
