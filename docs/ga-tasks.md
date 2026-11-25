@@ -175,7 +175,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-29-04 | M7 | Preserve useful development owner chains through deep Java/TeaVM element conversion without React-private stack mutation or global Error hooks; accepted limit or implementation required by R-31 | diagnostic depth | ⬜ planned: first R-29 run exposed truncated pure-Java owner chains |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | 🟡 partial — Flight PR49 and typed cache/signal/Java continuation context PR51 are merged with green local gates and both Verify checks; combined proof 28 Node + 4 Chrome. [ADR 0007](decisions/0007-react-server-components.md) tracks open directives, general references, server functions and production qualification |
 | R-31 | M10 | Parity gate: zero `unsupported`, zero `untested`, only approved exclusions, mutation survivors zero, every case green in every applicable mode; all option-level limits implemented or explicitly accepted | closes the track | ⬜ planned |
-| R-31-01 | M10 | Responsive image preload options with actual candidate requests, resource identity and referrer-policy evidence | closes an option-level gap | 🟡 review: two JVM option tests and eight React/JX projects pass; integrated bench 903 checks/169 skipped/134 cases; both scoped mutants killed after a passing baseline; local push gate, Verify and publication pending |
+| R-31-01 | M10 | Responsive image preload options with actual candidate requests, resource identity and referrer-policy evidence | closes an option-level gap | ✅ done: PR #59 merged as a805810; two JVM option tests and eight React/JX projects pass; integrated bench 903 checks/169 skipped/134 cases; both scoped mutants killed after a passing baseline; 15-step local gate passed in 436 seconds and both Verify checks passed on 4af20f2 |
 
 R-31 functional component contract repair, 25 November 2026: 🟡 implemented
 locally, integration pending. `ComponentType.render` now permits intentional null
@@ -352,7 +352,7 @@ feature-pair claim. The original
 three-argument constructor remains available; record patterns/equality now include
 the two new action alternatives, as documented in [the language guide](language.md).
 
-R-31-01 — responsive image preloads (implemented, integrated verification green): extend `Resources.Options` with
+R-31-01 — responsive image preloads (merged PR #59): extend `Resources.Options` with
 `imageSrcSet`, `imageSizes` and `referrerPolicy`, retaining its seven-argument
 constructor. The new options are immutable copies; image-specific settings require
 `as="image"`. Candidate selection, resource equivalence and request behavior remain
@@ -367,8 +367,9 @@ pairs. Client is 132 reference /131 JX, hydrate 101, static 107 and lazy 112 per
 side; all 15 reporter checks pass.
 Both preload mutants were killed after a passing baseline in the five-mutant
 `e63ea76` integration campaign (5 killed, zero survived/unusable); its six preload
-implementation/consumer files match this slice byte for byte. The publication
-gate and Verify remain pending; no blanket
+implementation/consumer files match this slice byte for byte. PR #59 merged as
+`a805810` after its 15-step gate passed in 436 seconds and both Verify checks
+passed on `4af20f2`; no blanket
 preload or browser qualification follows from this slice. See the
 [focused evidence](evidence/responsive-preload.md).
 Adding record components preserves the old constructor and accessors but extends

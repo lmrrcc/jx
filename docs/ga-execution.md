@@ -188,8 +188,9 @@ Integrated source `33a2fae` over merged lifecycle authoring `338872c` passes pac
 and lazy 112 per side. All 15 reporter checks pass. The two targeted preload
 mutants were killed after the shared baseline passed; those files are unchanged
 from that qualified source. This closes a bounded option gap without adding pair
-credit (54 / 6,328 unchanged). The local push gate, Verify and publication remain
-pending; no cross-browser or full parity qualification is implied.
+credit (54 / 6,328 unchanged). PR #59 merged as `a805810` after its 15-step
+gate passed in 436 seconds and both Verify checks passed on `4af20f2`;
+no cross-browser or full parity qualification is implied.
 
 R-28-03e adds typed pending context to explicit and authored class update
 policies. Integration over preload candidate `4af20f2` passes 51 core, 2 React,

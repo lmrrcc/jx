@@ -50,8 +50,11 @@ recorded results; interaction evidence remains 54/6328. This integrated run used
 already identical to the recorded evidence.
 The final rebase onto PR #58's squash merge changes commit ancestry only;
 production, build and test files match the previously tested candidate byte for byte.
-PR #58 passed its 15-step gate and both Verify checks on `0011c1d`; this preload
-slice still awaits its own publication gate and Verify.
+PR #58 passed its 15-step gate and both Verify checks on `0011c1d`. This preload
+slice merged in [PR #59](https://github.com/lmrrcc/jx/pull/59) as `a805810`,
+after its 15-step local gate passed in 436 seconds and both
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45661193871) and
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45661370351) passed on `4af20f2`.
 
 The earlier integration over FormStatus candidate `1b65e70`, source `0f41000`,
 passed 887 checks /169 skipped /132 cases. It is historical evidence, not the
@@ -63,7 +66,7 @@ of an exclusive five-mutant run: 5 killed, 0 survived, 0 unusable. The integrate
 candidate `e63ea76` passed 905 checks /175 skipped across 135 cases, with 54/6328
 interaction pairs unchanged. The six preload implementation/consumer files are
 byte-identical to the qualified slice. Scratch evidence:
-`jx-mutation-7730846870036546774`. The historical full campaign remains 100. The local push gate and Verify remain pending.
+`jx-mutation-7730846870036546774`. The historical full campaign remains 100.
 The browser check is Chrome evidence, not cross-browser or GA qualification.
 
 Compatibility: existing constructor and accessor descriptors remain available.
