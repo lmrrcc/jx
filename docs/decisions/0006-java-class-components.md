@@ -200,13 +200,20 @@ effect need not observe a ref inside an Activity that has not yet hydrated.
 The consumer also checks context during cleanup and after intentional retention,
 with balanced mount/cleanup under Strict Mode and Activity reappearance.
 
-Local package verification passed 36 core, 48 compiler and 15 Maven-plugin tests.
-`class-context` passed eight focused React/JX projects: client, hydration and lazy
-execute the interactions; static compares initial HTML only. This is Chrome-only
-focused evidence. The existing `class-runtime`, `class-keyed` and `class-authoring`
-cases also pass all 24 checks after the shared host change. `CheckBaseline` and
-`git diff --check` pass. No aggregate result table or pair witness is changed. A captured
-initial-context mutant is registered but unrun; integrated bench, mutation, gate
+Integrated over utility merge `8fdbed0`, package verification passed 37 core,
+48 compiler and 15 Maven-plugin tests. The complete bench passes **855 checks,
+169 skipped, across 128 cases**: client 126 React / 125 JX, hydrate 95 per side,
+static 101 and lazy 106. The context consumer and three existing class cases
+pass all eight projects each. Static compares initial HTML only; the interactive
+modes exercise the assertions. Case evidence adds only `class-context`, and all
+54 existing pair witnesses remain green among 6,328 active candidates.
+
+The scoped `class-context-captured` mutant was killed by this consumer in client,
+hydrate and lazy modes after a passing unmutated scratch baseline: 1 killed,
+0 survived, 0 unusable. Its runtime/consumer/spec source at `6c3aa63` is identical
+to rebased source `d897468`; scratch `jx-mutation-6746600491109191949` is retained.
+The catalog now has 121 entries; the historical full campaign still covers 100.
+These checks are Chrome-only and do not qualify native IDEs. The final push gate
 and Verify remain pending.
 
 Derived state from props, derived error state and committed error information are

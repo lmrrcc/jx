@@ -47,8 +47,9 @@ inapplicable cells across 127 case IDs: client 125 reference / 124 JX, hydrate 9
 static 100 and lazy 105 per side on merged class-authoring base `3e1db97` (code `52eb29e`).
 All 54 interaction witnesses pass among 6,328 active candidate pairs; utility
 cases add no automatic pair credit. Four scoped utility mutants were killed after
-the unmutated baseline passed, with no survivors or unusable mutants; publication
-checks remain pending. The production case checks the
+the unmutated baseline passed, with no survivors or unusable mutants. The utility
+slice merged as PR #52 (`8fdbed0`) after the 15-step gate and both Verify checks
+passed on `f0b5a5b`. The production case checks the
 esbuild input manifests for actual production React modules and no development
 modules, as well as the browser's version values. Deep pure-Java
 owner chains remain an explicit R-29-04/R-31 diagnostic gap; the owner-name witness
@@ -138,9 +139,9 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The integrated R-29 local run passes 847 checks, with 169 skipped
-cells across 127 case IDs: client 125 reference / 124 JX, hydrate 94 per side,
-static 100 per side and lazy 105 per side. Fifty-four pairs have complete local
+The integrated class-context run over PR #52 passes 855 checks, with 169 skipped
+cells across 128 case IDs: client 126 reference / 125 JX, hydrate 95 per side,
+static 101 per side and lazy 106 per side. Fifty-four pairs have complete local
 evidence in their declared modes; 6,274 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate
@@ -243,8 +244,9 @@ completion. All eight focused projects pass, and the complete integrated run
 passes 833 checks with 151 skipped across 123 cases. The authored subset accepts
 direct, non-generic classes and nested record props/state; supported field types
 and remaining syntax limits are in ADR 0006. The generated-snapshot mutant was
-killed after the unmutated baseline passed; the full push gate and Verify remain pending. Native
-editor qualification remains a separate acceptance task.
+killed after the unmutated baseline passed. PR #50 merged as `3e1db97` after the
+15-step local gate and both Verify checks passed. Native editor qualification
+remains a separate acceptance task.
 
 The separate `class-context` consumer exercises explicit typed native
 `contextType` factories. Its eight focused projects pass: constructor/default/
@@ -255,8 +257,19 @@ hydration mode; it does not assume a parent mount effect sees a deferred hydrate
 child ref. Cleanup reads current context, and an intentionally retained instance
 keeps native React's last context after unmount. This is focused Chrome evidence,
 not a disposal guarantee or full class lifecycle parity. Static mode compares
-initial HTML only. The `class-context-captured` mutant is registered but unrun;
-no pair/result table has been updated for this slice.
+initial HTML only. The complete integrated run over `8fdbed0` passes 855 checks,
+169 skipped, across 128 cases, including all 32 cells for the four class cases.
+Case evidence adds only `class-context`; pair evidence remains 54/6328.
+`class-context-captured` was killed after a passing unmutated baseline:
+1 killed, 0 survived, 0 unusable. Runtime and fixture source at `6c3aa63` is
+identical after the rebase (`d897468`). The catalog has 121 entries, while the
+historical full campaign remains 100. Run mutation campaigns exclusively:
+
+```sh
+java tools/MutateBench.java --only class-context-captured --keep
+```
+
+The final push gate and Verify are pending; the browser evidence is Chrome-only.
 
 Static HTML equality does not execute interactive assertion blocks, so it does
 not credit those witnesses. Hydration-owned and Node-only scenarios can carry

@@ -28,8 +28,8 @@ That makes 27 complete React tasks. R-27-01 and R-27-02a–02c merged with green
 Verify, establishing 38 executed pair witnesses. The Promise prerequisite also
 merged in [PR #42](https://github.com/lmrrcc/jx/pull/42) with green Verify.
 R-27-03a merged in [PR #43](https://github.com/lmrrcc/jx/pull/43) as `1ba8c1d`,
-with both Verify checks green. The integrated R-28-02a local bench passes 833 checks
-with 54 witnessed pairs among 5,460 active candidates; 5,406 remain without
+with both Verify checks green. The integrated R-28-03a local bench passes 855 checks
+with 54 witnessed pairs among 6,328 active candidates; 6,274 remain without
 complete evidence. The optimistic/store, transition and SSR scoped mutants were killed
 after their unmutated baselines passed. R-27-03b merged as `3e24edb` in
 [PR #44](https://github.com/lmrrcc/jx/pull/44), and R-27-03c as `812a27a` in
@@ -51,8 +51,11 @@ The Flight proof merged in [PR #49](https://github.com/lmrrcc/jx/pull/49) as
 `5fa53c0`, after the 15-step gate and both Verify checks passed. Direct `.jx`
 class authoring merged in [PR #50](https://github.com/lmrrcc/jx/pull/50) as
 `3e1db97`, after its 15-step gate and both Verify checks passed. R-29's eight
-utility rows are implemented with local evidence; all four scoped mutants were
-killed after the baseline passed, and the publication gate remains pending. Its active feature universe
+utility rows merged in [PR #52](https://github.com/lmrrcc/jx/pull/52) as `8fdbed0`:
+the 15-step local gate passed in 285 seconds, and both
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45591209626) and
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45591325376) passed on tested head
+`f0b5a5b`. All four scoped mutants were killed after the baseline passed. Its active feature universe
 has 113 features and 6,328 candidate pairs, with 54 witnessed and 6,274 open.
 The five deferred features contribute a further 575 eventual candidate pairs.
 
@@ -163,10 +166,10 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-25 | M4–M6 | Generated coverage of every HTML and SVG element, attribute and event name React accepts | deepens the `dom:` rows | ✅ done |
 | R-26 | M6 | Every case run in every rendering mode that applies: client, static HTML, server render with hydration, lazy route | adds the mode axis | ✅ done: Luca's try-it confirms 715 passes and 133 inapplicable cells; Verify green at eb5a18a, 24 November |
 | R-27 | M6 | Combined scenarios so that every pair of features meets at least once; split into R-27-01 onward below | adds pair coverage | 🟡 partial: 54 / 6,328 active pairs have local evidence after R-29 utility activation; 6,274 remain open, plus 575 deferred-feature pairs; utility cases add no pair credit |
-| R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | 🟡 partial: runtime slice R-28-01 merged; class authoring and remaining lifecycle/context/options still open |
-| R-29 | M7 | Remaining small surface; split into R-29-01 through R-29-04 below | 9 | 🟡 partial: 8 rows have full bench evidence; four scoped mutants killed after baseline passed; push gate/Verify pending, cache refresh and deep owner diagnostics remain open |
-| R-29-01 | M7 | Runtime version getters, development owner stacks and the legacy batching callback/return contract | 7 | 🟡 implemented with full bench evidence; R-29-04 diagnostic depth and publication gates remain open |
-| R-29-02 | M7 | Awaited asynchronous `act` for Java test consumers, including flushing, nesting, failure recovery and real production-build rejection | 1 | 🟡 implemented with full bench evidence; flush-bypass mutant killed after baseline passed; push gate/Verify pending; async-only contract |
+| R-28 | M7 | Class components authored in Java: `Component` lifecycle and `PureComponent` | 2 | 🟡 partial: runtime R-28-01 and class authoring R-28-02a merged; native editor qualification and remaining lifecycle/context/options still open |
+| R-29 | M7 | Remaining small surface; split into R-29-01 through R-29-04 below | 9 | 🟡 partial: eight rows merged in PR52 after green local gate and both Verify checks; four scoped mutants killed; cache refresh and deep owner diagnostics remain open |
+| R-29-01 | M7 | Runtime version getters, development owner stacks and the legacy batching callback/return contract | 7 | ✅ done for the bounded utility contract: PR52 merged as 8fdbed0 with green gate/Verify; deep Java diagnostic chains remain explicitly assigned to R-29-04 |
+| R-29-02 | M7 | Awaited asynchronous `act` for Java test consumers, including flushing, nesting, failure recovery and real production-build rejection | 1 | ✅ done for the asynchronous contract: PR52 merged with green gate/Verify; flush-bypass mutant killed after baseline passed; no synchronous or overlapping-scope parity claim |
 | R-29-03 | M8–M10 | `unstable_useCacheRefresh` with an exercised server cache owner and invalidation contract; depends on R-30 | 1 | ⬜ planned; cache/signal proof merged in PR51, but refresh ownership and invalidation still need implementation and evidence |
 | R-29-04 | M7 | Preserve useful development owner chains through deep Java/TeaVM element conversion without React-private stack mutation or global Error hooks; accepted limit or implementation required by R-31 | diagnostic depth | ⬜ planned: first R-29 run exposed truncated pure-Java owner chains |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | 🟡 partial — Flight PR49 and typed cache/signal/Java continuation context PR51 are merged with green local gates and both Verify checks; combined proof 28 Node + 4 Chrome. [ADR 0007](decisions/0007-react-server-components.md) tracks open directives, general references, server functions and production qualification |
@@ -270,7 +273,10 @@ Final integration preserves the merged request-cache/continuation changes from
 passed in 287 seconds and whose [push Verify](https://github.com/lmrrcc/jx/actions/runs/45587877665)
 and [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45588054123) are green.
 The rebased R-29 utility source is `79b0d28`; utility assertions and the four
-mutant targets are unchanged. Its final publication checks are still pending.
+mutant targets are unchanged. The final tested head `f0b5a5b` passed the 15-step
+local gate in 285 seconds and both Verify checks before [PR #52](https://github.com/lmrrcc/jx/pull/52)
+merged as `8fdbed0`. R-29 remains partial because cache refresh and deep owner
+diagnostics have their own unfinished slices.
 
 Audit, 23 November 2026: R-16's primary action APIs and browser cases are delivered,
 but `useFormState` has no Java API or case and remains excluded in the feature
@@ -346,7 +352,7 @@ lifecycle parity or preserved class state across hot replacement.
 | R-28-02a | Direct native class declarations in `.jx`, generated typed schemas and immutable state-patch builder, class tags/refs, mapped diagnostics and compiling/browser consumers | ✅ merged PR #50 at 3e1db97: 34 core, 48 compiler, 15 Maven and 10 LSP tests pass; generated class consumer passes 8/8 projects; integrated bench 833 checks/151 skipped/123 cases and unchanged 54/5460 pairs; snapshot mutant killed after baseline passed; 15-step local gate and both Verify checks passed |
 | R-28-02b | Qualify class-aware Java completion, navigation, rename and inspections in both native IDE adapters, including incomplete editor source | ⬜ planned |
 | R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options; split below | 🟡 in progress: R-28-03a runtime context focused evidence below; derived/error lifecycle and compiler context sugar remain planned |
-| R-28-03a | Native contextType through additive typed factories; constructor/current context, Pure/SCU bypass, defaults/null, retained state and Activity lifecycle | 🟡 review: package 36 core/48 compiler/15 Maven tests and eight new focused React/JX projects plus 24 existing class checks pass; no new pair credit, full integrated bench/mutant/gate/Verify pending; native class instance retention preserved, no disposal guarantee |
+| R-28-03a | Native contextType through additive typed factories; constructor/current context, Pure/SCU bypass, defaults/null, retained state and Activity lifecycle | 🟡 review: package 37 core/48 compiler/15 Maven tests; integrated bench over PR52 passes 855 checks/169 skipped/128 cases, context and three prior class cases pass eight projects each; unchanged 54/6328 pairs; captured-context mutant killed after a passing baseline, zero survived/unusable; final gate/Verify pending; native class instance retention preserved, no disposal guarantee |
 | R-28-03b | Pure derived-state-from-props with typed partial patches, null updates and native render timing | ⬜ planned |
 | R-28-03c | Derived error state plus committed didCatch, checked Java error/component-stack information and recovery | ⬜ planned |
 | R-28-03d | Compiler context declaration sugar, typed third nextContext argument for should-update, and remaining class option qualification | ⬜ planned |

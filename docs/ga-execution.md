@@ -127,9 +127,21 @@ hydrate 94, static 100 and lazy 105 per side. Four focused utility cases pass
 baseline passed, with zero survivors or unusable mutants. The active universe
 expands to **113 features / 6,328 pairs**, with the same **54** witnesses and
 **6,274** open pairs; 575 eventual pairs involve deferred features. No automatic
-pair credit is given to the utility fixtures. The publication gate and Verify
-remain pending; deep Java owner-stack diagnostics and server-cache refresh stay
-open. The catalog has 120 entries; the historical full campaign remains 100.
+pair credit is given to the utility fixtures. [PR #52](https://github.com/lmrrcc/jx/pull/52)
+merged as `8fdbed0` after the 15-step local gate and both Verify checks passed on
+`f0b5a5b`; deep Java owner-stack diagnostics and server-cache refresh stay open.
+The utility snapshot's catalog has 120 entries; the historical full campaign remains 100.
+
+R-28-03a adds typed native class context readers. Integrated over PR #52's merge
+`8fdbed0`, package checks pass 37 core, 48 compiler and 15 Maven tests. The complete
+bench passes **855 checks, 169 skipped, across 128 cases**: client 126 reference /
+125 JX, hydrate 95, static 101 and lazy 106 per side. All four class cases pass
+eight projects each, with unchanged **54 / 6,328** pair evidence. The scoped
+captured-context mutant was killed after a passing baseline, zero survived/unusable;
+its runtime and fixture source is identical after rebase. The catalog is now 121,
+without rerunning the historical full campaign of 100. The final context gate and
+Verify remain pending. Compiler context sugar, advanced lifecycle options, native
+IDE qualification and class hot-state preservation are separate tasks.
 
 R-30-01 now has a [Java Server Components proof](../tests/rsc-proof/README.md)
 using actual Flight and separate server/client Java programs. Seven Node and four
@@ -201,7 +213,7 @@ exists, not when its document or skeleton module lands.
 | GA-15 | Rich DOM/events/refs and browser schema / R | GA-03, GA-14 | M3–M5 / L | HTML/SVG/IME/pointer/file/ref behavior; safe rich-content contract, CSR/SSR sanitization; wrong types rejected at source | 🟡 partial |
 | GA-16 | Nested router and resource cache / A | GA-03, GA-10, GA-06 | M3–M4 / L | Loaders/actions, nested layouts, abort/stale protection, invalidation/optimistic rollback and deep links | ⬜ planned |
 | GA-17 | Forms, validation, i18n and accessible primitives / A | GA-10, GA-15 | M3–M5 / L | Complex form, arrays/errors, locale/RTL, keyboard/reader, shared pure rules and server errors | ⬜ planned |
-| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger and differential fixtures. Interaction slices, native classes, Flight and direct class authoring merged through PR50; R-29 utility activation expands the universe to 54 / 6,328 witnessed active pairs, 6,274 open plus 575 deferred-feature pairs; four utility mutants killed after baseline passed, publication checks pending; remaining APIs/options and combined scenarios open | 🟡 partial |
+| GA-18 | Stable React API parity / R | GA-03, GA-06, GA-15 | M3–M6 / L | Complete pinned API ledger and differential fixtures. Interaction, class, Flight, cache and utility slices merged through PR52; native class context passes 855 integrated checks and a scoped mutant, with final gate/Verify pending. Pair evidence remains 54 / 6,328, with 6,274 open plus 575 deferred-feature pairs; remaining APIs/options and combined scenarios open | 🟡 partial |
 | GA-19 | HTTP headers/binary/upload/stream capabilities / C | GA-03, GA-10, GA-13 | M3–M5 / L | Auth/CSRF headers, upload progress, download, SSE/WS lifecycle, bounds/reconnect tested | ⬜ planned |
 | GA-20 | Real ecosystem binding SDK and catalog / R | GA-15, GA-18 | M4–M7 / L | Selected grid/editor/chart/headless/media bindings with refs/assets/cleanup; Java consumer examples | ⬜ planned |
 | GA-21 | Complex authenticated reference product / A | GA-12, GA-13, GA-16, GA-17, GA-19 | M4–M6 / L | Workspace/project workflow with roles, search/table/detail, forms/files/activity and two-tenant tests | ⬜ planned |

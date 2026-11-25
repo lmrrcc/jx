@@ -130,10 +130,10 @@ The compiling [`ClassContextCase`](../tests/conformance/src/main/java/jx/conform
 checks those contracts, Activity hide/show with state updated while hidden, and
 context during cleanup. Retaining a peer or its reader retains the native
 instance and its last context after unmount; this API makes no disposal promise.
-Package tests pass 36 core, 48 compiler and 15 Maven-plugin checks. The complete
-integrated bench over authoring merge `3e1db97` passes 841 checks, with 151 skipped
-across 124 cases: client 122 reference / 121 JX, hydrate 94, static 100 and lazy
-105 per side. The context and three existing class cases pass all eight projects.
+Package tests pass 37 core, 48 compiler and 15 Maven-plugin checks. The complete
+integrated bench over utility merge `8fdbed0` passes 855 checks, with 169 skipped
+across 128 cases: client 126 reference / 125 JX, hydrate 95, static 101 and lazy
+106 per side. The context and three existing class cases pass all eight projects.
 No new pair witness is claimed. The captured-context mutant was killed by
 `class-context` in client, hydration and lazy modes after a passing scratch
 baseline: 1 killed, 0 survived, 0 unusable. Gate and Verify remain pending. Compiler context syntax,
@@ -499,7 +499,8 @@ integrated full bench passes 847 checks with 169 inapplicable cells across 127
 cases, on merged class-authoring base `3e1db97` (code `52eb29e`). Client 125 reference /
 124 JX, hydrate 94, static 100 and lazy 105 per side pass. All four scoped utility
 mutants were killed after the unmutated baseline passed, with zero survivors or
-unusable mutants. The local push gate and Verify are still pending;
+unusable mutants. PR #52 merged as `8fdbed0` after the 15-step local gate and both
+Verify checks passed on `f0b5a5b`;
 these results do not qualify every diagnostic depth, synchronous test API or
 browser engine.
 
