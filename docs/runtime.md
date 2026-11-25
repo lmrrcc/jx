@@ -106,14 +106,15 @@ equality; package checks pass 34 core, 48 compiler and 15 Maven-plugin tests, an
 the language-server reactor passes 10 protocol tests. The compiler tests compile
 the real core API with javac, exercise static patch initialization and verify
 source-mapped type errors. LSP tests cover cross-file class/prop navigation and
-typed class-ref completion without changing functional ref props. These are
-local branch results: the complete branch bench passes 819 checks, with 133
-skipped across 119 cases (client 117 reference / 116 JX, hydrate 92 per side,
-static 98 per side, lazy 103 per side). Pair evidence remains 47 / 5,460; this
-compiler consumer claims no new pairs. The run required complete coverage but
-did not replace recorded TSVs, which await the integrated branch run. One
-compiler snapshot mutant is registered but unrun, alongside the three pending
-runtime mutants. Mutation qualification, push gate and Verify remain pending.
+typed class-ref completion without changing functional ref props. After rebase
+onto PR #48's merge `ccfcb2d`, the complete integrated bench passes 833 checks,
+with 151 skipped across 123 cases: client 121 reference / 120 JX, hydrate 93 per
+side, static 99 per side and lazy 104 per side. Both recorded TSVs come from that
+complete run. Pair evidence stays 54 / 5,460; this compiler consumer adds no pair
+witnesses. The `class-authoring-snapshot-lost` mutant was killed by the authored
+class case after the unmutated scratch baseline passed: 1 killed, 0 survived,
+0 unusable. The three runtime mutants already passed in R-28-01. Authoring push
+gate and Verify remain pending. No native IDE or human qualification is implied.
 
 ## Hook behavior
 

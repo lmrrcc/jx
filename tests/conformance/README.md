@@ -117,9 +117,9 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The integrated R-28-01 local run passes 825 checks, with 151 skipped
-cells across 122 case IDs: client 120 reference / 119 JX, hydrate 92 per side,
-static 98 per side and lazy 103 per side. Fifty-four pairs have complete local
+The integrated R-28-02a local run passes 833 checks, with 151 skipped
+cells across 123 case IDs: client 121 reference / 120 JX, hydrate 93 per side,
+static 99 per side and lazy 104 per side. Fifty-four pairs have complete local
 evidence in their declared modes; 5,406 of the 5,460 current candidates remain
 open. The active universe now includes 105 features after `PureComponent` becomes
 available. The eventual universe still includes 118 features and 6,903 candidate
@@ -203,13 +203,27 @@ commit snapshots/callbacks, forceUpdate, null output without unmounting, and
 native shallow comparison. Keyed Pure peers retain their class refs, DOM nodes
 and state through both reorder directions without rendering unchanged props.
 Both cases pass all eight projects; the two pair witnesses run only in client,
-hydrate and lazy modes. This slice uses explicit descriptors and Java `Views`;
-`.jx` class authoring, native editor semantics and advanced lifecycle/context
-options remain open. Hot replacement resets class state; compatible typed class
+hydrate and lazy modes. This runtime slice uses explicit descriptors and Java
+`Views`; direct `.jx` authoring is covered by the following compiler slice.
+Native editor semantics and advanced lifecycle/context options remain open.
+Hot replacement resets class state; compatible typed class
 checkpoints are deferred. Three class mutants were killed after the isolated
 baseline passed. [PR #48](https://github.com/lmrrcc/jx/pull/48) merged as `ccfcb2d`
-after the full local gate and both Verify checks passed. See
+after the local 14-step gate and both Verify checks passed. See
 [ADR 0006](../../docs/decisions/0006-java-class-components.md).
+
+The `class-authoring` case compiles annotated native classes from `.jx` through
+generated typed schemas, partial patches and lifecycle descriptors. Its shared
+spec checks queued updates and render snapshots, omitted versus null state,
+pre-commit DOM snapshots and callback order, Pure bailout, class refs, remount
+and unmount. It adds no interaction-pair credit. Compiler JVM tests compile the
+real core API, and LSP protocol tests cover class/prop navigation and typed ref
+completion. All eight focused projects pass, and the complete integrated run
+passes 833 checks with 151 skipped across 123 cases. The authored subset accepts
+direct, non-generic classes and nested record props/state; supported field types
+and remaining syntax limits are in ADR 0006. The generated-snapshot mutant was
+killed after the unmutated baseline passed; the full push gate and Verify remain pending. Native
+editor qualification remains a separate acceptance task.
 
 Static HTML equality does not execute interactive assertion blocks, so it does
 not credit those witnesses. Hydration-owned and Node-only scenarios can carry
@@ -321,7 +335,16 @@ Result: **3 killed, 0 survived, 0 unusable**. Repeat the scoped campaign alone:
 java tools/MutateBench.java --only class-pure-renders,class-snapshot-lost,class-ref-detach-lost
 ```
 
-The current catalog has **115 entries**; the historical full result
+R-28-02a registers `class-authoring-snapshot-lost`, which removes the authored
+snapshot lifecycle from the generated descriptor. After the unmutated baseline
+passed, `class-authoring` killed the mutant: **1 killed, 0 survived, 0 unusable**.
+Repeat in isolation:
+
+```sh
+java tools/MutateBench.java --only class-authoring-snapshot-lost
+```
+
+The current catalog has **116 entries**; the historical full result
 still covers 100. Scoped campaigns do not establish a fresh full-catalog result.
 
 ## Feature list

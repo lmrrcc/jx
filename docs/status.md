@@ -8,6 +8,21 @@ browser, or editor distribution.
 The [GA roadmap](ga-roadmap.md) defines the next year of work, measurable release
 gates and portfolio migrations. Its planned capabilities are not delivered status.
 
+## R-28-02a update — 25 November 2026
+
+Native Java classes can now be authored in `.jx` with generated typed field
+schemas, partial patches, lifecycle descriptors and checked instance refs.
+The integrated package passes 34 core, 48 compiler, 15 Maven-plugin and 10 LSP
+tests. The complete browser bench over PR #48's merge `ccfcb2d` passes **833
+checks**, with 151 inapplicable cells across 123 cases: client 121 React / 120 JX,
+hydrate 93, static 99 and lazy 104 per side. The new authored-class consumer passes
+all eight projects; existing pair evidence remains 54 / 5,460.
+
+R-28-02a is in review: the generated snapshot mutant was killed after the
+unmutated baseline passed, with no survivors or unusable mutants; local push
+gate and Verify remain pending. Native editor qualification is R-28-02b, and
+advanced lifecycle/context options and class hot checkpoints remain R-28-03/04.
+
 ## R-28-01 update — 25 November 2026
 
 The first class runtime slice creates actual React `Component`/`PureComponent`
@@ -24,11 +39,15 @@ pass all eight projects. The two class witnesses bring this branch to
 54 / 5,460 active pairs; 5,406 remain open.
 The expanded denominator includes the newly active PureComponent feature.
 
-R-28 remains partial: `.jx` class authoring, advanced lifecycle/context options
-and class hot checkpoints are still planned. Class hot replacement resets state.
+R-28 remains partial: `.jx` class authoring is in review; native editor
+qualification, advanced lifecycle/context options and class hot checkpoints
+remain open. Class hot replacement resets state.
 All three targeted mutants were killed after the isolated baseline passed,
-with no survivors or unusable mutants; push gate and Verify are
-pending. These results are Chrome evidence, with no new human qualification.
+with no survivors or unusable mutants. PR [#48](https://github.com/lmrrcc/jx/pull/48)
+merged as `ccfcb2d` after the local 14-step gate and both Verify checks passed:
+[push](https://github.com/lmrrcc/jx/actions/runs/45560759038) and
+[PR](https://github.com/lmrrcc/jx/actions/runs/45560907924).
+These results are Chrome evidence, with no new human qualification.
 See [the class decision](decisions/0006-java-class-components.md) and
 [task slices](ga-tasks.md#r-28-implementation-slices).
 

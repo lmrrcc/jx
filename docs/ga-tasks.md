@@ -28,7 +28,7 @@ That makes 27 complete React tasks. R-27-01 and R-27-02a–02c merged with green
 Verify, establishing 38 executed pair witnesses. The Promise prerequisite also
 merged in [PR #42](https://github.com/lmrrcc/jx/pull/42) with green Verify.
 R-27-03a merged in [PR #43](https://github.com/lmrrcc/jx/pull/43) as `1ba8c1d`,
-with both Verify checks green. The integrated R-28-01 local bench passes 825 checks
+with both Verify checks green. The integrated R-28-02a local bench passes 833 checks
 with 54 witnessed pairs among 5,460 active candidates; 5,406 remain without
 complete evidence. The optimistic/store, transition and SSR scoped mutants were killed
 after their unmutated baselines passed. R-27-03b merged as `3e24edb` in
@@ -245,7 +245,7 @@ lifecycle parity or preserved class state across hot replacement.
 | --- | --- | --- |
 | R-28-01 | Explicit Java descriptors and schemas; actual React Component/PureComponent; typed partial updates, basic lifecycle/snapshots/refs and compiling consumer with browser comparison | ✅ done: PR [#48](https://github.com/lmrrcc/jx/pull/48), merged `ccfcb2d`; 34 core, 41 compiler, 15 Maven tests and 825 integrated bench checks; three scoped mutants killed; local gate 14/14 and both Verify checks passed. Native IDE and broader class qualification remain separate tasks |
 | R-28-02 | `.jx` class authoring, generated field projections and patches, diagnostics and native editor projections | 🟡 in progress: split into compiler/consumer slice 02a and editor qualification 02b; no completion credit yet |
-| R-28-02a | Direct native class declarations in `.jx`, generated typed schemas and immutable state-patch builder, class tags/refs, mapped diagnostics and compiling/browser consumers | 🟡 review: 34 core, 48 compiler, 15 Maven and 10 LSP tests pass; generated class consumer passes 8/8 React/JX projects; full branch bench 819 passed/133 skipped/119 cases; compiler snapshot mutant registered but unrun; integrated evidence/gate/Verify pending |
+| R-28-02a | Direct native class declarations in `.jx`, generated typed schemas and immutable state-patch builder, class tags/refs, mapped diagnostics and compiling/browser consumers | 🟡 review: 34 core, 48 compiler, 15 Maven and 10 LSP tests pass; generated class consumer passes 8/8 React/JX projects; integrated bench over PR48 passes 833 checks/151 skipped/123 cases, with unchanged 54/5460 pairs; compiler snapshot mutant killed after the unmutated baseline passed, zero survived/unusable; gate/Verify pending |
 | R-28-02b | Qualify class-aware Java completion, navigation, rename and inspections in both native IDE adapters, including incomplete editor source | ⬜ planned |
 | R-28-03 | Context, derived state/error lifecycle, error information, SSR/hydration/lazy qualification and remaining class API options | ⬜ planned |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |
@@ -261,8 +261,9 @@ options. `equivalent` described the previous error-boundary-only Java route and
 would be misleading for the new actual React class bridge. Activating the
 previously deferred PureComponent row increases the active universe from 104 to
 105 features, or 5,460 candidate pairs. The two new executed witnesses prove
-PureComponent with keys and instance refs; 47 pairs now have complete local
-evidence. Three new class mutants are pending an exclusive run:
+PureComponent with keys and instance refs; 54 pairs now have complete local
+evidence after integration with the server/resource witnesses. All three runtime
+class mutants were killed after the unmutated baseline passed. Repeat in isolation:
 `java tools/MutateBench.java --only class-pure-renders,class-snapshot-lost,class-ref-detach-lost`.
 
 ### R-27 implementation slices
