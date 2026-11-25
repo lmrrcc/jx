@@ -45,15 +45,19 @@ qualification is implied by these automated results.
 ## Current evidence and remaining scope
 
 R-29 adds eight supported/equivalent utility rows without adding pair witnesses.
-On its integrated class-authoring baseline `3e1db97`, all 54 existing witnesses pass among
+The class-context integration over utility merge `8fdbed0` keeps all 54 existing witnesses green among
 6,328 active candidates: 113 active features, 6,274 pairs without complete
 evidence. Five deferred features account for 575 further pairs in the unchanged
-118-feature / 6,903-pair eventual universe. The complete run passes 847 checks,
-with 169 inapplicable cells across 127 case IDs; client 125 React / 124 JX,
-hydrate 94, static 100 and lazy 105 per side. All four scoped utility mutants
+118-feature / 6,903-pair eventual universe. The complete run passes 855 checks,
+with 169 inapplicable cells across 128 case IDs; client 126 React / 125 JX,
+hydrate 95, static 101 and lazy 106 per side. The context case adds eight cells
+and no new pair witness. Its captured-context mutant was killed after a passing
+baseline on runtime/fixture source identical after rebase; the final context gate
+and Verify are pending. All four scoped utility mutants
 were killed after the unmutated baseline passed, with no survivors or unusable
-mutants. Class authoring merged as PR #50 (`3e1db97`); the combined branch's publication checks are
-pending. The dated R-28 evidence below remains separate from the current utility
+mutants. Class authoring merged as PR #50 (`3e1db97`), and the utilities merged as
+PR #52 (`8fdbed0`) after the 15-step local gate and both Verify checks passed on
+`f0b5a5b`. The dated R-28 evidence below remains separate from the current utility
 candidate denominator.
 
 The R-28 baseline includes R-28-02a's complete authoring run integrated

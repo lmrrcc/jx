@@ -1,10 +1,12 @@
 package jx.react;
 
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import jx.ClassComponent;
 import jx.ClassComponentType;
 import jx.ClassRef;
 import jx.ClassSchema;
+import jx.Context;
 import jx.StatePatch;
 import jx.View;
 import org.teavm.jso.JSBody;
@@ -41,11 +43,40 @@ final class ReactClasses {
         void clear() { source = null; value = null; }
     }
 
+    /** The same owner backs current props/state and the optional typed context reader. No
+     * independent context subscription, instance cache or lifecycle/disposal flag is added. */
+    private static final class InstanceHost<P,S> implements ClassComponent.Host<P,S>, ClassComponentType.ContextAccess {
+        private final JSObject instance;
+        private final ClassSchema<S> stateSchema;
+        private final Context<?> context;
+        private final Current<P> propsValue;
+        private Current<S> stateValue;
+
+        InstanceHost(JSObject instance, ClassComponentType<P,S,?> type, JSObject initialProps, P initial) {
+            this.instance = instance; this.stateSchema = type.stateSchema(); this.context = type.contextType();
+            this.propsValue = new Current<>(type.propsSchema(), initialProps, initial);
+        }
+        void initializeState(JSObject initialState, S value) { stateValue = new Current<>(stateSchema, initialState, value); }
+        @Override public P props() { return propsValue.read(propsOf(instance)); }
+        @Override public S state() { return stateValue.read(stateOf(instance)); }
+        @Override public void update(BiFunction<S,P,StatePatch<S>> updater, Runnable committed) {
+            updateNative(instance, (pendingState, props) -> patch(stateSchema,
+                    updater.apply(stateValue.pending(pendingState), propsValue.pending(props))),
+                    committed == null ? null : committed::run);
+        }
+        @Override public void force(Runnable committed) { forceNative(instance, committed == null ? null : committed::run); }
+        @Override public <T> Supplier<T> current(Context<T> requested) {
+            if (requested == null || requested != context) throw new IllegalArgumentException("Class context does not belong to this descriptor");
+            return () -> Interop.value(contextOf(instance));
+        }
+    }
+
 
     static <P,S,C extends ClassComponent<P,S,?>> JSObject element(View.ClassComponentView<P,S,C> view, String path, String key) {
         ClassComponentType<P,S,C> type = view.component();
         Factory create = (instance, props) -> create(type, instance, props);
         JSObject constructor = constructor(TYPES, type, create, type.name(), type.pure(),
+                type.contextType() == null ? null : React.context(type.contextType()),
                 type.lifecycle(ClassComponentType.Lifecycle.MOUNT), type.lifecycle(ClassComponentType.Lifecycle.UPDATE),
                 type.lifecycle(ClassComponentType.Lifecycle.SNAPSHOT),
                 type.lifecycle(ClassComponentType.Lifecycle.SHOULD_UPDATE));
@@ -59,21 +90,14 @@ final class ReactClasses {
     private static <P,S,C extends ClassComponent<P,S,?>> JSObject create(ClassComponentType<P,S,C> type,
             JSObject instance, JSObject initialProps) {
         P initial = decode(type.propsSchema(), initialProps);
-        C peer = type.create(initial);
+        InstanceHost<P,S> host = new InstanceHost<>(instance, type, initialProps, initial);
+        C peer = type.create(initial, host);
         S state = peer.initialState();
         JSObject initialState = encode(type.stateSchema(), state);
-        Current<P> propsValue = new Current<>(type.propsSchema(), initialProps, initial);
-        Current<S> stateValue = new Current<>(type.stateSchema(), initialState, state);
-        peer.bind(new ClassComponent.Host<>() {
-            @Override public P props() { return propsValue.read(propsOf(instance)); }
-            @Override public S state() { return stateValue.read(stateOf(instance)); }
-            @Override public void update(BiFunction<S,P,StatePatch<S>> updater, Runnable committed) {
-                updateNative(instance, (pendingState, props) -> patch(type.stateSchema(),
-                        updater.apply(stateValue.pending(pendingState), propsValue.pending(props))),
-                        committed == null ? null : committed::run);
-            }
-            @Override public void force(Runnable committed) { forceNative(instance, committed == null ? null : committed::run); }
-        });
+        host.initializeState(initialState, state);
+        Current<P> propsValue = host.propsValue;
+        Current<S> stateValue = host.stateValue;
+        peer.bind(host);
         HotReload.classStateReset(pathOf(initialProps));
         Render render = () -> {
             // Keep only the current graph even when the Java render does not read one of
@@ -156,6 +180,7 @@ final class ReactClasses {
     @JSBody(params = {"object", "field"}, script = "return object[field];") private static native Object reference(JSObject object, String field);
     @JSBody(params = "instance", script = "return instance.props;") private static native JSObject propsOf(JSObject instance);
     @JSBody(params = "instance", script = "return instance.state;") private static native JSObject stateOf(JSObject instance);
+    @JSBody(params = "instance", script = "return instance.context;") private static native Object contextOf(JSObject instance);
     @JSBody(params = "instance", script = "return instance.__jx.peer;") private static native Object peer(JSObject instance);
     @JSBody(params = "props", script = "return props.__jxPath;") private static native String pathOf(JSObject props);
     @JSBody(params = {"instance", "updater", "committed"}, script = "instance.setState(function(state, props) { return updater(state, props); }, committed === null ? undefined : function() { committed(); });") private static native void updateNative(JSObject instance, Update updater, Done committed);
@@ -166,12 +191,12 @@ final class ReactClasses {
     private static native JSObject ref(JSObject cache, Object ref, Attach attach);
     @JSBody(params = {"constructor", "props", "key", "path", "ref"}, script = "props.__jxPath = path; if (key !== null) props.key = key; if (ref !== null) props.ref = ref; return React.createElement(constructor, props);", imports = @JSBodyImport(alias = "React", fromModule = "react"))
     private static native JSObject element(JSObject constructor, JSObject props, String key, String path, JSObject ref);
-    @JSBody(params = {"cache", "descriptor", "create", "name", "pure", "mount", "update", "snapshot", "should"}, script = """
+    @JSBody(params = {"cache", "descriptor", "create", "name", "pure", "context", "mount", "update", "snapshot", "should"}, script = """
         var Type = cache.get(descriptor);
         if (Type) return Type;
         var Base = pure ? React.PureComponent : React.Component;
-        Type = function(props) {
-            Base.call(this, props);
+        Type = function(props, contextValue) {
+            Base.call(this, props, contextValue);
             this.__jx = create(this, props);
             this.state = this.__jx.initial;
             this.__jx.initial = null;
@@ -179,6 +204,7 @@ final class ReactClasses {
         Type.prototype = Object.create(Base.prototype);
         Type.prototype.constructor = Type;
         Type.displayName = name;
+        if (context !== null) Type.contextType = context;
         Type.prototype.render = function() { return this.__jx.render(); };
         if (mount) Type.prototype.componentDidMount = function() { this.__jx.mount(); };
         Type.prototype.componentWillUnmount = function() { this.__jx.unmount(); };
@@ -191,5 +217,5 @@ final class ReactClasses {
         return Type;
         """, imports = @JSBodyImport(alias = "React", fromModule = "react"))
     private static native JSObject constructor(JSObject cache, Object descriptor, Factory create, String name, boolean pure,
-            boolean mount, boolean update, boolean snapshot, boolean should);
+            JSObject context, boolean mount, boolean update, boolean snapshot, boolean should);
 }
