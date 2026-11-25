@@ -117,24 +117,23 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The complete R-27-02c local run on 24 November passes 779 checks, with 133 skipped
-cells across 114 case IDs: client 112 reference / 111 JX, hydrate 87 per side,
-static 93 per side and lazy 98 per side. Thirty-eight pairs have complete evidence
-in their declared modes; 5,318 of the
+The complete R-27-03a local run on 24 November passes 787 checks, with 133 skipped
+cells across 115 case IDs: client 113 reference / 112 JX, hydrate 88 per side,
+static 94 per side and lazy 99 per side. Forty-two pairs have complete local evidence
+in their declared modes; 5,314 of the
 5,356 current candidates remain open. The eventual universe includes 118 features
 and 6,903 candidate pairs. **R-27 remains partial.** See the
 [interaction evidence record](../../docs/ga-react-interactions.md) for the two
 initial combined scenarios, children-composition regressions, seven ref pairs,
-six portal pairs and acceptance status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
+six portal pairs, four action pairs and acceptance status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
 at `413558b636679dd5926f4d7bf1c987ea707ed95c`, after its 755-check bench and green
 Verify. R-27-02b merged in [PR #40](https://github.com/lmrrcc/jx/pull/40) at
 `15c0c6eee36f506910e854c568547ebc6d3758ea`, with green
 [CI](https://github.com/lmrrcc/jx/actions/runs/45452120669) and
 [CI](https://github.com/lmrrcc/jx/actions/runs/45452801956).
-R-27-02c merged in [PR #41](https://github.com/lmrrcc/jx/pull/41) as
-`a0f5460980c6b288f3ac2fa2c4c73c0b774f0563`, with its scoped mutant killed and green
-[CI](https://github.com/lmrrcc/jx/actions/runs/45461059543) and
-[CI](https://github.com/lmrrcc/jx/actions/runs/45460586560). Browser evidence is Chrome-only and
+R-27-02c's scoped mutant was killed; [PR #41](https://github.com/lmrrcc/jx/pull/41)
+merged as `a0f5460` with green Verify. R-27-03a's scoped mutant was killed after
+its unmutated baseline passed; its Verify is pending. Browser evidence is Chrome-only and
 does not establish additional human or cross-browser qualification.
 
 The ref scenarios use actual Playwright element handles to compare DOM identity,
@@ -146,17 +145,23 @@ across context updates and a fresh node after closing and reopening. It checks
 capture/bubble order, target/currentTarget and default/propagation semantics,
 focus and ref cleanup. The portal begins closed in the server HTML and opens only
 after browser hydration; this does not prove server rendering of an open portal.
-Future R-27-03a actions,
-R-27-03b optimistic/store and R-27-03c transition slices remain planned.
+The action scenario also passes all eight focused checks. Its four witnesses
+combine action state with form actions, form status, Java async functions and the
+existing error-boundary equivalent. It checks captured submission payloads,
+sequential previous-state composition, pending status and reset, rejection that
+cancels successors, retry while pending and unmount/remount with a fresh owner.
+The cancellation behavior is fixture-local, not the G0 API; class components
+remain R-28. R-27-03a is in review; R-27-03b optimistic/store and R-27-03c transition
+slices remain planned in this baseline.
 
-The separate R-27-03-PROMISE prerequisite (`7ed3f2c`) is in review. A throwing
+The separate R-27-03-PROMISE prerequisite merged in
+[PR #42](https://github.com/lmrrcc/jx/pull/42) as `f2b64cb`. A throwing
 Promise observer previously prevented React's later bridge observer from receiving
 settlement, leaving its reader suspended. JVM and Chrome regressions reproduced
 the defect; nine Promise JVM tests (included in 36 runtime-package JVM tests) and
-13 Chrome runtime checks now pass locally. The full local gate and CI Verify are
-pending. These [runtime checks](../../docs/runtime.md#promise-observer-isolation)
-add no case or feature-pair credit to this bench: its accepted totals remain 779
-passes and 38 pairs.
+13 Chrome runtime checks pass, together with the full local gate and CI Verify.
+These [runtime checks](../../docs/runtime.md#promise-observer-isolation) added no
+case or feature-pair credit to the portal baseline of 779 passes and 38 pairs.
 
 Static HTML equality does not execute interactive assertion blocks, so it does
 not credit those witnesses. Hydration-owned and Node-only scenarios can carry
@@ -218,8 +223,17 @@ the scoped check exclusively:
 java tools/MutateBench.java --only portal-context-stale
 ```
 
-The current catalog has **107 entries**; the historical full result still covers 100. These
-scoped campaigns do not establish a fresh full 107-mutant result.
+R-27-03a adds `action-queue-previous-lost`, which discards the previous action
+state when accumulating a queued submission. Its unmutated scratch baseline
+passed, then `combined-action-queue` killed it: **1 killed, 0 survived,
+0 unusable**. Repeat it exclusively:
+
+```sh
+java tools/MutateBench.java --only action-queue-previous-lost
+```
+
+The current catalog has **108 entries**; the historical full result still covers 100. These
+scoped campaigns do not establish a fresh full 108-mutant result.
 
 ## Feature list
 

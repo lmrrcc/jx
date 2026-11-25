@@ -96,6 +96,7 @@ import { CombinedChildrenMap, CombinedChildrenList } from './cases/combined-chil
 import { CombinedChildrenContract } from './cases/combined-children-contract.jsx';
 import { CombinedKeyedRefs } from './cases/combined-keyed-refs.jsx';
 import { CombinedImperativeHandles } from './cases/combined-imperative-handles.jsx';
+import { CombinedActionQueue } from './cases/combined-action-queue.jsx';
 
 export const cases = {
   'combined-portal-lifecycle': CombinedPortalLifecycle,
@@ -106,6 +107,7 @@ export const cases = {
   'combined-children-contract': CombinedChildrenContract,
   'combined-keyed-refs': CombinedKeyedRefs,
   'combined-imperative-handles': CombinedImperativeHandles,
+  'combined-action-queue': CombinedActionQueue,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,
   'callable-state': CallableState,

@@ -17,7 +17,7 @@ react:useTransition	hook	supported	transition-pending,transition-promise	Hooks.u
 react:startTransition	api	supported	start-transition,transition-pending	React.startTransition		
 react:useDeferredValue	hook	supported	deferred-value	Hooks.useDeferredValue		Equal scalars compare by value
 react:useOptimistic	hook	supported	optimistic	Hooks.useOptimistic		Returns a State, or a ReducerState with an update function
-react:useActionState	hook	supported	action-state	Hooks.useActionState, Hooks.useActionStateAsync, ActionState		The permalink argument is not offered
+react:useActionState	hook	supported	action-state,combined-action-queue	Hooks.useActionState, Hooks.useActionStateAsync, ActionState		The permalink argument is not offered
 react:use	hook	supported	use-promise	Hooks.use		Takes a jx.Promise or a Context
 react:useDebugValue	hook	supported	debug-value	Hooks.useDebugValue		The DevTools label itself is not asserted
 react:Fragment	component	supported	fragment,combined-children-contract	<>...</>, Views.fragment		Explicit fragments are opaque to Children traversal
@@ -35,7 +35,7 @@ react:cloneElement	legacy	equivalent	clone-element	Views.cloneElement		DOM eleme
 react:Children	legacy	equivalent	children-utilities,combined-children-map,combined-children-list,combined-children-contract	jx.Children		count, toList, map, forEach and only over a View children prop
 react:isValidElement	legacy	equivalent	is-valid-element	Views.isValidElement		Also expressible as instanceof View
 react:createRef	legacy	equivalent	create-ref	new DomRef(), new Ref<>(initial)		Ref objects are plain Java objects and may be created outside a component
-react:Component	legacy	equivalent	error-boundary	React.boundary	R-28	Only the error-boundary use is offered; class components are not authored in JX
+react:Component	legacy	equivalent	error-boundary,combined-action-queue	React.boundary	R-28	Only the error-boundary use is offered; class components are not authored in JX
 react:PureComponent	legacy	excluded			R-28	Class component API; its function equivalent is memo, listed separately
 react:act	test	excluded			R-29	Test utility, not application behavior
 react:cache	server	excluded			R-30	Deferred to the server-component protocol proof; in scope under the 21 November all-features decision
@@ -48,7 +48,7 @@ react/jsx-runtime:jsxs	compiler	equivalent	children-prop	Markup lowering
 react/jsx-runtime:Fragment	compiler	equivalent	fragment	<>...</>		
 react-dom:createPortal	api	supported	portal,combined-portal-lifecycle	React.portal, React.documentBody		A view factory; the target is a DomElement
 react-dom:flushSync	api	supported	flush-sync	React.flushSync		
-react-dom:useFormStatus	hook	supported	form-status	Hooks.useFormStatus, FormStatus		The action field is not offered
+react-dom:useFormStatus	hook	supported	form-status,combined-action-queue	Hooks.useFormStatus, FormStatus		The action field is not offered
 react-dom:requestFormReset	api	supported	form-reset	React.requestFormReset		
 react-dom:preconnect	resource	supported	resource-hints	Resources.preconnect		
 react-dom:prefetchDNS	resource	supported	resource-hints	Resources.prefetchDNS		
@@ -92,7 +92,7 @@ jsx:generic-components	markup	supported	generic-list	generic Props record and re
 jsx:ref-as-prop	markup	supported	ref-as-prop,combined-imperative-handles	ref as a Props field		Switching supplied refs clears the old handle owner
 jsx:ref-callback	markup	supported	ref-callback,combined-keyed-refs	RefCallback, Attributes.ref		The returned cleanup runs on removal
 jsx:namespace-components	markup	equivalent	namespace-components	Fully qualified component class name		Java has no component namespace objects; the dotted form is a qualified class name
-jsx:async-functions	markup	equivalent	async-function,transition-promise	Async.run, Async.await, Promise		JavaScript async functions and promises; await works only in code called from Async.run
+jsx:async-functions	markup	equivalent	async-function,transition-promise,combined-action-queue	Async.run, Async.await, Promise		JavaScript async functions and promises; await works only in code called from Async.run
 dom:ref-on-element	dom	supported	dom-ref-focus,combined-portal-lifecycle	ref with Hooks.useDomRef		DomElement exposes focus and value only
 dom:attributes	dom	supported	attributes,dom-attributes	Markup attributes		Every name in React DOM table rendered on an HTML and an SVG element and compared with React; 16 names are covered by dedicated cases
 dom:style	dom	supported	attributes	Style		
@@ -110,7 +110,7 @@ dom:controlled-checkbox	dom	supported	checkbox
 dom:radio-select-textarea	dom	supported	choice-inputs	checked, value and onChange on radio, select and textarea		
 dom:uncontrolled-inputs	dom	supported	uncontrolled-inputs	defaultValue and defaultChecked attributes		
 dom:form-submit	dom	supported	prevent-default	onSubmit		
-dom:form-actions	dom	supported	form-actions,action-state	FormAction, FormAction.async, FormData		File fields are not offered
+dom:form-actions	dom	supported	form-actions,action-state,combined-action-queue	FormAction, FormAction.async, FormData		File fields are not offered
 dom:dangerously-set-inner-html	dom	supported	raw-html	RawHtml.unsanitized, dangerouslySetInnerHTML		Nothing is sanitized; a plain string is rejected
 dom:document-metadata	dom	supported	document-metadata	title and meta elements in markup		
 dom:resource-elements	dom	supported	resource-elements	style with href and precedence		Stylesheet links and async scripts are not covered
