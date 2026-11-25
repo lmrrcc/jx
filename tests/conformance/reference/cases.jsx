@@ -83,6 +83,7 @@ import { ChildrenUtilities } from './cases/children-utilities.jsx';
 import { Portal } from './cases/portal.jsx';
 import { FlushSync } from './cases/flush-sync.jsx';
 import { ResourceHints } from './cases/resource-hints.jsx';
+import { ImagePreload } from './cases/image-preload.jsx';
 import { SpreadProps } from './cases/spread-props.jsx';
 import { DefaultProps } from './cases/default-props.jsx';
 import { GenericList } from './cases/generic-list.jsx';
@@ -214,6 +215,7 @@ export const cases = {
   'portal': Portal,
   'flush-sync': FlushSync,
   'resource-hints': ResourceHints,
+  'image-preload': ImagePreload,
   'spread-props': SpreadProps,
   'default-props': DefaultProps,
   'generic-list': GenericList,

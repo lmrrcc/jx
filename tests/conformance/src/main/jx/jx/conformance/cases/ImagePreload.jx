@@ -1,0 +1,39 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.react.Resources;
+
+/** A Java consumer of responsive images, the legacy options constructor and referrer policy. */
+@Component
+public final class ImagePreload {
+    private static final String SOURCES = "/__bench/images/small.svg 40w, /__bench/images/large.svg 80w";
+
+    private static Resources.Options responsive(String sizes) {
+        return new Resources.Options("image", "anonymous", null, null, "high", "image/svg+xml", null)
+                .withImageSources(SOURCES, sizes).withReferrerPolicy("no-referrer");
+    }
+
+    public static View render() {
+        State<Integer> repeated = Hooks.useState(0);
+        State<Boolean> wide = Hooks.useState(false);
+        Resources.preload("/__bench/images/fallback.svg", responsive("30px"));
+        // Actual React identifies a responsive preload by source set and sizes, not this fallback URL.
+        Resources.preload("/__bench/images/other-fallback.svg", responsive("30px"));
+        Resources.preload("/__bench/images/legacy.svg",
+                new Resources.Options("image", null, null, null, "low", "image/svg+xml", null));
+        return <main>
+            <output data-testid="image-status">{(wide.value() ? "wide:" : "narrow:") + repeated.value()}</output>
+            <button onClick={event -> {
+                Resources.preload("/__bench/images/repeated-fallback.svg", responsive("30px"));
+                repeated.update(value -> value + 1);
+            }}>Repeat responsive preload</button>
+            <button onClick={event -> {
+                Resources.preload("/__bench/images/fallback.svg", responsive("70px"));
+                wide.set(true);
+            }}>Preload wide image</button>
+        </main>;
+    }
+}

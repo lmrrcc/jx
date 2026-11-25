@@ -54,7 +54,7 @@ react-dom:preconnect	resource	supported	resource-hints	Resources.preconnect
 react-dom:prefetchDNS	resource	supported	resource-hints	Resources.prefetchDNS		
 react-dom:preinit	resource	supported	resource-hints	Resources.preinit		
 react-dom:preinitModule	resource	supported	resource-hints	Resources.preinitModule		
-react-dom:preload	resource	supported	resource-hints,combined-resource-hydration	Resources.preload		The image settings imageSrcSet and imageSizes are not offered
+react-dom:preload	resource	supported	resource-hints,combined-resource-hydration,image-preload	Resources.preload, Resources.Options.withImageSources, Resources.Options.withReferrerPolicy	R-31	Responsive image and referrer policy options: 8 focused passes across client/hydrate/static/lazy; full regression and mutation verification pending
 react-dom:preloadModule	resource	supported	resource-hints	Resources.preloadModule		
 react-dom:useFormState	hook	equivalent	form-state	Hooks.useFormState, Hooks.useFormStateAsync		Deprecated alias that delegates to useActionState
 react-dom:unstable_batchedUpdates	unstable	equivalent	runtime-utilities,runtime-utilities-production	React.unstableBatchedUpdates		Supplier callback preserves Java result identity and null, queues updates and propagates failure; modern roots already batch automatically

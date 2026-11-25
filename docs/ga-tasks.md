@@ -28,8 +28,8 @@ That makes 27 complete React tasks. R-27-01 and R-27-02a–02c merged with green
 Verify, establishing 38 executed pair witnesses. The Promise prerequisite also
 merged in [PR #42](https://github.com/lmrrcc/jx/pull/42) with green Verify.
 R-27-03a merged in [PR #43](https://github.com/lmrrcc/jx/pull/43) as `1ba8c1d`,
-with both Verify checks green. The lifecycle-authoring candidate over the
-class-error integration branch passes 895 local bench checks
+with both Verify checks green. The responsive-preload candidate over the
+lifecycle-authoring branch passes 903 local bench checks
 with 54 witnessed pairs among 6,328 active candidates; 6,274 remain without
 complete evidence. The optimistic/store, transition and SSR scoped mutants were killed
 after their unmutated baselines passed. R-27-03b merged as `3e24edb` in
@@ -175,6 +175,7 @@ typed equivalent with the same observable outcome, marked `equivalent`.
 | R-29-04 | M7 | Preserve useful development owner chains through deep Java/TeaVM element conversion without React-private stack mutation or global Error hooks; accepted limit or implementation required by R-31 | diagnostic depth | ⬜ planned: first R-29 run exposed truncated pure-Java owner chains |
 | R-30 | M8–M10 | React Server Components: `cache`, `cacheSignal`, the client and server directives and the server-component protocol, behind a decision record after a feasibility proof | 4 | 🟡 partial — Flight PR49 and typed cache/signal/Java continuation context PR51 are merged with green local gates and both Verify checks; combined proof 28 Node + 4 Chrome. [ADR 0007](decisions/0007-react-server-components.md) tracks open directives, general references, server functions and production qualification |
 | R-31 | M10 | Parity gate: zero `unsupported`, zero `untested`, only approved exclusions, mutation survivors zero, every case green in every applicable mode; all option-level limits implemented or explicitly accepted | closes the track | ⬜ planned |
+| R-31-01 | M10 | Responsive image preload options with actual candidate requests, resource identity and referrer-policy evidence | closes an option-level gap | 🟡 review: two JVM option tests and eight React/JX projects pass; integrated bench 903 checks/169 skipped/134 cases; both scoped mutants killed after a passing baseline; local push gate, Verify and publication pending |
 
 R-31 functional component contract repair, 25 November 2026: 🟡 implemented
 locally, integration pending. `ComponentType.render` now permits intentional null
@@ -351,6 +352,28 @@ feature-pair claim. The original
 three-argument constructor remains available; record patterns/equality now include
 the two new action alternatives, as documented in [the language guide](language.md).
 
+R-31-01 — responsive image preloads (implemented, integrated verification green): extend `Resources.Options` with
+`imageSrcSet`, `imageSizes` and `referrerPolicy`, retaining its seven-argument
+constructor. The new options are immutable copies; image-specific settings require
+`as="image"`. Candidate selection, resource equivalence and request behavior remain
+owned by React and the browser. The `image-preload` Java consumer and differential
+case must prove actual candidate requests, no-referrer behavior, source-set/sizes
+deduplication, the legacy constructor, static HTML and hydration. On 25 November,
+the case passed all eight React/JX mode combinations and both option-contract JVM
+tests passed. Integrated source `33a2fae` on merged lifecycle authoring
+`338872c` passes 47 core, two React options, 52 compiler and 15 plugin checks plus
+the full bench: 903 passed /169 skipped /134 cases, unchanged 54/6328 interaction
+pairs. Client is 132 reference /131 JX, hydrate 101, static 107 and lazy 112 per
+side; all 15 reporter checks pass.
+Both preload mutants were killed after a passing baseline in the five-mutant
+`e63ea76` integration campaign (5 killed, zero survived/unusable); its six preload
+implementation/consumer files match this slice byte for byte. The publication
+gate and Verify remain pending; no blanket
+preload or browser qualification follows from this slice. See the
+[focused evidence](evidence/responsive-preload.md).
+Adding record components preserves the old constructor and accessors but extends
+the record's structural equality and textual representation.
+
 R-01 result, 21 November 2026: all four cases passed on JX without a defect; the
 rows are now `supported` (three) and `equivalent` (dotted names).
 
@@ -416,7 +439,7 @@ lifecycle parity or preserved class state across hot replacement.
 | R-28-03a | Native contextType through additive typed factories; constructor/current context, Pure/SCU bypass, defaults/null, retained state and Activity lifecycle | ✅ done: PR [#53](https://github.com/lmrrcc/jx/pull/53), merged `198c0b8`; package 37 core/48 compiler/15 Maven tests; 855 checks/169 skipped/128 cases, unchanged 54/6328 pairs; captured-context mutant killed after baseline passed, zero survived/unusable; local gate 15/15 in 308 s and both Verify checks passed on `30a8911`; native instance retention preserved, no disposal guarantee |
 | R-28-03b | Pure derived-state-from-props with typed partial patches, null updates and native render timing | ✅ done: PR [#55](https://github.com/lmrrcc/jx/pull/55), merged `84eb8cd`; package 42 core/48 compiler/15 Maven tests; 879 checks/169 skipped/131 cases, all 40 class cells pass, unchanged 54/6328 pairs; dropped-derivation mutant killed after passing baseline, zero survived/unusable; local gate 15/15 in 377 s and both Verify checks green on `021bc02` |
 | R-28-03c | Derived error state plus committed didCatch, checked Java error/component-stack information and recovery | ✅ done: PR [#57](https://github.com/lmrrcc/jx/pull/57), merged `6ebfc76`; package 47 core/48 compiler/15 Maven tests; 887 checks/169 skipped/132 cases, all 48 class cells pass; strict error reports pass 8/8 focused projects; reporting mutant killed after a passing baseline, zero survived/unusable; local gate 15/15 in 342 s and both Verify checks passed on `baa2da5`; native diagnostic and server-error limits remain explicit |
-| R-28-03d | Direct `.jx` context/derived-state/error declarations, checked signatures, generated descriptors and editor projections, with a composed browser consumer | 🟡 review: integrated 47 core/52 compiler/15 Maven/10 LSP tests; full bench 895 checks/169 skipped/133 cases, all 56 class cells and unchanged 54/6328 pairs; strengthened expected-error assertions pass 8/8; real-core javac and source-mapped editor projections verified; native IDE qualification, scoped compiler mutant killed after a passing baseline; final gate/Verify pending |
+| R-28-03d | Direct `.jx` context/derived-state/error declarations, checked signatures, generated descriptors and editor projections, with a composed browser consumer | ✅ merged PR #58 at 338872c: integrated 47 core/52 compiler/15 Maven/10 LSP tests; full bench 895 checks/169 skipped/133 cases, all 56 class cells and unchanged 54/6328 pairs; strengthened expected-error assertions pass 8/8; real-core javac and source-mapped editor projections verified; scoped compiler mutant killed after a passing baseline; 15-step gate passed in 352 seconds and both Verify checks passed on 0011c1d; native IDE qualification remains separate |
 | R-28-03e | Typed third nextContext argument for should-update through an additive context-aware descriptor policy, then `.jx` overload support | ⬜ planned: preserve the existing two-argument override and specify policy precedence |
 | R-28-03f | Remaining class option qualification, including null initial state, direct null updates and compatibility limits | ⬜ planned |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |

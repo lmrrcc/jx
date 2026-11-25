@@ -69,6 +69,7 @@ function-props	pass	pass	pass	pass	pass	pass	pass	pass
 generic-list	pass	pass	pass	pass	pass	pass	pass	pass
 hydrate-root	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
 hydrate-server	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+image-preload	pass	pass	pass	pass	pass	pass	pass	pass
 imperative-handle	pass	pass	pass	pass	pass	pass	pass	pass
 insertion-effect	pass	pass	pass	pass	pass	pass	pass	pass
 is-valid-element	pass	pass	pass	pass	pass	pass	pass	pass

@@ -6,7 +6,8 @@ import org.teavm.jso.JSBodyImport;
 import org.teavm.jso.JSObject;
 
 /** React DOM's resource hints: tell the browser early about servers and files the page will
- * need. Each call adds the matching element to the document head once per URL. They may be
+ * need. React deduplicates equivalent hints, including responsive image source sets and sizes.
+ * Hints may be
  * called while rendering, in an event handler or in an effect. URLs are used as given; do not
  * pass a URL taken from untrusted input. */
 public final class Resources {
@@ -14,12 +15,37 @@ public final class Resources {
 
     /** Optional settings shared by the hints; a null component is left out. {@code as} is the
      * kind of resource ({@code "style"}, {@code "script"}, {@code "font"}, {@code "image"}...),
-     * {@code precedence} orders stylesheets for {@link #preinit}. */
-    public record Options(String as, String crossOrigin, String integrity, String nonce, String fetchPriority, String type, String precedence) {
+     * {@code precedence} orders stylesheets for {@link #preinit}. Responsive image settings
+     * require {@code as="image"}; their syntax and candidate selection belong to the browser.
+     * {@code referrerPolicy} controls the preload request's Referer header. Null fields are omitted,
+     * not serialized as the string {@code "null"}. */
+    public record Options(String as, String crossOrigin, String integrity, String nonce, String fetchPriority,
+                          String type, String precedence, String imageSrcSet, String imageSizes, String referrerPolicy) {
+        public Options {
+            if ((imageSrcSet != null || imageSizes != null) && !"image".equals(as))
+                throw new IllegalArgumentException("Responsive image settings require as=image");
+        }
+        /** Compatibility constructor; responsive image and referrer policy settings are omitted. */
+        public Options(String as, String crossOrigin, String integrity, String nonce, String fetchPriority,
+                       String type, String precedence) {
+            this(as, crossOrigin, integrity, nonce, fetchPriority, type, precedence, null, null, null);
+        }
         /** Only the resource kind. */
         public static Options as(String as) { return new Options(Objects.requireNonNull(as), null, null, null, null, null, null); }
         /** No settings. */
         public static Options none() { return new Options(null, null, null, null, null, null, null); }
+        /** Returns a copy with the image candidates and sizes. Either may be null to omit that
+         * setting; this method requires {@code as="image"} when either setting is present. */
+        public Options withImageSources(String imageSrcSet, String imageSizes) {
+            return new Options(as, crossOrigin, integrity, nonce, fetchPriority, type, precedence,
+                    imageSrcSet, imageSizes, referrerPolicy);
+        }
+        /** Returns a copy with a browser referrer policy such as {@code "no-referrer"}.
+         * Null omits the option. The browser validates the policy token. */
+        public Options withReferrerPolicy(String referrerPolicy) {
+            return new Options(as, crossOrigin, integrity, nonce, fetchPriority, type, precedence,
+                    imageSrcSet, imageSizes, referrerPolicy);
+        }
     }
 
     /** {@code preconnect}: open a connection to the server of {@code href}. */
@@ -61,6 +87,9 @@ public final class Resources {
         if (options.fetchPriority() != null) set(result, "fetchPriority", options.fetchPriority());
         if (options.type() != null) set(result, "type", options.type());
         if (options.precedence() != null) set(result, "precedence", options.precedence());
+        if (options.imageSrcSet() != null) set(result, "imageSrcSet", options.imageSrcSet());
+        if (options.imageSizes() != null) set(result, "imageSizes", options.imageSizes());
+        if (options.referrerPolicy() != null) set(result, "referrerPolicy", options.referrerPolicy());
         return result;
     }
 

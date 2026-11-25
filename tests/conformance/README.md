@@ -139,9 +139,9 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The integrated lifecycle-authoring run passes 895 checks, with 169 skipped cells
-across 133 case IDs: client 131 reference / 130 JX, hydrate 100 per side, static
-106 per side and lazy 111 per side. Fifty-four pairs have complete local
+The integrated responsive-preload run passes 903 checks, with 169 skipped cells
+across 134 case IDs: client 132 reference / 131 JX, hydrate 101 per side, static
+107 per side and lazy 112 per side. Fifty-four pairs have complete local
 evidence in their declared modes; 6,274 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate
@@ -240,7 +240,8 @@ in an exclusive build/browser window with
 Case evidence adds only this case; pair evidence stays 54/6328. The catalog has
 128 mutants after the source-preserving rebase onto the Forms-integrated error
 lifecycle head, with no new full-catalog run beyond the historical 100. The
-final combined gate and Verify remain pending.
+15-step gate passed in 352 seconds; PR #58 merged as `338872c` after both
+Verify checks passed on `0011c1d`.
 
 
 The optimistic/store scenario passes all eight focused checks. Its three witnesses
