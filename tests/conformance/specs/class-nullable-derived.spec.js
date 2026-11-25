@@ -56,5 +56,6 @@ test('class-nullable-derived: derivations see null pending state and preserve sp
   expect(await native('error')).toEqual({keys: ['note'], count: 'absent', note: 'caught'});
   const caught = (await log(page)).slice(start).filter(entry => entry.startsWith('error:caught:'));
   expect(caught).toEqual(['error:caught:nullable child failed:state=count=absent;note=caught:stack=true']);
-  expect(problems.filter(problem => !problem.includes('uses `getDerivedStateFromProps`')).every(problem => problem.includes('nullable child failed'))).toBe(true);
+  expect(problems.filter(problem => !problem.includes('uses `getDerivedStateFromProps`')))
+    .toEqual([expect.stringContaining('nullable child failed')]);
 });

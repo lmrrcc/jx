@@ -1,6 +1,7 @@
 package jx;
 
 import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -120,8 +121,8 @@ public final class ClassSchema<T> {
     /** Typed constructor input. Reading a field from another schema fails explicitly. */
     public static final class Reader {
         private final ClassSchema<?> schema;
-        private final Function<Field<?,?>, Presence<?>> source;
-        private Reader(ClassSchema<?> schema, Function<Field<?,?>, Presence<?>> source) { this.schema = schema; this.source = source; }
+        private final List<Presence<?>> values;
+        private Reader(ClassSchema<?> schema, List<Presence<?>> values) { this.schema = schema; this.values = List.copyOf(values); }
         public <V> V get(Field<?,V> field) {
             return field.defined(find(field));
         }
@@ -129,7 +130,7 @@ public final class ClassSchema<T> {
          * undefined; requesting a field from another schema fails explicitly. */
         public <V> Presence<V> find(Field<?,V> field) {
             schema.requireField(field);
-            return field.decodePresence(source.apply(field));
+            return field.decodePresence(values.get(schema.fields.indexOf(field)));
         }
     }
     private final List<Field<T,?>> fields;
@@ -146,10 +147,15 @@ public final class ClassSchema<T> {
         return readPresence(field -> Presence.present(source.apply(field)));
     }
     /** Constructs a non-null record from explicitly typed property presence. The constructor
-     * and source must be pure; field values are validated without filling missing properties.
+     * and source must be pure. Every source field is read once, in schema order, and validated
+     * before the constructor is invoked. Reader access uses that immutable validated snapshot;
+     * ignoring a field cannot hide an invalid source. Missing properties receive no defaults.
      * Null aggregate state is a separate ClassComponentType opt-in, not a nullable schema. */
     public T readPresence(Function<Field<?,?>,Presence<?>> source) {
-        T value = Objects.requireNonNull(construct.apply(new Reader(this, Objects.requireNonNull(source))), "Schema constructor returned null");
+        Objects.requireNonNull(source, "source");
+        var values = new ArrayList<Presence<?>>();
+        for (Field<T,?> field : fields) values.add(field.decodePresence(source.apply(field)));
+        T value = Objects.requireNonNull(construct.apply(new Reader(this, values)), "Schema constructor returned null");
         validate(value);
         return value;
     }

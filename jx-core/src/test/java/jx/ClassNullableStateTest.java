@@ -80,7 +80,8 @@ class ClassNullableStateTest {
                 ClassSchema.optionalField("count", ClassSchema.INTEGER, Sparse::count);
         var wrongReader = new ClassSchema<Sparse>(List.of(COUNT, NOTE),
                 reader -> new Sparse(reader.find(foreign), reader.find(NOTE)));
-        assertThrows(IllegalArgumentException.class, () -> wrongReader.readPresence(field -> Presence.present(1)));
+        assertThrows(IllegalArgumentException.class, () -> wrongReader.readPresence(field ->
+                field == COUNT ? Presence.present(1) : Presence.present("valid note")));
         assertThrows(IllegalArgumentException.class, () -> STATE.readPresence(field -> Presence.present("not an int")));
 
         record Token(String value) {}
@@ -201,5 +202,29 @@ class ClassNullableStateTest {
         assertNull(unchanged.deriveStateFromProps(props, null));
         var empty = nullable.withDerivedStateFromProps((next, state) -> STATE.patch());
         assertTrue(empty.deriveStateFromProps(props, null).entries().isEmpty());
+    }
+
+    @Test void constructionCannotHideInvalidSourceFieldsAndReadsUseOneValidatedSnapshot() {
+        AtomicInteger constructors = new AtomicInteger();
+        ClassSchema<Props> ignoresSource = new ClassSchema<>(List.of(LABEL), reader -> {
+            constructors.incrementAndGet(); return new Props("invented");
+        });
+        assertThrows(IllegalArgumentException.class, () -> ignoresSource.readPresence(field -> Presence.absent()));
+        assertThrows(IllegalArgumentException.class, () -> ignoresSource.readPresence(field -> Presence.undefined()));
+        assertThrows(IllegalArgumentException.class, () -> ignoresSource.readPresence(field -> Presence.present(1)));
+        assertThrows(IllegalArgumentException.class, () -> ignoresSource.read(field -> null));
+        assertEquals(0, constructors.get());
+
+        AtomicInteger sources = new AtomicInteger();
+        var repeatedReads = new ClassSchema<Props>(List.of(LABEL), reader -> {
+            assertEquals("source", reader.get(LABEL));
+            assertEquals(Presence.present("source"), reader.find(LABEL));
+            return new Props(reader.get(LABEL));
+        });
+        Props result = repeatedReads.readPresence(field -> {
+            assertSame(LABEL, field); sources.incrementAndGet(); return Presence.present("source");
+        });
+        assertEquals(new Props("source"), result);
+        assertEquals(1, sources.get());
     }
 }
