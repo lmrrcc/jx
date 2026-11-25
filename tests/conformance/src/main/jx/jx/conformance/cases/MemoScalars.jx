@@ -1,0 +1,38 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+@Component
+public final class MemoScalars {
+    private record Value(int number) {}
+    private static final Value SHARED = new Value(5);
+    private static Object value(int step) {
+        return switch (step) {
+            case 0 -> Integer.valueOf(7);
+            case 1 -> Double.valueOf(7);
+            case 2 -> Double.valueOf(-0.0);
+            case 3 -> Integer.valueOf(0);
+            case 4 -> Float.valueOf(0);
+            case 5 -> Double.NaN;
+            case 6 -> Float.NaN;
+            case 7 -> Character.valueOf('x');
+            case 8 -> "x";
+            case 9, 10 -> SHARED;
+            case 11 -> new Value(5);
+            default -> null;
+        };
+    }
+    public static View render() {
+        State<Integer> step = Hooks.useState(0);
+        return (
+            <main>
+                <button onClick={event -> step.update(current -> current + 1)}>Next scalar</button>
+                <p role="status">{step.value()}</p>
+                <MemoScalarRow value={value(step.value())} />
+            </main>
+        );
+    }
+}

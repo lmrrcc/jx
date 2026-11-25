@@ -1,0 +1,22 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+@Component
+public final class EmptyRender {
+    public static View render() {
+        State<Boolean> visible = Hooks.useState(true);
+        State<Boolean> mounted = Hooks.useState(true);
+        return (
+            <main>
+                <button onClick={event -> visible.update(value -> !value)}>Toggle output</button>
+                <button onClick={event -> mounted.update(value -> !value)}>Toggle owner</button>
+                {mounted.value() ? <EmptyChild visible={visible.value()} /> : null}
+                <button data-testid="following">Following sibling</button>
+            </main>
+        );
+    }
+}

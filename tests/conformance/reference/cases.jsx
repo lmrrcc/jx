@@ -28,6 +28,8 @@ import { KeyedList } from './cases/keyed-list.jsx';
 import { RemountByKey } from './cases/remount-by-key.jsx';
 import { PropsUpdate } from './cases/props-update.jsx';
 import { Conditional } from './cases/conditional.jsx';
+import { EmptyRender } from './cases/empty-render.jsx';
+import { MemoScalars } from './cases/memo-scalars.jsx';
 import { FragmentCase } from './cases/fragment.jsx';
 import { ChildrenProp } from './cases/children-prop.jsx';
 import { TextEscaping } from './cases/text-escaping.jsx';
@@ -148,6 +150,8 @@ export const cases = {
   'remount-by-key': RemountByKey,
   'props-update': PropsUpdate,
   'conditional': Conditional,
+  'empty-render': EmptyRender,
+  'memo-scalars': MemoScalars,
   'fragment': FragmentCase,
   'children-prop': ChildrenProp,
   'text-escaping': TextEscaping,

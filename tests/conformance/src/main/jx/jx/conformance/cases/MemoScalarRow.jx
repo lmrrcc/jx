@@ -1,0 +1,16 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Memo;
+import jx.View;
+import jx.conformance.Bench;
+
+@Component
+@Memo
+public final class MemoScalarRow {
+    public record Props(Object value) {}
+    public static View render(Props props) {
+        Bench.log("memo scalar render");
+        return <p data-testid="memo-scalar">present</p>;
+    }
+}
