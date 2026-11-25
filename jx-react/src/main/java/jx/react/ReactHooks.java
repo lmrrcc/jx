@@ -77,7 +77,7 @@ final class ReactHooks implements HookRuntime {
         insertionNative(setup, Interop.dependencies(dependencies));
     }
     @JSFunctor interface Call extends JSObject { void call(Object argument); }
-    @JSFunctor interface Format extends JSObject { String format(Object value); }
+    @JSFunctor interface Format extends JSObject { String format(); }
     @Override public <A> Consumer<A> effectEvent(Consumer<A> callback) {
         HotReload.slot("effect-event");
         JSObject event = effectEventNative(argument -> callback.accept(Interop.value(argument)));
@@ -85,15 +85,15 @@ final class ReactHooks implements HookRuntime {
     }
     @Override public <T> void debugValue(T value, Function<T, String> format) {
         HotReload.slot("debug-value");
-        debugNative(Interop.scalar(value), format == null ? null : shown -> format.apply(Interop.value(shown)));
+        debugNative(Interop.scalar(value), format == null ? null : () -> format.apply(value));
     }
     @JSBody(params = {"setup", "deps"}, script = "React.useInsertionEffect(function() { var cleanup = setup(); return cleanup === null ? undefined : cleanup; }, deps === null ? undefined : deps);", imports = @JSBodyImport(alias = "React", fromModule = "react"))
-    private static native void insertionNative(Setup setup, Object[] deps);
+    private static native void insertionNative(Setup setup, JSObject deps);
     @JSBody(params = "callback", script = "return React.useEffectEvent(function(argument) { callback(argument); });", imports = @JSBodyImport(alias = "React", fromModule = "react"))
     private static native JSObject effectEventNative(Call callback);
     @JSBody(params = {"event", "argument"}, script = "event(argument);") private static native void callEvent(JSObject event, Object argument);
-    @JSBody(params = {"value", "format"}, script = "if (format) React.useDebugValue(value, function(shown) { return format(shown); }); else React.useDebugValue(value);", imports = @JSBodyImport(alias = "React", fromModule = "react"))
-    private static native void debugNative(Object value, Format format);
+    @JSBody(params = {"value", "format"}, script = "if (format) React.useDebugValue(value, function() { return format(); }); else React.useDebugValue(value);", imports = @JSBodyImport(alias = "React", fromModule = "react"))
+    private static native void debugNative(JSObject value, Format format);
     @JSFunctor interface AsyncAction extends JSObject { void run(JSObject resolve); }
     @Override public TransitionState transition() {
         HotReload.slot("transition");
@@ -187,7 +187,7 @@ final class ReactHooks implements HookRuntime {
     }
     @JSBody(script = "return new WeakMap();") private static native JSObject weakMap();
     @JSBody(params = {"cache", "ref", "assign"}, script = "var target = cache.get(ref); if (!target) { target = function(handle) { assign(handle); }; cache.set(ref, target); } return target;") private static native JSObject handleTarget(JSObject cache, Object ref, Assign assign);
-    @JSBody(params = {"target", "factory", "deps"}, script = "React.useImperativeHandle(target, factory, deps === null ? undefined : deps);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native void imperativeNative(JSObject target, Factory factory, Object[] deps);
+    @JSBody(params = {"target", "factory", "deps"}, script = "React.useImperativeHandle(target, factory, deps === null ? undefined : deps);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native void imperativeNative(JSObject target, Factory factory, JSObject deps);
     @Override public <T> T memo(Supplier<T> calculation, Dependencies dependencies) {
         HotReload.slot("memo");
         return memoRaw(calculation, dependencies);
@@ -225,9 +225,9 @@ final class ReactHooks implements HookRuntime {
     @JSBody(params = {"setter", "update"}, script = "setter(update);") private static native void updateNative(JSObject setter, Update update);
     @JSBody(params = {"setter", "action"}, script = "setter(action);") private static native void dispatchNative(JSObject setter, Object action);
     @JSBody(params = {"setup", "deps", "layout"}, script = "var effect = function() { var cleanup = setup(); return cleanup === null ? undefined : cleanup; }; if (layout) React.useLayoutEffect(effect, deps === null ? undefined : deps); else React.useEffect(effect, deps === null ? undefined : deps);", imports = @JSBodyImport(alias = "React", fromModule = "react"))
-    private static native void effectNative(Setup setup, Object[] deps, boolean layout);
+    private static native void effectNative(Setup setup, JSObject deps, boolean layout);
     @JSBody(params = "initial", script = "return React.useRef(initial).current;", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object refNative(Object initial);
-    @JSBody(params = {"factory", "deps"}, script = "return React.useMemo(factory, deps === null ? undefined : deps);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object memoNative(Factory factory, Object[] deps);
+    @JSBody(params = {"factory", "deps"}, script = "return React.useMemo(factory, deps === null ? undefined : deps);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object memoNative(Factory factory, JSObject deps);
     @JSBody(params = "context", script = "return React.useContext(context);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object contextNative(JSObject context);
     @JSBody(params = {"subscribe", "snapshot", "serverSnapshot"}, script = "return React.useSyncExternalStore(subscribe, snapshot, serverSnapshot);", imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native Object storeNative(Subscribe subscribe, Factory snapshot, Factory serverSnapshot);
 }

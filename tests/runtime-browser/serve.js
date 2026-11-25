@@ -24,5 +24,5 @@ const server = createServer(async (req, res) => {
   try {res.writeHead(200, {'Content-Type': asset[1]}).end(await readFile(asset[0]));}
   catch {res.writeHead(503).end('Build the runtime fixture first.');}
 });
-server.listen(4373, '127.0.0.1');
+server.listen(Number(process.env.RUNTIME_PORT || 4373), '127.0.0.1');
 process.on('SIGTERM', () => server.close());
