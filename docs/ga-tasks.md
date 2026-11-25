@@ -282,6 +282,16 @@ gate still pending.
 Publication and Verify remain pending, with no added pair or mutant credit.
 Details are in the bootstrap evidence record above.
 
+R-31-SERVER-HEADERS, 25 November 2026: 🟡 implementation and differential
+consumer prepared. Typed immutable Link snapshots normalize Node/Web callbacks;
+an explicit positive UTF-16 header budget is preserved across builders. Initial
+render/prerender supports the options; resume rejects them. Callback failures
+remain observable through onError even when React continues the body. Source
+tests cover four renderers, request isolation, deduplication, budget/empty cases
+and original Java errors. Package/runtime qualification, full bench, mutation,
+gate and Verify are pending; no pair credit or production HTTP/103 integration
+is claimed. See the [header contract](evidence/server-resource-headers.md).
+
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven
 tests. The complete bench passes 871 checks with 169 inapplicable cells across

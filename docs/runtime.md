@@ -22,6 +22,15 @@ options because their HTML can be reused. See the [bootstrap evidence](evidence/
 for the tested Node/Chrome contract, the upstream classic-preload nonce defect,
 and the remaining streaming/resume/production qualification.
 
+## Server resource headers
+
+Initial streaming and prerendering accept `StreamOptions.withHeaders` and
+`withMaxHeadersLength`. The callback receives immutable `ResourceHeaders` with a
+nullable Link field. The optional positive budget is in UTF-16 code units. The
+host owns sending headers and handling failures: a thrown callback reaches
+`onError` while React may continue the body. Resume rejects these initial-only
+options. See the [contract and qualification status](evidence/server-resource-headers.md).
+
 ## Components and ownership
 
 Declare a `ComponentType<Props>` once, normally as a static final descriptor. Compose

@@ -48,10 +48,18 @@ public final class ReactServer {
      * application. {@code onError} hears of every error thrown while rendering, also the ones a
      * {@code React.suspense} boundary absorbs by sending its fallback; it runs outside rendering. */
     public record StreamOptions(String identifierPrefix, List<String> bootstrapScripts, List<String> bootstrapModules,
-            Consumer<Throwable> onError, String bootstrapScriptContent, Nonce nonce) {
+            Consumer<Throwable> onError, String bootstrapScriptContent, Nonce nonce,
+            Consumer<ResourceHeaders> onHeaders, Integer maxHeadersLength) {
         public StreamOptions {
             bootstrapScripts = bootstrapScripts == null ? null : List.copyOf(bootstrapScripts);
             bootstrapModules = bootstrapModules == null ? null : List.copyOf(bootstrapModules);
+            if (maxHeadersLength != null && maxHeadersLength <= 0)
+                throw new IllegalArgumentException("Header hint limit must be positive");
+        }
+        /** Retains the constructor introduced with nonce/bootstrap support; no header callback. */
+        public StreamOptions(String identifierPrefix, List<String> bootstrapScripts, List<String> bootstrapModules,
+                Consumer<Throwable> onError, String bootstrapScriptContent, Nonce nonce) {
+            this(identifierPrefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, nonce, null, null);
         }
         /** Retains the original constructor; inline bootstrap and CSP nonces are absent. */
         public StreamOptions(String identifierPrefix, List<String> bootstrapScripts, List<String> bootstrapModules,
@@ -59,29 +67,62 @@ public final class ReactServer {
             this(identifierPrefix, bootstrapScripts, bootstrapModules, onError, null, null);
         }
         public static StreamOptions defaults() { return new StreamOptions(null, null, null, null); }
-        public StreamOptions withIdentifierPrefix(String prefix) { return new StreamOptions(prefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, nonce); }
-        public StreamOptions withBootstrapScripts(List<String> urls) { return new StreamOptions(identifierPrefix, urls, bootstrapModules, onError, bootstrapScriptContent, nonce); }
-        public StreamOptions withBootstrapModules(List<String> urls) { return new StreamOptions(identifierPrefix, bootstrapScripts, urls, onError, bootstrapScriptContent, nonce); }
-        public StreamOptions withError(Consumer<Throwable> callback) { return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, callback, bootstrapScriptContent, nonce); }
+        public StreamOptions withIdentifierPrefix(String prefix) { return new StreamOptions(prefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength); }
+        public StreamOptions withBootstrapScripts(List<String> urls) { return new StreamOptions(identifierPrefix, urls, bootstrapModules, onError, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength); }
+        public StreamOptions withBootstrapModules(List<String> urls) { return new StreamOptions(identifierPrefix, bootstrapScripts, urls, onError, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength); }
+        public StreamOptions withError(Consumer<Throwable> callback) { return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, callback, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength); }
         /** Trusted JavaScript source emitted by React in an inline bootstrap script. Null omits it;
          * an empty string is retained. React escapes HTML script terminators, but does not sanitize
          * executable code or serialize application data: never concatenate untrusted input here.
          * Set this on the initial render/prerender; resume does not replace that bootstrap
          * configuration or retroactively authorize scripts already emitted in static output. */
         public StreamOptions withBootstrapScriptContent(String source) {
-            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError, source, nonce);
+            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError, source, nonce, onHeaders, maxHeadersLength);
         }
         /** React's string nonce contract: scripts only, without a style nonce. Null clears both.
          * The host must generate a fresh unpredictable nonce per response and send a matching CSP
          * header. JX does not generate nonces or configure headers. Not valid for static prerendering. */
         public StreamOptions withNonce(String value) {
             return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError,
-                    bootstrapScriptContent, value == null ? null : new ScriptNonce(value));
+                    bootstrapScriptContent, value == null ? null : new ScriptNonce(value), onHeaders, maxHeadersLength);
         }
         /** Separate script/style nonces for request-time streaming and resume. Null clears both.
          * These values authorize React-managed resources; they do not change explicit element props. */
         public StreamOptions withNonces(Nonces value) {
-            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, value);
+            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, value, onHeaders, maxHeadersLength);
+        }
+        /** Receives React's resource hint headers, including an empty snapshot when there are
+         * none. Runs on the rendering host's thread when React has determined the initial hints;
+         * the HTTP host owns sending headers/103 responses before starting body delivery. Null
+         * removes the callback. The immutable snapshot may be retained by that request. A thrown
+         * callback error reaches {@code onError}; React may continue rendering. Body completion
+         * does not prove header delivery, so the host must track its own delivery failures.
+         * Supported on initial render/prerender only; resume rejects these options. */
+        public StreamOptions withHeaders(Consumer<ResourceHeaders> callback) {
+            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError,
+                    bootstrapScriptContent, nonce, callback, maxHeadersLength);
+        }
+        /** Maximum hint-header content in UTF-16 code units, not network bytes. Null uses React's
+         * default. A supplied limit must be positive. React omits hints that do not fit and may
+         * retain them in HTML; this bounds its header collection, not the whole document.
+         * Applies when a header callback is supplied, on initial render/prerender only. */
+        public StreamOptions withMaxHeadersLength(Integer limit) {
+            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError,
+                    bootstrapScriptContent, nonce, onHeaders, limit);
+        }
+    }
+
+    /** Immutable projection of React's currently supported Link resource-hint field. Null means
+     * no Link header. Header controls other than horizontal tab are rejected; transmit this
+     * through the host's HTTP library rather than writing an HTTP message manually. This is
+     * resource metadata only and supplies no status, cookies, authorization or other headers. */
+    public record ResourceHeaders(String link) {
+        public ResourceHeaders {
+            if (link != null) for (int i = 0; i < link.length(); i++) {
+                char value = link.charAt(i);
+                if ((value < ' ' && value != '\t') || value == 127)
+                    throw new IllegalArgumentException("Invalid control character in resource hint header");
+            }
         }
     }
 
@@ -157,14 +198,24 @@ public final class ReactServer {
     }
 
     /** React's {@code resumeToPipeableStream}: continues a prerender that was aborted, sending
-     * what {@code postponed} left out. {@code view} must be the view that was prerendered. */
+     * what {@code postponed} left out. {@code view} must be the view that was prerendered.
+     * @throws IllegalArgumentException if initial-only resource header options are supplied */
     public static PipeableStream resumeToPipeableStream(View view, ReactStatic.Postponed postponed, StreamOptions options) {
+        validateResumeOptions(options);
         return pipeable(view, options, Objects.requireNonNull(postponed));
     }
 
-    /** React's {@code resume}: as {@link #resumeToPipeableStream}, to a web stream. */
+    /** React's {@code resume}: as {@link #resumeToPipeableStream}, to a web stream.
+     * @throws IllegalArgumentException if initial-only resource header options are supplied */
     public static Promise<ReadableStream> resume(View view, ReactStatic.Postponed postponed, StreamOptions options) {
+        validateResumeOptions(options);
         return readable(view, options, Objects.requireNonNull(postponed));
+    }
+
+    static void validateResumeOptions(StreamOptions options) {
+        Objects.requireNonNull(options);
+        if (options.onHeaders() != null || options.maxHeadersLength() != null)
+            throw new IllegalArgumentException("Resource hint headers are available only on initial render/prerender");
     }
 
     private static PipeableStream pipeable(View view, StreamOptions options, ReactStatic.Postponed postponed) {
@@ -220,6 +271,7 @@ public final class ReactServer {
     @JSFunctor interface Call extends JSObject { void call(); }
     @JSFunctor interface Failure extends JSObject { void fail(JSObject error); }
     @JSFunctor interface Chunk extends JSObject { void write(String html); }
+    @JSFunctor interface Header extends JSObject { void receive(String link); }
 
     static JSObject settings(StreamOptions options) {
         JSObject settings = object();
@@ -234,12 +286,25 @@ public final class ReactServer {
         }
         Consumer<Throwable> onError = options.onError();
         if (onError != null) setError(settings, "onError", error -> onError.accept(React.throwable(error)));
+        Consumer<ResourceHeaders> onHeaders = options.onHeaders();
+        if (onHeaders != null) setHeaders(settings, link -> onHeaders.accept(new ResourceHeaders(link)));
+        if (options.maxHeadersLength() != null) setHeaderLimit(settings, options.maxHeadersLength());
         return settings;
     }
 
     @JSBody(script = "return {};") private static native JSObject object();
     @JSBody(params = {"settings", "script", "style"}, script = "var nonce = {}; if (script !== null) nonce.script = script; if (style !== null) nonce.style = style; settings.nonce = nonce;")
     private static native void setNonces(JSObject settings, String script, String style);
+    @JSBody(params = {"settings", "callback"}, script = """
+        settings.onHeaders = function(headers) {
+            var link = typeof headers.get === 'function' ? headers.get('Link') : headers.Link;
+            if (link == null) link = null;
+            if (link !== null && typeof link !== 'string') throw new TypeError('Invalid React resource hint header');
+            callback(link);
+        };
+        """) private static native void setHeaders(JSObject settings, Header callback);
+    @JSBody(params = {"settings", "limit"}, script = "settings.maxHeadersLength = limit;")
+    private static native void setHeaderLimit(JSObject settings, int limit);
     @JSBody(params = {"object", "name", "value"}, script = "object[name] = value;") private static native void setText(JSObject object, String name, String value);
     @JSBody(params = {"object", "name", "values"}, script = "object[name] = Array.prototype.slice.call(values);") private static native void setList(JSObject object, String name, String[] values);
     @JSBody(params = {"object", "name", "call"}, script = "object[name] = function() { call(); };") private static native void setCall(JSObject object, String name, Call call);
