@@ -1,8 +1,6 @@
 # Component library ABI 2
 
-Status: the selected publication candidate passes 213 JVM tests, a source-independent Maven
-consumer and two Chrome journeys. The complete current class metadata is retained.
-The full push gate and Verify are pending; see
+Status: the bounded M1-10–13 proof is accepted in [PR89](https://github.com/lmrrcc/jx/pull/89), merged as `248293a`. The 21-step gate and both Verify checks pass, including 231 JVM tests and the source-independent Maven/two-Chrome consumer. The complete current class metadata is retained; general release and library hot replacement remain separate. See
 [measured evidence](evidence/component-library-jar.md).
 
 An application imports a library component using ordinary Java imports and `.jx`
