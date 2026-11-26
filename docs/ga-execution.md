@@ -7,13 +7,14 @@ does not complete its planned GA qualification work. IDs are stable for future
 issues/PRs and evidence records.
 No GitHub issues, scheduled jobs, deployments or releases were created by this plan.
 
-Latest published import-map slice: **937 passed /199 skipped /
-142 cases**, with package 56 core/10 React/54 compiler/15 plugin/10 LSP. The full run
+Latest published native Writable slice: **943 passed /217 skipped /
+145 cases**, with package 56 core/10 React/54 compiler/15 plugin/10 LSP. The full run
 preserves **62/6328 pairs** (6266 active pairs open), including the eight published
-header/resource witnesses. The bounded import-map slice is **✅ merged in PR69
-as `b9d8f67`**, after the 15-step gate passed in 377 seconds and both Verify checks
-passed on `00d4828`. Its two scoped mutants were killed after a passing baseline
-in the five-mutant `eb536cd` campaign.
+header/resource witnesses. The bounded native destination slice is **✅ merged
+in PR70 as `8da61ba`**, after the 15-step gate passed in 368 seconds and both Verify
+checks passed on `02d2ddf`. Its scoped destination mutant was killed after a passing
+baseline in the five-mutant `eb536cd` campaign. Nullable-state publication is
+prepared separately and still awaits its integrated gate and Verify checks.
 Production HTTP/103 and broader R-31 qualification remain open. Earlier figures
 below record their respective slices rather than this published integration.
 

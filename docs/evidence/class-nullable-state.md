@@ -106,8 +106,8 @@ Log: `/private/tmp/jx-react-options-mutations-first.log`; retained scratch suffi
 `jx-mutation-3306759765052529558`.
 
 Publication preparation on 26 November retains the same eleven nullable
-core/runtime/consumer/spec files as `80f2e57`, rebased onto the native Writable
-candidate `02d2ddf` as source `266b05f`. The two all-mode result rows are carried
+core/runtime/consumer/spec files as `80f2e57`, rebased onto the merged native
+Writable PR70 (`8da61ba`) as source `fb7c674`. The two all-mode result rows are carried
 from the already executed `e296d4a` integration as expected results for the
 publication gate; a new combined run on this exact publication tree is still
 pending. No new interaction pairs, gate or Verify completion is claimed. Real React

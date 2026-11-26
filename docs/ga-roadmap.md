@@ -20,21 +20,21 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
-Latest local combined qualification (`5643be9`): **943 checks pass, 217 skipped,
+Latest published native destination integration: **943 checks pass, 217 skipped,
 145 cases**, with 56 core/10 React/54 compiler/15 Maven package tests passing.
 This integrates the class-policy, sink, act, bootstrap, resume, resource-header
 and import-map slices, plus native Writable and real HTTP delivery consumers.
 All **62/6328** registered interaction pairs pass; **6266**
-remain without complete evidence. The integrated candidate is local: its scoped
-mutants are killed, while per-slice publication gates keep the broader work **🟡 partial**.
+remain without complete evidence. Its scoped mutants are killed; remaining
+capabilities and broader qualification keep the work **🟡 partial**.
 The measurements below describe earlier slices, not additional passing tests.
 
-Latest published import-map slice: **✅ PR69 merged as `b9d8f67`** after the
-15-step gate passed in 377 seconds and both Verify checks passed on `00d4828`.
-Its integrated bench passes 937 checks/199 skipped/142 cases and all 62/6328
-pair witnesses. The eight header/resource witnesses from PR68 remain published
-evidence; production HTTP/103 adapters and the broader R-31 gate remain open.
-The native Writable candidate above still requires its publication checks.
+**✅ PR70 merged as `8da61ba`** after the 15-step gate passed in 368 seconds
+and both Verify checks passed on `02d2ddf`. The eight header/resource witnesses
+from PR68 remain published evidence; production HTTP/103 adapters and the broader
+R-31 gate remain open. Nullable class state and explicit absent/undefined/null
+properties are prepared as R-28-03h1, with focused and scoped mutation evidence;
+that separate publication still requires its integrated gate and Verify checks.
 
 Responsive image preload options (R-31-01) pass the integrated bench over
 merged lifecycle authoring `338872c`: **903 checks, 169 skipped, 134 cases**,
