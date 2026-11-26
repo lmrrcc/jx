@@ -62,7 +62,7 @@ public final class ServerEntry {
     private static View document(TodoSnapshot snapshot, Promise<Void> ready) {
         return Views.element("html", Attributes.create().attr("lang", "en"),
                 Views.element("head", Attributes.create(),
-                        Views.element("meta", Attributes.create().attr("charset", "UTF-8")),
+                        Views.element("meta", Attributes.create().attr("charSet", "UTF-8")),
                         Views.element("title", Attributes.create(), "Protected JX todos"),
                         Views.element("link", Attributes.create().attr("rel", "icon").attr("href", "data:,"))),
                 Views.element("body", Attributes.create(),
