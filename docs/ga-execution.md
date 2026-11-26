@@ -7,7 +7,9 @@ does not complete its planned GA qualification work. IDs are stable for future
 issues/PRs and evidence records.
 No GitHub issues, scheduled jobs, deployments or releases were created by this plan.
 
-Latest protected-SSR acceptance: **✅ M1-26 merged in PR82 as `968ccf3`**, after all 18 local gate steps passed in 495 seconds and both Verify checks passed on `20e0eaa`. The actual Spring-authenticated route preserves two immutable request snapshots, hydrates retained DOM without refetch and cleans up a disconnected suspended request. Integrated **206 JVM, 47 runtime, 975 conformance checks/217 exclusions, three protected SSR checks and four real hot workflows** pass. Progressive private streaming, backend-fetch abort and production SSR hosting remain open.
+Latest MV3/WASM acceptance: **✅ M1-27 merged in PR83 as `c13bfd8`**, after all 19 local gate steps passed in 461 seconds and both Verify checks passed on `c1432dc`. The ZIP-extracted Java popup runs the pinned Rust/Brotli WASM module under actual MV3 CSP, opens and closes through Chrome's action API and rejects initialization under the negative CSP. Integrated **206 JVM, 47 runtime, 975 conformance checks/217 exclusions, three extension checks and four real hot workflows** pass. Full service-worker/storage/message, wallet and marketplace qualification remains separate.
+
+Earlier protected-SSR acceptance: **✅ M1-26 merged in PR82 as `968ccf3`**, after all 18 local gate steps passed in 495 seconds and both Verify checks passed on `20e0eaa`. The actual Spring-authenticated route preserves two immutable request snapshots, hydrates retained DOM without refetch and cleans up a disconnected suspended request. Integrated **206 JVM, 47 runtime, 975 conformance checks/217 exclusions, three protected SSR checks and four real hot workflows** pass. Progressive private streaming, backend-fetch abort and production SSR hosting remain open.
 
 Earlier session/CSRF acceptance: **✅ M1-21 merged in PR81 as `8795b35`**, after all 17 local gate steps passed in 451 seconds and both Verify checks passed on `cb279b0`. The native login, session rotation, CSRF/logout denial and two private workspaces are exercised through the executable JAR and actual Maven development proxy. Integrated **204 JVM, 47 runtime, 975 conformance checks/217 exclusions, four Todo, two packaged, two auth and four hot workflows** pass. OIDC, timed expiry/cross-tab recovery, general identity-generation disposal and deployment hardening remain separate.
 
@@ -135,8 +137,8 @@ the historical full campaign of 100. See the
 [interaction evidence record](ga-react-interactions.md) for the unchanged eventual
 118-feature / 6,903-pair scope and its limits. G0 remains open: the serialized lazy
 boundary, bounded shared/exact contracts, authenticated packaging and protected
-SSR proofs are now accepted. Component JAR, MV3, artifact-consumer publication
-and the remaining G0 review are tracked separately. Existing editor packages,
+SSR and MV3/Rust-WASM feasibility proofs are now accepted. Component JAR,
+artifact-consumer publication and the remaining G0 review are tracked separately. Existing editor packages,
 the todo API and hot updates are useful baselines, not completion of their GA
 qualification packages. The Cherry Test unit/coverage baseline is delivered;
 TT-01–TT-06 in the implementation sequence track the remaining test tooling.
@@ -324,7 +326,7 @@ exists, not when its document or skeleton module lands.
 | GA-06 | Lazy-chunk Java identity spike / R | GA-05 | M1 / M | Lazy route absent initially; domain values/context/callbacks cross safely; no duplicate React. M1-22/M1-23 prove the serialized boundary; independent library consumption and automatic application packaging remain | 🟡 partial |
 | GA-07 | React SSR→hydration spike / W | GA-03 | M1 / M | Protected data-dependent route, scoped API/auth, two simultaneous identities, immutable hydration snapshot, abort and no duplicate fetch/mutation | ✅ bounded G0 spike accepted through M1-24–26; PR82 adds real Spring-owned snapshots, retained hydration and suspended-request disconnect cleanup after gate/Verify. Progressive streaming, in-flight backend-fetch abort and production hosting remain GA-22 work. |
 | GA-08 | Native editor architecture/performance decision / T | GA-01 | M1 / M | Scale baseline; precise projection limits; source-preserving structural proof or explicit revised design | 🟡 bounded M1-28/M1-29 proofs accepted in PR79: measured SDK100-component baseline, closed rename101 and undo/redo25 with native undo101 limit recorded; original96SDK/ZIP/Verifier and integrated gate/Verify pass. Broader installed-editor qualification and architecture decision remain open. |
-| GA-09 | Artifact identities and clean distribution rehearsal / Q | GA-01 | M1–M3 / M | Namespaces/owners verified; external consumer installs candidate artifacts without workspace caches | ⬜ planned |
+| GA-09 | Artifact identities and clean distribution rehearsal / Q | GA-01 | M1–M3 / M | Namespaces/owners verified; external consumer installs candidate artifacts without workspace caches | 🟡 M1-30 local file-repository rehearsal passes: empty Maven cache, all Maven dependencies/plugins file-only, offline rebuild and real Chrome; independent npm provisioning stays online; namespace/publication/signing and Verify remain pending |
 | GA-10 | Contract IR and generators v1 / C | GA-04 | M2–M3 / L | Java authority + generated async client/codecs/server boundary/schema; incompatible wire change fails | ⬜ planned |
 | GA-11 | Browser Java certification and dependency scanner / J | GA-01, GA-04 | M2–M6 / L | Per-method JVM/browser vectors and transitive unsupported-call diagnostics; size budgets | ⬜ planned |
 | GA-12 | Optional Boot starter/BOM and template / S | GA-10 | M2–M3 / L | ST-01–06: React-style welcome, Maven create goal, one contract authority, independent three-command UI/API startup; executable Boot JAR in empty directory, auto-config backoff and route/caching tests | ⬜ planned |
@@ -352,7 +354,7 @@ exists, not when its document or skeleton module lands.
 | GA-34 | API freeze and version-skew/rollback / Q | GA-10, GA-18, GA-22, GA-29 | M9–M10 / M | Stable public/wire/metadata policies, old tab/new backend and retained asset rollback | ⬜ planned |
 | GA-35 | RC soak, external onboarding and release rehearsal / Q | GA-24, GA-25, GA-28, GA-30, GA-31, GA-34 | M10–M11 / L | Clean install/upgrade, support/security owners, 30-day pilots, zero blocking findings | ⬜ planned |
 | GA-36 | GA decision package / lead + Luca | GA-35; mandatory profile gates | M12 / M | Signed evidence manifest, known limits, artifacts and go/no-go; publication is a separate authorized action | ⬜ planned |
-| GA-37 | MV3/CSP/Rust-WASM feasibility / M + R | GA-01 | M1–M2 / S | Actual packaged extension renders JX and calls existing WASM under its CSP; popup close/reopen smoke | ⬜ planned |
+| GA-37 | MV3/CSP/Rust-WASM feasibility / M + R | GA-01 | M1–M2 / S | Actual packaged extension renders JX and calls existing WASM under its CSP; popup close/reopen smoke | ✅ bounded feasibility accepted in PR83 after gate/Verify: three actual Chrome extension checks cover action-popup lifetime, Java/Rust computation and CSP denial. Full extension/privileged-operation qualification remains GA-33 work. |
 | GA-38 | Persistence/offline policy and browser storage / A | GA-03, GA-16, GA-19 | M5–M8 / M | Storage/schema migrations, quota and stale-cache recovery; explicit opt-in PWA/service-worker profile; no unsafe offline mutation replay | ⬜ planned |
 | GA-39 | G4 portfolio qualification sign-off / M + Luca | GA-30, GA-31, GA-32, GA-33, GA-34, GA-38 | M12 / M | Separate signed media/finance/extension evidence and remaining migration register; not implied by G3 framework GA | ⬜ planned |
 

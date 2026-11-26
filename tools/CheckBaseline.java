@@ -142,6 +142,16 @@ public final class CheckBaseline {
             new Pin("jdt-ls", "tooling/vscode/PrepareJavaBridge.java", "bundle-version=\\\\\"\\[" + V + ",", "lower bound"));
 
     private static final List<Copy> COPIES = List.of(
+            new Copy("jx.framework", "tools/VerifyArtifactConsumer.java", "VERSION = \"" + V + "\""),
+            new Copy("jx.framework", "tests/artifact-consumer/pom.xml", "<version>([0-9.]+-SNAPSHOT)</version>"),
+            new Copy("react", "tests/artifact-consumer/package.json", "\"react\": \"" + V + "\""),
+            new Copy("react-dom", "tests/artifact-consumer/package.json", "\"react-dom\": \"" + V + "\""),
+            new Copy("esbuild", "tests/artifact-consumer/package.json", "\"esbuild\": \"" + V + "\""),
+            new Copy("playwright", "tests/artifact-consumer/package.json", "\"@playwright/test\": \"" + V + "\""),
+            new Copy("react", "tests/artifact-consumer/package-lock.json", "\"node_modules/react\": \\{\\s*\"version\": \"" + V + "\""),
+            new Copy("react-dom", "tests/artifact-consumer/package-lock.json", "\"node_modules/react-dom\": \\{\\s*\"version\": \"" + V + "\""),
+            new Copy("esbuild", "tests/artifact-consumer/package-lock.json", "\"node_modules/esbuild\": \\{\\s*\"version\": \"" + V + "\""),
+            new Copy("playwright", "tests/artifact-consumer/package-lock.json", "\"node_modules/@playwright/test\": \\{\\s*\"version\": \"" + V + "\""),
             new Copy("jx.framework", "tooling/intellij/build.gradle.kts", "-" + V + "\\.jar"),
             new Copy("jx.framework", "tooling/vscode/VerifyPackages.java", "([0-9]+\\.[0-9]+\\.[0-9]+-SNAPSHOT)"),
             new Copy("jx.framework", "tooling/vscode/PrepareServer.java", "([0-9]+\\.[0-9]+\\.[0-9]+-SNAPSHOT)"),

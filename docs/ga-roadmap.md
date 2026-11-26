@@ -20,7 +20,9 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
-Latest protected-SSR acceptance: **✅ M1-26 merged in PR82 as `968ccf3`**, after all 18 local gate steps passed in 495 seconds and both Verify checks passed on `20e0eaa`. The actual Spring-authenticated route preserves two immutable request snapshots, hydrates retained DOM without refetch and cleans up a disconnected suspended request. Integrated **206 JVM, 47 runtime, 975 conformance checks/217 exclusions, three protected SSR checks and four real hot workflows** pass. Progressive private streaming, backend-fetch abort and production SSR hosting remain open.
+Latest MV3/WASM acceptance: **✅ M1-27 merged in PR83 as `c13bfd8`**, after all 19 local gate steps passed in 461 seconds and both Verify checks passed on `c1432dc`. The ZIP-extracted Java popup runs the pinned Rust/Brotli WASM module under actual MV3 CSP, opens and closes through Chrome's action API and rejects initialization under the negative CSP. Integrated **206 JVM, 47 runtime, 975 conformance checks/217 exclusions, three extension checks and four real hot workflows** pass. Full service-worker/storage/message, wallet and marketplace qualification remains separate.
+
+Earlier protected-SSR acceptance: **✅ M1-26 merged in PR82 as `968ccf3`**, after all 18 local gate steps passed in 495 seconds and both Verify checks passed on `20e0eaa`. The actual Spring-authenticated route preserves two immutable request snapshots, hydrates retained DOM without refetch and cleans up a disconnected suspended request. Integrated **206 JVM, 47 runtime, 975 conformance checks/217 exclusions, three protected SSR checks and four real hot workflows** pass. Progressive private streaming, backend-fetch abort and production SSR hosting remain open.
 
 Earlier session/CSRF acceptance: **✅ M1-21 merged in PR81 as `8795b35`**, after all 17 local gate steps passed in 451 seconds and both Verify checks passed on `cb279b0`. The native login, session rotation, CSRF/logout denial and two private workspaces are exercised through the executable JAR and actual Maven development proxy. Integrated **204 JVM, 47 runtime, 975 conformance checks/217 exclusions, four Todo, two packaged, two auth and four hot workflows** pass. OIDC, timed expiry/cross-tab recovery, general identity-generation disposal and deployment hardening remain separate.
 
@@ -148,7 +150,7 @@ native editor qualification and class hot checkpoints are still open.
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
 | R-21 hydration | ✅ Done | `React.hydrate` over Node-rendered HTML (M1-25), store server snapshots and matching `useId`, added on 24 November 2026. |
-| G0 foundation proofs | 🟡 Partial | Lazy modules, basic and protected SSR→hydration, bounded shared/exact-value contracts, packaged Spring/session-CSRF and M1-28/29 editor proofs are accepted. Native SDK undo at 101 retained files remains an explicit limit. Component JAR, MV3, artifact-consumer publication and the remaining G0 review are separately tracked. |
+| G0 foundation proofs | 🟡 Partial | Lazy modules, protected SSR→hydration, bounded shared/exact-value contracts, packaged Spring/session-CSRF, MV3/Rust-WASM feasibility and M1-28/29 editor proofs are accepted. Native SDK undo at 101 retained files remains an explicit limit. Component JAR, artifact-consumer publication and the remaining G0 review are separately tracked. |
 | Shared contracts and complete Spring integration | 🟡 Partial | Shared Todo record/paths, generated String/bool/int codec, explicit exact-value vectors, empty-directory executable UI/API JAR and native session/CSRF in packaged/Maven-dev modes are accepted. Richer generated schemas/clients, starter/BOM, context prefixes, broader identity lifecycle and deployment policy remain open. |
 | JX server rendering and hydration | 🟡 Partial | Node rendering and streaming/resume have bench evidence. M1-26's protected Spring route is accepted in PR82 after gate/Verify: two authenticated immutable snapshots, retained hydration nodes, no browser refetch and disconnect cleanup. [Evidence](evidence/protected-ssr.md). Progressive private streaming, in-flight backend-fetch abort, production hosting and the broader RSC protocol track remain open. |
 | IntelliJ and VS Code experience | 🟡 Partial | Existing packages work within documented limits; GA qualification, scale, remaining editing actions and browser debugging are open. |
@@ -407,7 +409,7 @@ browser. It is an executable foundation, not a production framework yet.
 | Browser Java | Classes reached by the current fixtures execute under TeaVM | Method-level library certification, transitive dependency checks and size/correctness budgets |
 | Hot updates | Typed checkpoints, conservative resets, cancellation | Large application latency, generated codecs, foreign component/reset behavior and long-session qualification |
 | Editors | Native Java integration; IntelliJ Run gutter and bounded editing services | Broader Java action parity, VS Code gaps, debugging, workspace scale, compatibility maintenance |
-| Release | Source, wrappers, configured CI, local packages | Published supported artifacts, independently reproduced CI, release security, upgrade/support policies |
+| Release | Source, wrappers, configured CI, local packages; M1-30 external file-repository consumer locally passes with empty Maven cache and Chrome (publication pending) | Published supported artifacts, independently reproduced CI, release security, upgrade/support policies |
 
 The recorded baseline includes 92 IntelliJ tests and a compatible Plugin Verifier
 result for `IU-261.25134.95`; the earlier browser evidence is 17 Chrome tests at its
@@ -586,10 +588,10 @@ Prove minimal JX packaging under actual Chrome MV3 CSP and an existing Rust/WASM
 binding in M1–M2. Full extension qualification comes later, but runtime/packaging
 incompatibility must be discovered early.
 
-M1-27 is now **🟡 locally verified**: a packaged `.jx` popup invokes the existing
+M1-27 is now **✅ accepted in PR83 after gate/Verify**: a packaged `.jx` popup invokes the existing
 Rust Brotli WASM binding under actual MV3 CSP. Three Chrome checks cover the real
 action-popup lifecycle, Unicode/byte round trips and rejection without the WASM
-permission. Publication gates remain pending; this does not qualify privileged
+permission. The bounded proof does not qualify privileged
 Gandalf operations, background suspension or extension storage/messages. See the
 [proof and its limits](evidence/mv3-wasm.md).
 

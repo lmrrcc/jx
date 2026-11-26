@@ -1,6 +1,6 @@
 # M1-27: packaged MV3 and Rust/WASM feasibility
 
-Status: locally verified; publication gate and Verify pending. This is the G0
+Status: bounded M1-27 feasibility proof accepted in PR83 after the publication gate and Verify. This is the G0
 runtime/packaging proof, not the later portfolio extension qualification.
 
 ## Executed boundary
@@ -71,7 +71,7 @@ or a signed release. The packaging tool prints the hash for every build.
 
 Run the commands in the [example guide](../../examples/mv3-app/README.md).
 `npm run test:extension` is added to Verify and the matching local push gate.
-Remote Linux verification remains pending at this source revision. The Chrome
+The original macOS source qualification is supplemented by the publication Verify evidence below. The Chrome
 protocol is test infrastructure with a version-sensitive experimental surface;
 unsupported commands fail the test rather than silently skipping the proof.
 
@@ -82,3 +82,9 @@ content scripts, privileged host access, wallet protocols, Web Store submission
 or cross-browser behavior. Those remain explicit later milestone work. Resource
 and domain ownership do not survive popup closure by accident: persistent state
 needs a separately specified storage/message contract.
+
+## Publication acceptance
+
+[PR83](https://github.com/lmrrcc/jx/pull/83) merged as `c13bfd8e65ccfb7ed7c483a46fba9e37795455f6`. Exact head `c1432dc` passed all 19 local gate steps in 461 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45846065539) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45845915260). The integrated reactor passes 206 JVM checks plus TeaVM; 47 runtime checks, 975 conformance checks with 217 explicit exclusions, four Todo scenarios, two packaged scenarios, two authentication hosting modes, three protected SSR scenarios, four real hot workflows and all three extension checks pass. The extension checks take 2.5 seconds in this local run. The 149-case inventory and 62/6328 interaction count remain unchanged.
+
+This integrated ZIP has SHA-256 `785b346b770b51452370e8166a53ec233886232690953040e1c9aa03fb828084`. It is a build identifier, not a claim of reproducibility or a signed marketplace release. These publication results preserve all feasibility and platform limits above.
