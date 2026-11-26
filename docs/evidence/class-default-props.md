@@ -13,8 +13,8 @@ This does not close all class-component or hot-reload qualifications.
 
 ## Publication integration, 26 November
 
-The isolated source `4d96aad` builds on the nullable-state publication candidate
-`d735157`, including the published native Writable consumers. It retains the
+The isolated source `1c989c7` builds on the published nullable-state merge
+`30742a6` (PR71), including the published native Writable consumers. It retains the
 defaultProps API, raw input and clone semantics, compiler lowering and both
 complete differential consumers. Seventeen capability/consumer files and all
 three native mutation target regions are byte-identical to `7195939`.
