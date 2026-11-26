@@ -158,6 +158,7 @@ public final class RuntimeApplication {
     private static View button(String id, String label, EventHandler handler) { return Views.element("button", Attributes.create().attr("id", id).on("onClick", handler), label); }
     private static View elm() { return Programs.useProgram(PROGRAM); }
     public static void main(String[] args) {
+        if (classPresenceFixture()) { HotClassPresenceApplication.main(); return; }
         if (classJournalFixture()) { HotClassApplication.main(); return; }
         if (hotFixture()) { HotApplication.main(); return; }
         if (scalarBoundaryFixture()) { ScalarBoundaryFixture.main(); return; }
@@ -169,6 +170,8 @@ public final class RuntimeApplication {
     @JSBody(script = "return !!globalThis.hotFixture;") private static native boolean hotFixture();
     @JSBody(script = "return new URLSearchParams(location.search).get('fixture') === 'class-journal';")
     private static native boolean classJournalFixture();
+    @JSBody(script = "return new URLSearchParams(location.search).get('fixture') === 'class-presence';")
+    private static native boolean classPresenceFixture();
     @JSBody(script = "return new URLSearchParams(location.search).get('fixture') === 'scalar-boundary';")
     private static native boolean scalarBoundaryFixture();
     @JSBody(script = "return new URLSearchParams(location.search).get('fixture') === 'promise-observer';")
