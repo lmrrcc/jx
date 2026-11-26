@@ -1,0 +1,30 @@
+package jx.fixture.ssr;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.Promise;
+import jx.State;
+import jx.View;
+import jx.Views;
+
+@Component
+public final class TodoPage {
+    public record Props(TodoSnapshot snapshot, Promise<Void> ready) {}
+
+    public static View render(Props props) {
+        Hooks.use(props.ready());
+        State<Integer> count = Hooks.useState(0);
+        Hooks.useEffect(() -> { Hydration.committed(); return null; }, Dependencies.none());
+        return (
+            <main id="protected-todos">
+                <h1>Protected todos</h1>
+                <p id="owner">{props.snapshot().username()}</p>
+                <ul id="todos">{Views.fragment(props.snapshot().todos().stream().map(todo ->
+                    <li key={todo.id()} data-id={todo.id()} data-version={todo.version()}>{todo.title()}</li>
+                ).toList())}</ul>
+                <button id="local-counter" onClick={event -> count.update(value -> value + 1)}>Local updates: {count.value()}</button>
+            </main>
+        );
+    }
+}
