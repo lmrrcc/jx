@@ -1,0 +1,21 @@
+package jx.example.todo;
+
+import jx.Component;
+import jx.Dependencies;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+/** Actual Java/TeaVM HTTP proof, isolated by the browser query and server profile. */
+@Component
+public final class ContractProof {
+    public static View render() {
+        State<String> result = Hooks.useState("RUNNING");
+        Hooks.useEffect(() -> {
+            ExactValuesRun owner = new ExactValuesRun(result::set);
+            owner.start();
+            return owner::close;
+        }, Dependencies.none());
+        return (<main><h1>Exact contract values</h1><pre data-testid="contract-result">{result.value()}</pre></main>);
+    }
+}
