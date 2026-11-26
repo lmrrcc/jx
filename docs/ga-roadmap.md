@@ -20,11 +20,9 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
-Next compiler slice: **🟡 R-28-03h2b legacy `.jx` authoring** passes 195 JVM/TeaVM
-checks and the full **1,009-pass /223-exclusion /154-case** matrix. Only its new
-consumer row changes; all prior rows and **62/6,328** interaction pairs remain.
-One scoped compiler mutant was killed in the earlier selected-source campaign.
-Publication gate and Verify remain pending; native IDE qualification is separate.
+Current sparse compiler candidate: **🟡 R-28-03h4 passes 200 JVM checks plus TeaVM and the full 1,017 checks /223 exclusions /155 cases** on source equivalent to `aebcfaa`, rebased onto accepted PR86. Client passes are 153 reference/152 JX, hydrate 113, static 119 and lazy 124 per side; only the new sparse row changes, with **62/6,328** pairs unchanged. Normal explicit checkpoint codecs remain admitted and Pure checkpoints remain rejected. The earlier nullable-authoring mutation retains its own source scope; the 20-step publication gate and remote Verify remain pending.
+
+Latest compiler acceptance: **✅ R-28-03h2b legacy `.jx` authoring merged in PR86 as `50388f5`**, after all 20 local gate steps passed in 512 seconds and both Verify checks passed on `0beb087`. The integration passes **213 JVM, 47 runtime and 1,009 conformance checks /223 exclusions /154 cases**. Only the new authoring row changes; prior rows and **62/6,328** interaction pairs remain. The earlier compiler mutation retains its recorded scope; native IDE qualification and remaining class options are separate.
 
 Latest class-runtime acceptance: **✅ R-28-03h2a merged in PR85 as `51c0acb`**, after all 20 local gate steps passed in 425 seconds and both Verify checks passed on `d1899eb`. The integration passes **210 JVM, 47 runtime and 1,001 conformance checks /223 exclusions /153 cases**. Four new legacy cases preserve the existing **62/6,328** interaction result. Compiler declaration discovery, native IDE qualification and broader hot ownership remain separate; historical mutation results retain their original scope. See the [contract and evidence](evidence/class-legacy-lifecycles.md).
 

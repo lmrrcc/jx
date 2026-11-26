@@ -92,8 +92,52 @@ The generated schema supports `int`, `long`, `float`, `double`, `boolean`, their
 boxed forms, `String`, and reifiable named/array reference types. References are
 nullable and preserve identity. Primitive fields reject null; the runtime's exact
 JavaScript-number policy still applies to `long`. Scalar `byte`/`short`/`char`,
-parameterized fields, generic classes/records and indirect component inheritance
-are outside this slice. Primitive arrays remain reference values.
+general parameterized fields, generic classes/records and indirect component inheritance
+are outside this slice. Primitive arrays remain reference values. The explicit
+state-only Presence form below is a separate supported schema shape.
+
+### Explicit nullable and sparse class state
+
+R-28-03h4 passes five new compiler tests and eight focused React/JX projects;
+full integration and publication qualification remain pending.
+`@jx.NullableState` opts a direct `@Component` class into null aggregate state:
+
+```java
+@Component
+@NullableState
+public final class Panel extends ClassComponent<Panel.Props, Panel.Model, Void> {
+    public record Props(String title) {}
+    public record Model(Presence<Integer> count, Presence<String> note) {}
+    public Panel(Props props) { super(props, null); }
+    public void begin() { setState(statePatch().withCount(1).build()); }
+    public void clearNoteValue() { setState(statePatch().undefinedNote().build()); }
+    public View render() {
+        return <p>{state() == null ? "Not started" : state().count().toString()}</p>;
+    }
+}
+```
+
+The marker never infers permission from a constructor body and does not make
+props nullable. Use it only on a direct top-level class component; lifecycle
+pending/previous state arguments can then be null. A `Presence<T>` state field
+uses a native optional property and distinguishes absent, own undefined and a
+defined value (including null for the supported reference value types).
+`T` follows the supported boxed scalar/String/reifiable reference/array rules;
+raw, wildcard and nested parameterized forms fail with a source diagnostic.
+
+The generated `withCount(Integer)` sets a defined value. `undefinedNote()`
+assigns own undefined; omitting a setter leaves the existing property unchanged.
+There is no generated deletion operation or setter for a null aggregate.
+Ordinary fields and required props retain their checks. Generated builder
+collisions fail before Java generation. An explicit typed `StateCodec` can preserve
+nullable aggregate and sparse state through the existing conservative checkpoint
+journal. The annotation does not generate a codec or relax commit/owner checks;
+complete hidden/Pure/preflight behavior remains separate R-28-04 work.
+See [the source contract and qualification](evidence/class-sparse-authoring.md)
+and the authored [normal](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredSparse.jx)
+and [Pure](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredSparsePure.jx) consumers.
+
+### Class lifecycle declarations
 
 Declared mount, update, unmount, snapshot and should-update overrides enable those
 existing runtime callbacks. `PureComponent` supplies shallow comparison by default.

@@ -73,11 +73,14 @@ immutable values; `X` is the typed snapshot passed from `getSnapshotBeforeUpdate
 to `componentDidUpdate`. Descriptors explicitly select lifecycle support.
 Constructors, render methods and state updaters must be pure and cannot call
 hooks. Rendering may return null while retaining the class instance. Initial
-props and state must be non-null.
+props must be non-null. State is non-null unless the descriptor explicitly uses
+`withNullableState()`; direct `.jx` authoring has an explicit
+[`@NullableState` marker](language.md#explicit-nullable-and-sparse-class-state).
 
 `ClassSchema<T>` declares each field's name, accessor, value type and a checked
-constructor. Props and state become native objects with one property per declared
-field, so `PureComponent` uses React's comparison of those fields rather than an
+constructor. Required fields become native own properties; optional state fields
+use `Presence` to distinguish absent, own undefined and defined values. Thus
+`PureComponent` uses React's comparison of those fields rather than an
 opaque aggregate record. Scalars follow the browser representation rules below;
 nested Java objects retain identity, even when their record values compare equal.
 Schema validation rejects duplicate fields, wrong schema ownership and invalid
@@ -92,7 +95,8 @@ state. Its optional callback still runs after commit; other queued updates,
 props, context or derived state may still cause a render. A null updater function
 is rejected. Because Java has both patch and updater overloads, use a typed
 `StatePatch<Model>` null value rather than an ambiguous `setState(null)` call.
-This does not allow null initial props or state. The compiling
+This does not itself allow null initial props or state; nullable aggregate state
+requires the separate descriptor opt-in. The compiling
 [NullPatchCounter.jx](../tests/conformance/src/main/jx/jx/conformance/cases/NullPatchCounter.jx)
 consumer exercises queue order, callback timing and snapshot identity.
 `setState` queues a patch or a pure function of pending state and next props.
@@ -259,8 +263,8 @@ force updates, Pure bailouts and previous-DOM snapshots. The
 [class decision](decisions/0006-java-class-components.md#r-28-03b-derived-state-from-props--25-november-2026)
 records evidence and remaining qualification. Explicit descriptors and authored
 static lifecycle declarations share this runtime contract. Browser error-boundary
-qualification is described below; committed class hot checkpoints remain open. Initial state still
-must be non-null.
+qualification is described below; complete class hot checkpoints remain open.
+Initial state may be null only with the explicit nullable descriptor opt-in.
 
 ### Class error boundaries
 

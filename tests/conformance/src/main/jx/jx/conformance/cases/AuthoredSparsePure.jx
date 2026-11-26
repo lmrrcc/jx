@@ -1,0 +1,61 @@
+package jx.conformance.cases;
+
+import jx.*;
+import jx.conformance.Bench;
+
+/** Direct .jx consumer of null aggregates and native optional state properties. */
+@Component
+@NullableState
+public final class AuthoredSparsePure extends PureComponent<AuthoredSparsePure.Props,AuthoredSparsePure.Model,String> {
+    public record Props(String id) {}
+    public record Model(Presence<Integer> count, Presence<String> note) {}
+    public AuthoredSparsePure(Props props) { super(props, null); }
+
+    private static String value(Presence<?> field) {
+        return switch (field) {
+            case Presence.Absent<?> ignored -> "absent";
+            case Presence.Undefined<?> ignored -> "undefined";
+            case Presence.Present<?> present -> present.value() == null ? "null" : present.value().toString();
+        };
+    }
+    private static String summary(Model state) {
+        return state == null ? "null" : "count=" + value(state.count()) + ";note=" + value(state.note());
+    }
+    private static int count(Model state) {
+        return state != null && state.count() instanceof Presence.Present<Integer> present ? present.value() : 0;
+    }
+    public void operate(String operation) {
+        Model before = state();
+        Runnable committed = () -> Bench.log(props().id() + ":callback:" + operation + ":" + summary(state())
+                + ":same=" + (state() == before));
+        switch (operation) {
+            case "empty" -> setState(statePatch().build(), committed);
+            case "partial" -> setState(statePatch().withCount(1).build(), committed);
+            case "undefined" -> setState(statePatch().undefinedNote().build(), committed);
+            case "null-field" -> setState(statePatch().withNote(null).build(), committed);
+            case "queued" -> {
+                setState((pending, props) -> {
+                    Bench.log(props.id() + ":updater:first:" + summary(pending));
+                    return statePatch().withCount(count(pending) + 1).build();
+                });
+                setState((pending, props) -> {
+                    Bench.log(props.id() + ":updater:second:" + summary(pending));
+                    return statePatch().withCount(count(pending) + 1).build();
+                }, committed);
+            }
+            default -> throw new IllegalArgumentException("Unknown state operation");
+        }
+        Bench.log(props().id() + ":handler:" + operation + ":" + summary(state()) + ":same=" + (state() == before));
+    }
+    @Override protected String getSnapshotBeforeUpdate(Props previous, Model previousState) {
+        return summary(previousState);
+    }
+    @Override protected void componentDidUpdate(Props previous, Model previousState, String snapshot) {
+        Bench.log(props().id() + ":commit:" + summary(previousState) + "->" + summary(state()) + ":snapshot=" + snapshot);
+    }
+    @Override public View render() {
+        Bench.log(props().id() + ":render");
+        return <output data-testid={"sparse-" + props().id()}>{summary(state())}</output>;
+    }
+}
+

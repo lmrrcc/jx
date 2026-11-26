@@ -636,7 +636,7 @@ class cells pass; pair evidence remains 54/6328. PR
 
 | Option | Status and next evidence |
 | --- | --- |
-| Null initial props/state | Open: design explicit nullable schema decoding and merge semantics before removing guards |
+| Null initial props/state | Nullable state has explicit runtime admission in R-28-03h1; direct authoring R-28-03h4 passes five compiler and eight focused checks, integration/publication pending. Null initial props remain open; required props are not relaxed |
 | PureComponent with a custom should-update policy | R-28-03g below: locally implemented and focused-tested; integrated qualification pending |
 | `componentWillMount`, `componentWillReceiveProps`, `componentWillUpdate`, and their `UNSAFE_` forms | R-28-03h2a explicit runtime descriptors pass 26 focused native checks including modern suppression, interrupted mounting and server traces; R-28-03h2b direct declarations pass8/8 projects plus real-core javac/editor checks with defaults and typed-context precedence; full qualification/publication and native IDE support remain open; see [evidence](../evidence/class-legacy-lifecycles.md) |
 | Class `defaultProps` | Open: define absent versus explicit null props before compiler/runtime support |
@@ -734,7 +734,9 @@ not a serialization compatibility promise. Modifier composition preserves the
 nullable opt-in with context policies and both derived-state callbacks.
 
 See [the consumer and qualification record](../evidence/class-nullable-state.md).
-Native `.jx` sparse-record authoring, nullable initial props, general dynamic
-object state, supported legacy lifecycle options and presence-aware hot codecs
+Native `.jx` sparse-record authoring passes five compiler and eight focused
+checks in [R-28-03h4](../evidence/class-sparse-authoring.md), with full integration
+and publication qualification pending.
+Nullable initial props, general dynamic object state and presence-aware hot codecs
 remain open. In particular, this slice does not resolve R-28-04's hidden/SCU-false
 commit-proof requirement or permit opaque values to cross TeaVM generations.

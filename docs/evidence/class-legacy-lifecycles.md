@@ -143,7 +143,7 @@ plus TeaVM in **27.912 seconds**. The complete React/JX comparison passes
 client 152 reference / 151 JX, hydration 112, static 118 and lazy 123 per side.
 Only the `class-legacy-authoring` row is added to the result table; all preceding
 rows and the **62 / 6,328** interaction result are unchanged. The publication gate
-and remote Verify are still pending. The compiler mutant execution below remains
+and both remote Verify checks subsequently pass, as recorded below. The compiler mutant execution below remains
 the earlier two-mutant campaign, not a new execution on this final candidate.
 
 ### Earlier selected focused qualification
@@ -247,3 +247,7 @@ modern-method suppression and pending context used in the differential fixtures.
 ## Runtime publication acceptance
 
 [PR85](https://github.com/lmrrcc/jx/pull/85) merged as `51c0acb8354069abdcfabaf836a1bcdb1c09918f`. Exact head `d1899eb907511c33bd96d18852d6f3d88efd2d44` passed all 20 local gate steps in 425 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45857113824) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45857049443). The final integration passes 210 JVM checks plus TeaVM, 47 runtime checks, 1,001 conformance checks with 223 exclusions, four real hot workflows and the existing packaged/auth/SSR/MV3/external-consumer proofs. The 153-case inventory and 62/6,328 pair count match the committed ledgers. The earlier selected focused and historical mutation evidence above remains separate; this receipt does not qualify broader class authoring or hot protocols.
+
+## Authoring publication acceptance
+
+[PR86](https://github.com/lmrrcc/jx/pull/86) merged as `50388f593214379c9771d01df5068d604337eb53`. Exact head `0beb08721e27cd7725f001b7b61e121cf438d449` passed all 20 local gate steps in 512 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45861093324) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45860994373). Integrated 213 JVM tests plus TeaVM, 47 runtime checks, the 1,009/223 conformance matrix across 154 cases, four real hot workflows and packaged/auth/SSR/MV3/independent-consumer proofs pass. Both conformance ledgers match and 62/6,328 interaction pairs remain unchanged. The earlier package/full and selected compiler mutant evidence above are distinct executions. This receipt does not qualify native IDE editing, sparse declarations or broader hot ownership.

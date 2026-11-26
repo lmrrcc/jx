@@ -37,6 +37,7 @@ import jx.conformance.cases.ClassDefaultsAuthoring;
 import jx.conformance.cases.ClassPurePolicy;
 import jx.conformance.cases.ClassLegacy;
 import jx.conformance.cases.ClassLegacyAuthoring;
+import jx.conformance.cases.ClassSparseAuthoring;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
 import jx.conformance.cases.DomRefFocus;
@@ -254,6 +255,7 @@ public final class Main {
             case "class-legacy-suppression" -> ClassLegacy.SUPPRESSION;
             case "class-legacy-interrupted" -> ClassLegacy.INTERRUPTED;
             case "class-legacy-authoring" -> ClassLegacyAuthoring.JX;
+            case "class-sparse-authoring" -> ClassSparseAuthoring.JX;
             default -> null;
         };
     }

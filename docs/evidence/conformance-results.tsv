@@ -33,6 +33,7 @@ class-nullable-derived	pass	pass	pass	pass	pass	pass	pass	pass
 class-nullable-state	pass	pass	pass	pass	pass	pass	pass	pass
 class-pure-policy	pass	pass	pass	pass	pass	pass	pass	pass
 class-runtime	pass	pass	pass	pass	pass	pass	pass	pass
+class-sparse-authoring	pass	pass	pass	pass	pass	pass	pass	pass
 clone-element	pass	pass	pass	pass	pass	pass	pass	pass
 combined-action-queue	pass	pass	pass	pass	pass	pass	pass	pass
 combined-activity-store	pass	pass	pass	pass	pass	pass	pass	pass
