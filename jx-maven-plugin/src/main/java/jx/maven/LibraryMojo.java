@@ -10,8 +10,10 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /** Publishes a versioned, binary-verified component index in the module's ordinary JAR.
- * Run after javac; the goal does not package sources or initialize application classes. */
-@Mojo(name = "library", defaultPhase = LifecyclePhase.PROCESS_CLASSES,
+ * The configured goal follows the packaging's javac goal in compile, so a reactor
+ * compile can resolve a preceding library without waiting for package. The goal
+ * does not package sources or initialize application classes. */
+@Mojo(name = "library", defaultPhase = LifecyclePhase.COMPILE,
         requiresDependencyResolution = ResolutionScope.COMPILE, threadSafe = true)
 public final class LibraryMojo extends AbstractJxMojo {
     @Override public void execute() throws MojoExecutionException, MojoFailureException {
