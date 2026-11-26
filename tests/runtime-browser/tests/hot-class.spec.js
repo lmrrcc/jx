@@ -27,7 +27,7 @@ const captured = page => page.evaluate(() => {
   catch (error) { return {error: error.message}; }
 });
 
-test('nullable and sparse checkpoint descriptors reject before touching the live root', async ({page}) => {
+test('Pure checkpoints strict null state and invalid metadata reject before touching the live root', async ({page}) => {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   await open(page);
@@ -40,14 +40,14 @@ test('nullable and sparse checkpoint descriptors reject before touching the live
     hot.capture = (...args) => { calls.push('capture'); return capture(...args); };
     hot.dispose = (...args) => { calls.push('dispose'); return dispose(...args); };
     try {
-      return {calls, nullableFirst: globalThis.hotClassAdmission('nullable-first'),
-        checkpointFirst: globalThis.hotClassAdmission('checkpoint-first'),
-        optional: globalThis.hotClassAdmission('optional-state')};
+      return {calls, strictNull: globalThis.hotClassAdmission('strict-null'),
+        metadata: globalThis.hotClassAdmission('invalid-metadata'),
+        pure: globalThis.hotClassAdmission('pure-state')};
     } finally { hot.capture = capture; hot.dispose = dispose; }
   });
-  expect(attempts.nullableFirst).toContain('nullable');
-  expect(attempts.checkpointFirst).toContain('nullable');
-  expect(attempts.optional).toContain('optional');
+  expect(attempts.strictNull).toContain('non-null');
+  expect(attempts.metadata).toContain('signature');
+  expect(attempts.pure).toContain('Pure');
   expect(attempts.calls).toEqual([]);
   expect(await page.locator('#class-value').evaluate((node, old) => node === old, original)).toBe(true);
   await original.dispose();

@@ -140,7 +140,7 @@ final class ReactClasses {
         C peer = type.create(initial, host);
         S state = peer.initialState();
         boolean checkpointEnabled = HotReload.enabled() && type.checkpoint() != null;
-        if (checkpointEnabled) state = ClassCheckpoints.restore(initialProps, type.checkpoint(), type.stateSchema(), state);
+        if (checkpointEnabled) state = ClassCheckpoints.restore(initialProps, type, state);
         JSObject initialState = state == null && type.nullableState() ? null : encode(type.stateSchema(), state);
         host.initializeState(initialState, state);
         Current<P> propsValue = host.propsValue;

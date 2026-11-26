@@ -133,15 +133,14 @@ class ClassCheckpointContractTest {
         assertNull(pure.checkpoint()); assertTrue(pure.pure());
     }
 
-    @Test void nullableCheckpointCombinationsRejectInBothOrdersBeforeCodecOrFactoryWork() {
+    @Test void nullableCheckpointCombinationsPreserveOptionsInBothOrders() {
         var strict = plain();
         var nullable = strict.withNullableState();
         var checkpointed = strict.withStateCheckpoint("counter", CODEC);
-        var first = assertThrows(IllegalArgumentException.class,
-                () -> nullable.withStateCheckpoint("counter", CODEC));
-        var last = assertThrows(IllegalArgumentException.class, checkpointed::withNullableState);
-        assertTrue(first.getMessage().contains("nullable"));
-        assertTrue(last.getMessage().contains("nullable"));
+        var first = nullable.withStateCheckpoint("counter", CODEC);
+        var last = checkpointed.withNullableState();
+        assertTrue(first.nullableState()); assertTrue(last.nullableState());
+        assertSame(CODEC, first.checkpoint().codec()); assertSame(CODEC, last.checkpoint().codec());
         assertTrue(nullable.nullableState()); assertNull(nullable.checkpoint());
         assertFalse(checkpointed.nullableState()); assertSame(CODEC, checkpointed.checkpoint().codec());
         assertEquals(new Model(3), checkpointed.create(new Model(3)).initialState());
@@ -153,7 +152,7 @@ class ClassCheckpointContractTest {
         @Override public View render() { return null; }
     }
 
-    @Test void optionalStateSchemaRejectsCheckpointEvenWhenAllCurrentFieldsArePresent() {
+    @Test void optionalStateSchemaAcceptsExplicitCodecWithoutExecutingItAtConfigurationTime() {
         var count = ClassSchema.optionalField("count", ClassSchema.INTEGER, Sparse::count);
         var sparse = new ClassSchema<Sparse>(List.of(count), reader -> new Sparse(reader.find(count)));
         AtomicInteger calls = new AtomicInteger();
@@ -165,9 +164,9 @@ class ClassCheckpointContractTest {
             public String encode(Sparse value) { calls.incrementAndGet(); return ""; }
             public Sparse decode(String value) { calls.incrementAndGet(); return new Sparse(Presence.absent()); }
         };
-        var failure = assertThrows(IllegalArgumentException.class,
-                () -> type.withStateCheckpoint("sparse", codec));
-        assertTrue(failure.getMessage().contains("optional"));
+        var configured = type.withStateCheckpoint("sparse", codec);
+        assertSame(codec, configured.checkpoint().codec());
+        assertSame(sparse, configured.stateSchema());
         assertEquals(0, calls.get());
         assertNull(type.checkpoint());
         assertEquals(new Sparse(Presence.present(3)), type.create(new Model(3)).initialState());

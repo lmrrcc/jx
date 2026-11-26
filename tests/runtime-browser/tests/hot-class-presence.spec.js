@@ -3,6 +3,9 @@ import {test, expect} from '@playwright/test';
 const events = page => page.evaluate(() => globalThis.presenceEvents || []);
 const captured = page => page.evaluate(() => JSON.parse(JSON.stringify(globalThis.__JX_HOT__.capture())));
 const presence = snapshot => snapshot.classes.find(value => value.signature === 'class-presence:1');
+// The pinned native React warns once per constructor type for derived state
+// starting at null. Independent TeaVM generations create independent types.
+const initialNullWarning = '`%s` uses `getDerivedStateFromProps` but its initial state is %s. This is not recommended. Instead, define the initial state by assigning an object to `this.state` in the constructor of `%s`. This ensures that `getDerivedStateFromProps` arguments have a consistent shape. hot.ClassPresencePeer null hot.ClassPresencePeer';
 
 async function open(page, skip = false) {
   await page.goto('/hot?fixture=class-presence&skip=' + skip);
@@ -60,11 +63,14 @@ test('explicit class codecs preserve null aggregate empty record and every spars
   }
   await page.locator('#presence-undefined').click();
   await expect(page.locator('#presence-value')).toHaveText('undefined');
-  expect(errors).toEqual([]);
+  // Initial mount and the first replacement both begin at null. Every other
+  // restored state is an object, so no additional warning is expected.
+  expect(errors).toEqual([initialNullWarning, initialNullWarning]);
 });
 
 test('nullable and sparse checkpoints preserve native skipped callbacks and committed props derivation', async ({page}) => {
   const errors = []; page.on('pageerror', error => errors.push(error.message));
+  const warnings = []; page.on('console', message => { if (message.type() === 'error') warnings.push(message.text()); });
   await open(page, true);
   const offset = (await events(page)).length;
   await page.locator('#presence-undefined').click();
@@ -83,6 +89,7 @@ test('nullable and sparse checkpoints preserve native skipped callbacks and comm
   expect((await replace(page)).status).toBe('ready');
   await expect(page.locator('#presence-value')).toHaveText('value:derived');
   expect(errors).toEqual([]);
+  expect(warnings).toEqual([initialNullWarning]);
 });
 
 for (const mode of ['throw', 'invalid']) {

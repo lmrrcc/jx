@@ -74,14 +74,6 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         if (defaultProps != null && defaultProps.schema() != props)
             throw new IllegalArgumentException("Default props belong to another class schema");
         this.defaultProps = defaultProps;
-        if (checkpoint != null) {
-            if (nullableState)
-                throw new IllegalArgumentException("Class checkpoints with nullable aggregate state are not qualified");
-            for (ClassSchema.Field<S,?> field : state.fields()) {
-                if (field.optional())
-                    throw new IllegalArgumentException("Class checkpoints with optional state fields are not qualified: " + field.name());
-            }
-        }
         if (this.lifecycles.contains(Lifecycle.SNAPSHOT) && !this.lifecycles.contains(Lifecycle.UPDATE))
             throw new IllegalArgumentException("Snapshot lifecycle requires update lifecycle");
     }
@@ -155,10 +147,9 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      * <p>Null initial state reaches constructors, rendering, updaters, derivation and lifecycle
      * callbacks as Java null. A null patch preserves state; an empty patch merges to an
      * object, including from null. This does not offer resetting aggregate state to null.
-     * No checkpoint/serialization support or compiler-generated sparse record is implied.
+     * Serialization requires a separately declared state checkpoint codec capable of
+     * preserving null and every declared field's presence. No codec is inferred.
      * Existing factory, context, lifecycle and derivation settings are preserved.
-     * @throws IllegalArgumentException when this descriptor has a state checkpoint;
-     * nullable aggregate checkpoints are not yet qualified
      */
     public ClassComponentType<P,S,C> withNullableState() {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
@@ -173,24 +164,27 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     }
     /** Returns an immutable descriptor opting into conservative development state checkpoints.
      * Declare the result once. Production rendering is unchanged. Only an actual native class
-     * commit callback can publish state; pending updates or render candidates without a matching
-     * callback make capture fail before replacement rather than restore possibly stale state.
-     * This first slice requires one owned root and connected class owners. Hidden Activity,
-     * props-only skipped commits and abandoned renders may therefore
+     * commit callback, or the exact committed connected owner attempt for a props-only skipped
+     * update, can publish state. Pending updates or unmatched render candidates make capture
+     * fail before replacement rather than restore possibly stale state.
+     * This slice requires one owned root and connected class owners. Hidden Activity,
+     * pending updates and abandoned renders may therefore
      * prevent replacement until this owner is removed. Restored owners must commit in the initial
      * tree; missing or delayed owners fail readiness and cannot restore into a later insertion.
      * This is not complete class hot reload.
-     * Pure classes, nullable aggregate state and optional state fields are not qualified
-     * by this first slice and are rejected explicitly when configuring the descriptor.
-     * Required fields whose value type permits null remain valid: they cannot represent
-     * missing or undefined properties. This admission check prevents unqualified state
-     * from being captured; it does not preflight arbitrary candidate startup code.
+     * Pure classes remain unqualified and are rejected when configuring the descriptor.
+     * For nullable aggregate state and optional fields, the explicit codec must preserve
+     * null, absence, own undefined and each present value independently. Every decoded
+     * non-null state still validates against this descriptor's exact state schema; a null
+     * result requires {@link #withNullableState()}. Required fields remain strict.
      *
      * <p>Only the codec's string payload crosses generations. Constructors, ordinary instance
      * fields, refs, effects and pending callbacks restart; resources must not be encoded. A
      * schema/signature change resets this class deliberately. Use the browser rendering thread.
-     * @throws IllegalArgumentException if this descriptor is Pure, permits null aggregate
-     * state, declares optional state fields, or the checkpoint metadata is invalid
+     * The current loader invokes the new decoder after disposing the old root. A decoder
+     * exception or schema-invalid result fails readiness rather than silently resetting;
+     * this API does not preflight candidate codecs or arbitrary startup code before teardown.
+     * @throws IllegalArgumentException if this descriptor is Pure or checkpoint metadata is invalid
      */
     public ClassComponentType<P,S,C> withStateCheckpoint(String signature, StateCodec<S> codec) {
         if (pure) throw new IllegalArgumentException("Pure class checkpoints are not qualified");

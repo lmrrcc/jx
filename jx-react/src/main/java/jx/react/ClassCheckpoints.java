@@ -1,7 +1,6 @@
 package jx.react;
 
 import jx.ClassComponentType;
-import jx.ClassSchema;
 import java.util.function.Function;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSBodyImport;
@@ -27,11 +26,12 @@ final class ClassCheckpoints<S> {
     void mounted() { connected(journal, true); if (firstMount(journal)) commit(); }
     void disconnected() { connected(journal, false); }
 
-    static <S> S restore(JSObject props, ClassComponentType.Checkpoint<S> checkpoint, ClassSchema<S> schema, S initial) {
+    static <S> S restore(JSObject props, ClassComponentType<?,S,?> type, S initial) {
+        ClassComponentType.Checkpoint<S> checkpoint = type.checkpoint();
         String encoded = payload(props, checkpoint.signature(), checkpoint.codec().schema());
         if (encoded == null) return initial;
         S restored = checkpoint.codec().decode(encoded);
-        schema.validate(restored);
+        type.validateState(restored);
         return restored;
     }
 
