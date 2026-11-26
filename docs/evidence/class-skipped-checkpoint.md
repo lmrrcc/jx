@@ -1,11 +1,13 @@
 # R-28-04b public commit observation audit
 
-26 November 2026. Read-only design from the current journal and installed React
-19.3.1; no new browser experiment or implementation is claimed. The existing
-runtime tests remain the behavioral evidence. This proposal does not discharge
-hidden, Pure, nullable/sparse, delayed incoming or discarded-work requirements.
+26 November 2026. Public-API design followed by a bounded local implementation and
+real browser RED/GREEN on React 19.3.1. Source `4bd62af` qualifies connected,
+owner-driven props-only updates whose explicit SCU decision skips rendering.
+Hidden own updates, Pure, nullable/sparse codecs, delayed incoming owners and
+complete discarded-work handling remain open. Mutation, full integration gate
+and Verify are pending.
 
-## Current evidence and the unresolved distinction
+## Starting evidence and the unresolved distinction
 
 `ClassCheckpoints` records render/SCU candidates, pending native updates and a
 string published only by own class commit callbacks. The stable functional owner
@@ -18,7 +20,7 @@ The actual tests already establish:
 - Visible SCU-false setState is supported through its own native callback.
 - Hidden SCU-false setState defers that callback. The native control independently
   records the behavior; revealing reconnects lifecycle callbacks.
-- A props-only derived update with SCU false currently rejects capture.
+- Before this change, a props-only derived update with SCU false rejected capture.
 - A suspended class candidate followed by an urgent retained descendant commit
   must not publish speculative state.
 - Deleting an owner while hidden removes it permanently; portal and external-root
@@ -59,7 +61,7 @@ No public per-update commit notification for **hidden own setState with SCU fals
 has been demonstrated. That requirement stays open; this is not an approved
 non-applicability decision or a proof that no solution can exist.
 
-## Smallest bounded implementation candidate: owner-driven skipped updates
+## Bounded implementation: owner-driven skipped updates
 
 First qualify ordinary, already-connected classes receiving a props-only update
 whose SCU returns false, with no pending queued native updates. This closes a real
@@ -90,10 +92,9 @@ current rejection without claiming hidden own-update support.
    Pure checkpoint opt-in is already rejected; the new changing private token
    must not silently enter a future Pure shallow comparison contract.
 
-The exact owner effect/token mechanism is a candidate that needs native controls.
-If an accepted owner effect can run while its exact class input remains abandoned,
-the design must be rejected; equality of user props or native state values is not
-an acceptable substitute.
+The native controls and adversarial cases below qualify this bounded mechanism.
+An accepted owner effect must not publish an abandoned class input; equality of
+user props or native state values is not an acceptable substitute for its token.
 
 ## Required RED then GREEN sequence
 
@@ -113,9 +114,9 @@ an acceptable substitute.
 4. Retain hidden own-update, deletion while hidden, incoming omission,
    disconnected/foreign-root, codec failure, schema reset and portal tests.
    Their rejection/ownership behavior must not weaken.
-5. Add a scoped hot test mutation that replaces token matching with the most
-   recent eligible candidate; the abandoned props candidate must kill it.
-   Keep this outside the conformance mutation catalog.
+5. Run the prepared scoped hot mutation that clears every candidate after one
+   owner attempt commits; the equal-user-props abandoned attempt must kill it.
+   Keep this outside the conformance mutation catalog. This mutation is pending.
 
 ## Later hidden work, still unresolved
 
@@ -130,7 +131,7 @@ need separate positive and adversarial controls. Preserving the current visible
 rejection is safer than accepting a stale payload, but rejection alone cannot
 mark R-28-04 complete.
 
-## Source preparation
+## Local RED/GREEN evidence
 
 Worktree `/private/tmp/jx-class-skipped-checkpoint` starts from integrated
 `4dcaf41`. The audit is committed in `c8f313b`; buildable regression sources
@@ -139,9 +140,53 @@ RED run. They add the native default/ref control, an abandoned props-only
 candidate plus retained descendant commit, and two same-user-props attempts
 where only the later owner commits.
 
-The proposed two-file production change is staged separately in
-`/private/tmp/jx-class-skipped-checkpoint-fix/`; it has not been applied or
-compiled. A source-only independent review found no concrete false-success
-path. That review does not establish insertion-effect timing or any hidden-state
-preservation. The targeted hot mutation is prepared outside the conformance
-catalog. RED/GREEN, complete runtime regression and publication remain pending.
+The production change was applied only after the regression failed behaviorally.
+The positive case first proved the native control has committed state2, DOM0,
+the same peer and no render/update callback. Old JX then returned
+`Class checkpoint capture unqualified ... unmatched render candidates` instead
+of payload2. Both discarded-work controls passed. The assertion reports the
+actual rejection rather than dereferencing a missing snapshot.
+
+| Check | Actual result |
+| --- | --- |
+| Old production reactor package, actual TeaVM compilation | PASS; 82 core, 17 React and 7 Elm JVM checks; 6.519 s |
+| Old production, three owner-attempt browser tests | 1 failed / 2 passed; expected capture rejection; 2.3 s |
+| Fixed source `4bd62af` reactor package, actual TeaVM compilation | PASS; same 106 JVM checks; 4.620 s |
+| Fixed source, same three owner-attempt browser tests | 3 passed; 2.0 s |
+| Complete `hot-class.spec.js` | 18 passed; 10.8 s |
+| All other runtime-browser specs | 16 passed; 6.0 s |
+
+The two disjoint browser groups cover the complete 34-test runtime suite on Chrome.
+They include hidden pending-update rejection, deletion while hidden, abandoned
+props and state attempts, same-user-props attempts, independent-generation
+restoration, defaults/ref copies, codec failure, signature changes, missing
+incoming owners, actual runtime attestation, foreign roots and logical portals.
+No conformance result table or interaction credit changes in this slice.
+
+The package command was:
+
+```sh
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -pl tests/runtime-browser -am package
+npm run build:runtime
+```
+
+Browser checks used `RUNTIME_PORT=59192` with the configured
+`tests/runtime-browser/playwright.config.js`. The focused selection was
+`exact committed owner attempt|abandoned props-only skipped attempt|equal user props`.
+The remaining group consists of `runtime.spec.js`, `hot.spec.js`,
+`scalar-boundary.spec.js` and `promise-observer.spec.js`; no hot-class test was
+silently omitted or counted twice in the 34-test total. The first sandbox launch
+encountered a localhost proxy 502 before any browser test ran; the actual RED/GREEN
+and regression executions used the normal local server outside that sandbox.
+
+Local build logs are `/private/tmp/jx-class-skipped-checkpoint-red-build.log` and
+`/private/tmp/jx-class-skipped-checkpoint-green-build.log`. Browser artifacts use
+the corresponding `red-results`, `green-results`, `hot-results` and
+`runtime-results` directories under `/private/tmp/jx-class-skipped-checkpoint-`.
+These are local artifacts, not permanent CI evidence or performance measurements.
+
+The prepared `class-owner-unmatched-cleared` hot mutation replaces exactly
+`return value !== accepted;` with `return false;`. It must fail the same-user-props
+discarded-attempt test after a baseline pass. It is unexecuted and outside the
+conformance mutation catalog. Broader integration, push gate, Verify and
+publication remain pending; R-28-04 is partial.

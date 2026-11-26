@@ -635,6 +635,17 @@ teardown; a matching path or the existence of another JX root is insufficient.
 Only committed encoded strings transfer, with conservative rejection for the
 unproved lifecycle cases documented in the evidence report.
 
+The bounded [owner-attempt extension](evidence/class-skipped-checkpoint.md) also
+handles a connected class receiving a props-only update whose explicit
+`shouldComponentUpdate` returns false. The owner commit carries an exact attempt
+token through React's ref/default-props copies. With no pending native updates,
+it encodes that attempt's captured state and retires only that candidate. It
+does not read live state from an ancestor commit, force a render or clear other
+abandoned work. A native control and 34 runtime Chrome checks pass locally on
+`4bd62af`; hidden own updates, Pure checkpoints, nullable/sparse codecs and
+complete incoming/discarded ownership remain unqualified. Its scoped mutation,
+integration gate and Verify are still pending.
+
 ## Runtime metadata and test scopes
 
 The R-29 APIs below have compiling consumers and differential evidence:
