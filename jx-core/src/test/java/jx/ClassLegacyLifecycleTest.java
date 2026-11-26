@@ -102,4 +102,35 @@ class ClassLegacyLifecycleTest {
         assertThrows(NullPointerException.class, () -> configured.beforeUpdate(peer, UNSAFE, new Value(2), null, DEFAULT));
         assertThrows(NullPointerException.class, () -> configured.beforeUpdate(peer, UNSAFE, new Value(2), new Value(3), null));
     }
+
+    @Test void nullableCheckpointAndDefaultsSurviveLegacyPoliciesInEitherOrder() {
+        var defaults = ClassProps.empty(SCHEMA).set(COUNT, 7);
+        StateCodec<Value> nullable = new StateCodec<>() {
+            public String schema() { return "nullable-legacy:1"; }
+            public String encode(Value value) { return value == null ? "null" : Integer.toString(value.count()); }
+            public Value decode(String text) { return text.equals("null") ? null : new Value(Integer.parseInt(text)); }
+        };
+        var original = plain();
+        var before = original.withNullableState().withStateCheckpoint("legacy-null", nullable)
+                .withDefaultProps(defaults)
+                .withContextWillReceiveProps(THEME, DEPRECATED, (peer, props, context) -> peer.calls.add("receive:" + context))
+                .withContextWillUpdate(THEME, UNSAFE, (peer, props, state, context) -> peer.calls.add("update:" + state + ":" + context));
+        var after = original.withContextWillReceiveProps(THEME, DEPRECATED, (peer, props, context) -> peer.calls.add("receive:" + context))
+                .withContextWillUpdate(THEME, UNSAFE, (peer, props, state, context) -> peer.calls.add("update:" + state + ":" + context))
+                .withDefaultProps(defaults).withStateCheckpoint("legacy-null", nullable).withNullableState();
+        for (var type : List.of(before, after)) {
+            assertTrue(type.nullableState());
+            assertSame(defaults, type.defaultProps());
+            assertSame(nullable, type.checkpoint().codec());
+            assertSame(SCHEMA, type.stateSchema());
+            assertDoesNotThrow(() -> type.validateState(type.checkpoint().codec().decode("null")));
+            Peer peer = type.create(new Value(1), DEFAULT);
+            type.beforeReceiveProps(peer, DEPRECATED, new Value(2), DEFAULT);
+            type.beforeUpdate(peer, UNSAFE, new Value(2), null, DEFAULT);
+            assertEquals(List.of("receive:day", "update:null:day"), peer.calls);
+            assertEquals(new Value(1), peer.state());
+        }
+        assertFalse(original.nullableState()); assertNull(original.checkpoint());
+        assertFalse(original.hasContextWillUpdate(UNSAFE));
+    }
 }

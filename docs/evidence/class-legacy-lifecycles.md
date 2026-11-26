@@ -1,9 +1,34 @@
 # Native legacy class lifecycles
 
-R-28-03h2a, 25 November 2026. This is the explicit typed runtime slice for the
-three deprecated lifecycle methods and their three `UNSAFE_` counterparts.
-Package and focused differential tests pass; full integration, scoped mutations,
-push gate and Verify are pending. Compiler declaration sugar is R-28-03h2b.
+R-28-03h2a. This is the explicit typed runtime slice for the three deprecated
+lifecycle methods and their three `UNSAFE_` counterparts. Compiler declaration
+sugar is R-28-03h2b.
+
+## Selected publication integration, 26 November 2026
+
+Sources `b0fbead`/`a4aaa64` select only the legacy runtime on accepted main
+`515f2c2`. The existing nullable/sparse checkpoint admission and committed
+journal are preserved; the historical blanket rejection is not reinstated.
+No creator changes or hot protocols 4/5 are included.
+
+The selected reactor package passes **169 JVM tests** (83 core, 11 React,
+60 compiler, 15 Maven plugin) in 27.692 seconds. An additional integration
+contract then passes with all **4 legacy JVM tests**, proving default props,
+nullable state, codec identity and pending-null dispatch survive both orders of
+legacy modifier composition without mutating the current peer. This is codec
+admission/composition evidence, not a new browser checkpoint-restoration claim.
+
+All four differential cases pass **26 Chrome checks / 6 declared mode exclusions**
+in 48.0 seconds on port 59185. Initial static HTML, hydration and lazy mounting
+remain explicit mode contracts. The full result tables are unchanged; a complete
+integrated bench, publication gate and Verify have not run on this branch.
+Two runtime mutants were killed in the historical `cc929bb` campaigns; those
+results are not a new mutation campaign on this selected integration.
+
+Logs: `/private/tmp/jx-legacy-runtime-integrated-build.log` and
+`/private/tmp/jx-legacy-journal-composition.log`; the focused reporter output is
+retained in `tests/conformance/target/results/`. No unrelated capability was
+imported to make this slice compile.
 
 ## Public contract
 
@@ -38,7 +63,7 @@ must not call `setState`. Native derived-props or snapshot APIs suppress legacy
 callbacks. A derived-error callback alone does not suppress them. Supported
 deprecated behavior remains distinct from React 19's removed legacy context API.
 
-## Evidence
+## Historical first qualification
 
 The [Java consumer](../../tests/conformance/src/main/java/jx/conformance/cases/ClassLegacy.java),
 [native React reference](../../tests/conformance/reference/cases/class-legacy.jsx)
@@ -77,7 +102,7 @@ package found a fixture call to a nonexistent React factory; it was corrected
 to the existing `new Context<>(...)` API before qualification. No runtime
 behavior or warning filter was changed to make the reference pass.
 
-Two curated mutations are registered but unrun:
+At the first qualification, two curated mutations were registered but unrun:
 `class-legacy-unsafe-mount-aliased` and `class-legacy-next-context-stale`.
 They target native callback selection and the pending context passed to user
 code. No new pair witness or aggregate result-table credit is claimed yet.
