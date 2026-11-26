@@ -1,8 +1,37 @@
 # Source-independent component-library proof
 
-## Selected publication integration, 26 November 2026
+## Publication candidate requalification, 26 November 2026
 
-The current selected ABI2 source `8f54ce8` and lifecycle fix `655f062` build on the
+Candidate `b89db24` preserves the seven selected ABI commits on the sparse
+authoring candidate, based on accepted PR86. The seven ABI-specific commits are
+retained; the current parent also includes previously qualified compiler/plugin
+and gate changes beyond the earlier selected `655f062` source. This is a new
+qualification of the combined candidate, not a whole-file identity claim against
+that earlier source.
+The selected ABI install now passes **213 JVM tests** (84 core, 11 React,
+84 compiler, 24 plugin, 10 language server) plus TeaVM in **38.868 seconds**.
+The source-independent consumer then passes normal Maven `package` in **9.540
+seconds**, followed by **2/2 Chrome journeys in 4.1 seconds** on its saved site.
+These timings are execution receipts under coordinated concurrent work, not a
+performance comparison. No extra full conformance run was used for this check.
+
+The producer JAR contains class files and ABI metadata but no producer sources;
+the consumer's TeaVM classpath names the installed JAR. Its SHA-256 is
+`742c8e4ac4980570b5d514dc9435d643196acc4acaa0caba74fd2b11f3797770`.
+The retained proof directory is
+`/var/folders/y9/29rtk6bd2dz_xj36rw2jn6g40000gn/T/jx-component-library-proof-16254659902728514045`.
+Local logs are `/private/tmp/jx-abi-selected-install.log` and
+`/private/tmp/jx-abi-selected-standalone.log`. The mandatory **21-step** gate
+preserves the preceding 20 checks and adds this standalone proof. Final gate,
+remote Verify and publication remain pending.
+
+Commands: `./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -pl
+jx-maven-plugin,jx-language-server,examples/component-library,examples/library-consumer -am install`,
+then `java tools/VerifyComponentLibrary.java .cache/maven-repository`.
+
+## Earlier selected publication integration, 26 November 2026
+
+The earlier selected ABI2 source `8f54ce8` and lifecycle fix `655f062` build on the
 minimal legacy-runtime → legacy-authoring → sparse-authoring stack above accepted
 main `515f2c2`. Source `d2c4c1e` includes the six component-library commits only;
 the original R30 work and unrelated creator/hot-protocol changes stay separate.
