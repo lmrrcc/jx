@@ -139,7 +139,14 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The selected `.jx` legacy authoring integration passes **1,009 checks**, with
+The selected nullable/Presence authoring integration passes **1,017 checks** with
+**223 declared exclusions across 155 case IDs** in 4.5 minutes: client 153 reference
+/152 JX, hydrate 113, static 119 and lazy 124 per side. The table adds only
+`class-sparse-authoring`; all earlier rows and **62/6,328** pairs remain unchanged.
+Its selected reactor passes 200 JVM checks plus TeaVM. The earlier compiler mutant
+retains its source scope; publication gate and Verify remain pending.
+
+The accepted `.jx` legacy authoring integration passes **1,009 checks**, with
 **223 declared exclusions across 154 case IDs**: client 152 reference /151 JX,
 hydrate 112, static 118 and lazy 123 per side. Only `class-legacy-authoring` is
 added to the prior table; previous rows and all 62/6,328 interaction pairs are

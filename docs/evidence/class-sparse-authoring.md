@@ -1,12 +1,30 @@
 # Explicit nullable and sparse class state authoring
 
 R-28-03h4, scoped on 25 November and qualified locally on 26 November 2026.
-**Source bd27ef7 passes compiler/package and eight focused projects; integrated
-qualification and publication remain pending.** The runtime contracts are already represented by `withNullableState`,
+**Selected source aebcfaa, rebased onto accepted PR86 without changing production
+or tests, passes 200 JVM tests and the full 1,017-check matrix. Publication gate
+and Verify remain pending.** The runtime contracts are already represented by `withNullableState`,
 `ClassSchema.optionalField` and `Presence`. This slice compiles explicit `.jx`
 declarations to those APIs; it does not change native React state merging.
 
 ## Selected publication integration
+
+The final selected package passes **200 JVM tests** (84 core, 11 React,
+73 compiler, 22 Maven plugin and 10 language server), plus TeaVM compilation,
+in **28.626 seconds**. The source-equivalent rebase on PR86 (`50388f5`) then
+passes the full matrix at `276dcc4`: **1,017 passed, 223 declared exclusions,
+155 cases, 4.5 minutes**. Client passes are 153 reference /152 JX; hydration 113,
+static HTML 119 and lazy-route 124 per side. Only `class-sparse-authoring` is
+added to the recorded table; every earlier row and all **62/6,328** pair witnesses
+remain unchanged. This is eight passing projects for the new case, with no new
+pair credit. The historical compiler mutation below retains its own source scope;
+it was not rerun on this head. The mandatory publication gate and remote Verify
+are the remaining publication checks.
+
+Commands: `./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -pl
+jx-maven-plugin,jx-language-server,tests/conformance -am package`, then
+`BENCH_PORT=59180 BENCH_UPDATE=1 npm run test:bench`. The selected full run is
+retained locally as `/private/tmp/jx-sparse-selected-full.log`.
 
 The selected branch preserves accepted main's explicit nullable/sparse checkpoint
 codec contract and imports only legacy runtime, legacy authoring and sparse
@@ -20,13 +38,14 @@ must still reject checkpoint admission. All schema, builder, source-mapping and
 normal/Pure compiler assertions remain enabled. No runtime guard is relaxed.
 The RED log is `/private/tmp/jx-sparse-authoring-integration-red.log`.
 
-The corrected selected source `ef3c5ec` passes **188 JVM tests** (84 core,
+The earlier corrected selected source `ef3c5ec` passes **188 JVM tests** (84 core,
 11 React, 68 compiler, 15 Maven plugin, 10 language server), plus TeaVM compilation,
 in 33.072 seconds. The browser run passes **16/16 Chrome checks** in 22.7 seconds:
 the eight sparse projects and all eight legacy-authoring regression projects.
 `CheckBaseline` validates 155 registered cases and the unchanged 62 pair witnesses.
-The complete result tables are unchanged. Full integration, compiler mutation,
-publication gate and Verify remain pending.
+That focused run leaves the complete result tables unchanged. Full integration
+and compiler mutation were pending at that point; their subsequent results are
+recorded separately above and below. Publication gate and Verify remain pending.
 
 The GREEN build log is `/private/tmp/jx-sparse-authoring-integrated-build.log`.
 Focused command: `BENCH_PORT=59185 node node_modules/@playwright/test/cli.js test
@@ -113,8 +132,8 @@ is registered for both class features without adding an interaction pair.
 
 The targeted `class-authoring-nullable-lost` compiler mutant was unrun at the
 original qualification. Its selected-source campaign is recorded below. A source
-review found no concrete blocker; it is not execution evidence. Full reference/JX
-integration, gate and Verify remain pending.
+review found no concrete blocker; it is not execution evidence. The final selected
+full reference/JX integration is recorded above; gate and Verify remain pending.
 
 ## Executed source-specific qualification
 
@@ -132,8 +151,8 @@ Local logs are `/private/tmp/jx-class-sparse-authoring-compiler.log`,
 `/private/tmp/jx-class-sparse-authoring-focused.log`. These are local execution
 artifacts, not committed CI evidence. The filtered run deliberately did not
 overwrite either complete result table. It adds one case and no pair witness.
-No independent full bench was run: the parent integration will qualify the
-combined compiler/runtime stack and run the targeted mutation separately.
+No independent full bench was run at that original qualification; the later
+selected full bench and compiler mutation are recorded in their own sections.
 
 ## Selected compiler mutation qualification — 26 November 2026
 
