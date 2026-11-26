@@ -26,6 +26,9 @@ test('resource keys own independent requests and reject late or duplicate comple
   expect(await count(page, 'cancel', 'B')).toBe(1);
   await page.locator('#resource-key-c').click();
   await expect(page.locator('#resource-left')).toHaveText('loading');
+  const committedC = (await events(page)).filter(event => event.kind === 'snapshot' && event.value.startsWith('C:'));
+  expect(committedC.map(event => event.value)).toContain('C:loading');
+  expect(committedC.some(event => event.value === 'C:ready:B')).toBe(false);
   await page.locator('#resource-mounted').click();
   await expect(page.locator('#resource-left')).toHaveCount(0);
   expect(await count(page, 'cancel', 'C')).toBe(1);
