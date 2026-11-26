@@ -20,8 +20,18 @@ must still reject checkpoint admission. All schema, builder, source-mapping and
 normal/Pure compiler assertions remain enabled. No runtime guard is relaxed.
 The RED log is `/private/tmp/jx-sparse-authoring-integration-red.log`.
 
-Current selected package and browser qualification are pending. Historical
-numbers below remain evidence for their named source only.
+The corrected selected source `ef3c5ec` passes **188 JVM tests** (84 core,
+11 React, 68 compiler, 15 Maven plugin, 10 language server), plus TeaVM compilation,
+in 33.072 seconds. The browser run passes **16/16 Chrome checks** in 22.7 seconds:
+the eight sparse projects and all eight legacy-authoring regression projects.
+`CheckBaseline` validates 155 registered cases and the unchanged 62 pair witnesses.
+The complete result tables are unchanged. Full integration, compiler mutation,
+publication gate and Verify remain pending.
+
+The GREEN build log is `/private/tmp/jx-sparse-authoring-integrated-build.log`.
+Focused command: `BENCH_PORT=59185 node node_modules/@playwright/test/cli.js test
+-c tests/conformance/playwright.config.js -g 'class-sparse-authoring|class-legacy-authoring'
+--workers=1`. Historical numbers below remain evidence for their named source only.
 
 ## Scope fixed before implementation
 
