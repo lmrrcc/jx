@@ -139,7 +139,13 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The selected legacy runtime integration passes **1,001 checks**, with **223
+The selected `.jx` legacy authoring integration passes **1,009 checks**, with
+**223 declared exclusions across 154 case IDs**: client 152 reference /151 JX,
+hydrate 112, static 118 and lazy 123 per side. Only `class-legacy-authoring` is
+added to the prior table; previous rows and all 62/6,328 interaction pairs are
+unchanged. Its publication gate and Verify remain pending.
+
+The earlier selected legacy runtime integration passes **1,001 checks**, with **223
 declared exclusions across 153 case IDs**: client 151 reference /150 JX,
 hydrate 111, static 117 and lazy 122 per side. The conformance table adds only
 the four legacy cases, and the interaction table is unchanged. Publication gate

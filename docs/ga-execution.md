@@ -7,6 +7,12 @@ does not complete its planned GA qualification work. IDs are stable for future
 issues/PRs and evidence records.
 No GitHub issues, scheduled jobs, deployments or releases were created by this plan.
 
+Next compiler slice: **🟡 R-28-03h2b legacy `.jx` authoring** passes 195 JVM/TeaVM
+checks and the full **1,009-pass /223-exclusion /154-case** matrix. Only its new
+consumer row changes; all prior rows and **62/6,328** interaction pairs remain.
+One scoped compiler mutant was killed in the earlier selected-source campaign.
+Publication gate and Verify remain pending; native IDE qualification is separate.
+
 Next selected class slice: **🟡 R-28-03h2a legacy runtime** passes 182 JVM/TeaVM
 checks and the complete **1,001-pass /223-exclusion /153-case** matrix. Its four
 new legacy cases preserve the existing **62/6,328** interaction result. Publication

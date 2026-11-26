@@ -136,8 +136,20 @@ BENCH_PORT=59191 node_modules/.bin/playwright test -c tests/conformance/playwrig
 
 ### Selected publication qualification, 26 November 2026
 
+Final selected source `815b47f` above legacy candidate `d1899eb` passes **195 JVM
+tests** (84 core, 11 React, 68 compiler, 22 Maven plugin, 10 language server)
+plus TeaVM in **27.912 seconds**. The complete React/JX comparison passes
+**1,009 checks / 223 declared exclusions / 154 cases** in **4.0 minutes**:
+client 152 reference / 151 JX, hydration 112, static 118 and lazy 123 per side.
+Only the `class-legacy-authoring` row is added to the result table; all preceding
+rows and the **62 / 6,328** interaction result are unchanged. The publication gate
+and remote Verify are still pending. The compiler mutant execution below remains
+the earlier two-mutant campaign, not a new execution on this final candidate.
+
+### Earlier selected focused qualification
+
 Source `8092a1d` adds only the compiler/consumer slice on the selected legacy
-runtime. The current package passes **183 JVM tests** (84 core, 11 React,
+runtime. That earlier package passes **183 JVM tests** (84 core, 11 React,
 63 compiler, 15 Maven plugin, 10 language server) in 40.633 seconds, including
 the nullable-checkpoint modifier regression inherited from the runtime branch.
 The new consumer passes **8/8 Chrome projects** in 16.9 seconds: native React
@@ -147,9 +159,10 @@ warnings are asserted; they are not filtered away to make the case pass.
 Build log: `/private/tmp/jx-legacy-authoring-integrated-build.log`. The focused
 command uses port 59185 and `-g class-legacy-authoring --workers=1` with the
 shared conformance configuration. Its reporter leaves aggregate result tables
-unchanged. `CheckBaseline` validates all 154 registered cases. The compiler
-mutant, complete integrated bench, publication gate and Verify remain pending;
-no new pair witness or native IDE qualification is claimed.
+unchanged. `CheckBaseline` validates all 154 registered cases. The subsequent
+full matrix and scoped mutation qualification are recorded separately in this
+document; publication gate and Verify remain pending. No new pair witness or
+native IDE qualification is claimed.
 
 ### Declaration contract and historical qualification
 
@@ -194,7 +207,8 @@ Logs: `/private/tmp/jx-class-legacy-authoring-compiler.log`,
 `/private/tmp/jx-class-legacy-authoring-focused.log`. No separate full run or result
 table update is claimed. The new `class-legacy-authoring-context-lost` mutant was
 unrun at that qualification; its later selected-source execution is below. Full
-reference/JX integration and publication remain pending. The active
+reference/JX integration was pending at that point; the later full result is
+recorded above, while publication remains pending. The active
 interaction scope stays 113 features/6,328 candidate pairs, with no added witness.
 
 ### Selected compiler mutation qualification — 26 November 2026
