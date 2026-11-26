@@ -143,6 +143,28 @@ bootstrap. Development writes `target/jx/dev-site`, leaving packaged `target/sit
 assets intact for a separately running backend. Do not serve development output
 as a production artifact.
 
+### Development runtime attestation
+
+A browser entry point using this JX runtime automatically makes the framework's
+`HotRuntime` class reachable. TeaVM exports it as `JxHotRuntime`; no additional
+application annotation or method is required. Its one `protocolN` export name
+and the runtime's initialization check derive from the same Java version constant.
+The bootstrap validates that marker without calling it: invoking an exported Java
+wrapper can initialize the TeaVM application's entry class before `main`.
+
+The development bootstrap imports the attestation from the actual compiled
+JavaScript, rather than inferring compatibility from the Maven plugin version.
+An old main-only module fails bundling with a missing `JxHotRuntime` export; the
+last published application remains live. A compiled runtime advertising another
+protocol is rejected during candidate evaluation, before capture or disposal.
+Rebuild the application with the matching JX runtime and reload the development
+page when migrating from an older protocol. Do not copy a JavaScript version
+constant into an old bundle.
+
+Ordinary production builds still import only `main` and do not activate hot
+replacement. This uses TeaVM's documented
+[JavaScript module exports](https://www.teavm.org/docs/runtime/js-modules.html).
+
 Useful properties:
 
 | Property | Default / behavior |

@@ -275,12 +275,13 @@ public final class React {
     private static <P> Root mount(String elementId, ComponentType<P> component, P props, boolean strict, RootOptions options, boolean hydrate) {
         Hooks.installRuntime(ReactHooks.INSTANCE);
         JSObject child = component(new View.ComponentView<>(component, props, null), HotReload.rootPath(Objects.requireNonNull(elementId), component.name()), true);
-        JSObject tree = strict ? strict(child) : child;
+        JSObject token = HotReload.rootToken(elementId);
+        JSObject tree = HotReload.ownedTree(strict ? strict(child) : child, token);
         // hydrateRoot takes the tree at creation; createRoot renders it afterwards.
         JSObject root = createRoot(elementId, hydrate ? tree : null, options.identifierPrefix(),
                 report(options.onCaughtError()), report(options.onUncaughtError()), report(options.onRecoverableError()));
         Root owner = new Root(root, elementId);
-        HotReload.root(elementId, owner);
+        HotReload.root(elementId, owner, token);
         if (!hydrate) renderRoot(root, tree);
         return owner;
     }

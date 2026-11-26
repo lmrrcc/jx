@@ -105,8 +105,9 @@ across discarded work or simulated unmounts is not qualified.
 `ClassRef<C>` identifies the concrete Java peer through a checked decoder. Keep
 the ref stable; `current()` is null before attachment and after detachment. The
 class peer and its resources belong to that mounted instance. All calls run on
-the browser main thread. The initial hot-reload policy resets class state; opaque
-peers never cross TeaVM generations. Class checkpoints remain future work.
+the browser main thread. Class state resets unless the descriptor opts into the
+partial [commit journal](evidence/class-checkpoint-journal.md); opaque peers never
+cross TeaVM generations. Complete class checkpoint support remains R-28-04 work.
 
 Compiling consumers are
 [`ClassRuntime`](../tests/conformance/src/main/java/jx/conformance/cases/ClassRuntime.java)
@@ -590,6 +591,15 @@ encoded strings only; `ready()` waits for root commit and two animation frames a
 rejects on an uncaught root-render error. Handled error boundaries retain their
 normal application behavior. Development bundles share one React/React DOM vendor
 runtime across generations, avoiding repeated delegated DOM listener registration.
+The compiled runtime exports `jx.react.HotRuntime` as `JxHotRuntime`. The generated
+bootstrap reads its single `protocolN` method name before calling `main`; it does
+not invoke the export, because TeaVM's exported wrappers can initialize the
+application entry class. This probe does not initialize React, hot state or the application.
+The plugin does not stamp its own version onto an arbitrary compiled bundle.
+Missing runtime exports fail bundling before new assets are published, and a
+protocol mismatch requires a fresh development page before teardown. Production
+bootstrap does not require this export or enable hot replacement. See the
+[runtime migration](maven.md#development-runtime-attestation).
 The loader must capture before disposal, retain the checkpoint if candidate startup
 fails, and leave the old tree running on build/load failure. Runtime bounds cover
 4,096 component instances, 256 hooks per component, 128 tracked stores, one million
@@ -615,6 +625,41 @@ behavior. See the [dated progress review](status.md#progress-review--23-november
 Source maps are generated for the TeaVM output; compiler/editor source mapping is
 a separate contract. No payload-size or speed claim is made from the development
 fixture's unminified bundle.
+
+The opt-in [class commit journal](evidence/class-checkpoint-journal.md) remains a
+partial R-28-04 foundation. Its class owner receives the registered JX root token
+through a private React context. A portal keeps its logical owner even outside
+the root's DOM container. A class rendered through an exported component in a
+separate native React root may run normally, but disqualifies capture before
+teardown; a matching path or the existence of another JX root is insufficient.
+Only committed encoded strings transfer, with conservative rejection for the
+unproved lifecycle cases documented in the evidence report.
+
+The bounded [owner-attempt extension](evidence/class-skipped-checkpoint.md) also
+handles a connected class receiving a props-only update whose explicit
+`shouldComponentUpdate` returns false. The owner commit carries an exact attempt
+token through React's ref/default-props copies. With no pending native updates,
+it encodes that attempt's captured state and retires only that candidate. It
+does not read live state from an ancestor commit, force a render or clear other
+abandoned work. A native control and 34 runtime Chrome checks pass locally on
+`4bd62af`; hidden own updates, Pure checkpoints, nullable/sparse codecs and
+complete incoming/discarded ownership remain unqualified. Its scoped mutation,
+integration gate and Verify are still pending.
+
+Explicit [nullable and sparse class codecs](evidence/class-checkpoint-presence.md)
+are qualified locally on `6dd30ab` with the strengthened consumer `1e589e7`.
+`withNullableState` permits a decoded null
+aggregate; every non-null result still passes the descriptor's exact state
+schema. A declared `StateCodec<S>` must distinguish absence, own undefined,
+explicit null and values itself; no serializer or default value is inferred.
+The complete 39-case runtime suite passes in two disjoint Chrome groups, with
+independent TeaVM generations and post-restore edits. Pure and hidden own-update
+checkpoint behavior remains unqualified. The current loader calls a candidate
+decoder after disposing the old root: exceptions or invalid returned state fail
+readiness, and a corrected generation can recover the retained checkpoint.
+Typed candidate decoder validation before teardown is separate planned work.
+The candidate constructors start with a deliberately different value, so restored
+null is distinguished from resetting to a constructor default.
 
 ## Runtime metadata and test scopes
 

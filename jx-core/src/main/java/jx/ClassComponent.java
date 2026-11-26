@@ -6,7 +6,8 @@ import java.util.function.BiFunction;
 /** Java peer of an actual React class instance. Browser-main-thread only. Props/state are
  * immutable values; React owns update evaluation and commit timing. Constructors, render and
  * updater functions must be pure and may be repeated/discarded. Hooks are not allowed here.
- * Class state currently resets on hot replacement; peers never cross TeaVM generations. */
+ * Class state resets on hot replacement by default. The limited portable opt-in is
+ * {@link ClassComponentType#withStateCheckpoint}; peers never cross TeaVM generations. */
 public abstract class ClassComponent<P,S,X> {
     /** Renderer-owned instance access; applications do not implement or bind this adapter. */
     public interface Host<P,S> {

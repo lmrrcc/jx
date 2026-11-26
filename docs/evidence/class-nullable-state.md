@@ -114,6 +114,14 @@ pending. No new interaction pairs, gate or Verify completion is claimed. Real Re
 development mode may repeat pure evaluation; assertions distinguish committed
 callbacks and observable skipped rendering from an exact speculative render count.
 
+The separate combined nullable/journal source `c205ca2` retains these semantics
+while rejecting nullable aggregate or optional-field state checkpoints at descriptor
+construction. Its JVM and browser admission regressions fail before the guard and
+pass afterward; the combined package, all 96 class checks and full conformance
+953/199 across 144 cases pass, with the 62/6,328 pair ledger unchanged. This is an
+explicit temporary rejection, not nullable checkpoint support. See the
+[combined qualification](class-checkpoint-journal.md#combined-nullablejournal-admission--source-c205ca2).
+
 Logs: `/private/tmp/jx-null-state-source-validation-red.log`,
 `/private/tmp/jx-class-null-state-final-build.log`,
 `/private/tmp/jx-class-null-state-field-tests.log` and

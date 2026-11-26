@@ -10,7 +10,7 @@ import org.teavm.jso.*;
  * loader before main. Effects/refs/memos restart; only compatible scalar or explicitly coded state
  * transfers. No Java object, callback, DOM handle, or pending command crosses runtime generations. */
 public final class HotReload {
-    private static final boolean ENABLED = setup();
+    private static final boolean ENABLED = setup(HotRuntime.version());
     private HotReload() {}
     @JSFunctor interface Encoder extends JSObject { String encode(); }
     @JSFunctor interface Stop extends JSObject { void stop(); }
@@ -42,7 +42,9 @@ public final class HotReload {
     static String childPath(String name, String key, String position, String container) { return ENABLED ? childPathNative(name, key, position, container) : ""; }
     static String keyedPosition(String container, String key) { return ENABLED ? keyedPositionNative(container, key) : ""; }
     static String rootPath(String root, String name) { return ENABLED ? rootPathNative(root, name) : ""; }
-    static void root(String id, React.Root root) { if (ENABLED) rootNative(id, root::close); }
+    static JSObject rootToken(String id) { return ENABLED ? rootTokenNative(id) : null; }
+    static JSObject ownedTree(JSObject tree, JSObject token) { return ENABLED ? ownedTreeNative(tree, token) : tree; }
+    static void root(String id, React.Root root, JSObject token) { if (ENABLED) rootNative(id, root::close, token); }
     static void forgetRoot(String id) { if (ENABLED) forgetRootNative(id); }
     static <T> T restore(JSObject slot, StateCodec<T> codec, T initial) {
         if (slot == null || codec == null) return initial;
@@ -59,13 +61,19 @@ public final class HotReload {
         recordNative(slot, codec.schema(), () -> codec.encode(value.get()));
     }
 
-    @JSBody(script = """
+    @JSBody(params = "expectedVersion", script = """
         var hot = globalThis.__JX_HOT__;
         if (!hot || !hot.enabled) return false;
-        if (hot.version && hot.version !== 1) throw new Error('Incompatible JX hot runtime');
-        if (hot.version) return true;
-        hot.version = 1;
+        if (hot.version && hot.version !== expectedVersion) throw new Error('Incompatible JX hot runtime; load a fresh development page');
+        if (hot.version) {
+            if (!(hot.classOwners instanceof Map) || !(hot.incomingClasses instanceof Map) || !hot.classRootContext)
+                throw new Error('Incomplete JX hot runtime; load a fresh development page');
+            return true;
+        }
+        hot.version = expectedVersion;
         hot.components = new Map(); hot.stores = new Map(); hot.roots = new Map();
+        hot.classRootContext = React.createContext(null);
+        hot.classOwners = new Map(); hot.incomingClasses = new Map(); hot.classRestoreClosed = false;
         hot.incomingComponents = new Map(); hot.incomingStores = new Map(); hot.current = null;
         hot.notices = [];
         hot.notice = function(message) { hot.notices.push(message); if (hot.notices.length > 100) hot.notices.shift(); };
@@ -78,7 +86,22 @@ public final class HotReload {
             return value;
         }
         hot.capture = function() {
-            var checkpoint = {version: 1, components: [], stores: []};
+            var checkpoint = {version: 1, components: [], stores: [], classes: []};
+            if (hot.classOwners.size && hot.roots.size !== 1) throw new Error('Class checkpoint capture unqualified: this slice requires one owned root');
+            if (hot.incomingClasses.size) throw new Error('Class checkpoint capture unqualified: incoming class owners have not committed');
+            if (hot.classOwners.size + hot.components.size > 4096) throw new Error('JX checkpoint component capacity exceeded');
+            hot.classOwners.forEach(function(owner) {
+                if (!owner.root || hot.roots.get(owner.root.id) !== owner.root)
+                    throw new Error('Class checkpoint capture unqualified: class owner is outside a JX-owned root');
+                if (!owner.path || owner.path.length > 8192) throw new Error('Invalid class checkpoint owner path');
+                var journal = owner.journal;
+                if (!journal || journal.failure || journal.pending || journal.candidates.length || journal.payload === null || !journal.connected)
+                    throw new Error('Class checkpoint capture unqualified for ' + owner.path + ': '
+                        + (!journal ? 'no native class commit' : journal.failure || (journal.pending ? 'pending native updates'
+                            : journal.candidates.length ? 'unmatched render candidates' : 'class owner is disconnected')));
+                checkpoint.classes.push({path: owner.path, signature: journal.signature,
+                    schema: journal.schema, payload: journal.payload});
+            });
             hot.components.forEach(function(frame) {
                 if (!frame.signature) { hot.notice('State reset: missing component signature for ' + frame.path); return; }
                 try {
@@ -100,9 +123,10 @@ public final class HotReload {
             return checkpoint;
         };
         hot.dispose = function() {
-            Array.from(hot.roots.values()).forEach(function(stop) { stop(); });
+            Array.from(hot.roots.values()).forEach(function(root) { root.stop(); });
             Array.from(hot.stores.values()).forEach(function(store) { store.stop(); });
             hot.components.clear(); hot.stores.clear(); hot.roots.clear(); hot.current = null;
+            hot.classOwners.clear();
             hot.resetReady();
         };
         hot.restore = function(checkpoint) {
@@ -110,13 +134,27 @@ public final class HotReload {
             if (new TextEncoder().encode(text).length > 8388608) throw new Error('JX checkpoint exceeds eight MiB');
             var copy = JSON.parse(text);
             if (copy.version !== 1 || !Array.isArray(copy.components) || !Array.isArray(copy.stores) || copy.components.length > 4096 || copy.stores.length > 128) throw new Error('Invalid JX checkpoint');
+            var classes = copy.classes === undefined ? [] : copy.classes;
+            if (!Array.isArray(classes) || classes.length + copy.components.length > 4096) throw new Error('Invalid JX class checkpoint count');
+            var paths = new Set();
+            classes.forEach(function(value) {
+                if (!value || typeof value.path !== 'string' || !value.path || value.path.length > 8192
+                    || typeof value.signature !== 'string' || !value.signature || value.signature.length > 256
+                    || typeof value.schema !== 'string' || !value.schema || value.schema.length > 256
+                    || typeof value.payload !== 'string' || value.payload.length > 1048576 || paths.has(value.path))
+                    throw new Error('Invalid JX class checkpoint');
+                paths.add(value.path);
+            });
             hot.incomingComponents.clear(); hot.incomingStores.clear();
+            hot.incomingClasses.clear();
+            hot.classRestoreClosed = false;
             copy.components.forEach(function(frame) { hot.incomingComponents.set(frame.path, frame); });
             copy.stores.forEach(function(store) { hot.incomingStores.set(store.id, store); });
+            classes.forEach(function(value) { hot.incomingClasses.set(value.path, value); });
             hot.resetReady();
         };
         return true;
-        """) private static native boolean setup();
+        """, imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native boolean setup(int expectedVersion);
     @JSBody(params = {"path", "signature", "root"}, script = """
         var hot = globalThis.__JX_HOT__;
         var previous = hot.current;
@@ -132,9 +170,11 @@ public final class HotReload {
             if (hot.components.size >= 4096 && !hot.components.has(frame.path)) throw new Error('JX hot component capacity exceeded');
             hot.components.set(frame.path, frame); hot.incomingComponents.delete(frame.path);
             if (frame.root) {
+                hot.classRestoreClosed = true;
                 Array.from(hot.incomingComponents.keys()).forEach(function(path) { if (path.indexOf(frame.path + '/') === 0) hot.incomingComponents.delete(path); });
                 var ready = hot.resolveReady;
-                requestAnimationFrame(function() { requestAnimationFrame(function() { ready(); }); });
+                if (hot.incomingClasses.size) hot.fail(new Error('Class checkpoint restore unqualified: incoming owners did not commit in the initial tree'));
+                else requestAnimationFrame(function() { requestAnimationFrame(function() { ready(); }); });
             }
             return function() { if (hot.components.get(frame.path) === frame) hot.components.delete(frame.path); };
         });
@@ -160,7 +200,10 @@ public final class HotReload {
     @JSBody(params = {"name", "key", "position", "container"}, script = "var frame = globalThis.__JX_HOT__.current; return (frame ? frame.path : 'external') + '/' + (key === null ? position : container + '/key:' + encodeURIComponent(key)) + '/component:' + encodeURIComponent(name);") private static native String childPathNative(String name, String key, String position, String container);
     @JSBody(params = {"container", "key"}, script = "return container + '/key:' + encodeURIComponent(key);") private static native String keyedPositionNative(String container, String key);
     @JSBody(params = {"root", "name"}, script = "return 'root:' + encodeURIComponent(root) + '/component:' + encodeURIComponent(name);") private static native String rootPathNative(String root, String name);
-    @JSBody(params = {"id", "stop"}, script = "var hot = globalThis.__JX_HOT__; if (hot.roots.has(id)) throw new Error('Duplicate JX hot root: ' + id); hot.roots.set(id, stop);") private static native void rootNative(String id, Stop stop);
+    @JSBody(params = "id", script = "return {id: id, stop: null};") private static native JSObject rootTokenNative(String id);
+    @JSBody(params = {"tree", "token"}, script = "return React.createElement(globalThis.__JX_HOT__.classRootContext.Provider, {value: token}, tree);",
+            imports = @JSBodyImport(alias = "React", fromModule = "react")) private static native JSObject ownedTreeNative(JSObject tree, JSObject token);
+    @JSBody(params = {"id", "stop", "token"}, script = "var hot = globalThis.__JX_HOT__; if (hot.roots.has(id)) throw new Error('Duplicate JX hot root: ' + id); token.stop = stop; hot.roots.set(id, token);") private static native void rootNative(String id, Stop stop, JSObject token);
     @JSBody(params = "id", script = "globalThis.__JX_HOT__.roots.delete(id);") private static native void forgetRootNative(String id);
     @JSBody(params = {"id", "signature", "schema"}, script = "var hot = globalThis.__JX_HOT__; var value = hot.incomingStores.get(id); hot.incomingStores.delete(id); if (!value) return null; if (value.signature !== signature || value.schema !== schema || typeof value.payload !== 'string') { hot.notice('Store reset: schema/signature changed for ' + id); return null; } return value.payload;") private static native String storePayload(String id, String signature, String schema);
     @JSBody(params = {"id", "signature", "schema", "encode", "stop"}, script = "var hot = globalThis.__JX_HOT__; if (hot.stores.size >= 128 || hot.stores.has(id)) throw new Error('Duplicate or excessive JX hot stores'); var token = {signature: signature, schema: schema, encode: encode, stop: stop}; hot.stores.set(id, token); return token;") private static native JSObject trackStoreNative(String id, String signature, String schema, Encoder encode, Stop stop);

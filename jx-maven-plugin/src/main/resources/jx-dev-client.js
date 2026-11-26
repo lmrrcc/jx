@@ -91,6 +91,7 @@
       });
       module = globalThis.__JX_BUNDLE__;
       if (typeof module?.main !== 'function') throw new Error('Development bundle does not export main; restart the JX dev goal');
+      if (module.hotRuntimeVersion !== hot.version) throw new Error('Incompatible JX hot runtime; load a fresh development page');
     } finally { hot.defer = false; }
     await boot(module.main, next);
     for (const link of document.querySelectorAll('link[rel="stylesheet"][href]')) {
