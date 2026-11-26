@@ -144,7 +144,7 @@ The selected nullable/Presence authoring integration passes **1,017 checks** wit
 /152 JX, hydrate 113, static 119 and lazy 124 per side. The table adds only
 `class-sparse-authoring`; all earlier rows and **62/6,328** pairs remain unchanged.
 Its selected reactor passes 200 JVM checks plus TeaVM. The earlier compiler mutant
-retains its source scope; publication gate and Verify remain pending.
+retains its source scope. PR87 is accepted after gate 20/20 in 551s and both Verify checks on `5b7714c`; the final integrated reactor passes 218 JVM checks and runtime 47/47.
 
 The accepted `.jx` legacy authoring integration passes **1,009 checks**, with
 **223 declared exclusions across 154 case IDs**: client 152 reference /151 JX,
