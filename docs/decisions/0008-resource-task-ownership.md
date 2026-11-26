@@ -1,6 +1,6 @@
 # ADR 0008: owned resource tasks
 
-Status: M1-15 and M1-16 have local JVM/browser evidence; publication remains open.
+Status: M1-15 is accepted in PR75 (`f4b87ba`); M1-16 has local JVM/browser evidence and awaits publication.
 
 ## Contract
 
@@ -155,3 +155,7 @@ this integration adds no conformance or mutation-catalog credit.
 
 The earlier roadmap reference to ADR 0003 was stale: ADR 0003 already covers
 state-preserving development, so this decision is ADR 0008.
+
+## M1-15 publication acceptance, 26 November
+
+[PR75](https://github.com/lmrrcc/jx/pull/75) merged as `f4b87ba2bbab14f6beea01f1a5b31ea873cd8a76` after the exact head `74ee92e` passed the mandatory 15-step gate in 366 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45798321752) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45798178568). The final integrated gate passes 187 JVM checks, 45 runtime Chrome checks, 975 conformance checks with 217 mode exclusions across 149 cases, both complete examples and four real hot-reload workflows. The 62/6328 interaction count is unchanged. This accepts the bounded task/owner/resource API above; the route proof, general data caching, server fetching and retry policies remain separately qualified work. Earlier scoped results and the two mutation observations retain their original scope.
