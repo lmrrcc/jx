@@ -32,6 +32,7 @@ final class Server {
         CombinedServerExports.install();
         SinkCompletionExports.install();
         BootstrapExports.install();
+        ResumeNonceExports.install();
         register("reactVersion", React::version);
         register("domVersion", React::domVersion);
         register("clientVersion", React::clientVersion);

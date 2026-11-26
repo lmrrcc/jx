@@ -1,6 +1,6 @@
 # Request-time bootstrap and CSP options
 
-Status: **implemented locally; publication and complete option qualification pending**.
+Status: **bootstrap slice merged in PR #66; resume publication and complete option qualification pending**.
 Source `8682f3d`, based on the synchronous sink-delivery slice `7636fae`.
 
 `ReactServer.StreamOptions` accepts trusted inline bootstrap source and a typed
@@ -16,8 +16,8 @@ matching CSP header. A managed `<style precedence="...">` must receive the same
 style nonce in its element props. `ReactStatic` rejects nonce-bearing options
 for all four prerender entry points before entering the native runtime: reusable
 static output must not retain per-request CSP authority. A request-time resume
-can pass a fresh nonce through `ReactServer`; resume nonce behavior is not
-qualified by this case.
+can pass a fresh nonce through `ReactServer`; the separate resume case below
+qualifies that behavior for the pinned Node/Chrome combination.
 
 Inline bootstrap content is executable, framework-owned source. React's script
 terminator escaping does not sanitize code or serialize untrusted application
@@ -56,7 +56,15 @@ remains Java; this is an explicit bootstrap/interop boundary.
   10 language-server checks; the full bench passes **931/181/139 cases** with
   unchanged 54/6328 pair evidence. Bootstrap source and consumer files are
   byte-identical to this branch. This is a scoped campaign, not a new full-catalog
-  result. Final publication onto merged main, local gate and Verify remain pending.
+  result.
+- Bootstrap PR [#66](https://github.com/lmrrcc/jx/pull/66) merged as `d683c4d`
+  after the 15-step local push gate passed in 335 seconds and both
+  [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45696891784) and
+  [push Verify](https://github.com/lmrrcc/jx/actions/runs/45696708415) passed on
+  `224f6a1`. The final integrated bench passes **931/181/139 cases**:
+  client 137 reference /136 JX, hydrate 104, static 110 and lazy 115 per side.
+  Pair evidence remains 54/6328. The separate resume addition below still
+  requires its own publication gate and Verify.
 
 Logs: `/private/tmp/jx-server-bootstrap-build.log`,
 `/private/tmp/jx-server-bootstrap-focused.log`, and
@@ -66,8 +74,8 @@ environment. Initial focused runs exposed a wrapper representation error and
 the upstream behavior below before the final passing run.
 Integrated logs are `/private/tmp/jx-bootstrap-integrated-build.log` and
 `/private/tmp/jx-bootstrap-integrated-bench.log`. Independent source review found
-no blocking contract/security defect; the record-shape and unqualified resume
-limits above remain explicit.
+no blocking contract/security defect; the record-shape compatibility change and
+bounded resume qualification below remain explicit.
 
 The completed mutation log is `/private/tmp/jx-class-bootstrap-mutations.log`;
 scratch `jx-mutation-2296619748002841958` is retained under the macOS temporary
@@ -85,10 +93,62 @@ exact behavior. The test allows exactly that report and rejects other console
 or page errors. Converting a string nonce into the object form changes output.
 
 This defect remains visible; the slice neither patches React nor relaxes the
-browser policy. Streaming continuation scripts, resumed output, import maps,
-header hints, form-state transport, production bundles and additional browsers
-need their own evidence. This is not blanket CSP or SSR qualification.
+browser policy. Ordinary streaming continuations, import maps, header hints,
+form-state transport, production bundles and additional browsers need their own
+evidence. This is not blanket CSP or SSR qualification.
 
 Primary contracts: [React pipeable rendering](https://react.dev/reference/react-dom/server/renderToPipeableStream),
 [readable rendering](https://react.dev/reference/react-dom/server/renderToReadableStream),
 and [static prerender's nonce restriction](https://react.dev/reference/react-dom/static/prerender).
+
+## Request-time resume qualification
+
+Source `7686627` adds a Java consumer and a native React reference for
+`resume` and `resumeToPipeableStream`. It waits for an actual Suspense attempt
+before aborting prerender, using a microtask observation barrier rather than a
+timer. Trusted postponed state crosses a JSON round trip. Two concurrent renders
+resume with different response nonces and independent data promises; there is
+no shared mutable request slot.
+
+Package passes **47 core, 4 React, 52 compiler and 15 Maven-plugin tests** in
+22.377 seconds. Focused Chrome run: **2 passed /6 mode cells inapplicable** in
+7.1 seconds. Exact native/JX shell and continuation HTML match. The continuation
+does not repeat the shell or replace the original bootstrap configuration.
+With the correct nonce, React's continuation instructions reveal the resolved
+content and apply its deferred style. With another response's nonce, that
+content stays hidden and the fallback remains; exactly the script and style CSP
+violations are expected. The original bootstrap executes exactly once in both
+cases. No production rendering code changed; its Java contract documentation
+now clarifies that resume does not retroactively authorize static scripts.
+
+The static prelude contains two known fixture scripts without nonces. The test
+asserts their exact source strings before granting their CSP hashes; it does
+not authorize arbitrary scripts found in untrusted HTML. React's documented
+guidance is to omit prerender bootstrap scripts when using request-time nonces.
+A nonce-only deployment cannot authorize already emitted static scripts merely
+by adding a nonce to resume. This fixture uses a deliberately bounded hash-plus-
+nonce policy; a general CSP host, external-script resume behavior, partial network
+delivery and cross-browser qualification remain open.
+
+The object nonce variant is evidenced against pinned React 19.3.1; the resume
+reference pages describe the string variant. See [resume](https://react.dev/reference/react-dom/server/resume)
+and [resumeToPipeableStream](https://react.dev/reference/react-dom/server/resumeToPipeableStream).
+Logs: `/private/tmp/jx-resume-nonce-build.log` and
+`/private/tmp/jx-resume-nonce-focused.log`.
+
+The later shared server-option integration `eb536cd` passes **943 checks /217
+inapplicable cells /145 cases**, including this case's two passing client cells
+and six mode exclusions. The Java consumer and native reference are byte-identical
+to the current resume slice. Its recorded row is retained from that actual run.
+The subsequent local gate passed all 15 steps in 353 seconds at `df76df8`, including
+933 checks /187 skipped /140 cases on merged bootstrap main. Both native/JX result
+tables match and the 54/6328 existing pair witnesses remain unchanged.
+
+A final assertion review found that an empty second continuation could satisfy
+the original negative isolation check. The shared spec now also requires the
+second response's script/style nonces and resolved content and compares both
+responses against native React. Both strengthened client checks pass in 6.6 seconds
+on source `ac0a577`; the exact-head publication gate still needs to run. The earlier
+shared qualification does not claim to have executed these additional assertions.
+No new pair coverage or mutation qualification is
+attributed to the resume case. Publication and Verify remain pending.
