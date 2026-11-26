@@ -7,8 +7,20 @@ const assets = new Map([
   ['/application.js', ['tests/runtime-browser/target/site/application.js', 'text/javascript']],
   ['/application.js.map', ['tests/runtime-browser/target/site/application.js.map', 'application/json']]
 ]);
+const resourceRequests = new Set();
+let resourceClosed = 0;
 const server = createServer(async (req, res) => {
   const path = new URL(req.url, 'http://localhost').pathname;
+  if (path === '/api/resource-state') {
+    res.writeHead(200, {'Content-Type': 'application/json'}).end(JSON.stringify({active: resourceRequests.size, closed: resourceClosed})); return;
+  }
+  if (path === '/api/resource-hold') {
+    if (resourceRequests.size >= 8) {res.writeHead(503).end(); return;}
+    resourceRequests.add(res);
+    const deadline = setTimeout(() => res.destroy(), 10_000);
+    res.once('close', () => {clearTimeout(deadline); resourceRequests.delete(res); resourceClosed++;});
+    return;
+  }
   if (path === '/api/value') {res.writeHead(200, {'Content-Type': 'application/json'}).end('{"title":"ready","version":7,"completed":true,"items":[{"title":"nested"}]}'); return;}
   if (path === '/api/error') {res.writeHead(409, {'Content-Type': 'application/problem+json'}).end('{"detail":"conflict"}'); return;}
   if (path === '/api/invalid') {res.writeHead(200, {'Content-Type': 'application/json'}).end('invalid'); return;}
@@ -25,4 +37,4 @@ const server = createServer(async (req, res) => {
   catch {res.writeHead(503).end('Build the runtime fixture first.');}
 });
 server.listen(Number(process.env.RUNTIME_PORT || 4373), '127.0.0.1');
-process.on('SIGTERM', () => server.close());
+process.on('SIGTERM', () => {for (const response of resourceRequests) response.destroy(); server.close();});

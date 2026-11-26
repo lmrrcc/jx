@@ -84,6 +84,24 @@ class HookSignaturesTest {
                 signature(component("var count = Hooks.useState(1); return <span/>;", "")));
     }
 
+    @Test void resourceHookHasAKnownBoundaryAndDoesNotHideAdjacentState() {
+        String render = """
+                Resource<String, String> resource = Hooks.useResource("/api/value", App::load);
+                State<Integer> count = Hooks.useState(0);
+                return <span>{count.value()}</span>;
+                """;
+        String helper = """
+                static Task<String, String> load(String key) {
+                    return completion -> { completion.accept(new Task.Success<>(key)); return Cancellation.NONE; };
+                }
+                """;
+        String original = signature(component(render, helper));
+        assertFalse(original.isEmpty());
+        assertEquals(original, signature(component(render.replace("<span>", "<b>").replace("</span>", "</b>"), helper)));
+        assertNotEquals(original, signature(component(render.replace("resource =", "renamed ="), helper)));
+        assertNotEquals(original, signature(component("State<Integer> count = Hooks.useState(0); return <span/>;", helper)));
+    }
+
     private String signature(String source) {
         Compilation compilation = new JxCompiler().compile(List.of(new SourceFile(Path.of("App.jx"), source)));
         assertTrue(compilation.successful(), compilation.diagnostics().toString());
