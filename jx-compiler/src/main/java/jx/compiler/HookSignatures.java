@@ -20,7 +20,7 @@ import javax.tools.JavaFileObject;
 /** Conservative structural compatibility for browser state checkpoints; never executes user code. */
 final class HookSignatures {
     private static final Set<String> BUILT_INS = Set.of("useState", "useStateLazy", "useReducer", "useEffect",
-            "useLayoutEffect", "useRef", "useImperativeHandle",
+            "useLayoutEffect", "useRef", "useImperativeHandle", "useResource",
             "useTransition", "useDeferredValue", "useActionState", "useActionStateAsync", "useFormState", "useFormStateAsync", "useOptimistic", "useFormStatus", "useReducerLazy", "useInsertionEffect", "useEffectEvent", "useDebugValue", "useDomRef", "useMemo", "useCallback", "useContext", "useSyncExternalStore", "useId");
     private static final Set<String> STATE = Set.of("useState", "useStateLazy", "useReducer", "useReducerLazy");
 

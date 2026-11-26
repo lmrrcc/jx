@@ -75,6 +75,39 @@ The integrated conformance run passes 975 checks with 217 mode exclusions across
 149 cases; both examples and the real hot workflow also pass. Resource-hook
 ownership and route-loading integration remain separate G0 tasks.
 
+## Owned resources
+
+`Http.task(request, decoder)` describes work without starting it. Every start
+owns an independent HTTP operation and returns `jx.Cancellation`. Its typed
+failure is the unchanged `Http.Failure<T>`, including HTTP status, timeout/network
+category and response body.
+
+```java
+Resource<String, Http.Failure<String>> resource = Hooks.useResource(
+    "/api/value",
+    path -> Http.task(Http.Request.get(path), json -> json.get("title").stringValue()));
+
+String text = switch (resource) {
+    case Resource.Loading<String, Http.Failure<String>> ignored -> "Loading";
+    case Resource.Ready<String, Http.Failure<String>> ready -> ready.value();
+    case Resource.Failed<String, Http.Failure<String>> failed ->
+        "Request failed: " + failed.error().kind();
+};
+```
+
+The key identifies the complete read: include every reactive input, including
+identity/tenant generation and explicit retries when needed. Inline loader lambdas
+do not reload an unchanged key. Work starts after commit and is cancelled when the
+key changes, the component unmounts or React disconnects its effects. Obsolete or
+duplicate replies cannot publish into a new request. No value from the previous
+key is exposed while the new key is loading. Effect reconnection starts fresh
+work; use repeatable reads here and put mutations in explicit events/commands.
+
+This API neither suspends nor supplies server data or a global cache. Unexpected
+loader/start exceptions reach React error handling; declared failures remain
+typed data. See [the ownership decision](decisions/0008-resource-task-ownership.md)
+and the compiling [resource consumer](../tests/runtime-browser/src/main/java/jx/fixture/ResourceApplication.java).
+
 ## History routing
 
 ```java

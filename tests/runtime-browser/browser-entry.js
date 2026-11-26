@@ -9,6 +9,7 @@ globalThis.ForeignBadge = function ForeignBadge({ label }) {
   return React.createElement('button', {id: 'foreign', onClick: () => setCount(n => n + 1)}, `${label}: ${count}`);
 };
 export { main, hotRuntimeVersion };
+export {resourceLifecycleProbe} from './resource-reference.js';
 if (!globalThis.__JX_HOT__?.deferMain) {
   main([]);
   if (globalThis.ExportedCounter) {

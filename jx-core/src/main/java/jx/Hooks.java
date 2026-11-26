@@ -56,6 +56,25 @@ public final class Hooks {
     public static DomRef useDomRef() { return useMemo(DomRef::new, Dependencies.none()); }
     public static <T> T useMemo(Supplier<T> calculation, Dependencies dependencies) { return runtime().memo(Objects.requireNonNull(calculation), Objects.requireNonNull(dependencies)); }
     public static <T> T useCallback(T callback, Dependencies dependencies) { return useMemo(() -> callback, dependencies); }
+    /** Loads one typed resource after commit. The key is the complete request
+     * identity: include every reactive input, such as URL, tenant and retry
+     * generation. It follows {@link Dependencies} comparisons. Loader identity
+     * is not a dependency, so an inline lambda is safe; changing only the loader
+     * does not reload an unchanged key. Keep immutable data in the key.
+     *
+     * <p>Key changes, unmount and effect disconnection cancel owned work. A late
+     * result cannot replace a newer key; duplicate completion is ignored. Effect
+     * reconnection starts a fresh task. Work never starts in rendering, including
+     * abandoned renders and server rendering. This hook reports loading/ready/
+     * typed-failure snapshots; it neither suspends nor caches across instances.
+     * Use repeatable read work here; user-triggered mutations belong in events
+     * or commands, because React may replay an effect.
+     * Unexpected loader/start exceptions propagate to React's error handling.
+     * Pending work and result snapshots reset on a new TeaVM generation.
+     */
+    public static <K, T, E> Resource<T, E> useResource(K key, Function<? super K, ? extends Task<T, E>> loader) {
+        return ResourceHook.use(key, loader);
+    }
     public static <T> Context<T> createContext(T defaultValue) { return new Context<>(defaultValue); }
     public static <T> T useContext(Context<T> context) { return runtime().context(Objects.requireNonNull(context)); }
     /** React's {@code use} for a promise: returns its value, or suspends the component so that the

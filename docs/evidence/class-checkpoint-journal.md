@@ -21,7 +21,13 @@ The assembled source passes **166 JVM checks and 39 runtime Chrome checks**
 (74 core, 11 React, seven Elm, 59 compiler and 15 Maven). Its
 `ClassCheckpoints.java` matches the qualified nullable-codec source `7a4fafc`;
 this source comparison is independent of the actual runtime checks just recorded.
-The final full push gate and Verify remain pending. The
+[PR74](https://github.com/lmrrcc/jx/pull/74) is merged as `ae8cdca` after
+180 integrated JVM checks, 39 runtime Chrome checks, the full 975/217 bench and
+four real hot workflow checks passed. The 15-step local gate completed in 406
+seconds; [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45794971306) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45794925743) both passed on
+`4c02583`. These results supersede publication-pending statements in the historical
+sections below, without completing the remaining R-28-04 requirements. The
 [three earlier journal mutations](class-journal-mutations.md) remain scoped to
 their recorded source and assertions. A separate one-mutant follow-up now kills
 the substitution of constructor state for a successfully decoded null checkpoint:

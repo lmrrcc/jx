@@ -1,6 +1,7 @@
 package jx.browser;
 
 import jx.Cancellation;
+import jx.Task;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -32,6 +33,22 @@ public final class Http {
         public static Request delete(String url) { return new Request(Method.DELETE, url, null); }
     }
     public static <T> Cancellation get(String url, Function<Json, T> decoder, Consumer<Result<T>> completion) { return send(Request.get(url), decoder, completion); }
+    /** A cold task for a resource, loader or command. No request starts until
+     * {@link Task#start} is called. Every start owns a new request; the existing
+     * structured HTTP failure (including timeout/network/schema categories and
+     * body) is preserved. Cancellation suppresses completion. */
+    public static <T> Task<T, Failure<T>> task(Request request, Function<Json, T> decoder) {
+        Objects.requireNonNull(request); Objects.requireNonNull(decoder);
+        return completion -> {
+            Objects.requireNonNull(completion);
+            return send(request, decoder, result -> {
+                switch (result) {
+                    case Success<T> success -> completion.accept(new Task.Success<>(success.value()));
+                    case Failure<T> failure -> completion.accept(new Task.Failure<>(failure));
+                }
+            });
+        };
+    }
     public static <T> Cancellation send(Request request, Function<Json, T> decoder, Consumer<Result<T>> completion) {
         Objects.requireNonNull(request); Objects.requireNonNull(decoder); Objects.requireNonNull(completion);
         JSObject handle = fetch(request.url(), request.method().name(), request.body() == null ? null : request.body().stringify(), request.timeoutMillis(), request.maxBytes(), (status, kind, body) -> {
