@@ -9,6 +9,8 @@ All callbacks execute on the browser thread; application logic remains Java.
 Codecs explicitly validate their wire schema:
 
 ```java
+import jx.Cancellation;
+
 record Todo(String id, String title, boolean completed, int version) {
     static Todo decode(Json json) {
         return new Todo(json.get("id").stringValue(), json.get("title").stringValue(),
@@ -46,8 +48,27 @@ one minute and eight MiB. Request encoding and streamed response reads both enfo
 the byte limit. There is no automatic retry. The server still owns authentication,
 authorization, CSRF policy, validation, and concurrency controls.
 
-For Elm commands, return `request::cancel` from the command work. Store command
-replacement additionally guards late results from transports that ignore abort.
+HTTP, Elm commands and subscriptions share `jx.Cancellation` from `jx-core`.
+Return `Http.send(...)` directly from command work, as the compiling
+[`TodoGateway`](../examples/todo-app/src/main/java/jx/example/todo/TodoGateway.java)
+does. Store replacement additionally guards late results from transports that
+ignore abort. Use `Cancellation.NONE` when no resource needs releasing.
+
+This pre-GA API consolidation replaces `jx.browser.Cancellation` and
+`jx.elm.Cancellation`. Update those imports to `jx.Cancellation` and recompile
+consumers; the HTTP and command method return descriptors have changed. The core
+contract adds no browser, Spring or networking dependency. Cancellation remains
+idempotent, runs on the operation's owning thread and does not roll back server
+work that has already happened.
+
+The consolidation's selected Maven reactor (`tests/runtime-browser,examples/todo-app`
+with dependencies) passes 144 JVM checks and compiles both TeaVM applications in
+25.729 seconds. The complete runtime browser suite passes 16/16 in 5.0 seconds,
+including real HTTP cancellation, late Elm replies, owned subscription disposal
+and independent hot generations. A JVM regression additionally covers completion
+before work returns its cancellation handle: the owner releases it once and
+rejects later replies. These are local checks; publication still requires the
+repository gate and Verify.
 
 ## History routing
 

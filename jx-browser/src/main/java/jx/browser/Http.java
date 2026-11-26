@@ -1,5 +1,6 @@
 package jx.browser;
 
+import jx.Cancellation;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;

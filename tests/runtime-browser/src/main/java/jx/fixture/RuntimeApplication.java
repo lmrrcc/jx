@@ -85,7 +85,7 @@ public final class RuntimeApplication {
     }
     private static View browser() {
         State<String> result = Hooks.useState("idle");
-        Ref<jx.browser.Cancellation> pending = Hooks.useRef(() -> {});
+        Ref<Cancellation> pending = Hooks.useRef(Cancellation.NONE);
         Router router = Hooks.useMemo(Router::new, Dependencies.none());
         Location location = Hooks.useSyncExternalStore(router);
         Hooks.useEffect(() -> () -> pending.current().cancel(), Dependencies.none());

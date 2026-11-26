@@ -837,7 +837,7 @@ as a test, with a recorded decision.
 | M1-11 | 05 | Compiler resolves components from descriptors in classpath JARs, without their sources | `./mvnw -pl jx-compiler test` | ⬜ planned |
 | M1-12 | 05 | `examples/component-library` (producer JAR) and `examples/library-consumer` (separate app) with a Chrome test | `npm run test:library` | ⬜ planned |
 | M1-13 | 05 | Incompatible or missing descriptor version fails the build with a diagnostic at the `.jx` usage | `./mvnw -pl jx-maven-plugin test` | ⬜ planned |
-| M1-14 | 03 | One cancellation type in `jx-core`, used by both `jx-browser` HTTP and `jx-elm` commands | `npm run test:runtime` | ⬜ planned |
+| M1-14 | 03 | One cancellation type in `jx-core`, used by both `jx-browser` HTTP and `jx-elm` commands | `npm run test:runtime` | 🟡 locally verified: shared `jx.Cancellation`, HTTP/Elm signatures and direct TodoGateway consumer; 144 JVM checks, both TeaVM applications and 16 Chrome runtime checks pass. Migration documented and source reviewed; publication gate/Verify pending |
 | M1-15 | 03 | `useResource` hook: loading, value and error states, abort on unmount or key change, stale replies dropped | `npm run test:runtime` | ⬜ planned |
 | M1-16 | 03 | Router loader built on the same model; ADR 0003 records the async ownership and Suspense decision | `npm run test:runtime` | ⬜ planned |
 | M1-17 | 04 | `examples/todo-contract`: one Todo value and operation paths compiled into both the Spring API and the browser app | `npm run test:todo` | ⬜ planned |

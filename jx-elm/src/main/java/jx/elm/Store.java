@@ -1,5 +1,6 @@
 package jx.elm;
 
+import jx.Cancellation;
 import jx.ExternalStore;
 import jx.StateTransfer;
 import java.util.ArrayDeque;

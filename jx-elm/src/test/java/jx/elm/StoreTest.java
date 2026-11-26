@@ -1,5 +1,6 @@
 package jx.elm;
 
+import jx.Cancellation;
 import jx.View;
 import jx.Views;
 import java.util.ArrayList;
@@ -51,6 +52,33 @@ class StoreTest {
             store.stop(); replies.get(1).send(6);
             assertEquals(4, store.snapshot().value());
         }
+    }
+    @Test void completionBeforeReturningSharedHandleStillReleasesItOnce() {
+        var cancellations = new AtomicInteger();
+        List<Dispatch<Integer>> replies = new ArrayList<>();
+        var program = new TestProgram() {
+            @Override public Transition<Model, Integer> update(Model model, Integer message) {
+                return new Transition<>(new Model(message), message == 1
+                        ? List.of(new Command<>("immediate", reply -> {
+                            replies.add(reply);
+                            reply.send(2);
+                            Cancellation handle = cancellations::incrementAndGet;
+                            return handle;
+                        })) : List.of());
+            }
+        };
+        try (var store = new Store<>(program)) {
+            store.start();
+            store.dispatch(1);
+            assertEquals(2, store.snapshot().value());
+            assertEquals(1, cancellations.get());
+            replies.getFirst().send(3);
+            assertEquals(2, store.snapshot().value());
+            store.stop();
+            store.stop();
+            assertEquals(1, cancellations.get());
+        }
+        assertEquals(1, cancellations.get());
     }
     @Test void snapshotIdentityAndManagedSubscriptionsSurviveDevelopmentRemount() {
         AtomicInteger started = new AtomicInteger();
