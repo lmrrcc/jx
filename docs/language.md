@@ -98,7 +98,8 @@ state-only Presence form below is a separate supported schema shape.
 
 ### Explicit nullable and sparse class state
 
-R-28-03h4 source is prepared; its compiler/browser qualification is pending.
+R-28-03h4 passes five new compiler tests and eight focused React/JX projects;
+full integration and publication qualification remain pending.
 `@jx.NullableState` opts a direct `@Component` class into null aggregate state:
 
 ```java

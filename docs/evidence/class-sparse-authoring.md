@@ -1,7 +1,8 @@
 # Explicit nullable and sparse class state authoring
 
-R-28-03h4, 25 November 2026. **Source preparation; no tests have run for this
-slice.** The runtime contracts are already represented by `withNullableState`,
+R-28-03h4, scoped on 25 November and qualified locally on 26 November 2026.
+**Source bd27ef7 passes compiler/package and eight focused projects; integrated
+qualification and publication remain pending.** The runtime contracts are already represented by `withNullableState`,
 `ClassSchema.optionalField` and `Presence`. This slice compiles explicit `.jx`
 declarations to those APIs; it does not change native React state merging.
 
@@ -70,7 +71,7 @@ classes, fully qualified annotations and Presence arrays/references, source
 shadowing, invalid placement/types, builder collisions, mapped argument errors,
 nullable previous-state signatures and strict required props. It also checks the
 generated descriptor's checkpoint rejection for nullable and non-null sparse
-models without invoking either codec. These checks have **not run yet**.
+models without invoking either codec. All five compiler tests passed.
 
 The `class-sparse-authoring` differential case uses actual authored normal/Pure
 classes and the native React reference. Its native-ref observer only reads the
@@ -82,5 +83,23 @@ is registered for both class features without adding an interaction pair.
 
 The targeted `class-authoring-nullable-lost` compiler mutant is registered but
 unrun. A source review found no concrete blocker; it is not execution evidence.
-Compilation, browser checks, full integration, mutation, gate and Verify remain
-pending while the separate exclusive mutation campaign owns local execution.
+Full integration, mutation, gate and Verify remain pending.
+
+## Executed source-specific qualification
+
+All commands ran from the isolated worktree on source bd27ef7, with a private
+Maven repository and no install into shared snapshot coordinates.
+
+| Check | Actual outcome |
+| --- | --- |
+| `./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -pl jx-compiler -Dtest=ClassSparseAuthoringTest test` | Five tests passed, 6.725 seconds; real-core normal/Pure schemas, placement/shadowing, reference/array types, mapped arguments and editor projections |
+| `./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -pl tests/conformance -am package` | 82 core, 17 React, 67 compiler and 15 Maven tests passed, 52.520 seconds; actual TeaVM browser and Node outputs built |
+| `npm run build:bench && npm run build:bench-server && npm run build:bench-lazy`, then `BENCH_PORT=59191 node_modules/.bin/playwright test -c tests/conformance/playwright.config.js -g class-sparse-authoring --workers=1` | Eight checks passed in 22.7 seconds: reference and JX client/hydrate/lazy interactions plus static initial HTML |
+
+Local logs are `/private/tmp/jx-class-sparse-authoring-compiler.log`,
+`/private/tmp/jx-class-sparse-authoring-build.log` and
+`/private/tmp/jx-class-sparse-authoring-focused.log`. These are local execution
+artifacts, not committed CI evidence. The filtered run deliberately did not
+overwrite either complete result table. It adds one case and no pair witness.
+No independent full bench was run: the parent integration will qualify the
+combined compiler/runtime stack and run the targeted mutation separately.
