@@ -7,8 +7,36 @@ core contracts and five compiler tests. All **16 focused mode checks** and
 **32 runtime browser checks** pass. The full bench passes **969 checks, 199
 inapplicable cells, 146 cases**: client 144 reference /143 JX, hydration 108,
 static HTML 114 and lazy mode 119 per side. Existing **62/6328** pair witnesses
-remain unchanged. Three scoped mutants and publication gates remain open.
+remain unchanged. These are the original source-branch measurements; publication
+integration and the subsequent mutation campaign are recorded below.
 This does not close all class-component or hot-reload qualifications.
+
+## Publication integration, 26 November
+
+The isolated source `4d96aad` builds on the nullable-state publication candidate
+`d735157`, including the published native Writable consumers. It retains the
+defaultProps API, raw input and clone semantics, compiler lowering and both
+complete differential consumers. Seventeen capability/consumer files and all
+three native mutation target regions are byte-identical to `7195939`.
+
+The original source had been developed above the unpublished class journal.
+This publication deliberately defers its checkpoint-only adapter changes:
+`ClassComponentType` checkpoint-copy parameters and admission checks, the
+`ClassCheckpoints` owner `overrides` argument and clone, and the checkpoint branch
+of `ReactClasses.element`. The ordinary native constructor/encoder/clone path is
+unchanged. The journal follow-up must restore those adapter changes before its
+defaults/ref-copy regression can compile and run. This is not whole-file identity
+for `ClassComponentType` or `ReactClasses`, and does not qualify class checkpoints.
+
+After a passing baseline, the earlier eight-mutant campaign at `e296d4a`
+(production `cc929bb`) killed `class-defaults-dropped`,
+`class-default-null-omitted` and `class-clone-default-eager`. The first two were
+detected by both default-props cases; the last was detected by `class-defaults`.
+This slice owns three of those eight kills, with zero survivors or unusable
+mutants. These are historical scoped mutation results, not a new campaign on the
+isolated source. The unchanged native target regions and consumers were compared
+explicitly; the final integrated package, full push gate and Verify remain pending.
+No new interaction-pair credit is claimed.
 
 ## Authoring
 
@@ -83,9 +111,9 @@ chain of retained views. A null override preserves props, a null replacement key
 retains the key, and the explicit ref overload uses null to remove the ref.
 Native React owns construction, state, reconciliation and ref commits.
 
-The ordinary and checkpoint-owner materializers both preserve these two phases.
-Checkpoint qualifications and conservative refusal cases still apply; adding
-defaults is not evidence of general state-preserving hot reload. This API exposes
+The ordinary materializer preserves these two phases. The checkpoint-owner
+adapter belongs to the subsequent journal integration; adding defaults is not
+evidence of general state-preserving hot reload. This API exposes
 immutable per-descriptor defaults, not native mutation/reassignment. Sparse
 `Presence` record authoring, wider generic/indirect class authoring, arbitrary
 opaque element copies, full editor qualification and these dynamic options remain
@@ -110,9 +138,9 @@ client, hydration, static HTML and lazy modes. No interaction-pair credit is
 claimed merely from these combinations. Curated mutations target missing native
 defaults, omitted explicit null and premature clone-default resolution.
 
-The full result table adds the two default cases plus the parent's two nullable
+The original full result table added the two default cases plus the parent's two nullable
 cases, already independently qualified in its 953-check run; no prior result
-changes. This candidate is based on the import-map/nullable/checkpoint stack,
+changes. That original candidate was based on the import-map/nullable/checkpoint stack,
 not the separate native-Writable/component-copy candidate. Results from different
 branches are not added together. Source-only independent review found no blocker
 in raw-input/default/clone ordering or the core ownership contract.
