@@ -113,12 +113,58 @@ test('hidden skipped updates reject replacement rather than restore the old jour
   else expect(await events(page)).not.toContainEqual(callback);
 });
 
-test('props-only derivation with a skipped render cannot promote a candidate', async ({page}) => {
+test('an exact committed owner attempt preserves props-only skipped derived state with defaults and refs', async ({page}) => {
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   await open(page, true);
+  expect(await page.evaluate(() => globalThis.hotClassNativeSkippedProbe()))
+    .toEqual({state: 2, dom: '0', skip: true, same: true, events: []});
+  const original = await page.locator('#class-value').elementHandle();
+  const offset = (await events(page)).length;
   await page.locator('#class-derived').click();
   await expect.poll(() => events(page)).toContainEqual({kind: 'should', value: 2});
   await expect(page.locator('#class-value')).toHaveText('0');
+  expect((await events(page)).slice(offset).some(event => ['render', 'commit', 'callback'].includes(event.kind))).toBe(false);
+  expect(await page.locator('#class-value').evaluate((node, old) => node === old, original)).toBe(true);
+  await original.dispose();
+  expect((await captured(page)).snapshot.classes[0].payload).toBe('2');
+  const result = await replace(page);
+  expect(result.independent).toBe(true);
+  expect(result.snapshot.classes[0].payload).toBe('2');
+  await expect(page.locator('#class-value')).toHaveText('2');
+  expect(errors).toEqual([]);
+});
+
+test('an abandoned props-only skipped attempt cannot borrow a retained descendant commit', async ({page}) => {
+  await open(page, true);
+  const original = await page.locator('#class-value').elementHandle();
+  await page.locator('#class-suspend-derived').click();
+  await expect.poll(() => events(page)).toContainEqual({kind: 'should', value: 99});
+  await page.locator('#class-descendant').click();
+  await expect(page.locator('#class-descendant')).toHaveText('Descendant 1');
+  await expect(page.locator('#class-value')).toHaveText('0');
   expect((await captured(page)).error).toContain('unmatched render candidates');
+  await expect(replace(page)).rejects.toThrow('Class checkpoint capture unqualified');
+  expect(await page.locator('#class-value').evaluate((node, old) => node === old, original)).toBe(true);
+  await original.dispose();
+});
+
+test('equal user props in a later committed attempt do not clear an abandoned attempt', async ({page}) => {
+  await page.goto('/hot?fixture=class-journal&skip=true&repeat=true');
+  await expect(page.locator('#class-value')).toHaveText('1');
+  await page.evaluate(() => globalThis.__JX_HOT__.ready());
+  const original = await page.locator('#class-value').elementHandle();
+  await page.locator('#class-discard-attempt').click();
+  await expect.poll(() => events(page)).toContainEqual({kind: 'should', value: 2});
+  const offset = (await events(page)).length;
+  await page.locator('#class-pulse').click();
+  await expect(page.locator('#class-pulse-value')).toHaveText('1');
+  await expect.poll(async () => (await events(page)).slice(offset)).toContainEqual({kind: 'should', value: 2});
+  await expect(page.locator('#class-value')).toHaveText('1');
+  expect((await captured(page)).error).toContain('unmatched render candidates');
+  await expect(replace(page)).rejects.toThrow('Class checkpoint capture unqualified');
+  expect(await page.locator('#class-value').evaluate((node, old) => node === old, original)).toBe(true);
+  await original.dispose();
 });
 
 test('an abandoned class candidate and urgent retained descendant commit cannot promote speculative state', async ({page}) => {

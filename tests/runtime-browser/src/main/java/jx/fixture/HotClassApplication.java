@@ -40,6 +40,10 @@ public final class HotClassApplication {
         if (count == 99) Hooks.use(gate);
         return button("class-descendant", "Descendant " + pulse.value(), () -> pulse.update(previous -> previous + 1));
     });
+    private static final ComponentType<Boolean> SIBLING = new ComponentType<>("hot.ClassSiblingGate", blocked -> {
+        if (blocked) Hooks.use(gate);
+        return null;
+    });
     public static final class Counter extends ClassComponent<Props,Model,Void> {
         public Counter(Props props) { super(props, new Model(0)); }
         void increment() { setState((previous, props) -> MODEL.patch().set(COUNT, previous.count() + 1), () -> event("callback", state().count())); }
@@ -61,14 +65,19 @@ public final class HotClassApplication {
     private static final ClassComponentType<Props,Model,Counter> COUNTER = ClassComponentType.normal(
             "hot.JournalCounter", PROPS, MODEL, Counter::new,
             Set.of(ClassComponentType.Lifecycle.MOUNT, ClassComponentType.Lifecycle.UPDATE, ClassComponentType.Lifecycle.SHOULD_UPDATE))
-            .withDerivedStateFromProps((props, state) -> props.minimum() > state.count() ? MODEL.patch().set(COUNT, props.minimum()) : null)
+            .withDerivedStateFromProps((props, state) -> repeatedProps()
+                    ? MODEL.patch().set(COUNT, state.count() + 1)
+                    : props.minimum() > state.count() ? MODEL.patch().set(COUNT, props.minimum()) : null)
+            .withDefaultProps(ClassProps.empty(PROPS).set(SKIP, true))
             .withStateCheckpoint("class-count:1", CODEC);
     private static final ComponentType<Void> EXTERNAL = new ComponentType<>("hot.ExternalClassOwner", "external:1",
             ignored -> Views.component(COUNTER, new Props(false, 0), "external", null));
-    private static final ComponentType<Void> APP = new ComponentType<>("hot.ClassJournal", "journal:state,state,state,effect:1", ignored -> {
+    private static final ComponentType<Void> APP = new ComponentType<>("hot.ClassJournal", "journal:state,state,state,state,state,effect:2", ignored -> {
         State<Boolean> visible = Hooks.useState(true);
         State<Boolean> mounted = Hooks.useState(true);
         State<Integer> minimum = Hooks.useState(0);
+        State<Integer> attempt = Hooks.useState(0);
+        State<Integer> pulse = Hooks.useState(0);
         Hooks.useEffect(() -> {
             gate = Promise.create(resolver -> release = resolver);
             return () -> { if (release != null) release.resolve(null); release = null; };
@@ -80,10 +89,19 @@ public final class HotClassApplication {
                 button("class-remove", "Remove class", () -> mounted.set(false)),
                 button("class-remount", "Remount class", () -> mounted.set(true)),
                 button("class-derived", "Derive class state", () -> minimum.set(2)),
+                button("class-suspend-derived", "Suspend derived state", () -> React.startTransition(() -> minimum.set(99))),
+                button("class-discard-attempt", "Suspend equal props", () -> React.startTransition(() -> attempt.set(1))),
+                button("class-pulse", "Commit equal props", () -> pulse.update(value -> value + 1)),
+                Views.element("output", Attributes.create().attr("id", "class-pulse-value"), pulse.value()),
                 Views.element("output", Attributes.create().attr("id", "class-mode"), visible.value() ? "visible" : "hidden"),
                 position(React.suspense(Views.element("p", Attributes.create(), "Waiting"), React.activity(visible.value(), mounted.value() && !omit()
-                        ? Views.component(COUNTER, new Props(skip(), minimum.value()), "counter", REF) : null))));
+                        ? Views.fragment(counter(minimum.value()), Views.component(SIBLING, minimum.value() == 99 || attempt.value() != 0)) : null))));
     });
+    private static View counter(int minimum) {
+        ClassProps<Props> input = ClassProps.empty(PROPS).set(MINIMUM, minimum);
+        if (!skip()) input = input.set(SKIP, false);
+        return Views.classPropsView(COUNTER, input, "counter", REF);
+    }
     public static void main() {
         ClassCheckpointNativeProbe.install();
         ClassCheckpointAdmissionProbe.install();
@@ -130,6 +148,7 @@ public final class HotClassApplication {
         };
         """) private static native void export(TestAction action);
     @JSBody(script = "return new URLSearchParams(location.search).get('skip') === 'true';") private static native boolean skip();
+    @JSBody(script = "return new URLSearchParams(location.search).get('repeat') === 'true';") private static native boolean repeatedProps();
     @JSBody(script = "return globalThis.hotClassSchema || '1';") private static native String schemaVersion();
     @JSBody(script = "return globalThis.hotClassLabel || 'First generation';") private static native String label();
     @JSBody(script = "return !!globalThis.hotClassFailEncoding;") private static native boolean failEncoding();
