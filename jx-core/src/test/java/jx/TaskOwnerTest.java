@@ -17,6 +17,7 @@ class TaskOwnerTest {
             done.accept(new Task.Success<>("duplicate"));
             return releases::incrementAndGet;
         });
+        assertEquals(1, releases.get(), "Synchronous completion must release its handle before start returns");
         owner.cancel(); owner.cancel();
         assertEquals(List.of(new Task.Success<>("first")), results);
         assertEquals(1, releases.get());
