@@ -127,7 +127,7 @@ test('an exact committed owner attempt preserves props-only skipped derived stat
   expect((await events(page)).slice(offset).some(event => ['render', 'commit', 'callback'].includes(event.kind))).toBe(false);
   expect(await page.locator('#class-value').evaluate((node, old) => node === old, original)).toBe(true);
   await original.dispose();
-  expect((await captured(page)).snapshot.classes[0].payload).toBe('2');
+  expect(await captured(page)).toMatchObject({snapshot: {classes: [{payload: '2'}]}});
   const result = await replace(page);
   expect(result.independent).toBe(true);
   expect(result.snapshot.classes[0].payload).toBe('2');

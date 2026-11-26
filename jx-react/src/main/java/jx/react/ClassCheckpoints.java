@@ -2,23 +2,25 @@ package jx.react;
 
 import jx.ClassComponentType;
 import jx.ClassSchema;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.teavm.jso.JSBody;
 import org.teavm.jso.JSBodyImport;
 import org.teavm.jso.JSFunctor;
 import org.teavm.jso.JSObject;
 
-/** Conservative development journal. Candidates can reject capture; only native own commits
- * publish strings. Neither candidates nor native/Java instance identities cross generations. */
+/** Conservative development journal. Native own callbacks and exact committed owner
+ * attempts for skipped props updates can publish strings. Unmatched candidates reject
+ * capture; native/Java instance identities never cross generations. */
 final class ClassCheckpoints<S> {
     private static final JSObject OWNER = ownerType();
-    @JSFunctor interface Encoder extends JSObject { String encode(); }
+    @JSFunctor interface Encoder extends JSObject { String encode(JSObject state); }
     private final JSObject journal;
-    ClassCheckpoints(JSObject instance, ClassComponentType.Checkpoint<S> checkpoint, Supplier<S> state) {
+    ClassCheckpoints(JSObject instance, ClassComponentType.Checkpoint<S> checkpoint, Function<JSObject,S> snapshot) {
         journal = journal(instance, checkpoint.signature(), checkpoint.codec().schema(),
-                () -> checkpoint.codec().encode(state.get()));
+                state -> checkpoint.codec().encode(snapshot.apply(state)));
     }
     void candidate(JSObject props, JSObject state) { candidate(journal, props, state); }
+    void skipped(JSObject props, JSObject state) { skipped(journal, props, state); }
     void pending() { pending(journal); }
     void completed() { completed(journal); }
     void commit() { commit(journal); }
@@ -60,10 +62,33 @@ final class ClassCheckpoints<S> {
                     owner.journal = null;
                 };
             }, [owner, input.path, root]);
-            var childProps = Object.assign({}, input.values, {__jxPath: input.path, __jxCheckpointOwner: owner});
+            // A native class may receive a props copy for ref/default resolution.
+            // The attempt token survives that public operation; props identity need not.
+            var attempt = {};
+            var childProps = Object.assign({}, input.values, {__jxPath: input.path,
+                __jxCheckpointOwner: owner, __jxCheckpointAttempt: attempt});
             if (input.forwardedRef !== null) childProps.ref = input.forwardedRef;
             var element = React.createElement(input.type, childProps);
-            return input.overrides === null ? element : React.cloneElement(element, input.overrides);
+            if (input.overrides !== null) element = React.cloneElement(element, input.overrides);
+            React.useInsertionEffect(function() {
+                if (hot.classOwners.get(owner.path) !== owner
+                    || !owner.root || hot.roots.get(owner.root.id) !== owner.root) return;
+                var journal = owner.journal;
+                if (!journal || journal.owner !== owner || !journal.connected
+                    || journal.failure || journal.pending) return;
+                var matches = journal.candidates.filter(function(value) {
+                    return value.attempt === attempt && value.skipped;
+                });
+                if (matches.length !== 1) return;
+                var accepted = matches[0];
+                // This exact owner's props attempt committed. No unrelated attempt or
+                // pending update is retired, and the live instance is not sampled here.
+                journal.publish(accepted.state);
+                if (!journal.failure) journal.candidates = journal.candidates.filter(function(value) {
+                    return value !== accepted;
+                });
+            }, [owner, attempt]);
+            return element;
         };
         """, imports = @JSBodyImport(alias = "React", fromModule = "react"))
     private static native JSObject ownerType();
@@ -86,21 +111,36 @@ final class ClassCheckpoints<S> {
     private static native String payload(JSObject props, String signature, String schema);
 
     @JSBody(params = {"instance", "signature", "schema", "encode"}, script = """
-        return {instance: instance, owner: instance.props.__jxCheckpointOwner,
-            signature: signature, schema: schema, encode: encode,
+        var journal = {instance: instance, owner: instance.props.__jxCheckpointOwner,
+            signature: signature, schema: schema,
             pending: 0, candidates: [], payload: null, failure: null, connected: false};
+        journal.publish = function(state) {
+            if (journal.failure) return;
+            try {
+                var value = encode(state);
+                if (typeof value !== 'string' || value.length > 1048576) throw new Error('Invalid class checkpoint payload');
+                journal.payload = value;
+                globalThis.__JX_HOT__.incomingClasses.delete(journal.owner.path);
+            } catch (error) { journal.failure = 'Class checkpoint encoding failed'; }
+        };
+        return journal;
         """) private static native JSObject journal(JSObject instance, String signature, String schema, Encoder encode);
 
     @JSBody(params = {"journal", "props", "state"}, script = """
         if (journal.failure) return;
-        if (journal.candidates.some(function(value) { return value.props === props && value.state === state; })) return;
+        var existing = journal.candidates.find(function(value) { return value.props === props && value.state === state; });
+        if (existing) { existing.skipped = false; return; }
         if (journal.candidates.length >= 16) {
             journal.failure = 'Unmatched class render candidate capacity exceeded';
             journal.candidates = [];
             return;
         }
-        journal.candidates.push({props: props, state: state});
+        journal.candidates.push({props: props, state: state, attempt: props.__jxCheckpointAttempt, skipped: false});
         """) private static native void candidate(JSObject journal, JSObject props, JSObject state);
+    @JSBody(params = {"journal", "props", "state"}, script = """
+        var existing = journal.candidates.find(function(value) { return value.props === props && value.state === state; });
+        if (existing) existing.skipped = true;
+        """) private static native void skipped(JSObject journal, JSObject props, JSObject state);
     @JSBody(params = "journal", script = "if (++journal.pending > 256) journal.failure = 'Pending class update capacity exceeded';")
     private static native void pending(JSObject journal);
     @JSBody(params = "journal", script = "if (journal.pending > 0) journal.pending--;")
@@ -117,12 +157,6 @@ final class ClassCheckpoints<S> {
         journal.candidates = journal.candidates.filter(function(value) {
             return value.props !== instance.props || value.state !== instance.state;
         });
-        if (journal.failure) return;
-        try {
-            var value = journal.encode();
-            if (typeof value !== 'string' || value.length > 1048576) throw new Error('Invalid class checkpoint payload');
-            journal.payload = value;
-            hot.incomingClasses.delete(journal.owner.path);
-        } catch (error) { journal.failure = 'Class checkpoint encoding failed'; }
+        journal.publish(instance.state);
         """) private static native void commit(JSObject journal);
 }

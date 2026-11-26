@@ -147,7 +147,8 @@ final class ReactClasses {
         Current<S> stateValue = host.stateValue;
         peer.bind(host);
         ClassCheckpoints<S> checkpoint = checkpointEnabled
-                ? new ClassCheckpoints<>(instance, type.checkpoint(), host::state) : null;
+                ? new ClassCheckpoints<>(instance, type.checkpoint(),
+                        snapshot -> decode(type.stateSchema(), snapshot, type.nullableState())) : null;
         host.checkpoint = checkpoint;
         if (!checkpointEnabled) HotReload.classStateReset(pathOf(initialProps));
         Render render = () -> {
@@ -182,6 +183,7 @@ final class ReactClasses {
             boolean renderNext = type.shouldUpdate(peer, nextProps, next,
                     type.hasContextShouldUpdate() ? new PendingContext(type.contextType(), nextContext) : null);
             if (!renderNext) {
+                if (checkpoint != null) checkpoint.skipped(props, nextState);
                 // React advances instance props/state even when it skips render. Release the
                 // preceding graph rather than retaining it until an imperative accessor runs.
                 propsValue.observe(props, nextProps);
