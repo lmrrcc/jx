@@ -1,6 +1,6 @@
 # JX starter and fast development plan
 
-24 November 2026. Status: **⬜ planned**. These are product requirements and a
+24 November 2026; functional-component priority revised 26 November. Status: **⬜ planned**. These are product requirements and a
 proposed technical approach, not delivered commands or measured performance.
 Implementation tasks are tracked in the [GA task list](ga-tasks.md).
 
@@ -9,6 +9,30 @@ minutes, see a small working example immediately, and edit it with rapid browser
 feedback. The first experience must exercise the same build and runtime that a
 larger application uses. The starter and fast development path are release
 requirements, not optional IDE conveniences.
+
+### Functional components are the default
+
+Luca clarified on 26 November that the intended experience is React + Vite with
+functional components. In JX, `@Component` with a static `render` method and
+`Hooks` is that model: the Java class is its source container, not a native React
+class component. Use this form in the starter, tutorial and ordinary hot-update
+examples. Existing `ClassComponent`/`PureComponent` APIs and their qualified
+runtime behavior remain available.
+
+The default development contract preserves compatible functional hook state.
+Editing the usual Counter must retain its count, not silently reset it. Hook
+signature/schema incompatibility needs an explained reset; compile errors retain
+the last good running app. Native class components may remount when refreshed.
+Vite's React plugin enables [Fast Refresh](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md),
+whose [state-preservation decision](https://github.com/react/react/blob/main/packages/react-refresh/src/ReactFreshRuntime.js)
+rejects class types. This is the experience to qualify, not a claim that JX already
+implements Vite's update mechanism or timing.
+
+Advanced preservation of native class state, including hidden Activity and
+SCU-false ownership, remains an optional later R-28-04 extension after ST/HR.
+This supersedes the earlier request to make that extension a starter prerequisite.
+It does not complete R-28-04 or accept unsupported React runtime behavior.
+The remaining React runtime parity and G0 proofs still precede ST/HR.
 
 ## 1. The first application
 
@@ -21,7 +45,8 @@ panel must report the failed request rather than fabricate a server response.
 
 Keep the first `App.jx` small and readable. The page tells the developer which file
 to edit and shows a compatible hot update retaining counter state and input focus.
-Use `@Component` and current Java syntax; getting started does not wait for the
+Use functional `@Component`, static `render` and `Hooks` with current Java syntax;
+getting started does not wait for the
 separate DX-01/DX-02 language proposals. Keep the existing counter conformance
 example intact, including the separately pending decision about its heading.
 
@@ -203,7 +228,12 @@ Preserve [decision 0003](decisions/0003-state-preserving-development.md): a rebu
 TeaVM generation gets new Java identities. Transfer only compatible typed
 checkpoints; never pass old objects or closures into new code. Keep one React
 vendor runtime, effect cleanup, cancellation, focus preservation and no replayed
-HTTP mutations. Hook/schema changes produce an explained reset. Lazy-module
+HTTP mutations. Compatible functional hook state must survive ordinary edits;
+an unchanged Counter resetting is a failure. Incompatible hook/schema changes
+produce an explained reset. Class remount is the planned default refresh behavior;
+advanced class-state preservation remains a separate optional extension. Existing
+explicit class-checkpoint contracts are not removed or reclassified as complete.
+Lazy-module
 generations must also obey [decision 0005](decisions/0005-lazy-module-boundary.md)
 and have a bounded retention strategy. A full reload used to recover from resource
 limits must be reported, not counted as state-preserving hot reload.
@@ -229,7 +259,7 @@ separate cold starts; do not mix them into warm-update statistics.
 | Warm CSS change | Edit-to-visible-style p95 at most 200 ms on the starter, without Java/TeaVM work or component remount. |
 | Warm Java/.jx change | Edit-to-committed-browser-frame p95 at most one second on the starter and at most two seconds on Todo/100-component fixture; no Maven subprocess or backend restart for source-only UI edits. |
 | Unsaved IDE preview | Same end-to-end budgets, including document debounce and queueing; invalid/superseded snapshots never appear. |
-| Reliability | At least 100 updates with retained compatible state, cleanup, no duplicated roots/listeners or replayed requests; generation/cache counts remain bounded and heap retention is recorded. |
+| Reliability | At least 100 updates with retained compatible functional hook state, cleanup, no duplicated roots/listeners or replayed requests; generation/cache counts remain bounded and heap retention is recorded. Include a Counter count/focus witness, compile-error recovery retaining the old app, and separately identified class-remount behavior. |
 
 Capture timestamps for edit receipt, detection/debounce, queue, lowering, javac,
 TeaVM, bundle, publication, browser receipt, checkpoint restore, React commit and
@@ -248,13 +278,16 @@ generator, fast service and editor paths must all use the same tested implementa
 
 ## 7. Implementation order
 
-Luca confirmed the execution order on 25 November: complete the entire React
-parity track and all G0 proofs first. Then add the browser welcome example and
+Luca's 26 November clarification retains React runtime parity and all G0 proofs
+first, then the functional starter and fast development service. Advanced native
+class-state preservation is scheduled after those deliverables as an optional
+extension; it no longer blocks their start. Add the browser welcome example and
 measure the current loop (ST-01, HR-01), using the qualified shared-contract/Boot
 proofs to implement the independent template and generator. In the development
 track, remove unnecessary asset work, prove a persistent compiler session, then
 add TeaVM/bundler reuse and IDE buffers. This supersedes the earlier proposal to
-start ST/HR after an individual parity task.
+start ST/HR after an individual parity task, while applying the explicit later
+exception for advanced native class checkpoints.
 The first persistent-service task must already compile and update a real fixture
 without launching Maven for each edit. A daemon skeleton, or a service that only
 launches the existing build command, does not meet HR-03 acceptance.

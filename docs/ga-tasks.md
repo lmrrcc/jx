@@ -1,6 +1,6 @@
 # GA implementation sequence
 
-Revision 13, 25 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
+Revision 14, 26 November 2026. Parent: [GA roadmap](ga-roadmap.md). This file turns
 the [work package register](ga-execution.md) into an ordered list of tasks, grouped
 by the roadmap's milestones. Work proceeds down this list, one task at a time.
 
@@ -11,13 +11,23 @@ slice and preserve automated gates. Record outstanding human qualification or
 applicability decisions explicitly; the request to continue is not evidence that
 an untested capability works.
 
+Latest user clarification, 26 November: the starter, tutorials and fast update
+experience use functional `@Component`/static `render`/`Hooks`, with compatible
+hook state preserved. Advanced native `ClassComponent`/`PureComponent` checkpoint
+preservation moves after ST/HR as an optional extension; R-28-04 remains open and
+existing class runtime APIs/proofs remain. Native class remount is the planned
+default refresh behavior, not a runtime-parity exemption. The remaining React
+runtime parity and G0 order is unchanged. This supersedes the earlier request to
+block starter/autoreload on complete class-state preservation.
+
 Plan amendment, 24 November 2026: add a React-style welcome example, a Maven
 generator for a complete Java/.jx and Spring application, and a persistent fast
 development service integrated with the editors. The
 [starter and fast development plan](ga-developer-experience.md) defines the
 proposed commands, boundaries, prerequisites and latency targets. ST/HR rows below
 are **planned implementation**, not delivered features. Execution order confirmed
-by Luca on 25 November: complete the React parity track and all G0 proofs first,
+by Luca on 25 November, narrowed by the functional-first clarification above:
+complete React runtime parity and all G0 proofs first,
 then implement the starter and fast development service. This supersedes the
 earlier proposal to begin ST/HR slices after an individual parity task.
 
@@ -604,13 +614,13 @@ lifecycle parity or preserved class state across hot replacement.
 | R-28-03h2a | Six native deprecated/UNSAFE lifecycle callbacks and typed pending-context descriptor policies | ✅ bounded runtime slice accepted in [PR85](https://github.com/lmrrcc/jx/pull/85), merged `51c0acb`; all 20 local gate steps pass in 425 s and both Verify checks pass on `d1899eb`. Integrated 210 JVM, 47 runtime and full 1001 pass/223 exclusions/153 cases; 62/6328 pairs unchanged. Nullable checkpoint/defaults composition retained. Two runtime mutants were killed historically on cc929bb, not rerun here; authoring and broader hot ownership remain separate. See [contract](evidence/class-legacy-lifecycles.md). |
 | R-28-03h2b | `.jx` declaration and typed next-context overload support for all six legacy lifecycle methods | ✅ bounded authoring slice accepted in [PR86](https://github.com/lmrrcc/jx/pull/86), merged `50388f5`; all 20 local gate steps pass in 512 s and both Verify checks pass on `0beb087`. Integrated 213 JVM, 47 runtime and full 1009 passes/223 exclusions/154 cases; prior rows and 62/6328 pairs unchanged. One typed-context compiler mutant killed in the earlier a225add campaign after a passing JX four-mode baseline. Native IDE and remaining class options stay separate; [contract](evidence/class-legacy-lifecycles.md#direct-jx-authoring--r-28-03h2b) |
 | R-28-03h3 | Schema-owned raw class input, native defaultProps, correct clone undefined timing and source-authored default metadata | ✅ done within this slice: [PR72](https://github.com/lmrrcc/jx/pull/72), merged `1717215`; gate 15/15 in 332 s and both Verify checks on `8372309`; 66 core/10 React/59 compiler/15 Maven/10 LSP and full 975/217 across 149 cases pass. Three scoped mutants killed after baseline in historical `e296d4a`; 17 capability files and three native regions preserved. Immutable defaults only; checkpoint adapters follow in journal publication. See [contract](evidence/class-default-props.md). |
-| R-28-03h4 | Explicit nullable and Presence state declarations in direct normal/Pure .jx classes | 🟡 selected integration on accepted PR86: 200 JVM plus TeaVM and full 1017 passes/223 exclusions/155 cases in 4.5m; only the sparse row changes, prior rows and 62/6328 pairs unchanged. Earlier focused 16/16 sparse/legacy checks and nullable compiler mutant killed in four JX modes after baseline on a225add retain their scope; normal explicit-codec admission preserved, Pure checkpoint rejection remains; publication gate/Verify pending, no new pair or native IDE credit; [contract](evidence/class-sparse-authoring.md) |
-| R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | 🟡 partial: conservative opt-in foundation below; complete hidden/SCU-false/incoming-owner behavior remains required |
+| R-28-03h4 | Explicit nullable and Presence state declarations in direct normal/Pure .jx classes | ✅ bounded authoring slice accepted in [PR87](https://github.com/lmrrcc/jx/pull/87), merged `4e41b15`; local gate 20/20 in 551s and both Verify checks pass on `5b7714c`. Integrated 218 JVM, 47 runtime and full 1017/223/155; prior rows and 62/6328 pairs unchanged. Historical compiler mutant retains its a225add scope; normal explicit codecs remain admitted and Pure checkpoints remain rejected. Native IDE and broader class preservation stay separate; [contract](evidence/class-sparse-authoring.md) |
+| R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | 🟡 partial; optional advanced extension scheduled after ST/HR by the 26 November user clarification. The conservative opt-in foundation remains; hidden/SCU-false/incoming-owner behavior is still required to complete this extension, but is not a functional starter/fast-refresh prerequisite |
 | R-28-04a | Typed bounded commit journal, actual owner lifetime, visible callback restoration and explicit rejection of unproved captures | ✅ done within the conservative slice: [PR74](https://github.com/lmrrcc/jx/pull/74), merged `ae8cdca`; 180 JVM checks, 39 runtime Chrome checks, full 975/217 across 149 cases and four real hot workflow checks pass. Gate 15/15 in 406 s and both Verify checks pass on `4c02583`. Three earlier direct journal mutants plus one separate nullable-reset mutant were killed on their recorded sources. Complete R-28-04 remains partial; [evidence](evidence/class-checkpoint-journal.md). |
-| R-28-04b | Complete class commit correlation and restoration for hidden Activity, SCU-false props/state, discarded work, delayed/missing owners, Pure and remaining options | 🟡 partial: bounded connected-owner and explicit nullable/sparse codec slices below; hidden own updates, Pure, candidate preflight and complete incoming/discarded ownership remain required; no private Fiber, forced renders, duplicate state owner or stale-state success |
+| R-28-04b | Complete class commit correlation and restoration for hidden Activity, SCU-false props/state, discarded work, delayed/missing owners, Pure and remaining options | 🟡 partial, optional extension after ST/HR: bounded connected-owner and explicit nullable/sparse codec slices below; hidden own updates, Pure, candidate preflight and complete incoming/discarded ownership remain required for this extension; no private Fiber, forced renders, duplicate state owner or stale-state success |
 | R-28-04b1 | Correlate a connected owner's exact committed props-only SCU-false attempt, preserving unrelated discarded candidates | ✅ done within this bounded scope: PR74 merged `ae8cdca` after the gate and both Verify checks. Original RED 1 failed/2 passed becomes 3/3; integrated 39 runtime checks retain peer/DOM, native defaults/ref copies and unrelated discarded candidates. The unmatched-candidate-clearing mutant was killed in its earlier direct campaign. Hidden own updates and complete incoming/discarded ownership remain open; [evidence](evidence/class-skipped-checkpoint.md). |
 | R-28-04b2 | Explicit typed checkpoint codecs preserve nullable aggregate and sparse field presence across independent TeaVM generations | ✅ done within explicit-codec scope: PR74 merged `ae8cdca`, gate 15/15 and both Verify checks on `4c02583`. Null/empty/Absent/Undefined/PresentNull/value, skipped callbacks/derivation and decoder recovery pass with fresh generation objects. The compiled nullable-reset mutant fails the existing null-vs-constructor assertion; restored source passes. Decoder validation still follows old-root teardown; preflight, Pure and hidden commits remain open; [evidence](evidence/class-checkpoint-presence.md). |
-| R-28-04b3 | Validate candidate class checkpoint codecs before disposing the old root | ⬜ planned: declared typed registry/compiler export, new-generation decode plus exact schema validation before dispose, no candidate main or duplicate rendered tree as validation; prove initializer/DOM isolation and retain old DOM/state when the candidate decoder changes or rejects; b2's post-teardown readiness error and recovery do not satisfy this task |
+| R-28-04b3 | Validate candidate class checkpoint codecs before disposing the old root | ⬜ planned within the optional class extension after ST/HR: declared typed registry/compiler export, new-generation decode plus exact schema validation before dispose, no candidate main or duplicate rendered tree as validation; prove initializer/DOM isolation and retain old DOM/state when the candidate decoder changes or rejects; b2's post-teardown readiness error and recovery do not satisfy this task |
 
 R-28-03a publication evidence: [PR #53](https://github.com/lmrrcc/jx/pull/53)
 merged after its 15-step local gate passed in 308 seconds and both
@@ -1006,14 +1016,16 @@ because it appears here.
 
 | Task | GA / prerequisite | Change and acceptance | Status |
 | --- | --- | --- | --- |
-| ST-01 | 12; current browser runtime | Small React-style welcome screen with readable App.jx, counter, props, CSS and edit instructions. Browser test proves offline local state and compatible hot update. Canonical template assets must be reused by the generator; this browser example alone is not the full-stack starter | ⬜ planned |
+| ST-01 | 12; current browser runtime | Small functional React-style welcome screen with readable App.jx, static render/Hooks, counter, props, CSS and edit instructions. Browser test proves offline local hook state and compatible hot update retaining count/focus; compilation errors keep the old app. Canonical template assets must be reused by the generator; this browser example alone is not the full-stack starter | ⬜ planned |
 | ST-02 | 12; ST-01, M1-17–19, M2-01–07 | Independent contract/web/server template: real typed Spring greeting with loading/error/retry, one contract authority, root wrapper, own locked tools and assets inside the Boot JAR. Test from outside the framework checkout and run the JAR in an empty directory | ⬜ planned |
 | ST-03 | 12; ST-02 | Project-independent Maven `create` goal with bundled versioned templates, coordinate/package validation and deterministic atomic generation. Reject non-empty destinations and escaping paths; creation works without an existing POM | ⬜ planned |
 | ST-04 | 09/12; ST-03 | Tool/bootstrap preflight and reproducibility: generated wrappers for supported OSes, pinned npm lockfile, automatic locked setup, actionable missing JDK/Node/Maven errors. No ancestor checkout or undocumented global tools | ⬜ planned |
 | ST-05 | 13; ST-02, HR-03; refines M2-09 | One root `jx:dev` invocation owns Spring and frontend readiness, one browser origin, ports, failure propagation and shutdown. API/asset errors retain correct responses; UI-only edits do not restart Spring. Public greeting and authenticated application profiles have separate claims | ⬜ planned |
 | ST-06 | 09/12/13; ST-03–05, M1-30, candidate artifacts | Fresh external consumer follows at most three commands; real browser API call, hot update, packaged JAR and process cleanup all pass. Introduce the template integration check and record cold/warm onboarding times; publish quick-start instructions only for resolvable artifacts | ⬜ planned |
 
-After React parity and G0, ST-01 and HR-01 are the first independent slices. ST-02 waits for the minimal
+After React runtime parity and G0, ST-01 and HR-01 are the first independent slices;
+advanced R-28-04 class preservation follows ST/HR and does not block them.
+ST-02 waits for the minimal
 shared-contract/Boot prerequisites rather than generating duplicated DTOs and
 handwritten wire codecs. ST-05 delivers the startup portion of M2-09; its later
 session/CSRF qualification remains required, so neither parent task is closed by
@@ -1028,11 +1040,11 @@ the public greeting demo alone.
 | HR-03 | 27; HR-01 | Persistent isolated development JVM with typed versioned session protocol, resolved Maven model/toolchain and bounded build queue. CLI proves repeated source-only edits without Maven subprocesses; configuration changes invalidate/restart explicitly. Record process/protocol ADR | ⬜ planned |
 | HR-04 | 27; HR-03 | Reuse JX analysis and warm javac/file-manager infrastructure with in-memory sources/bytecode where supported. API/constant/generic/processor changes invalidate dependants; add/delete/rename and error recovery agree with clean Maven diagnostics and behavior | ⬜ planned |
 | HR-05 | 27; HR-04 | TeaVM development caches on the pinned release; qualify cache/loader invalidation and async bridge behavior. Materialize files where required by supported APIs; retain explicit fallback and compare warm output behavior against clean builds | ⬜ planned |
-| HR-06 | 27; HR-05 | Persistent bundler context, vendor reuse and immediate generation notification with bounded reconnect fallback. Atomic newest-successful publication; preserve checkpoint semantics and lazy-module retention boundaries | ⬜ planned |
+| HR-06 | 27; HR-05 | Persistent bundler context, vendor reuse and immediate generation notification with bounded reconnect fallback. Atomic newest-successful publication; compatible functional hook checkpoints, old app retained on compile errors and lazy-module retention boundaries. Native class remount is the default refresh contract; advanced class preservation remains separate | ⬜ planned |
 | HR-07 | 24; HR-06, M1-28 | IntelliJ saved/unsaved document snapshots through the service, revision-matched diagnostics and native Java editing retained. No compiler work on UI thread; test cancellation, multi-file changes, disposal, trust and stale-result rejection | ⬜ planned |
 | HR-08 | 25; HR-07 protocol | VS Code consumes the same service and buffer contract, with equivalent correctness and latency checks; no separate build implementation | ⬜ planned |
 | HR-09 | 26; HR-07 protocol, TurboJ project integration | TurboJ connects its native .jx editor to the same service. Preserve native Java analysis and prove versioned source changes; this connection alone does not close all GA-26 editing/debugging requirements | ⬜ planned |
-| HR-10 | 27/28; HR-06–08 | Initial latency and 100-update qualification: starter CSS p95 ≤200 ms, Java/.jx p95 ≤1 s, Todo/100 components ≤2 s as proposed targets; no replay or state/cleanup regressions, bounded caches and retained generations. Record achieved budgets before enforcing them | ⬜ planned |
+| HR-10 | 27/28; HR-06–08 | Initial latency and 100-update qualification: starter CSS p95 ≤200 ms, Java/.jx p95 ≤1 s, Todo/100 components ≤2 s as proposed targets; compatible functional hook state survives, no replay or cleanup regressions, bounded caches and retained generations. Assert ordinary Counter retention and compile-error recovery; qualify class remount separately, without crediting advanced class preservation. Record achieved budgets before enforcing them | ⬜ planned |
 
 The targets above are unmeasured acceptance proposals, with methodology in the
 technical plan. HR work preserves the complete Maven Verify gate; it changes the

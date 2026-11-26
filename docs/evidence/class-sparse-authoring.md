@@ -2,8 +2,8 @@
 
 R-28-03h4, scoped on 25 November and qualified locally on 26 November 2026.
 **Selected source aebcfaa, rebased onto accepted PR86 without changing production
-or tests, passes 200 JVM tests and the full 1,017-check matrix. Publication gate
-and Verify remain pending.** The runtime contracts are already represented by `withNullableState`,
+or tests, passes 200 JVM tests and the full 1,017-check matrix. The subsequent
+publication gate and both Verify checks pass, as recorded below.** The runtime contracts are already represented by `withNullableState`,
 `ClassSchema.optionalField` and `Presence`. This slice compiles explicit `.jx`
 declarations to those APIs; it does not change native React state merging.
 
@@ -18,8 +18,8 @@ static HTML 119 and lazy-route 124 per side. Only `class-sparse-authoring` is
 added to the recorded table; every earlier row and all **62/6,328** pair witnesses
 remain unchanged. This is eight passing projects for the new case, with no new
 pair credit. The historical compiler mutation below retains its own source scope;
-it was not rerun on this head. The mandatory publication gate and remote Verify
-are the remaining publication checks.
+it was not rerun on this head. The mandatory publication gate and both remote
+Verify checks subsequently pass, as recorded below.
 
 Commands: `./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -pl
 jx-maven-plugin,jx-language-server,tests/conformance -am package`, then
@@ -187,3 +187,7 @@ source or Maven cache was changed. No fresh reference-side execution, complete
 pair witness or whole-catalog mutation result is claimed. The tool's zero pair
 count in this JX-only invocation reflects the intentionally absent reference
 projects; the canonical pair/result tables are not overwritten.
+
+## Publication acceptance
+
+[PR87](https://github.com/lmrrcc/jx/pull/87) merged as `4e41b157fad3ffc0996fec8bc74316e69f8b215c`. Exact head `5b7714caf7b39807c9d04e4bd16dba5a67b7aab9` passes all 20 local gate steps in 551s, [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45869270533) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45869169677). Integrated 218 JVM tests plus TeaVM, 47 runtime checks, the 1017/223 matrix across 155 cases and the complete existing hot, Spring/auth/SSR, extension and independent artifact-consumer checks pass. Both ledgers match; 62/6328 pairs remain unchanged. The earlier 200 JVM/full and historical compiler mutation are separate executions. This accepts nullable/Presence authoring, without claiming native IDE editing, Pure checkpoint support or complete class hot preservation.
