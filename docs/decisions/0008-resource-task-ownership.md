@@ -77,8 +77,10 @@ Two additional browser checks cover synchronous completion under Strict Mode and
 unexpected loader/start exceptions caught by an actual React boundary, including
 attempted completion after failure. Final selected reactor: 135 JVM checks and
 TeaVM in 10.971 seconds; log `/private/tmp/jx-resource-lifecycle-final-build.log`.
-All six new Chrome checks pass together in 2.8 seconds. These focused results do
-not establish the complete runtime suite, mutation coverage or publication gates.
+All six new Chrome checks pass together in 2.8 seconds. The complete runtime suite
+then passes **22/22 in 4.3 seconds**, including the prior HTTP, hook, MVU, interop
+and independent-generation checks. Mutation coverage and publication gates remain
+open; no broader React interaction credit is inferred.
 
 The G0 router loader will consume the same hook/task/cancellation contract using
 the router's immutable location. That integration and its navigation/late-response
