@@ -111,9 +111,10 @@ queued partial merges, old handler snapshots, nullable previous lifecycle input
 and retained DOM/instance identity. Static mode compares initial HTML. The case
 is registered for both class features without adding an interaction pair.
 
-The targeted `class-authoring-nullable-lost` compiler mutant is registered but
-unrun. A source review found no concrete blocker; it is not execution evidence.
-Full integration, mutation, gate and Verify remain pending.
+The targeted `class-authoring-nullable-lost` compiler mutant was unrun at the
+original qualification. Its selected-source campaign is recorded below. A source
+review found no concrete blocker; it is not execution evidence. Full reference/JX
+integration, gate and Verify remain pending.
 
 ## Executed source-specific qualification
 
@@ -133,3 +134,37 @@ artifacts, not committed CI evidence. The filtered run deliberately did not
 overwrite either complete result table. It adds one case and no pair witness.
 No independent full bench was run: the parent integration will qualify the
 combined compiler/runtime stack and run the targeted mutation separately.
+
+## Selected compiler mutation qualification — 26 November 2026
+
+Source `a225add` passes the unmodified JX bench across client, hydration, static
+HTML and lazy-route modes before either mutation is applied. The curated
+`class-authoring-nullable-lost` then removes the generated `.withNullableState()`
+call. It compiles successfully and **fails `class-sparse-authoring` in all four
+modes**: the declared null initial state is incorrectly rejected, preventing the
+client/lazy UI and failing server rendering with `Class props/state must be
+non-null`. The final mutated run has 504 passing checks, four intended failures
+and 112 structurally inapplicable cells across 155 case IDs. These are mutant
+results, not a green conformance total.
+
+Run in isolation:
+
+```sh
+java tools/MutateBench.java --only class-legacy-authoring-context-lost,class-authoring-nullable-lost --keep
+```
+
+The same campaign kills the preceding typed-context legacy generator mutation
+with `class-legacy-authoring`: **2 killed, 0 survived, 0 unusable**, exit 0. This
+section credits one nullable-authoring mutant. The tool builds actual TeaVM
+client/server bundles for each candidate, deliberately skipping JVM tests while
+constructing mutants; the 188 JVM qualification above remains separate.
+
+The source/cache worktree is `/private/tmp/jx-class-authoring-mutants`. Scratch is
+`/var/folders/y9/29rtk6bd2dz_xj36rw2jn6g40000gn/T/jx-mutation-14847958175598351148`.
+Its final log is also retained as `/private/tmp/jx-class-authoring-final-mutant.log`.
+The generator source is restored and compared byte-for-byte with the original,
+but retained compiled scratch outputs still contain the final mutant. No original
+source or Maven cache was changed. No fresh reference-side execution, complete
+pair witness or whole-catalog mutation result is claimed. The tool's zero pair
+count in this JX-only invocation reflects the intentionally absent reference
+projects; the canonical pair/result tables are not overwritten.
