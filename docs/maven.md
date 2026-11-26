@@ -32,6 +32,7 @@ consumer configuration. It explicitly binds these plugin goals:
 | check-test | process-test-sources | Validate production/test Java with test classpath |
 | record-codecs | generate-sources | Generate browser JSON codecs from selected compiled dependency records |
 | browser | prepare-package | Bundle TeaVM's ES module and copy web assets |
+| web-jar | prepare-package | Attach the built site as a resource-only web classifier JAR |
 | dev | Explicit command only | Rebuild, serve loopback assets, and preserve compatible browser state |
 
 A minimal plugin execution configuration is:
@@ -58,6 +59,17 @@ Normal Maven compilation compiles the generated Java. Configure TeaVM 0.16.0
 `targetFileName=application.js`. The browser goal generates the framework's
 small main-function bootstrap and bundles it with the locked React runtime.
 Application behavior requires no authored JavaScript.
+
+To embed a browser site in a Spring application, bind `web-jar` after `browser`.
+The [Todo POM](../examples/todo-app/pom.xml) binds TeaVM first and browser/web-jar
+next at `process-classes`, making the attached artifact available to downstream
+reactor tests. The backend's runtime dependency selects classifier `web` and
+excludes every transitive dependency from the browser module. Spring serves the
+archive's `META-INF/resources` using its ordinary classpath resource handler;
+no filesystem site location is needed. `web-jar` excludes source maps, source and
+class files and dot files, rejects symlinks/noncanonical names, and recreates the
+archive so removed assets do not survive. Keep the site directory immutable while
+the goal runs. See the [empty-directory proof](evidence/packaged-spring-todo.md).
 
 ## Shared record codecs
 
