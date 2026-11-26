@@ -60,6 +60,7 @@ public final class CheckBaseline {
     /** Verification commands that are not root npm scripts. */
     private static final Set<String> COMMANDS = Set.of(
             "./mvnw install",
+            "java tools/VerifyComponentLibrary.java .cache/maven-repository",
             "tooling/intellij: ./gradlew test",
             "tooling/vscode: npm test");
     private static final Pattern ID = Pattern.compile("[a-z0-9]+(?:[.-][a-z0-9]+)*");
