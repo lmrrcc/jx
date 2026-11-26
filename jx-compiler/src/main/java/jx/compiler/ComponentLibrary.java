@@ -24,7 +24,9 @@ import javax.lang.model.SourceVersion;
  * All I/O is bounded and owned streams/archives are closed before returning. */
 public final class ComponentLibrary {
     public static final String RESOURCE = "META-INF/jx/components.idx";
-    public static final int VERSION = 1;
+    /** ABI 2 preserves native defaults and the complete sparse/nullable class declaration.
+     * The unpublished ABI 1 prototype is deliberately rejected, not inferred or upgraded. */
+    public static final int VERSION = 2;
     public static final int MAX_BYTES = 4 * 1024 * 1024;
     public static final int MAX_COMPONENTS = 1024;
     private static final int MAGIC = 0x4a58434c;
@@ -89,6 +91,12 @@ public final class ComponentLibrary {
                     for (var value : lifecycle) text(output, value.name());
                     nullable(output, spec.contextValueType()); output.writeBoolean(spec.derivedProps());
                     output.writeBoolean(spec.derivedError()); output.writeBoolean(spec.contextShouldUpdate());
+                    output.writeBoolean(spec.defaultProps());
+                    var contextual = spec.contextLifecycles().stream().sorted().toList(); output.writeInt(contextual.size());
+                    for (var value : contextual) text(output, value.name());
+                    output.writeBoolean(spec.nullableState());
+                    output.writeInt(spec.stateLayout().size());
+                    for (var field : spec.stateLayout()) nullable(output, field.presenceValueType());
                 }
                 if (bytes.size() > MAX_BYTES) throw new IOException("Component index exceeds four MiB");
             }
@@ -119,8 +127,19 @@ public final class ComponentLibrary {
                     Set<ComponentMetadata.Lifecycle> lifecycle = EnumSet.noneOf(ComponentMetadata.Lifecycle.class);
                     for (int n = 0; n < length; n++) if (!lifecycle.add(ComponentMetadata.Lifecycle.valueOf(text(input))))
                         throw new IOException("Duplicate component lifecycle");
+                    String context = nullable(input);
+                    boolean derivedProps = bool(input), derivedError = bool(input), contextUpdate = bool(input), defaults = bool(input);
+                    int contextualLength = count(input, ComponentMetadata.Lifecycle.values().length, "context lifecycles");
+                    Set<ComponentMetadata.Lifecycle> contextual = EnumSet.noneOf(ComponentMetadata.Lifecycle.class);
+                    for (int n = 0; n < contextualLength; n++) if (!contextual.add(ComponentMetadata.Lifecycle.valueOf(text(input))))
+                        throw new IOException("Duplicate component context lifecycle");
+                    boolean nullableState = bool(input);
+                    int layoutLength = count(input, MAX_FIELDS, "state layout");
+                    if (layoutLength != stateFields.size()) throw new IOException("Component state layout differs from declared fields");
+                    List<ComponentMetadata.StateField> layout = new ArrayList<>();
+                    for (var field : stateFields) layout.add(new ComponentMetadata.StateField(field, nullable(input)));
                     spec = new ComponentMetadata.ClassSpec(kind, state, stateFields, lifecycle,
-                            nullable(input), bool(input), bool(input), bool(input));
+                            context, derivedProps, derivedError, contextUpdate, defaults, contextual, nullableState, layout);
                 }
                 int dot = name.lastIndexOf('.');
                 var c = new ComponentMetadata(name, name.substring(dot + 1), dot < 0 ? "" : name.substring(0, dot),
@@ -229,6 +248,7 @@ public final class ComponentLibrary {
             if (!c.hasProps() || c.propsTypeParameters() != 0) throw new IllegalArgumentException("Invalid native class Props contract");
             validateText(c.classSpec().stateType()); validateProps(c.classSpec().stateFields());
             if (c.classSpec().contextValueType() != null) validateText(c.classSpec().contextValueType());
+            for (var field : c.classSpec().stateLayout()) if (field.presenceValueType() != null) validateText(field.presenceValueType());
         }
     }
     private static void validateProps(List<ComponentMetadata.Prop> props) {

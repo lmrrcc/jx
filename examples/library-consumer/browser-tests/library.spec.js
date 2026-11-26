@@ -34,3 +34,31 @@ test('the packaged library keeps independent state, typed callbacks, children an
   await expect(page.getByTestId('notifications')).toHaveText('2');
   expect(errors).toEqual([]);
 });
+
+test('a source-less native class preserves omitted defaults and nullable sparse state',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
+  await page.goto('/');
+  const output=page.getByTestId('library-sparse');
+  await expect(output).toHaveText('Sparse default: null');
+  const original=await output.elementHandle();
+  await page.getByRole('button',{name:'Create sparse state'}).click();
+  await expect(output).toHaveText('Sparse default: absent/absent');
+  await page.getByRole('button',{name:'Increment sparse count'}).click();
+  await expect(output).toHaveText('Sparse default: 7/absent');
+  await page.getByRole('button',{name:'Undefined sparse note'}).click();
+  await expect(output).toHaveText('Sparse default: 7/undefined');
+  await page.getByRole('button',{name:'Null sparse note'}).click();
+  await expect(output).toHaveText('Sparse default: 7/null');
+  await page.getByRole('button',{name:'Increment sparse count'}).click();
+  await page.getByRole('button',{name:'Rerender consumer'}).click();
+  await expect(page.getByTestId('consumer-pulse')).toHaveText('1');
+  await expect(output).toHaveText('Sparse default: 8/null');
+  expect(await original.evaluate(node=>node===document.querySelector('[data-testid="library-sparse"]'))).toBe(true);
+  await page.getByRole('button',{name:'Toggle library'}).click();
+  await expect(output).toHaveCount(0);
+  await page.getByRole('button',{name:'Toggle library'}).click();
+  await expect(output).toHaveText('Sparse default: null');
+  expect(await original.evaluate(node=>node.isConnected)).toBe(false);
+  expect(errors).toEqual([]);
+});

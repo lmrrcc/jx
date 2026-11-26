@@ -9,6 +9,7 @@ import jx.State;
 import jx.View;
 import jx.example.library.LibraryCounter;
 import jx.example.library.LibraryStatus;
+import jx.example.library.LibrarySparse;
 
 @Component
 public final class App {
@@ -39,6 +40,7 @@ public final class App {
                         </LibraryCounter>
                         <button onClick={event -> input.current().focus()}>Focus library input</button>
                         <LibraryStatus label="Imported class" ref={status} />
+                        <LibrarySparse />
                         <button onClick={event -> status.current().increment()}>Increment library class</button>
                     </section>
                 ) : null}

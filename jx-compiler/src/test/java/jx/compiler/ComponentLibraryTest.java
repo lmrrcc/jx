@@ -168,6 +168,8 @@ class ComponentLibraryTest {
         ByteBuffer.wrap(future).putInt(4, ComponentLibrary.VERSION + 1);
         Path incompatible = jar(producer, "future.jar", future);
         assertLibraryProblem(List.of(incompatible), "Unsupported component descriptor version");
+        byte[] prototype = encoded.clone(); ByteBuffer.wrap(prototype).putInt(4, 1);
+        assertLibraryProblem(List.of(jar(producer, "prototype.jar", prototype)), "Unsupported component descriptor version 1; expected 2");
         Path first = jar(producer, "first.jar", encoded);
         Path second = jar(producer, "second.jar", encoded);
         assertLibraryProblem(List.of(first, second), "Duplicate component binary");

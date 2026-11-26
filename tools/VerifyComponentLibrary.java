@@ -11,7 +11,9 @@ import java.util.zip.ZipFile;
  * The temporary project and Maven log are retained as evidence, not added to the repository. */
 public final class VerifyComponentLibrary {
     public static void main(String[] arguments) throws Exception {
-        if (arguments.length != 1) throw new IllegalArgumentException("Usage: java tools/VerifyComponentLibrary.java <Maven repository>");
+        if (arguments.length < 1 || arguments.length > 2 || arguments.length == 2 && !arguments[1].equals("--package-only"))
+            throw new IllegalArgumentException("Usage: java tools/VerifyComponentLibrary.java <Maven repository> [--package-only]");
+        boolean packageOnly = arguments.length == 2;
         Path root = Path.of("").toRealPath();
         Path repository = Path.of(arguments[0]).toRealPath();
         Path jar = repository.resolve("dev/jx/component-library/0.1.0-SNAPSHOT/component-library-0.1.0-SNAPSHOT.jar");
@@ -19,7 +21,8 @@ public final class VerifyComponentLibrary {
         try (var archive = new ZipFile(jar.toFile())) {
             if (archive.getEntry("META-INF/jx/components.idx") == null
                     || archive.getEntry("jx/example/library/LibraryCounter.class") == null
-                    || archive.getEntry("jx/example/library/LibraryStatus.class") == null)
+                    || archive.getEntry("jx/example/library/LibraryStatus.class") == null
+                    || archive.getEntry("jx/example/library/LibrarySparse.class") == null)
                 throw new IOException("Producer JAR is missing its classes or component descriptor");
             if (archive.stream().anyMatch(entry -> entry.getName().endsWith(".java") || entry.getName().endsWith(".jx")))
                 throw new IOException("The source-independent proof must not contain producer sources");
@@ -50,6 +53,10 @@ public final class VerifyComponentLibrary {
         Files.writeString(receipt, "Producer JAR: " + jar + "\nSHA-256: " + digest + "\nConsumer: " + consumer
                 + "\nMaven log: " + log + "\nBrowser site: " + site + "\nBrowser qualification: pending\n");
         System.out.println("Source-independent Maven consumer passed; testing " + site);
+        if (packageOnly) {
+            System.out.println("Browser qualification remains pending; saved site: " + site);
+            return;
+        }
         run(List.of("node", root.resolve("node_modules/@playwright/test/cli.js").toString(), "test", "-c",
                 root.resolve("examples/library-consumer/playwright.config.js").toString(), "--workers=1"), root,
                 Map.of("LIBRARY_SITE", site.toString()), Duration.ofMinutes(2));

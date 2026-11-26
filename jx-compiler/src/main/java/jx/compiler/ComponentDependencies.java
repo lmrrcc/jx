@@ -34,6 +34,7 @@ final class ComponentDependencies {
                     units += component.classSpec().stateType().length();
                     if (component.classSpec().contextValueType() != null) units += component.classSpec().contextValueType().length();
                     for (var prop : component.classSpec().stateFields()) units += prop.name().length() + prop.javaType().length();
+                    for (var field : component.classSpec().stateLayout()) if (field.presenceValueType() != null) units += field.presenceValueType().length();
                 }
             }
             if (components > 4096 || units > 16L * 1024 * 1024) throw new IOException("Component classpath catalog exceeds its bounded capacity");
