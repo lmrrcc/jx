@@ -1,6 +1,6 @@
 # M1-26: protected Java SSR and hydration
 
-Status: **locally verified; publication gate and Verify pending**. The final
+Status: **bounded M1-26 proof accepted in PR82 after the publication gate and Verify**. The final
 fixture source is `7c2c0aa`, based on the session/CSRF proof `eacf6df`. This closes
 the local protected-route experiment, not general SSR hosting or the R-30/R-31
 tracks. The [fixture guide](../../tests/protected-ssr/README.md) gives the exact
@@ -85,3 +85,7 @@ random process-only capability and are not part of the browser application.
 The next G0 review must decide the production SSR hosting boundary using this
 evidence and its operational limits. RSC transport, general server data APIs and
 the later starter/hot-reload tasks retain their own acceptance criteria.
+
+## Publication acceptance
+
+[PR82](https://github.com/lmrrcc/jx/pull/82) merged as `968ccf34ac7ab91743a844d6ebfdb7066c44b8d0`. Exact head `20e0eaa` passed all 18 mandatory local steps in 495 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45823288051) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45823204357). The integrated reactor passes 206 JVM checks and compiles TeaVM in 42.173 seconds; browser verification passes 47 runtime checks, 975 conformance checks with 217 explicit exclusions, four Todo scenarios, two packaged scenarios, two authentication hosting modes, all three protected SSR scenarios in 4.7 seconds and four actual source-save hot workflows. The 149-case inventory and 62/6328 interaction count remain unchanged. These results supplement the original evidence without broadening the hosting, streaming or cancellation limits above.
