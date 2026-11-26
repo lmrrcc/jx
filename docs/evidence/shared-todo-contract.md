@@ -29,6 +29,18 @@ Executed checks:
   tests cover unowned/edited files, unchanged timestamps, stale classes, unrelated
   dollar-named classes, traversal and symlinks.
 
+Publication integration found and reproduced a discovery defect before changing
+the generator: two subprocess probes failed because javac executed an auto-start
+plugin from either the host classpath or the selected contract classpath, despite
+`-proc:none`. The generator now reads binary symbols through its declared
+classpath while its public file-manager class/service loader is restricted to
+the platform loader. Empty source and processor paths also prevent implicit
+source discovery. This is dependency-discovery isolation, not a JVM sandbox.
+The two probes now pass, together with all 64 compiler tests in 9.004 seconds;
+the source-less JAR/throwing-initializer and real generated-code javac tests still
+pass. Full integration and publication checks remain pending on this revised
+source; the 159-check historical package above is not evidence for this fix.
+
 Limit: only required String/bool/int fields, fixed record names and canonical
 constructor/accessor behavior. Exact numbers, nullable/missing fields, arbitrary
 Jackson configuration, generated async operations/request DTOs, auth/session

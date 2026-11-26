@@ -15,7 +15,10 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.RecordComponentElement;
 import javax.lang.model.element.TypeElement;
 import javax.tools.DiagnosticCollector;
+import javax.tools.ForwardingJavaFileManager;
+import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 
 /** Generates browser JSON codecs from explicitly selected compiled record symbols.
@@ -35,9 +38,22 @@ public final class RecordCodecGenerator {
         var diagnostics = new DiagnosticCollector<JavaFileObject>();
         try (var files = JavaModel.compiler().getStandardFileManager(diagnostics, Locale.ROOT, StandardCharsets.UTF_8)) {
             files.setLocationFromPaths(StandardLocation.CLASS_PATH, List.copyOf(classPath));
+            files.setLocationFromPaths(StandardLocation.SOURCE_PATH, List.of());
+            files.setLocationFromPaths(StandardLocation.ANNOTATION_PROCESSOR_PATH, List.of());
+            // Reading binary symbols needs the contract path, but must never execute its
+            // auto-start javac plugins (which -proc:none does not disable). The public
+            // file-manager SPI isolates service/class loading from both dependency and host paths.
+            JavaFileManager symbols = new ForwardingJavaFileManager<StandardJavaFileManager>(files) {
+                @Override public ClassLoader getClassLoader(Location location) {
+                    return ClassLoader.getPlatformClassLoader();
+                }
+                @Override public <S> java.util.ServiceLoader<S> getServiceLoader(Location location, Class<S> service) {
+                    return java.util.ServiceLoader.load(service, ClassLoader.getPlatformClassLoader());
+                }
+            };
             // A source-less dependency JAR is sufficient. A probe initializes javac's Elements
             // environment without compiling or initializing any authored application class.
-            JavacTask task = (JavacTask) JavaModel.compiler().getTask(null, files, diagnostics,
+            JavacTask task = (JavacTask) JavaModel.compiler().getTask(null, symbols, diagnostics,
                     List.of("-proc:none", "--release", "25"), null,
                     List.of(new JavaModel.MemorySource("JxContractProbe.java", "final class JxContractProbe {}")));
             task.parse();
