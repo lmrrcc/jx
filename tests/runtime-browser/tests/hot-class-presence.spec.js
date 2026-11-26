@@ -18,6 +18,9 @@ async function open(page, skip = false) {
 async function replace(page, {mode = 'valid', snapshot = null} = {}) {
   return page.evaluate(async ({mode, snapshot}) => {
     globalThis.presenceDecoderMode = mode;
+    // The new Java constructor deliberately differs from the saved state.
+    // Resetting to it must not masquerade as a successful null restoration.
+    globalThis.presenceDifferentInitial = true;
     const next = await import('/application.js?presence-generation=' + crypto.randomUUID());
     const independent = next.main !== globalThis.hotFixtureModule.main;
     const checkpoint = snapshot || JSON.parse(JSON.stringify(globalThis.__JX_HOT__.capture()));
@@ -53,10 +56,12 @@ test('explicit class codecs preserve null aggregate empty record and every spars
     expect(before.classes.find(value => value.signature === 'empty-record:1').payload).toBe('empty-record');
     const old = await page.locator('#presence-value').elementHandle();
     const generation = Number(await page.locator('#presence-generation').textContent());
+    const beforeReplacement = (await events(page)).length;
     const result = await replace(page);
     expect(result).toMatchObject({independent: true, status: 'ready'});
     await expect(page.locator('#presence-value')).toHaveText(expected);
     await expect(page.locator('#empty-record')).toHaveText('empty-record');
+    expect((await events(page)).slice(beforeReplacement)).toContainEqual({kind: 'constructor', value: 'value:constructor'});
     expect(Number(await page.locator('#presence-generation').textContent())).toBe(generation + 1);
     expect(await page.locator('#presence-value').evaluate((node, previous) => node === previous, old)).toBe(false);
     await old.dispose();

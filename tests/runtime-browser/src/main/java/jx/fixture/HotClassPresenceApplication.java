@@ -15,6 +15,7 @@ public final class HotClassPresenceApplication {
     public record Empty() {}
     private static final int GENERATION = nextGeneration();
     private static final String DECODER = decoderMode();
+    private static final boolean DIFFERENT_INITIAL = differentInitial();
     private static final ClassSchema.Field<Props,Boolean> SKIP = ClassSchema.field("skip", ClassSchema.BOOLEAN, Props::skip);
     private static final ClassSchema.Field<Props,String> DERIVED = ClassSchema.field("derived", ClassSchema.STRING, Props::derived);
     private static final ClassSchema<Props> PROPS = new ClassSchema<>(List.of(SKIP, DERIVED),
@@ -60,7 +61,10 @@ public final class HotClassPresenceApplication {
         }
     };
     public static final class Peer extends ClassComponent<Props,Model,Void> {
-        Peer(Props props) { super(props, null); }
+        Peer(Props props) {
+            super(props, DIFFERENT_INITIAL ? new Model(Presence.present("constructor")) : null);
+            event("constructor", describe(initialState()));
+        }
         void update(String operation) {
             switch (operation) {
                 case "empty" -> setState(MODEL.patch(), () -> event("callback", describe(state())));
@@ -132,6 +136,7 @@ public final class HotClassPresenceApplication {
         return Views.element("button", Attributes.create().attr("id", id).on("onClick", event -> action.run()), label);
     }
     @JSBody(script = "return globalThis.presenceDecoderMode || 'valid';") private static native String decoderMode();
+    @JSBody(script = "return !!globalThis.presenceDifferentInitial;") private static native boolean differentInitial();
     @JSBody(script = "return new URLSearchParams(location.search).get('skip') === 'true';") private static native boolean skip();
     @JSBody(script = "globalThis.presenceGeneration = (globalThis.presenceGeneration || 0) + 1; return globalThis.presenceGeneration;")
     private static native int nextGeneration();
