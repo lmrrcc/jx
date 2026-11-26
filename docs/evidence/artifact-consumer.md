@@ -12,6 +12,13 @@ JAR/POM bytes. It copies those nine files and the publisher seed's third-party
 Maven artifacts into a separate file repository, recording SHA-256 and producing
 Maven checksums. No other JX module is admitted to that repository. The source
 seed can be warm; the consumer's local Maven repository is initially absent.
+Before freezing that repository, the proof explicitly resolves the parent's
+managed Maven clean plugin in the publisher seed through its `help` goal. The
+publisher preparation may use its configured repositories; it does not run
+`clean` or touch application outputs. An ordinary reactor `install` does not
+resolve this plugin. The first publication gate reproduced the missing-plugin
+failure in its colder seed, so the proof no longer relies on an earlier local
+`clean` invocation. The preparation log is retained with the other receipts.
 
 The consumer is created outside the checkout from only authored fixture files
 and the Maven Wrapper scripts/properties. Its parent uses `<relativePath/>`.
@@ -55,6 +62,15 @@ This configuration is a build-isolation proof, not an operating-system sandbox.
 | Offline `clean package` | Passed, 2.413 s |
 | Browser interaction | Chrome 1/1 passed in 1.2 s; evidence-copy rerun 1/1 in 2.2 s |
 | Distribution provenance | 991 staged Maven JAR/POMs; 429 actually resolved, all initial-inventory hashes and file-origin checks pass |
+
+The integrated candidate exposed a publisher-seed gap in its first mandatory
+gate: steps 1–19 passed, then the file-only consumer correctly rejected the
+missing managed clean plugin. With explicit publisher preparation, the new
+isolated proof passes both `clean package` runs (5.771 s and 4.302 s) and Chrome
+1/1 (1.8 s). It stages 966 artifacts and resolves 429; all initial hashes and
+file-origin checks pass, including the clean plugin. These figures describe
+this seed; the historical table above remains unchanged. The complete gate
+must run again on the correction before publication.
 
 The browser asserts two independent component states, queued functional updates,
 keyboard activation and preservation of the actual output DOM node. After assets

@@ -57,6 +57,12 @@ public final class VerifyArtifactConsumer {
         Files.writeString(receipt, "Proof: " + proof + "\nStatus: preparing\n");
         System.out.println("Artifact consumer proof: " + proof);
         try {
+        // `install` does not execute `clean`. Resolve that managed plugin in the publisher
+        // seed explicitly, before freezing the file repository. The consumer still starts
+        // with an empty cache and can resolve only the subsequently frozen file mirror.
+        run(List.of(root.resolve("mvnw").toString(), "-B", "-ntp", "-N",
+                "-Dmaven.repo.local=" + seed, "-l", proof.resolve("publisher-clean-plugin.log").toString(),
+                "org.apache.maven.plugins:maven-clean-plugin:help"), root, Map.of(), Duration.ofMinutes(3), true);
         Path repository = proof.resolve("repository");
         List<Artifact> artifacts = stageRepository(root, seed, repository);
         Path negativeRepository = proof.resolve("repository-without-plugin");
@@ -126,7 +132,7 @@ public final class VerifyArtifactConsumer {
         Path output = root.resolve("target/artifact-consumer-reports").resolve(proof.getFileName());
         Files.createDirectories(output);
         for (String name : List.of("receipt.txt", "repository-sha256.tsv", "resolved-sha256.tsv",
-                "maven-file.log", "maven-offline.log", "maven-missing-plugin.log")) {
+                "publisher-clean-plugin.log", "maven-file.log", "maven-offline.log", "maven-missing-plugin.log")) {
             Path input = proof.resolve(name);
             if (Files.isRegularFile(input)) {
                 if (Files.size(input) > 16 * 1024 * 1024) throw new IOException("Proof report exceeds 16 MiB: " + input);
