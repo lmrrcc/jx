@@ -192,9 +192,30 @@ React's removed `getChildContext` instead. No test is disabled.
 Logs: `/private/tmp/jx-class-legacy-authoring-compiler.log`,
 `/private/tmp/jx-class-legacy-authoring-build.log` and
 `/private/tmp/jx-class-legacy-authoring-focused.log`. No separate full run or result
-table update is claimed. The new `class-legacy-authoring-context-lost` mutant is
-registered but unrun; full integration and publication remain pending. The active
+table update is claimed. The new `class-legacy-authoring-context-lost` mutant was
+unrun at that qualification; its later selected-source execution is below. Full
+reference/JX integration and publication remain pending. The active
 interaction scope stays 113 features/6,328 candidate pairs, with no added witness.
+
+### Selected compiler mutation qualification — 26 November 2026
+
+An isolated campaign on selected source `a225add` first passes the unmodified JX
+bench in all four rendering modes, then compiles the
+`class-legacy-authoring-context-lost` mutation. Omitting the generated typed
+`UNSAFE_WILL_RECEIVE_PROPS` overload is **killed by `class-legacy-authoring`**.
+This source also contains the subsequent sparse-authoring slice; it is not a new
+execution on the earlier standalone legacy head. No native IDE, new interaction
+pair, complete reference/JX comparison or publication gate credit follows.
+
+The command selects this mutant and `class-authoring-nullable-lost` together:
+`java tools/MutateBench.java --only class-legacy-authoring-context-lost,class-authoring-nullable-lost --keep`.
+Both compile and fail their intended browser cases: **2 killed, 0 survived,
+0 unusable**, process exit 0. This paragraph credits the one legacy mutant only.
+The scratch directory ends in `jx-mutation-14847958175598351148`; the generator
+source is restored and byte-identical to `a225add`, but its retained compiled
+outputs still contain the final sparse mutant and must not be reused as valid
+artifacts. The original worktree/cache are unchanged. The historical whole-catalog
+mutation table is deliberately not rewritten by this scoped campaign.
 
 ## Remaining scope
 
