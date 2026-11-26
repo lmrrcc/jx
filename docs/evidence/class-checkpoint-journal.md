@@ -7,6 +7,29 @@ Their qualification below is separate from the original 18/18 result.
 The full R-28-04 requirement still includes hidden commits, skipped renders,
 discarded work, incoming ownership, all class options and integration qualification.
 
+## Publication preparation, 26 November
+
+The prepared publication at `0782e20` combines the original journal, explicit
+admission, the [bounded skipped-commit correction](class-skipped-checkpoint.md)
+and [nullable/sparse codecs](class-checkpoint-presence.md). It also restores the
+typed-default input/clone adapters deliberately deferred from the preceding
+default-props publication. The later sections below retain their original
+qualification dates; the two linked follow-ups supersede only their stated
+skipped-commit and nullable-state restrictions.
+
+The assembled source passes **74 core and 11 React JVM checks**. Its
+`ClassCheckpoints.java` matches the qualified nullable-codec source `7a4fafc`;
+this is source comparison, not browser qualification of the new integration.
+Current browser/package qualification, the final push gate and Verify remain
+pending. The [three earlier journal mutations](class-journal-mutations.md)
+remain scoped to their recorded source and assertions. A fourth planned mutant
+replaces a successfully decoded null checkpoint with the constructor state;
+it has not run and earns no mutation credit.
+
+Pure checkpoints, hidden commits, complete incoming ownership and pre-teardown
+candidate-codec validation remain separate requirements. This publication does
+not import the later protocol-4 preflight or creator-ownership work.
+
 ## Contract
 
 An ordinary native class descriptor can opt in with
