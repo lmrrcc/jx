@@ -1,0 +1,47 @@
+package jx.conformance.cases;
+
+import jx.*;
+import jx.conformance.Bench;
+import java.util.function.Supplier;
+
+@Component
+public final class AuthoredLegacy extends ClassComponent<AuthoredLegacy.Props,AuthoredLegacy.Model,Void> {
+    public record Props(int revision, @OptionalProp String label) {}
+    public record Model(int count) {}
+    public static final Context<String> contextType = new Context<>("day");
+    public static final ClassProps<Props> defaultProps = propsInput().withLabel("default").build();
+    private final Supplier<String> theme;
+    public AuthoredLegacy(Props props, Supplier<String> theme) {
+        super(props, new Model(0)); this.theme = theme;
+    }
+    private String current() { return props().revision() + "/" + state().count() + "/" + theme.get(); }
+    private void mounting(String variant, int amount) {
+        Bench.log("normal:mount:" + variant);
+        setState((pending, props) -> statePatch().withCount(pending.count() + amount).build(),
+                () -> Bench.log("normal:mount-callback:" + variant + ":" + state().count()));
+    }
+    @Override protected void componentWillMount() { mounting("old", 1); }
+    @Override protected void UNSAFE_componentWillMount() { mounting("unsafe", 10); }
+    // Typed overloads below take precedence; these ordinary overrides must never execute.
+    @Override protected void componentWillReceiveProps(Props next) { throw new IllegalStateException("unselected receive"); }
+    @Override protected void UNSAFE_componentWillReceiveProps(Props next) { throw new IllegalStateException("unselected unsafe receive"); }
+    @Override protected void componentWillUpdate(Props next, Model pending) { throw new IllegalStateException("unselected update"); }
+    @Override protected void UNSAFE_componentWillUpdate(Props next, Model pending) { throw new IllegalStateException("unselected unsafe update"); }
+    private void receiving(Props next, String nextContext, String variant, int amount) {
+        Bench.log("normal:receive:" + variant + ":" + current() + "->" + next.revision() + "/" + nextContext);
+        if (next.revision() != props().revision())
+            setState((pending, props) -> statePatch().withCount(pending.count() + amount).build(),
+                    () -> Bench.log("normal:receive-callback:" + variant + ":" + state().count()));
+    }
+    protected void componentWillReceiveProps(Props next, String nextContext) { receiving(next, nextContext, "old", 100); }
+    protected void UNSAFE_componentWillReceiveProps(Props next, String nextContext) { receiving(next, nextContext, "unsafe", 1000); }
+    private void updating(Props next, Model pending, String nextContext, String variant) {
+        Bench.log("normal:update:" + variant + ":" + current() + "->" + next.revision() + "/" + pending.count() + "/" + nextContext);
+    }
+    protected void componentWillUpdate(Props next, Model pending, String nextContext) { updating(next, pending, nextContext, "old"); }
+    protected void UNSAFE_componentWillUpdate(Props next, Model pending, String nextContext) { updating(next, pending, nextContext, "unsafe"); }
+    @Override public View render() {
+        Bench.log("normal:render");
+        return <output data-testid="authored-legacy-normal">{current() + "/" + props().label()}</output>;
+    }
+}

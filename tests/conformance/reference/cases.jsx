@@ -117,6 +117,7 @@ import { ClassNullableState, ClassNullableDerived } from './cases/class-nullable
 import { ClassDefaults, ClassDefaultsAuthoring } from './cases/class-defaults.jsx';
 import { ClassPurePolicy } from './cases/class-pure-policy.jsx';
 import { ClassLegacy, ClassLegacySuppression, ClassLegacyInterrupted } from './cases/class-legacy.jsx';
+import { ClassLegacyAuthoring } from './cases/class-legacy-authoring.jsx';
 
 export const cases = {
   'runtime-utilities': RuntimeUtilities,
@@ -148,6 +149,7 @@ export const cases = {
   'class-legacy': ClassLegacy,
   'class-legacy-suppression': ClassLegacySuppression,
   'class-legacy-interrupted': ClassLegacyInterrupted,
+  'class-legacy-authoring': ClassLegacyAuthoring,
   'state-counter': StateCounter,
   'state-lazy-init': StateLazyInit,
   'callable-state': CallableState,

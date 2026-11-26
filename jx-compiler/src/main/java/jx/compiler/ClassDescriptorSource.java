@@ -47,6 +47,17 @@ final class ClassDescriptorSource {
         if (spec.derivedProps()) out.append(".withDerivedStateFromProps(").append(owner).append("::getDerivedStateFromProps)");
         if (spec.derivedError()) out.append(".withDerivedStateFromError(").append(owner).append("::getDerivedStateFromError)");
         if (spec.contextShouldUpdate()) out.append(".withContextShouldUpdate(contextType, ").append(owner).append("::shouldComponentUpdate)");
+        for (ComponentMetadata.Lifecycle lifecycle : spec.contextLifecycles().stream().sorted().toList()) {
+            boolean unsafe = lifecycle == ComponentMetadata.Lifecycle.UNSAFE_WILL_RECEIVE_PROPS
+                    || lifecycle == ComponentMetadata.Lifecycle.UNSAFE_WILL_UPDATE;
+            boolean receive = lifecycle == ComponentMetadata.Lifecycle.WILL_RECEIVE_PROPS
+                    || lifecycle == ComponentMetadata.Lifecycle.UNSAFE_WILL_RECEIVE_PROPS;
+            out.append(receive ? ".withContextWillReceiveProps" : ".withContextWillUpdate")
+                    .append("(contextType, jx.ClassComponentType.LegacyVariant.")
+                    .append(unsafe ? "UNSAFE" : "DEPRECATED").append(", ").append(owner).append("::")
+                    .append(unsafe ? "UNSAFE_" : "").append(receive ? "componentWillReceiveProps" : "componentWillUpdate")
+                    .append(')');
+        }
         if (spec.defaultProps()) out.append(".withDefaultProps(__jxDefaults())");
         out.append(";\n");
         return out.toString();

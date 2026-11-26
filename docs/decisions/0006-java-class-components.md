@@ -638,7 +638,7 @@ class cells pass; pair evidence remains 54/6328. PR
 | --- | --- |
 | Null initial props/state | Open: design explicit nullable schema decoding and merge semantics before removing guards |
 | PureComponent with a custom should-update policy | R-28-03g below: locally implemented and focused-tested; integrated qualification pending |
-| `componentWillMount`, `componentWillReceiveProps`, `componentWillUpdate`, and their `UNSAFE_` forms | R-28-03h2a explicit runtime descriptors pass 26 focused native checks including modern suppression, interrupted mounting and server traces; full qualification/publication and R-28-03h2b compiler declarations remain open; see [evidence](../evidence/class-legacy-lifecycles.md) |
+| `componentWillMount`, `componentWillReceiveProps`, `componentWillUpdate`, and their `UNSAFE_` forms | R-28-03h2a explicit runtime descriptors pass 26 focused native checks including modern suppression, interrupted mounting and server traces; R-28-03h2b direct declarations pass8/8 projects plus real-core javac/editor checks with defaults and typed-context precedence; full qualification/publication and native IDE support remain open; see [evidence](../evidence/class-legacy-lifecycles.md) |
 | Class `defaultProps` | Open: define absent versus explicit null props before compiler/runtime support |
 | Generic/indirect class authoring and wider field types | Open: preserve checked schemas and original-source diagnostics |
 | Legacy `contextTypes`, `childContextTypes`, `getChildContext` | Removed by React 19; do not introduce obsolete behavior into the pinned React contract |

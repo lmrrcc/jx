@@ -125,7 +125,7 @@ class ClassAuthoringTest {
             Compilation result = compiler.compile(List.of(source("Counter.jx", source)));
             assertTrue(result.diagnostics().stream().anyMatch(value -> value.code().equals("JX110")), result.diagnostics().toString());
         }
-        for (String method : List.of("public void componentWillMount() {}", "public static Model getDerivedStateFromProps(Props p, Model s) { return s; }")) {
+        for (String method : List.of("public void getChildContext() {}", "public static Model getDerivedStateFromProps(Props p, Model s) { return s; }")) {
             Compilation result = compiler.compile(List.of(source("Counter.jx", COUNTER.replace("public void increment()", method + " public void increment()"))));
             assertTrue(result.diagnostics().stream().anyMatch(value -> value.code().equals("JX111")), result.diagnostics().toString());
         }

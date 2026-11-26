@@ -234,9 +234,10 @@ methods for effects. React 19's removed legacy context API is not introduced.
 The compiling [ClassLegacy consumer](../tests/conformance/src/main/java/jx/conformance/cases/ClassLegacy.java)
 and [evidence contract](evidence/class-legacy-lifecycles.md) cover both spellings,
 queued updates, Pure/SCU decisions, modern suppression, abandoned suspended
-mounts and server traces. Automatic `.jx` class declarations for these callbacks
-remain a separate compiler task; this runtime slice uses explicit typed Java
-descriptors and adds no checkpoint guarantee.
+mounts and server traces. Direct `.jx` declarations and typed overloads have
+separate [compiler evidence](evidence/class-legacy-lifecycles.md#direct-jx-authoring--r-28-03h2b),
+including composition with defaults. Neither slice adds a checkpoint guarantee
+or establishes native IDE qualification.
 
 ### State derived from class props
 

@@ -138,6 +138,29 @@ The compiling
 consumer demonstrates both forms. Pure classes without a custom policy retain
 their normal native comparison.
 
+The three deprecated lifecycle methods and their `UNSAFE_` forms may also be
+declared directly. Each must be one public/protected, non-static, non-generic
+`void` method: mount takes no arguments, receive-props takes `Props`, and
+will-update takes `Props, Model`. A context-aware class may additionally append
+its exact `Context<T>` value type to a receive/update signature:
+
+```java
+protected void UNSAFE_componentWillReceiveProps(Props next, String nextContext) {
+    // Current values stay on the peer; arguments describe the pending update.
+}
+```
+
+The typed overload is a descriptor policy, so omit `@Override` on it. If its
+ordinary override is also declared, the typed overload takes precedence for that
+spelling only. The deprecated and `UNSAFE_` spellings remain independently
+enabled. Generated descriptors preserve native `defaultProps`, context and all
+other class options. React owns warnings, queued state and suppression by modern
+derived-props/snapshot APIs. These are render-phase callbacks, not effect or
+commit notifications; do not schedule state from will-update callbacks.
+See [AuthoredLegacy.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredLegacy.jx),
+[AuthoredLegacyPure.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredLegacyPure.jx)
+and their [evidence](evidence/class-legacy-lifecycles.md#direct-jx-authoring--r-28-03h2b).
+
 [AuthoredCounter.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredCounter.jx),
 [AuthoredPure.jx](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredPure.jx)
 and their [parent](../tests/conformance/src/main/jx/jx/conformance/cases/ClassAuthoring.jx)

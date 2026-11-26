@@ -1,0 +1,20 @@
+package jx.conformance.cases;
+
+import jx.*;
+
+@Component
+public final class ClassLegacyAuthoring {
+    public static View render() {
+        State<Integer> revision = Hooks.useState(0), pulse = Hooks.useState(0);
+        State<String> theme = Hooks.useState("day");
+        return <main>
+            <button onClick={event -> pulse.update(value -> value + 1)}>Equal authored legacy props</button>
+            <button onClick={event -> revision.update(value -> value + 1)}>Advance authored legacy props</button>
+            <button onClick={event -> theme.set("night")}>Change authored legacy context</button>
+            <button onClick={event -> theme.set(null)}>Null authored legacy context</button>
+            <output data-testid="authored-legacy-pulse">{pulse.value()}</output>
+            {AuthoredLegacy.contextType.provide(theme.value(), <AuthoredLegacy revision={revision.value()} />)}
+            <AuthoredLegacyPure revision={revision.value()} />
+        </main>;
+    }
+}
