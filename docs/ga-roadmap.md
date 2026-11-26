@@ -407,7 +407,7 @@ browser. It is an executable foundation, not a production framework yet.
 | Browser Java | Classes reached by the current fixtures execute under TeaVM | Method-level library certification, transitive dependency checks and size/correctness budgets |
 | Hot updates | Typed checkpoints, conservative resets, cancellation | Large application latency, generated codecs, foreign component/reset behavior and long-session qualification |
 | Editors | Native Java integration; IntelliJ Run gutter and bounded editing services | Broader Java action parity, VS Code gaps, debugging, workspace scale, compatibility maintenance |
-| Release | Source, wrappers, configured CI, local packages | Published supported artifacts, independently reproduced CI, release security, upgrade/support policies |
+| Release | Source, wrappers, configured CI, local packages; M1-30 external file-repository consumer locally passes with empty Maven cache and Chrome (publication pending) | Published supported artifacts, independently reproduced CI, release security, upgrade/support policies |
 
 The recorded baseline includes 92 IntelliJ tests and a compatible Plugin Verifier
 result for `IU-261.25134.95`; the earlier browser evidence is 17 Chrome tests at its

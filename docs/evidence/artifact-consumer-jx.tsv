@@ -1,0 +1,10 @@
+path	bytes	sha256
+dev/jx/jx-compiler/0.1.0-SNAPSHOT/jx-compiler-0.1.0-SNAPSHOT.jar	108257	e78f353f2b0fa9d6d74afb72b89fa75b4a54282b21473f88fae904af029a32e5
+dev/jx/jx-compiler/0.1.0-SNAPSHOT/jx-compiler-0.1.0-SNAPSHOT.pom	673	f8bf97fc9b8d4d352815419166b72b84c2c75824133e06d62efdbf3313b13ea2
+dev/jx/jx-core/0.1.0-SNAPSHOT/jx-core-0.1.0-SNAPSHOT.jar	109804	0510909c3a255f22b2348c2f96ffe1337f9ade36c7a4ec60173b473eb32898fa
+dev/jx/jx-core/0.1.0-SNAPSHOT/jx-core-0.1.0-SNAPSHOT.pom	576	97008e2dd08c77c793a099294a47b91277becd18e74dee7e2078dd62060710ee
+dev/jx/jx-maven-plugin/0.1.0-SNAPSHOT/jx-maven-plugin-0.1.0-SNAPSHOT.jar	62380	a264e417e72bddc0a411a45f5d7a0f8a328b380fb21bbc509d2f5a4c8b268848
+dev/jx/jx-maven-plugin/0.1.0-SNAPSHOT/jx-maven-plugin-0.1.0-SNAPSHOT.pom	1548	5022c321cb587379cc59f0a2e1a50fbe8308d127e403ac4bece395fafb15d2ea
+dev/jx/jx-parent/0.1.0-SNAPSHOT/jx-parent-0.1.0-SNAPSHOT.pom	2782	0a088e5327a26d2ffbc16e348fd3f3b998f0f858829e31e04d2302ee35843622
+dev/jx/jx-react/0.1.0-SNAPSHOT/jx-react-0.1.0-SNAPSHOT.jar	134643	dffa96d6cc4864cc34401c91351e40504886c4a5d731f8e5bd83cd3aadeab4bc
+dev/jx/jx-react/0.1.0-SNAPSHOT/jx-react-0.1.0-SNAPSHOT.pom	968	adf65883930109bbfd29cc872d6e0144f13b26de7b466878bfa593691b7fdb40
