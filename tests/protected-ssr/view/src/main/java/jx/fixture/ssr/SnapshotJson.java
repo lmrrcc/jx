@@ -1,7 +1,9 @@
 package jx.fixture.ssr;
 
 import jx.browser.Json;
+import jx.example.contract.Todo;
 import jx.example.contract.TodoJson;
+import java.util.List;
 
 /** Explicit bootstrap schema shared by both independently compiled entry points. */
 public final class SnapshotJson {
@@ -11,14 +13,14 @@ public final class SnapshotJson {
     public static TodoSnapshot fromResponses(String session, String todos) {
         Json identity = bounded(session);
         return new TodoSnapshot(identity.get("username").stringValue(),
-                bounded(todos).items().stream().map(TodoJson::decode).toList());
+                todos(bounded(todos)));
     }
 
     public static TodoSnapshot decode(String encoded) {
         Json json = bounded(encoded);
         if (json.get("schema").intValue() != 1) throw new IllegalArgumentException("Unsupported SSR snapshot schema");
         return new TodoSnapshot(json.get("username").stringValue(),
-                json.get("todos").items().stream().map(TodoJson::decode).toList());
+                todos(json.get("todos")));
     }
 
     public static String encode(TodoSnapshot snapshot) {
@@ -38,5 +40,11 @@ public final class SnapshotJson {
     private static Json bounded(String value) {
         if (value.length() > LIMIT) throw new IllegalArgumentException("SSR JSON exceeds input limit");
         return Json.parse(value);
+    }
+
+    private static List<Todo> todos(Json array) {
+        var values = array.items();
+        if (values.size() > 500) throw new IllegalArgumentException("Too many todos in SSR snapshot");
+        return values.stream().map(TodoJson::decode).toList();
     }
 }

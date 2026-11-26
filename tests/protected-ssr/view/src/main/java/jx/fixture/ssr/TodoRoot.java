@@ -9,6 +9,6 @@ import jx.react.React;
 public final class TodoRoot {
     private TodoRoot() {}
     public static final ComponentType<TodoPage.Props> JX = new ComponentType<>("ProtectedTodoRoot", props ->
-            React.suspense(Views.component(TodoPage.JX, props),
-                    Views.element("p", Attributes.create().attr("id", "ssr-loading"), "Loading protected data")));
+            React.suspense(Views.element("p", Attributes.create().attr("id", "ssr-loading"), "Loading protected data"),
+                    Views.component(TodoPage.JX, props)));
 }
