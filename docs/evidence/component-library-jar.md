@@ -1,5 +1,15 @@
 # Source-independent component-library proof
 
+## Publication acceptance
+
+[PR89](https://github.com/lmrrcc/jx/pull/89) merged as `248293a` after the 21-step gate passed in 493 seconds and both Verify checks passed on `694a415`. The integrated install passes 231 JVM tests plus TeaVM; runtime 47/47, the unchanged 1,017-pass /223-exclusion matrix across 155 cases and 62/6,328 pairs pass. The outside-checkout source-less JAR consumer passes normal Maven package and both Chrome journeys.
+
+Exact tested head: `694a41535b03aceb9df652bb14c5f57b9c655332`; squash: `248293a3a1efbcadf61b7df901dc7e23fdc8707c`. [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45876468950) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45876382129) are green. Maven install took 59.073 s, the full matrix 4.2 minutes, standalone Maven 2.851 s and its two Chrome journeys 1.6 s. These are execution receipts, not latency budgets.
+
+The final producer SHA-256 is `4ea2c4cad774a5c1bd3faa31fbf234261590fd565f0e90e00ee1f4ebbb0f1402`; the retained standalone proof ends in `jx-component-library-proof-7565860269073765326`. All existing lazy, Flight, Counter, Todo, packaged/authenticated Spring, protected SSR, four real hot workflows, MV3 and independent artifact-consumer checks also pass. The full log is `/private/tmp/jx-component-library-694a415-push.log`.
+
+This accepts the bounded M1-10–13 proof. General artifact trust/release, native IDE dependency navigation, library hot replacement and browser-Java certification remain open. The separate G0 review still requires its own publication. Older receipts below retain their original source/counts; their pending statements describe those earlier checkpoints.
+
 ## Publication candidate requalification, 26 November 2026
 
 The final publication branch is rebased onto accepted sparse authoring PR87
