@@ -7,6 +7,15 @@ does not complete its planned GA qualification work. IDs are stable for future
 issues/PRs and evidence records.
 No GitHub issues, scheduled jobs, deployments or releases were created by this plan.
 
+User clarification, 26 November: starter, tutorials and the fast update workflow
+use functional `@Component`/static `render`/`Hooks`. Compatible hook state must
+survive ordinary edits; compile errors keep the last good app and ordinary edits
+must not start Maven. Native class remount is the planned default refresh policy.
+Advanced class-state preservation moves after ST/HR as an optional R-28-04
+extension, still open with hidden/SCU-false ownership requirements. Existing class
+APIs and qualified proofs remain. React runtime parity and G0 otherwise retain
+their prerequisite status; this scheduling change accepts no unproved behavior.
+
 Current sparse compiler candidate: **🟡 R-28-03h4 passes 200 JVM checks plus TeaVM and the full 1,017 checks /223 exclusions /155 cases** on source equivalent to `aebcfaa`, rebased onto accepted PR86. Client passes are 153 reference/152 JX, hydrate 113, static 119 and lazy 124 per side; only the new sparse row changes, with **62/6,328** pairs unchanged. Normal explicit checkpoint codecs remain admitted and Pure checkpoints remain rejected. The earlier nullable-authoring mutation retains its own source scope; the 20-step publication gate and remote Verify remain pending.
 
 Latest compiler acceptance: **✅ R-28-03h2b legacy `.jx` authoring merged in PR86 as `50388f5`**, after all 20 local gate steps passed in 512 seconds and both Verify checks passed on `0beb087`. The integration passes **213 JVM, 47 runtime and 1,009 conformance checks /223 exclusions /154 cases**. Only the new authoring row changes; prior rows and **62/6,328** interaction pairs remain. The earlier compiler mutation retains its recorded scope; native IDE qualification and remaining class options are separate.
@@ -152,7 +161,9 @@ qualification packages. The Cherry Test unit/coverage baseline is delivered;
 TT-01–TT-06 in the implementation sequence track the remaining test tooling.
 
 Luca authorized continued implementation of React parity and G0 on 24 November,
-followed by the JX/Spring starter and faster hot reload. Preserve the automated
+followed by the JX/Spring starter and faster hot reload. The 26 November
+clarification makes the latter functional-first and places advanced class-state
+preservation afterward as an optional extension. Preserve the automated
 gates and record human qualification or applicability decisions explicitly.
 The current browser evidence is Chrome automation, not cross-browser qualification.
 
@@ -307,9 +318,10 @@ are recorded in [the R-28 slice table](ga-tasks.md#r-28-implementation-slices).
 
 Added 24 November 2026: [starter and fast development](ga-developer-experience.md)
 is an explicit product requirement. ST-01–ST-06 refine GA-09/12/13; HR-01–HR-10
-refine GA-08/24/25/26/27/28. All are planned. Luca confirmed on 25 November that
-the entire React parity track and all G0 proofs precede starter and fast-loop
-implementation. These slices do not add completed work to the register or change
+refine GA-08/24/25/26/27/28. All are planned. Luca's 26 November clarification keeps
+React runtime parity and all G0 proofs before functional starter and fast-loop
+implementation, while advanced native class checkpoints follow as an optional
+extension. These slices do not add completed work to the register or change
 the remaining shared-contract/security prerequisites.
 
 ## Work package register
@@ -352,7 +364,7 @@ exists, not when its document or skeleton module lands.
 | GA-24 | IntelliJ editing and run/debug parity / T | GA-08, GA-14, GA-23 | M2–M7 / L | Native action corpus incl. safe closed-file edits; installed packages, trust, scale and version tests | ⬜ planned |
 | GA-25 | VS Code editing and run/debug parity / T | GA-08, GA-14, GA-23 | M2–M7 / L | Class/file rename, formatting, closed-file references, normal navigation and installed-JDT matrix | ⬜ planned |
 | GA-26 | TurboJ native .jx integration / T | GA-14, GA-23 | M4–M8 / L | Reuse compiler semantics; native mixed editor/run/debug with own acceptance corpus | ⬜ planned |
-| GA-27 | Fast development service and hot-update scale / R | React parity and G0; GA-10, GA-18, GA-23 for full qualification | After G0 / M2 proof; M4–M7 qualification / L | HR-01–10: measured edit-to-paint latency, persistent compiler/TeaVM/bundler, no Maven per UI edit, versioned IDE buffers, compatible checkpoints, bounded caches and no replay/leaks after 100 updates | ⬜ planned |
+| GA-27 | Fast development service and hot-update scale / R | React runtime parity and G0; GA-10, GA-18, GA-23 for full qualification; advanced native class checkpoints are a later optional extension | After G0 / M2 proof; M4–M7 qualification / L | HR-01–10: measured edit-to-paint latency, persistent compiler/TeaVM/bundler, no Maven per UI edit, versioned IDE buffers, compatible functional hook checkpoints, old app retained on compile errors, bounded caches and no replay/leaks after 100 updates | ⬜ planned |
 | GA-28 | Cross-browser/OS/performance/a11y/security CI / Q | GA-01; each delivered feature | M1–M12 / L | Required matrix/payload/latency gates; real-device and manual evidence attached to RC | ⬜ planned |
 | GA-29 | Existing Spring/Kotlin and schema-first adapters / C | GA-10, GA-11 | M3–M7 / L | Java21/Kotlin Gradle Boot consumes Maven-built JX contracts/assets in clean CI+IDE; Rust-schema consumer; no forced backend/build-tool rewrite | ⬜ planned |
 | GA-30 | Static site pilot / M | GA-02, GA-22, GA-28 | M6–M8 / M | Complete low-risk site with existing URLs/forms/SEO, canary and rollback | ⬜ planned |

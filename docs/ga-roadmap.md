@@ -13,6 +13,17 @@ updates. ST-01–ST-06 and HR-01–HR-10 in the [task list](ga-tasks.md) are all
 The compiler/service topology and subsecond targets are proposals to validate,
 not delivered functionality or measured performance.
 
+User clarification, 26 November: the intended React + Vite experience uses
+functional `@Component`, static `render` and `Hooks` in the starter and tutorials.
+Compatible hook state must survive ordinary updates, and compile errors retain
+the old app; no Maven process is started per ordinary edit. Native class remount
+is the planned default refresh behavior. Advanced `ClassComponent`/`PureComponent`
+state preservation is an optional later R-28-04 extension after ST/HR, still open
+with its hidden/SCU-false requirements. Existing class APIs and qualified proofs
+remain; this changes scheduling, not React runtime parity acceptance. Remaining
+React runtime parity and G0 still precede ST/HR. See the
+[updated development contract](ga-developer-experience.md#functional-components-are-the-default).
+
 ## Progress flags — 25 November 2026
 
 **✅ Done · 🟡 Partial · ⬜ Planned / to do · ➡️ Next · ⛔ Blocked.**
@@ -165,11 +176,12 @@ native editor qualification and class hot checkpoints are still open.
 | TT-01 Cherry Test orchestration | 🟡 Partial | Unit coverage/CRAP delivered; integration and browser kinds still open. |
 | TT-04 PIT through Cherry Test | ⛔ Blocked | Installed Cherry Test update and first verified PIT run. |
 | Production pilots and GA release | ⬜ To do | Complete platform gates, qualify pilots, then pass RC/release evidence gates. |
-| React-style welcome and full-stack Maven creation | ⬜ To do | ST-01–ST-06: canonical example, one shared API contract, independent generated app, one dev command, standalone Boot JAR and clean-consumer onboarding. |
-| Fast compiler service and live editor buffers | ⬜ To do | HR-01–HR-10: measure the loop, retain compiler state, incremental TeaVM/bundling, CSS fast path and shared IntelliJ/VS Code/TurboJ integration. Existing checkpoint hot reload is the baseline. |
+| React-style welcome and full-stack Maven creation | ⬜ To do | ST-01–ST-06: canonical functional component example, one shared API contract, independent generated app, one dev command, standalone Boot JAR and clean-consumer onboarding. |
+| Fast compiler service and live editor buffers | ⬜ To do | HR-01–HR-10: measure the loop, retain compiler state, incremental TeaVM/bundling, CSS fast path and shared IntelliJ/VS Code/TurboJ integration; preserve compatible functional hook state and the old app on compile errors. Advanced class checkpoints follow ST/HR. |
 
-Execution order confirmed by Luca on 24 November: continue through complete React
-parity and G0, then the JX/Spring starter and faster hot reload. R-27-01 and
+Execution order confirmed by Luca on 24 November and clarified on 26 November:
+React runtime parity and G0, then the functional JX/Spring starter and faster hot
+reload, then the optional advanced class-preservation extension. R-27-01 and
 R-27-02a–02c merged with green Verify; Children landed in [PR #39](https://github.com/lmrrcc/jx/pull/39)
 at `413558b636679dd5926f4d7bf1c987ea707ed95c`.
 The ref slice landed in [PR #40](https://github.com/lmrrcc/jx/pull/40) at
@@ -510,7 +522,7 @@ Spring integration must support:
 
 ### Fast development feedback
 
-Preserving state is necessary but insufficient: normal Java/.jx edits should
+Preserving compatible functional hook state is necessary but insufficient: normal Java/.jx edits should
 reach the browser rapidly. Measure detection, compilation, TeaVM, bundling,
 publication and React commit separately. The proposed service resolves Maven
 once, retains compiler state and consumes versioned editor/file snapshots; normal
@@ -521,9 +533,11 @@ owned by each editor.
 The [technical plan](ga-developer-experience.md) proposes starter p95 targets of
 200 ms for CSS and one second for Java/.jx, to be validated on a named reference
 machine. It preserves typed checkpoint transfer, clean Maven validation and
-explicit cache invalidation. The execution order confirmed on 25 November first
-completes React parity and G0, then implements the starter and fast development
-service. M7 broadens editor and long-session qualification; milestone labels do
+explicit cache invalidation. The execution order clarified on 26 November first
+completes React runtime parity and G0, then implements the functional starter and
+fast development service. Advanced native class-state preservation remains open
+as an optional later extension and does not block those deliverables. M7 broadens
+editor and long-session qualification; milestone labels do
 not override that dependency order.
 
 ### Browser Java standard library
