@@ -313,8 +313,12 @@ and 133 inapplicable cells; revision `eb5a18a` passed
 [Verify](https://github.com/lmrrcc/jx/actions/runs/45372691183), completing R-26.
 See the [task and try-it command](ga-tasks.md#react-parity-track).
 M1-22/M1-23 proved the serialized lazy-module boundary; automatic chunk packaging
-in the Maven plugin is still open. G0 also needs component JARs, exact shared
-contracts, authenticated packaged Spring and the protected SSR data route (M1-26).
+in the Maven plugin is still open. Component JAR candidate `b89db24` passes 213 scoped
+JVM checks, a separate source-independent Maven consumer and two Chrome journeys;
+ABI2 preserves current class defaults/context/nullable/Presence metadata and
+rejects the earlier prototype. Gate/Verify remain pending ([evidence](evidence/component-library-jar.md)).
+The shared-contract, authenticated packaged Spring and protected SSR proofs are
+accepted within their recorded bounds; the final G0 review remains open.
 Milestone dates have not been advanced or declared complete
 because client React work reached features originally assigned to M2/M3.
 
@@ -439,8 +443,9 @@ GA certification run. See [status](status.md), [runtime](runtime.md),
 
 Concrete gaps that influence sequencing:
 
-- Component metadata is currently derived from the source batch; library JAR
-  consumption must work before building a reusable component ecosystem.
+- Versioned component-library metadata and a source-independent JAR consumer now
+  pass the focused local proof. Integration, gate and Verify remain prerequisites
+  before claiming the reusable-component G0 deliverable is complete.
 - Accepted M1-17–19 proofs cover the shared Todo record/paths, generated bounded
   record codecs and explicit exact-value vectors. General protocol generation and
   wire evolution remain open.

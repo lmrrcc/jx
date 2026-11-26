@@ -38,6 +38,18 @@ public final class JxCompiler {
 
     /** Resolve all source-declared components, validate property names and generate ordinary Java. No files are written. */
     public Compilation compile(List<SourceFile> sources) {
+        return compile(sources, ComponentDependencies.EMPTY);
+    }
+
+    /** Resolves source declarations and versioned component descriptors from class directories
+     * or source-less JARs. No application classes or processors execute. Source declarations
+     * own matching qualified names; callers should exclude their own stale output directory.
+     * Missing/incompatible library metadata is reported at the importing markup tag. */
+    public Compilation compile(List<SourceFile> sources, List<Path> classpath) throws IOException {
+        return compile(sources, ComponentDependencies.read(List.copyOf(classpath)));
+    }
+
+    private Compilation compile(List<SourceFile> sources, ComponentDependencies dependencies) {
         List<Diagnostic> diagnostics = new ArrayList<>();
         List<JavaModel> models = new ArrayList<>();
         for (SourceFile source : sources.stream().sorted(Comparator.comparing(s -> s.path().toString())).toList()) {
@@ -49,9 +61,12 @@ public final class JxCompiler {
             diagnostics.addAll(parsed.diagnostics());
             if (parsed.diagnostics().isEmpty()) models.add(JavaModel.read(parsed, diagnostics));
         }
-        List<ComponentMetadata> components = models.stream().flatMap(m -> m.components().stream()).toList();
+        List<ComponentMetadata> declared = models.stream().flatMap(m -> m.components().stream()).toList();
+        dependencies = dependencies.excludingSources(declared);
+        List<ComponentMetadata> components = new ArrayList<>(declared);
+        components.addAll(dependencies.components());
         Map<String, ComponentMetadata> names = new LinkedHashMap<>();
-        for (ComponentMetadata component : components) {
+        for (ComponentMetadata component : declared) {
             if (names.putIfAbsent(component.qualifiedName(), component) != null) {
                 SourceFile source = models.stream().map(m -> m.parsed().source()).filter(s -> s.path().equals(component.source())).findFirst().orElseThrow();
                 diagnostics.add(Diagnostic.error(source, "JX106", "Duplicate component '" + component.qualifiedName() + "'", component.declaration()));
@@ -60,15 +75,16 @@ public final class JxCompiler {
         List<GeneratedSource> generated = new ArrayList<>();
         Map<Path, GeneratedSource> outputs = new LinkedHashMap<>();
         for (JavaModel model : models) {
-            GeneratedSource source = new Lowerer(model, components, diagnostics).lower();
+            GeneratedSource source = new Lowerer(model, components, diagnostics, Map.of(), dependencies).lower();
             if (outputs.putIfAbsent(source.relativePath(), source) != null)
                 diagnostics.add(Diagnostic.error(source.source(), "JX106", "Duplicate generated path " + source.relativePath(), new SourceSpan(0, 0)));
             generated.add(source);
             HookRules.check(source, components, diagnostics);
         }
         Map<String, String> signatures = HookSignatures.compute(generated, components);
+        ComponentDependencies resolved = dependencies;
         List<GeneratedSource> finalSources = models.stream()
-                .map(model -> new Lowerer(model, components, new ArrayList<>(), signatures).lower()).toList();
+                .map(model -> new Lowerer(model, components, new ArrayList<>(), signatures, resolved).lower()).toList();
         return new Compilation(finalSources, components, diagnostics);
     }
 

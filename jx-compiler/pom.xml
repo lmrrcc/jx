@@ -4,6 +4,7 @@
   <parent><groupId>dev.jx</groupId><artifactId>jx-parent</artifactId><version>0.1.0-SNAPSHOT</version></parent>
   <artifactId>jx-compiler</artifactId><name>JX compiler and semantic services</name>
   <dependencies>
+    <dependency><groupId>dev.jx</groupId><artifactId>jx-core</artifactId><version>${project.version}</version><scope>test</scope></dependency>
     <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.13.4</version><scope>test</scope></dependency>
   </dependencies>
 </project>

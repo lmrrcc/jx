@@ -14,6 +14,7 @@ final class Lowerer {
     private static final long MAX_EDITOR_PROP_SLOTS = 65_536;
     private final JavaModel model;
     private final List<ComponentMetadata> components;
+    private ComponentDependencies dependencies = ComponentDependencies.EMPTY;
     private final List<Diagnostic> diagnostics;
     private final SourceFile source;
     private final MappedBuilder out;
@@ -28,6 +29,12 @@ final class Lowerer {
 
     Lowerer(JavaModel model, List<ComponentMetadata> components, List<Diagnostic> diagnostics, Map<String, String> signatures) {
         this(model, components, diagnostics, signatures, false);
+    }
+
+    Lowerer(JavaModel model, List<ComponentMetadata> components, List<Diagnostic> diagnostics,
+            Map<String, String> signatures, ComponentDependencies dependencies) {
+        this(model, components, diagnostics, signatures, false);
+        this.dependencies = dependencies;
     }
 
     static Lowerer editor(JavaModel model, List<ComponentMetadata> components) {
@@ -345,10 +352,12 @@ final class Lowerer {
     }
 
     private ComponentMetadata resolve(String name, SourceSpan span) {
+        String problem = dependencies.problem(new SourceContext(model.parsed().source().path(), model.packageName(), model.imports()), name);
+        if (problem != null) { error("JX120", problem, span); return null; }
         List<ComponentMetadata> candidates = ComponentLookup.candidates(components,
                 new SourceContext(source.path(), model.packageName(), model.imports()), name);
         if (candidates.size() == 1) return candidates.getFirst();
-        error("JX104", candidates.isEmpty() ? "Unknown component '" + name + "' (include its .jx source in this compilation)"
+        error("JX104", candidates.isEmpty() ? "Unknown component '" + name + "' (include its .jx source or a component-library descriptor on the classpath)"
                 : "Ambiguous component '" + name + "'", span);
         return null;
     }

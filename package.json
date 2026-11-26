@@ -13,6 +13,7 @@
     "build:runtime": "esbuild tests/runtime-browser/browser-entry.js --bundle --format=esm --sourcemap --outfile=tests/runtime-browser/target/site/application.js",
     "test:runtime": "playwright test -c tests/runtime-browser/playwright.config.js",
     "test:counter": "playwright test -c examples/counter-app/playwright.config.js",
+    "test:library": "playwright test -c examples/library-consumer/playwright.config.js",
     "test:todo": "playwright test -c examples/todo-app/playwright.config.js",
     "test:contract": "playwright test -c examples/todo-app/playwright.config.js -g 'contract exact values'",
     "test:packaged": "playwright test -c tests/packaged/playwright.config.js",

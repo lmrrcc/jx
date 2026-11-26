@@ -1,0 +1,17 @@
+package jx.example.library;
+
+import jx.ClassComponent;
+import jx.Component;
+import jx.View;
+
+/** A checked class ref crosses the JAR boundary through the generated class descriptor. */
+@Component
+public final class LibraryStatus extends ClassComponent<LibraryStatus.Props, LibraryStatus.Model, Void> {
+    public record Props(String label) {}
+    public record Model(int count) {}
+    public LibraryStatus(Props props) { super(props, new Model(0)); }
+    public void increment() { setState((state, props) -> statePatch().withCount(state.count() + 1).build()); }
+    @Override public View render() {
+        return <output data-testid="library-class">{props().label()}: {state().count()}</output>;
+    }
+}

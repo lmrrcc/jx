@@ -33,6 +33,7 @@ jobs:
       - run: npm run test:lazy
       - run: npm run test:rsc
       - run: npm run test:counter
+      - run: java tools/VerifyComponentLibrary.java .cache/maven-repository
       - run: npm run test:todo
       - run: npm run test:packaged
       - run: npm run test:auth

@@ -44,6 +44,7 @@ public final class PrePush {
             "npm run test:lazy",
             "npm run test:rsc",
             "npm run test:counter",
+            "java tools/VerifyComponentLibrary.java .cache/maven-repository",
             "npm run test:todo",
             "npm run test:packaged",
             "npm run test:auth",

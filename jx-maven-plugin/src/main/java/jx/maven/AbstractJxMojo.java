@@ -11,6 +11,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 
 abstract class AbstractJxMojo extends AbstractMojo {
     /** The current reactor project, never shared across plugin invocations. */
@@ -48,6 +49,14 @@ abstract class AbstractJxMojo extends AbstractMojo {
             else getLog().warn(diagnostic.toString());
         }
         if (failed) throw new MojoFailureException("JX validation failed; see original-source diagnostics above");
+    }
+    /** Own generated sources are authoritative; an old target/classes index is not a dependency. */
+    protected List<Path> componentClasspath(boolean tests) throws DependencyResolutionRequiredException {
+        Path main = classDirectory.toPath().toAbsolutePath().normalize();
+        Path test = testClassDirectory.toPath().toAbsolutePath().normalize();
+        return (tests ? project.getTestClasspathElements() : project.getCompileClasspathElements()).stream()
+                .map(value -> Path.of(value).toAbsolutePath().normalize())
+                .filter(path -> !path.equals(main) && !path.equals(test)).toList();
     }
     protected List<Path> ordinaryJava(List<String> roots) throws IOException {
         Path generated = outputDirectory.toPath().toAbsolutePath().normalize();

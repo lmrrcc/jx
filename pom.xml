@@ -35,6 +35,8 @@
     <module>examples/todo-api</module>
     <module>examples/counter-app</module>
     <module>examples/mv3-app</module>
+    <module>examples/component-library</module>
+    <module>examples/library-consumer</module>
     <module>examples/todo-app</module>
   </modules>
   <build>

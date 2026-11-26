@@ -1,0 +1,46 @@
+package jx.example.library;
+
+import jx.ClassComponent;
+import jx.ClassProps;
+import jx.Component;
+import jx.NullableState;
+import jx.OptionalProp;
+import jx.Presence;
+import jx.View;
+
+/** Omitted native defaults and sparse state remain part of a source-less library contract. */
+@Component @NullableState
+public final class LibrarySparse extends ClassComponent<LibrarySparse.Props, LibrarySparse.Model, Void> {
+    public record Props(@OptionalProp String label, @OptionalProp int initial) {}
+    public record Model(Presence<Integer> count, Presence<String> note) {}
+    public static final ClassProps<Props> defaultProps = propsInput().withLabel("Sparse default").withInitial(7).build();
+
+    public LibrarySparse(Props props) { super(props, null); }
+
+    private void increment() {
+        setState((previous, props) -> {
+            int next = previous != null && previous.count() instanceof Presence.Present<Integer> present
+                    ? present.value() + 1 : props.initial();
+            return statePatch().withCount(next).build();
+        });
+    }
+
+    private static String display(Presence<?> value) {
+        return switch (value) {
+            case Presence.Absent<?> ignored -> "absent";
+            case Presence.Undefined<?> ignored -> "undefined";
+            case Presence.Present<?> present -> String.valueOf(present.value());
+        };
+    }
+
+    @Override public View render() {
+        String snapshot = state() == null ? "null" : display(state().count()) + "/" + display(state().note());
+        return <section aria-label="Sparse library">
+            <output data-testid="library-sparse">{props().label()}: {snapshot}</output>
+            <button onClick={event -> setState(statePatch().build())}>Create sparse state</button>
+            <button onClick={event -> increment()}>Increment sparse count</button>
+            <button onClick={event -> setState(statePatch().undefinedNote().build())}>Undefined sparse note</button>
+            <button onClick={event -> setState(statePatch().withNote(null).build())}>Null sparse note</button>
+        </section>;
+    }
+}
