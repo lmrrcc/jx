@@ -28,6 +28,13 @@ remain without complete evidence. The integrated candidate is local: pending
 mutation and per-slice publication gates keep the broader work **🟡 partial**.
 The measurements below describe earlier slices, not additional passing tests.
 
+Latest published header slice: **✅ PR68 merged as `ef7e9d3`** after the
+15-step gate passed in 346 seconds and both Verify checks passed on `426cc08`.
+Its integrated bench passes 935 checks/193 skipped/141 cases and all 62/6328
+pair witnesses. The eight header/resource witnesses are now published evidence;
+production HTTP/103 adapters and the broader R-31 gate remain open. The import-map
+candidate above remains local until its own publication checks pass.
+
 Responsive image preload options (R-31-01) pass the integrated bench over
 merged lifecycle authoring `338872c`: **903 checks, 169 skipped, 134 cases**,
 plus 15 reporter checks. Package checks pass 47 core / two React option /
@@ -37,7 +44,7 @@ mutants were killed after a passing baseline. The seven-argument constructor
 remains available; the expanded record shape is documented. PR #59 merged as
 `a805810` after the 15-step gate passed in 436 seconds and both Verify checks
 passed on `4af20f2`. No new pair evidence or cross-browser qualification is
-claimed. The active interaction count remains 54 / 6,328.
+claimed. That preload run retained 54 /6,328 interaction pairs.
 
 Earlier resource-header qualification: **🟡 partial**, with package
 47 core/7 React/52 compiler/15 plugin and **911 full-bench checks, 193 skipped,

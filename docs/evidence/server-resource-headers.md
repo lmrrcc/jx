@@ -1,8 +1,9 @@
 # Server resource hint headers
 
-R-31 option-level work, 25 November 2026. Implementation, focused differential
-consumer and full bench pass; both scoped mutants are killed, while release gates remain pending. This is
-not a completed parity gate.
+R-31 option-level work, 26 November 2026. The bounded header slice merged through
+[PR 68](https://github.com/lmrrcc/jx/pull/68) as `ef7e9d3`. Implementation, focused
+differential consumer, full bench and both scoped mutants pass. This does not
+complete the broader parity gate or production HTTP qualification.
 
 `ReactServer.StreamOptions.withHeaders` exposes an immutable `ResourceHeaders`
 snapshot of React's Link field. `link()` is null when React supplies no hints.
@@ -69,6 +70,19 @@ java tools/MutateBench.java --only server-hint-header-empty,server-hint-budget-i
 ```
 
 ## Executed evidence
+
+Final integration over resume PR67 passed all 15 local gate steps in **346 seconds**
+on `426cc08`. Both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45767190940)
+and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45766891658) passed on
+that exact head before the confirmed squash merge. The final bench passes
+**935 checks /193 inapplicable cells /141 cases**: client 139 React/138 JX,
+hydrate 104/static 110/lazy 115 per side. Both result tables match and all 62/6328
+pair witnesses pass, leaving 6266 open. Maven passes 56 core/7 React/54 compiler/
+15 plugin/10 language-server checks, plus the configured Elm/backend/examples;
+proof, runtime 16, lazy 4, Flight 28 Node+4 Chrome, counter, Todo and both real hot
+checks pass. These counts describe the merged header slice; the earlier local
+qualification below is retained as history. Summary:
+`/private/tmp/jx-headers-426cc08-gate-summary.txt`.
 
 - Package passes **47 core, 7 React, 52 compiler and 15 Maven-plugin tests**,
   including the compiling Java consumer. The initial sandbox attempt could not

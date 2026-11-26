@@ -1,19 +1,21 @@
 # GA execution backlog and daily review
 
-Draft 0.3, progress reviewed 25 November 2026. Parent: [GA roadmap](ga-roadmap.md).
+Draft 0.3, progress reviewed 26 November 2026. Parent: [GA roadmap](ga-roadmap.md).
 The Status column flags every work package: **✅ done · 🟡 partial · ⬜ planned**.
 It tracks the package's acceptance outcome; an existing baseline implementation
 does not complete its planned GA qualification work. IDs are stable for future
 issues/PRs and evidence records.
 No GitHub issues, scheduled jobs, deployments or releases were created by this plan.
 
-Latest local qualification, resource-header slice: **911 passed /193 skipped /
-138 cases**, with package 47 core/7 React/52 compiler/15 plugin. The full run adds
+Latest published resource-header slice: **935 passed /193 skipped /
+141 cases**, with package 56 core/7 React/54 compiler/15 plugin/10 LSP. The full run adds
 eight executed header/resource witnesses, for **62/6328 pairs** (6266 active
-pairs open), and includes the separately added resume-nonce case. Headers remain
-**🟡 partial** until publication gates pass; its two scoped mutants were killed
-after a passing baseline in the five-mutant `eb536cd` campaign. Earlier figures below
-record their respective slices rather than this latest candidate.
+pairs open), and includes the separately added resume-nonce case. The bounded
+header slice is **✅ merged in PR68 as `ef7e9d3`**, after the 15-step gate passed
+in 346 seconds and both Verify checks passed on `426cc08`. Its two scoped mutants
+were killed after a passing baseline in the five-mutant `eb536cd` campaign.
+Production HTTP/103 and broader R-31 qualification remain open. Earlier figures
+below record their respective slices rather than this published integration.
 
 Progress: **GA-01 and GA-02 are complete**. GA-14, GA-15 and GA-18 have substantial
 partial implementations through the React parity tasks; their broader acceptance
