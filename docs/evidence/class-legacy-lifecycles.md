@@ -13,8 +13,8 @@ complete matrix passes **1,001 checks / 223 declared exclusions / 153 cases** in
 **4.5 minutes**: client 151 reference / 150 JX, hydration 111, static 117 and lazy
 122 per implementation. The recorded conformance table adds exactly the four
 legacy cases below; all previous rows are unchanged. The interaction table is
-unchanged at **62 / 6,328** pairs. The publication gate and remote Verify remain
-pending. These local results do not count as a new mutation campaign.
+unchanged at **62 / 6,328** pairs. The publication gate and both remote Verify
+checks subsequently pass, as recorded below. These results do not count as a new mutation campaign.
 
 The source, native reference and shared spec retain the previously qualified
 selected runtime semantics. Compiler discovery and advanced hot protocols are
@@ -243,3 +243,7 @@ The public [React Component reference](https://react.dev/reference/react/Compone
 describes the supported legacy methods and their caveats. The pinned React 19.3.1
 client and server implementations determine the exact dual-spelling order,
 modern-method suppression and pending context used in the differential fixtures.
+
+## Runtime publication acceptance
+
+[PR85](https://github.com/lmrrcc/jx/pull/85) merged as `51c0acb8354069abdcfabaf836a1bcdb1c09918f`. Exact head `d1899eb907511c33bd96d18852d6f3d88efd2d44` passed all 20 local gate steps in 425 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45857113824) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45857049443). The final integration passes 210 JVM checks plus TeaVM, 47 runtime checks, 1,001 conformance checks with 223 exclusions, four real hot workflows and the existing packaged/auth/SSR/MV3/external-consumer proofs. The 153-case inventory and 62/6,328 pair count match the committed ledgers. The earlier selected focused and historical mutation evidence above remains separate; this receipt does not qualify broader class authoring or hot protocols.

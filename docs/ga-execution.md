@@ -13,11 +13,7 @@ consumer row changes; all prior rows and **62/6,328** interaction pairs remain.
 One scoped compiler mutant was killed in the earlier selected-source campaign.
 Publication gate and Verify remain pending; native IDE qualification is separate.
 
-Next selected class slice: **🟡 R-28-03h2a legacy runtime** passes 182 JVM/TeaVM
-checks and the complete **1,001-pass /223-exclusion /153-case** matrix. Its four
-new legacy cases preserve the existing **62/6,328** interaction result. Publication
-gate and Verify remain pending; compiler declaration discovery and broader hot
-ownership are separate slices. See the [contract and evidence](evidence/class-legacy-lifecycles.md).
+Latest class-runtime acceptance: **✅ R-28-03h2a merged in PR85 as `51c0acb`**, after all 20 local gate steps passed in 425 seconds and both Verify checks passed on `d1899eb`. The integration passes **210 JVM, 47 runtime and 1,001 conformance checks /223 exclusions /153 cases**. Four new legacy cases preserve the existing **62/6,328** interaction result. Compiler declaration discovery, native IDE qualification and broader hot ownership remain separate; historical mutation results retain their original scope. See the [contract and evidence](evidence/class-legacy-lifecycles.md).
 
 Latest artifact-consumer acceptance: **✅ M1-30 merged in PR84 as `20267ab`**, after all 20 local gate steps passed in 503 seconds and both Verify checks passed on `1551e80`. An independent Java/.jx consumer resolves all 429 Maven artifacts from a frozen file repository into an empty cache, rebuilds offline and passes Chrome. Integrated **206 JVM, 47 runtime, 975 conformance checks/217 exclusions and four real hot workflows** pass. Publisher/npm provisioning, signing and supported public artifact release remain separate.
 

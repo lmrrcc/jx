@@ -148,8 +148,9 @@ unchanged. Its publication gate and Verify remain pending.
 The earlier selected legacy runtime integration passes **1,001 checks**, with **223
 declared exclusions across 153 case IDs**: client 151 reference /150 JX,
 hydrate 111, static 117 and lazy 122 per side. The conformance table adds only
-the four legacy cases, and the interaction table is unchanged. Publication gate
-and Verify remain pending; this run supplies no new pair credit.
+the four legacy cases, and the interaction table is unchanged. PR85 is accepted
+after the 20-step gate in 425 seconds and both Verify checks on `d1899eb`;
+this slice supplies no new pair credit.
 
 The earlier published defaults integration (PR72) passes **975 checks**, with
 **217 skipped cells across 149 case IDs**: client 147 reference /146 JX,
