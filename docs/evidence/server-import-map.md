@@ -5,8 +5,13 @@ package checks (56 core, 10 React, 54 compiler and 15 Maven tests) and the compl
 bench: **937 passed, 199 skipped, 142 cases**. Client mode passes 140 reference /
 139 JX checks; hydration 104, static HTML 110 and lazy mode 115 per side. All
 62/6328 registered interaction pairs remain green; this option adds no pair credit.
-Both scoped mutants are killed; publication gates remain pending. This is not
-completed parity.
+Both scoped mutants are killed. PR [#69](https://github.com/lmrrcc/jx/pull/69)
+merged as `b9d8f6756eeca0fed96d2572810556e319510573` after the 15-step gate
+passed in 377 seconds and both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45771288979) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45771188348) passed on
+`00d4828`. That final integration preserves the counts above and also passes all
+ten language-server tests. This bounded slice does not complete R-31 parity.
 
 `ReactServer.StreamOptions.withImportMap` accepts a typed immutable `ImportMap`
 containing imports, scopes and integrity metadata. It preserves null versus
