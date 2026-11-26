@@ -129,3 +129,19 @@ owners, Pure/nullable/sparse codecs, and cleanup of superseded discarded candida
 need separate positive and adversarial controls. Preserving the current visible
 rejection is safer than accepting a stale payload, but rejection alone cannot
 mark R-28-04 complete.
+
+## Source preparation
+
+Worktree `/private/tmp/jx-class-skipped-checkpoint` starts from integrated
+`4dcaf41`. The audit is committed in `c8f313b`; buildable regression sources
+are committed in `1a071dc`, retaining the old production journal for a genuine
+RED run. They add the native default/ref control, an abandoned props-only
+candidate plus retained descendant commit, and two same-user-props attempts
+where only the later owner commits.
+
+The proposed two-file production change is staged separately in
+`/private/tmp/jx-class-skipped-checkpoint-fix/`; it has not been applied or
+compiled. A source-only independent review found no concrete false-success
+path. That review does not establish insertion-effect timing or any hidden-state
+preservation. The targeted hot mutation is prepared outside the conformance
+catalog. RED/GREEN, complete runtime regression and publication remain pending.
