@@ -11,9 +11,6 @@ spring:
   mvc:
     problemdetails:
       enabled: true
-  web:
-    resources:
-      static-locations: file:examples/todo-app/target/site/
   jackson:
     deserialization:
       fail-on-unknown-properties: true
