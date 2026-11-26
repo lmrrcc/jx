@@ -131,6 +131,6 @@ final class ResourceApplication {
     private static View button(String id, EventHandler handler) {
         return Views.element("button", Attributes.create().attr("id", id).on("onClick", handler), id);
     }
-    @JSBody(params = {"kind", "value"}, script = "(globalThis.resourceEvents ||= []).push({kind, value});")
+    @JSBody(params = {"kind", "value"}, script = "(globalThis.resourceEvents || (globalThis.resourceEvents = [])).push({kind: kind, value: value});")
     private static native void report(String kind, String value);
 }
