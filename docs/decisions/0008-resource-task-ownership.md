@@ -146,5 +146,12 @@ fixture reporting compatible with TeaVM's JSBody parser, the selected reactor
 passes 80 JVM checks (62 core, 10 React, 8 Elm) and TeaVM in 3.882 seconds, without
 JSBody warnings. The complete runtime suite passes **24/24 in 5.9 seconds**.
 
+The later publication assembly `05e26a6`, including the journal and resource
+integration above, passes **174 JVM checks and TeaVM in 16.667 seconds** and
+**all 47 runtime Chrome checks in 12.0 seconds**. Its route consumer and shared
+spec remain byte-identical to `feb7318`; both new route checks and the existing
+45 runtime checks pass together. Publication gate/Verify remain pending, and
+this integration adds no conformance or mutation-catalog credit.
+
 The earlier roadmap reference to ADR 0003 was stale: ADR 0003 already covers
 state-preserving development, so this decision is ADR 0008.
