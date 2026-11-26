@@ -20,19 +20,20 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
-Latest published class-defaults integration: **975 checks pass, 217 skipped,
-149 cases**, with 66 core/10 React/59 compiler/15 Maven package tests passing.
-Nullable class state and the published server consumers remain included.
-All **62/6328** registered interaction pairs pass; **6266** remain without
-complete evidence. Broader class/hot/editor qualification keeps R-28 **🟡 partial**.
+Latest published journal integration: **975 checks pass, 217 skipped,
+149 cases**, with 180 JVM checks, 39 runtime Chrome checks and four real hot
+workflow checks. All **62/6328** registered interaction pairs pass; **6266**
+remain without complete evidence. Broader class/hot/editor qualification keeps
+R-28 **🟡 partial**.
 
-**✅ PR72 merged as `1717215`** after the 15-step gate passed in 332 seconds
-and both Verify checks passed on `8372309`. Three scoped defaults mutants
-were killed in the historical campaign after a passing baseline. The native
-target regions and consumers were compared with that qualified source;
-checkpoint adapter changes remain for the journal publication.
-Shared cancellation is prepared as a separate G0 slice and still needs its
-integrated gate and Verify. Earlier measurements below describe their own slices.
+**✅ PR74 merged as `ae8cdca`** after the 15-step gate passed in 406 seconds
+and both Verify checks passed on `4c02583`. This accepts the bounded commit
+journal, connected-owner correlation and explicit nullable/sparse codec slices.
+Pure checkpoints, hidden own commits, complete incoming ownership and validation
+before old-root teardown remain open. The earlier three direct journal mutants
+and separate nullable-reset mutant remain scoped evidence. **✅ PR73 shared
+cancellation merged as `d9151c0`**; defaults remain accepted in PR72. Resource and
+route loading are prepared next. Earlier measurements below describe their own slices.
 
 Responsive image preload options (R-31-01) pass the integrated bench over
 merged lifecycle authoring `338872c`: **903 checks, 169 skipped, 134 cases**,
@@ -125,7 +126,7 @@ native editor qualification and class hot checkpoints are still open.
 | --- | --- | --- |
 | GA-01 baseline and GA-02 portfolio inventory | ✅ Done | Maintain evidence as implementation changes. |
 | React parity track / GA-18 | 🟡 Partial | Local header/resume slice passes 911 checks across 138 cases and 62/6328 pairs before subsequent class-policy integration; 6266 active and 575 deferred-feature pairs remain. Final header publication gates remain pending. Class runtime slices are merged through PR62. Complete remaining APIs, options, class qualifications, Flight and combined scenarios. |
-| R-28 Java class runtime | 🟡 Partial | Runtime, direct authoring, native context, derived props, error lifecycles, typed next-context policies, nullable direct patches and custom Pure policies merged through PR62 after green gates and both Verify checks. The latest integrated bench passes 927 checks; the scoped policy mutant was killed after a passing baseline. Native editor qualification, remaining class options and class hot checkpoints remain open. |
+| R-28 Java class runtime | 🟡 Partial | Runtime, direct authoring and lifecycle slices are joined by nullable state, native defaults and the bounded checkpoint journal through PR74 after green gates and both Verify checks. The latest integrated bench passes 975 checks and the runtime suite passes 39. Native editor qualification, remaining class options, Pure/hidden checkpoints, complete incoming ownership and candidate preflight remain open. |
 | R-31-01 responsive preload options | ✅ Done | PR #59 merged as a805810 after the 15-step gate and both Verify checks; integrated 903-check bench and both targeted mutants pass. Chrome evidence only; the broader R-31 parity gate remains open. |
 | R-16 actions | ✅ Done | The `useFormState` alias and its bench case were added on 23 November 2026. |
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
@@ -227,8 +228,8 @@ PureComponent/key and PureComponent/ref witnesses bring the current total to
 **54 / 5,460**, leaving **5,406** active pairs open across 105 active features.
 It uses typed explicit descriptors and ordinary Java `Views`; `.jx` class authoring,
 native editor semantics and advanced lifecycle/context options remain later
-slices. Hot replacement resets class state, with typed class checkpoints still
-open. All three targeted class mutants were killed after the baseline passed,
+slices. That initial runtime reset class state; the later bounded journal is
+now published in PR74 while full class checkpoint qualification remains open. All three targeted class mutants were killed after the baseline passed,
 with no survivors or unusable mutants; the local 14-step gate and both Verify
 checks passed before PR #48 merged as `ccfcb2d`. That runtime slice's catalog
 has 115 entries, while the historical full campaign

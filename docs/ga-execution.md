@@ -7,15 +7,16 @@ does not complete its planned GA qualification work. IDs are stable for future
 issues/PRs and evidence records.
 No GitHub issues, scheduled jobs, deployments or releases were created by this plan.
 
-Latest published class-defaults slice: **975 passed /217 skipped /149 cases**,
-with package 66 core/10 React/59 compiler/15 plugin/10 LSP. The full run
-preserves **62/6328 pairs** (6266 active pairs open), including the published
-resource-header witnesses. R-28-03h3 is **✅ merged in PR72 as `1717215`** after
-the 15-step gate passed in 332 seconds and both Verify checks passed on
-`8372309`. Its three scoped mutation results belong to the recorded earlier
-campaign. Shared cancellation and the class checkpoint journal follow in
-separate publications; broader R-28/R-31 and G0 remain open.
-Earlier figures below record their respective slices.
+Latest published journal integration: **975 passed /217 skipped /149 cases**,
+with 180 JVM checks, 39 runtime Chrome checks and four real hot workflow checks.
+The full run preserves **62/6328 pairs** (6266 active pairs open). Shared
+cancellation is **✅ merged in PR73 as `d9151c0`**; the bounded journal scopes
+R-28-04a/b1/b2 are **✅ merged in PR74 as `ae8cdca`**, after the 15-step gate
+passed in 406 seconds and both Verify checks passed on `4c02583`. Defaults remain
+accepted through PR72. The journal's three historical direct mutants and separate
+nullable-reset mutant retain their recorded source/observation scope. Full class
+hot reload, broader R-28/R-31 and G0 remain open; resource and route loading are
+prepared next. Earlier figures below record their respective slices.
 
 Progress: **GA-01 and GA-02 are complete**. GA-14, GA-15 and GA-18 have substantial
 partial implementations through the React parity tasks; their broader acceptance
@@ -104,8 +105,9 @@ evidence to **54 / 5,460**, with **5,406** active pairs open. Activating
 118-feature / 6,903-pair universe is unchanged, leaving 1,443 deferred-feature
 pairs. This runtime slice uses explicit descriptors and ordinary Java `Views`.
 `.jx` class authoring, native editor support and advanced lifecycle/context
-options remain open. Hot replacement resets class state; compatible class
-checkpoints are not implemented. All three targeted mutants were killed after
+options remained open in that first slice, whose hot replacement reset class
+state. The later bounded journal is now published through PR74; complete class
+checkpoint qualification remains open. All three targeted mutants were killed after
 the unmutated baseline passed, with zero survivors or unusable mutants.
 [PR #48](https://github.com/lmrrcc/jx/pull/48) merged as `ccfcb2d` after the local
 14-step gate and both Verify checks passed on `b8657cb`:
