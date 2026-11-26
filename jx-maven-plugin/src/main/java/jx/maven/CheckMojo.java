@@ -16,7 +16,7 @@ public final class CheckMojo extends AbstractJxMojo {
     @Override public void execute() throws MojoExecutionException, MojoFailureException {
         try {
             var compiler = new JxCompiler();
-            var compilation = compiler.compile(GenerationService.readSources(sourceDirectory.toPath()));
+            var compilation = compiler.compile(GenerationService.readSources(sourceDirectory.toPath()), componentClasspath(false));
             report(compiler.check(compilation, ordinaryJava(project.getCompileSourceRoots()),
                     project.getCompileClasspathElements().stream().map(Path::of).toList(),
                     metadataDirectory.toPath().resolve("checked-classes")));

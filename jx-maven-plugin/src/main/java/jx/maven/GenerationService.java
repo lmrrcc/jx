@@ -19,12 +19,16 @@ final class GenerationService {
 
     Result generate(Path sourceDirectory, List<Path> indexDirectories, Path outputDirectory,
                     Path metadataDirectory, Path classDirectory) throws IOException, InvalidSources {
+        return generate(sourceDirectory, indexDirectories, outputDirectory, metadataDirectory, classDirectory, List.of());
+    }
+    Result generate(Path sourceDirectory, List<Path> indexDirectories, Path outputDirectory,
+                    Path metadataDirectory, Path classDirectory, List<Path> classpath) throws IOException, InvalidSources {
         Path root = sourceDirectory.toAbsolutePath().normalize();
         List<SourceFile> authored = readSources(root);
         Map<Path, SourceFile> indexed = new LinkedHashMap<>();
         for (Path directory : indexDirectories) for (SourceFile source : readSources(directory)) indexed.put(source.path(), source);
         for (SourceFile source : authored) indexed.put(source.path(), source);
-        Compilation compilation = new JxCompiler().compile(List.copyOf(indexed.values()));
+        Compilation compilation = new JxCompiler().compile(List.copyOf(indexed.values()), classpath);
         if (!compilation.successful()) throw new InvalidSources(compilation.diagnostics());
         List<GeneratedSource> generated = compilation.generatedSources().stream().filter(s -> s.source().path().startsWith(root)).toList();
         outputDirectory = outputDirectory.toAbsolutePath().normalize();
@@ -67,6 +71,32 @@ final class GenerationService {
                 .append(String.join(",", entry.getValue())).append('\n');
         write(manifest, ownership.toString());
         return new Result(compilation, written, deleted);
+    }
+
+    /** Only an explicitly owned descriptor may be overwritten or removed. */
+    static void library(List<ComponentMetadata> declarations, Path classDirectory, Path metadataDirectory) throws IOException {
+        Path classes = classDirectory.toAbsolutePath().normalize(), metadata = metadataDirectory.toAbsolutePath().normalize();
+        Path descriptor = safe(classes, Path.of(ComponentLibrary.RESOURCE));
+        Path ownership = safe(metadata, Path.of("library-owned.txt"));
+        boolean owned = Files.exists(ownership);
+        if (owned && (Files.size(ownership) != 24 || !Files.readString(ownership).equals("jx-component-library-v1\n")))
+            throw new IOException("Invalid component library ownership marker");
+        if (!owned && Files.exists(descriptor)) throw new IOException("Refusing to overwrite an unowned component descriptor");
+        if (declarations.isEmpty()) {
+            if (owned) { Files.deleteIfExists(descriptor); Files.deleteIfExists(ownership); }
+            return;
+        }
+        byte[] bytes = ComponentLibrary.encode(ComponentLibrary.create(declarations, classes));
+        if (Files.exists(descriptor) && Files.size(descriptor) <= ComponentLibrary.MAX_BYTES
+                && java.util.Arrays.equals(Files.readAllBytes(descriptor), bytes)) return;
+        Files.createDirectories(descriptor.getParent());
+        Path temporary = Files.createTempFile(descriptor.getParent(), ".jx-components-", ".tmp");
+        try {
+            Files.write(temporary, bytes);
+            try { Files.move(temporary, descriptor, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING); }
+            catch (AtomicMoveNotSupportedException unsupported) { Files.move(temporary, descriptor, StandardCopyOption.REPLACE_EXISTING); }
+            write(ownership, "jx-component-library-v1\n");
+        } finally { Files.deleteIfExists(temporary); }
     }
 
     static List<SourceFile> readSources(Path directory) throws IOException {

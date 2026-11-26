@@ -1,0 +1,33 @@
+package jx.example.library;
+
+import jx.Component;
+import jx.DomRef;
+import jx.EventHandler;
+import jx.Hooks;
+import jx.OptionalProp;
+import jx.State;
+import jx.View;
+
+/** Reusable stateful component. Consumers compile against its JAR and ABI descriptor. */
+@Component
+public final class LibraryCounter {
+    public record Props(String title, int initial, DomRef inputRef, EventHandler onIncrement,
+                        View children, @OptionalProp String prefix) {
+        public Props { if (prefix == null) prefix = "Library"; }
+    }
+    public static View render(Props props) {
+        State<Integer> count = Hooks.useState(props.initial());
+        return (
+            <section aria-label={props.title()}>
+                <h2>{props.prefix()}: {props.title()}</h2>
+                <output data-testid="library-count">{count.value()}</output>
+                <input aria-label="Library draft" ref={props.inputRef()} />
+                <button onClick={event -> {
+                    count.update(value -> value + 1);
+                    props.onIncrement().handle(event);
+                }}>Increment library</button>
+                {props.children()}
+            </section>
+        );
+    }
+}

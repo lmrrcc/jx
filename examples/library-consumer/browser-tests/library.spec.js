@@ -1,0 +1,36 @@
+import {test,expect} from '@playwright/test';
+
+test('the packaged library keeps independent state, typed callbacks, children and refs across consumer updates',async({page,context})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  page.on('console',message=>{if(message.type()==='error')errors.push(message.text());});
+  await page.goto('/');
+  await expect(page.getByRole('heading',{name:'Library: Imported counter'})).toBeVisible();
+  await expect(page.getByTestId('library-count')).toHaveText('5');
+  await expect(page.getByTestId('library-children')).toHaveText('Child authored in the consumer');
+  const counter=await page.getByTestId('library-count').elementHandle();
+  const draft=page.getByRole('textbox',{name:'Library draft'});
+  await draft.fill('retained draft');
+  await page.getByRole('button',{name:'Increment library',exact:true}).click();
+  await page.getByRole('button',{name:'Increment library class',exact:true}).click();
+  await expect(page.getByTestId('library-count')).toHaveText('6');
+  await expect(page.getByTestId('notifications')).toHaveText('1');
+  await expect(page.getByTestId('library-class')).toHaveText('Imported class: 1');
+  await page.getByRole('button',{name:'Rerender consumer'}).click();
+  await expect(page.getByTestId('consumer-pulse')).toHaveText('1');
+  await expect(page.getByTestId('library-count')).toHaveText('6');
+  await expect(draft).toHaveValue('retained draft');
+  expect(await counter.evaluate(node=>node===document.querySelector('[data-testid="library-count"]'))).toBe(true);
+  await page.getByRole('button',{name:'Focus library input'}).click();await expect(draft).toBeFocused();
+  await page.getByRole('button',{name:'Inspect library ref'}).click();await expect(page.getByTestId('ref-state')).toHaveText('attached');
+  await page.getByRole('button',{name:'Toggle library'}).click();
+  await expect(page.getByTestId('library-count')).toHaveCount(0);
+  await page.getByRole('button',{name:'Inspect library ref'}).click();await expect(page.getByTestId('ref-state')).toHaveText('detached');
+  await page.getByRole('button',{name:'Toggle library'}).click();
+  await expect(page.getByTestId('library-count')).toHaveText('5');
+  await expect(page.getByTestId('library-class')).toHaveText('Imported class: 0');
+  await context.setOffline(true);
+  await page.getByRole('button',{name:'Increment library',exact:true}).click();
+  await expect(page.getByTestId('library-count')).toHaveText('6');
+  await expect(page.getByTestId('notifications')).toHaveText('2');
+  expect(errors).toEqual([]);
+});

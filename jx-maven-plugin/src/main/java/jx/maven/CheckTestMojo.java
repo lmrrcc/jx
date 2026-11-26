@@ -21,7 +21,7 @@ public final class CheckTestMojo extends AbstractJxMojo {
             sources.addAll(GenerationService.readSources(testSourceDirectory.toPath()));
             var roots = new ArrayList<>(project.getCompileSourceRoots());
             roots.addAll(project.getTestCompileSourceRoots());
-            report(compiler.check(compiler.compile(sources), ordinaryJava(roots),
+            report(compiler.check(compiler.compile(sources, componentClasspath(true)), ordinaryJava(roots),
                     project.getTestClasspathElements().stream().map(Path::of).toList(),
                     testMetadataDirectory.toPath().resolve("checked-classes")));
         } catch (IOException | DependencyResolutionRequiredException | IllegalStateException ex) {

@@ -1,0 +1,48 @@
+package jx.example.consumer;
+
+import jx.ClassRef;
+import jx.Component;
+import jx.Dependencies;
+import jx.DomRef;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+import jx.example.library.LibraryCounter;
+import jx.example.library.LibraryStatus;
+
+@Component
+public final class App {
+    public static View render() {
+        State<Integer> notifications = Hooks.useState(0);
+        State<Integer> pulse = Hooks.useState(0);
+        State<Boolean> mounted = Hooks.useState(true);
+        State<String> inspected = Hooks.useState("not inspected");
+        DomRef input = Hooks.useMemo(DomRef::new, Dependencies.none());
+        ClassRef<LibraryStatus> status = Hooks.useMemo(() -> new ClassRef<>(value -> {
+            if (value instanceof LibraryStatus peer) return peer;
+            throw new IllegalArgumentException("Expected library class");
+        }), Dependencies.none());
+        return (
+            <main>
+                <h1>Components from a source-less JAR</h1>
+                <button onClick={event -> pulse.update(value -> value + 1)}>Rerender consumer</button>
+                <button onClick={event -> mounted.update(value -> !value)}>Toggle library</button>
+                <button onClick={event -> inspected.set(status.current() == null ? "detached" : "attached")}>Inspect library ref</button>
+                <output data-testid="notifications">{notifications.value()}</output>
+                <output data-testid="consumer-pulse">{pulse.value()}</output>
+                <output data-testid="ref-state">{inspected.value()}</output>
+                {mounted.value() ? (
+                    <section>
+                        <LibraryCounter title="Imported counter" initial={5} inputRef={input}
+                                onIncrement={event -> notifications.update(value -> value + 1)}>
+                            <strong data-testid="library-children">Child authored in the consumer</strong>
+                        </LibraryCounter>
+                        <button onClick={event -> input.current().focus()}>Focus library input</button>
+                        <LibraryStatus label="Imported class" ref={status} />
+                        <button onClick={event -> status.current().increment()}>Increment library class</button>
+                    </section>
+                ) : null}
+            </main>
+        );
+    }
+}
