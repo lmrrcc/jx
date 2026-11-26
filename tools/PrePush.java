@@ -48,7 +48,8 @@ public final class PrePush {
             "npm run test:packaged",
             "npm run test:auth",
             "npm run test:ssr-protected",
-            "npm run test:hot");
+            "npm run test:hot",
+            "npm run test:extension");
 
     private PrePush() {}
 

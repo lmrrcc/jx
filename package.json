@@ -16,6 +16,8 @@
     "test:contract": "playwright test -c examples/todo-app/playwright.config.js -g 'contract exact values'",
     "test:packaged": "playwright test -c tests/packaged/playwright.config.js",
     "test:auth": "playwright test -c tests/session/playwright.config.js",
+    "build:extension": "java tools/PackageExtension.java",
+    "test:extension": "npm run build:extension && playwright test -c examples/mv3-app/playwright.config.js",
     "test:hot": "playwright test -c tests/hot-reload/playwright.config.js",
     "build:bench": "esbuild tests/conformance/reference/entry.jsx --bundle --format=esm --jsx=automatic --sourcemap --outfile=tests/conformance/target/reference-site/application.js && esbuild tests/conformance/reference/server.jsx --bundle --platform=node --format=cjs --jsx=automatic --outfile=tests/conformance/target/reference-site/server.cjs",
     "build:bench-server": "esbuild tests/conformance/server-entry.js --bundle --platform=node --format=cjs --outfile=tests/conformance/target/jx-server/server.cjs",
@@ -36,6 +38,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.65.1",
+    "brotli-wasm": "3.0.1",
     "esbuild": "0.28.2",
     "react-server-dom-webpack": "19.3.1",
     "webpack": "5.108.4",

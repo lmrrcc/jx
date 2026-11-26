@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "JX Java and Rust WASM proof",
+  "version": "0.1.0",
+  "action": {"default_popup": "index.html", "default_title": "JX proof"},
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; object-src 'none'; connect-src 'self'; style-src 'self'; base-uri 'none'"
+  }
+}

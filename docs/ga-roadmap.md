@@ -584,6 +584,13 @@ Prove minimal JX packaging under actual Chrome MV3 CSP and an existing Rust/WASM
 binding in M1–M2. Full extension qualification comes later, but runtime/packaging
 incompatibility must be discovered early.
 
+M1-27 is now **🟡 locally verified**: a packaged `.jx` popup invokes the existing
+Rust Brotli WASM binding under actual MV3 CSP. Three Chrome checks cover the real
+action-popup lifecycle, Unicode/byte round trips and rejection without the WASM
+permission. Publication gates remain pending; this does not qualify privileged
+Gandalf operations, background suspension or extension storage/messages. See the
+[proof and its limits](evidence/mv3-wasm.md).
+
 ## 4. Workstreams and completion contracts
 
 Each workstream needs a responsible maintainer and an independent reviewer.

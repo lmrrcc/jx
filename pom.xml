@@ -34,6 +34,7 @@
     <module>tests/protected-ssr/client</module>
     <module>examples/todo-api</module>
     <module>examples/counter-app</module>
+    <module>examples/mv3-app</module>
     <module>examples/todo-app</module>
   </modules>
   <build>
