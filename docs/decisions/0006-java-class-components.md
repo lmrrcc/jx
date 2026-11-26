@@ -687,3 +687,44 @@ with `java tools/MutateBench.java --only class-pure-policy-suppressed --keep`.
 Final push gate, Verify and native IDE qualification remain pending. This slice's
 original catalog had 132 entries, without a new full-catalog run beyond the
 historical 100.
+
+## R-28-03h1 nullable state and explicit field presence — 25 November 2026
+
+The manual runtime descriptor now offers `withNullableState()`, independent of
+the non-null props contract. Null state can reach constructors, render, queued
+updaters, static derivation, current instance reads and previous-state lifecycle
+arguments. The Java peer constructor no longer rejects null state immediately:
+validation occurs when its descriptor constructs the peer, before mounting.
+Existing descriptors still reject it unless explicitly configured. The null-patch
+regression retains that guard at the descriptor boundary; a queued null patch
+does not grant nullable initialization.
+
+Sparse objects cannot be represented by silently defaulting required record
+fields. `Presence<V>` therefore distinguishes Absent, own Undefined and Present
+(including null when the value type allows it). `ClassSchema.optionalField` and
+`Reader.find` expose that choice; existing required fields and `Reader.get` remain
+strict. Initial encoding omits absent fields and preserves own undefined. Native
+React still owns shallow merging, insertion order, Pure comparison and scheduling;
+there is no parallel Java state store.
+
+All declared source fields are validated once before calling the record factory;
+Reader reads a schema-known immutable snapshot. The factory cannot conceal a
+missing or invalid required source value by ignoring Reader and creating defaults.
+This intentional tightening also applies to the existing defined-value read API.
+
+`StatePatch.undefined(field)` explicitly assigns undefined to an optional field;
+omission preserves prior state and never deletes a key. A null direct/functional
+patch is a queued no-change operation. An empty patch produces an object merge,
+including from null. Derived null means no change. Required fields must still be
+defined after an object merge, even on a nullable-state descriptor.
+
+The new `Entry.undefined` record component expands its record shape, while the
+old two-argument constructor/accessors keep their defined-value meaning. This is
+not a serialization compatibility promise. Modifier composition preserves the
+nullable opt-in with context policies and both derived-state callbacks.
+
+See [the consumer and qualification record](../evidence/class-nullable-state.md).
+Native `.jx` sparse-record authoring, nullable initial props, general dynamic
+object state, supported legacy lifecycle options and presence-aware hot codecs
+remain open. In particular, this slice does not resolve R-28-04's hidden/SCU-false
+commit-proof requirement or permit opaque values to cross TeaVM generations.

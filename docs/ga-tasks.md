@@ -331,8 +331,9 @@ the same 937/199/142 result and 62/6328 pair witnesses; the 15-step gate passed 
 No new pair credit or cross-browser qualification is claimed. See the
 [import-map contract](evidence/server-import-map.md).
 
-R-31-NATIVE-WRITABLE, 25 November 2026: 🟡 focused qualification of the existing
-borrowed Node destination API. Package passes 56 core/10 React/54 compiler/15
+R-31-NATIVE-WRITABLE, 26 November 2026: ✅ bounded slice merged in PR70 as
+`8da61ba`; production HTTP qualification and broader R-31 remain partial.
+Package passes 56 core/10 React/54 compiler/15
 Maven checks and compiles two additional `.jx` consumers; three differential
 cases pass 6 Node checks, with 18 inapplicable cells. Multiple ready Suspense
 boundaries pause output until drain, asynchronous write/final errors preserve the
@@ -342,7 +343,11 @@ owns disconnect cancellation; no hard buffering limit is inferred from a
 high-water mark. Integrated source `5643be9` passes the full bench: 943 checks,
 217 skipped, 145 cases; client 143/142, hydrate 104, static 110 and lazy 115 per
 side. All 62/6328 registered pairs stay green. The native-destination mutant is
-killed by four cases after an unmodified full baseline; publication gates remain pending.
+killed by four cases after an unmodified full baseline. Final integration preserves
+the 943/217/145 result and 62/6328 pairs; the 15-step gate passed in 368 seconds
+on `02d2ddf`, followed by both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45775162282) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45775023854).
 No pair credit or production HTTP qualification is added. See the
 [native destination evidence](evidence/server-native-writable.md).
 
@@ -593,7 +598,9 @@ lifecycle parity or preserved class state across hot replacement.
 | R-28-03e | Typed third nextContext argument for should-update through an additive context-aware descriptor policy, then `.jx` overload support | ✅ done: PR [#60](https://github.com/lmrrcc/jx/pull/60), merged `3815001`; package 51 core/2 React/53 compiler/15 Maven/10 LSP; 911 checks/169 skipped/135 cases, all 64 class cells pass, unchanged 54/6328 pairs; explicit and generated policies preserve current versus pending values and take precedence over the old override; two scoped mutants killed after passing baseline, zero survived/unusable; local gate 15/15 in 373 s and both Verify checks passed on `251aaa7`; native IDE qualification remains separate |
 | R-28-03f | Nullable direct state patches with native queued callbacks, no-op identity, mixed-update ordering and ordinary `.jx` calls | ✅ done: PR [#61](https://github.com/lmrrcc/jx/pull/61), merged `a93e325`; original JX failed all three interactive modes while React passed; integrated package 54 core/2 React/53 compiler/15 Maven/10 LSP; final full bench 919 checks/169 skipped/136 cases and all 72 class cells pass; unchanged 54/6328 pairs; callback-dropping mutant killed after passing baseline, zero survived/unusable; local gate 15/15 in 348 s and both Verify checks passed on `1c23a22`; typed null preserves updater and constructor guards |
 | R-28-03g | Custom PureComponent should-update policies through typed descriptors and ordinary `.jx` declarations | ✅ done: PR [#62](https://github.com/lmrrcc/jx/pull/62), merged `39dd3ce`, tested head `035e6ab`; two JVM guard regressions red then green; integrated package 56 core/2 React/54 compiler/15 Maven/10 LSP and full 927 checks/169 skipped/137 cases, including all 80 class cells; native warning preserved; unchanged 54/6328 pairs; policy-omission mutant killed after passing baseline on f49b48f, zero survived/unusable (one of the seven scoped mutations); local gate 15/15 in 311 s and both Verify checks passed |
-| R-28-03h | Remaining class options: schema plan for null initial props/state, deprecated/UNSAFE lifecycles, class defaultProps and general authoring limits | ⬜ planned: see ADR 0006 option inventory; React 19 removed legacy context APIs are not implementation targets; supported deprecated lifecycle forms remain open, and rejecting a supported option is not an accepted parity reduction |
+| R-28-03h | Remaining class options, split into nullable state runtime and further supported legacy/authoring options | 🟡 nullable state slice 03h1 passes focused qualification; integration pending; no remaining-option acceptance implied |
+| R-28-03h1 | Explicit nullable aggregate class state and typed Absent/Undefined/Present fields, preserving native merge/Pure/lifecycle semantics | 🟡 review: package 63 core/54 compiler/15 Maven and 96 class checks pass; source-bypass JVM regression red then green; both scoped mutants killed after baseline in the first eight-mutant e296d4a campaign, zero survived/unusable; publication source fb7c674 preserves the eleven nullable files, final integrated gate/Verify pending; manual descriptors only; see [contract](evidence/class-nullable-state.md) |
+| R-28-03h2 | Sparse `.jx` class authoring, nullable initial props, deprecated/UNSAFE lifecycles, class defaultProps and remaining general authoring limits | ⬜ planned: see ADR 0006 option inventory; React 19 removed legacy context APIs are not implementation targets; supported deprecated lifecycle forms remain open, and rejecting a supported option is not an accepted parity reduction |
 | R-28-04 | Committed class checkpoints, concurrent/discard behavior, option matrix and mutation qualification | ⬜ planned |
 
 R-28-03a publication evidence: [PR #53](https://github.com/lmrrcc/jx/pull/53)

@@ -67,7 +67,13 @@ class ClassNullPatchTest {
     @Test void nullPatchDoesNotRelaxInitializationAndConstructionGuards() {
         Model initial = new Model(0);
         assertThrows(NullPointerException.class, () -> new Counter(null, initial));
-        assertThrows(NullPointerException.class, () -> new Counter(initial, null));
+        // Null aggregate initialization is checked at the descriptor boundary, separately
+        // from a queued null patch. Existing descriptors remain strict without opt-in.
+        ClassSchema.Field<Model,Integer> count = ClassSchema.field("count", ClassSchema.INTEGER, Model::count);
+        ClassSchema<Model> schema = new ClassSchema<>(List.of(count), reader -> new Model(reader.get(count)));
+        var descriptor = ClassComponentType.normal("StrictCounter", schema, schema,
+                props -> new Counter(props, null), java.util.Set.of());
+        assertThrows(NullPointerException.class, () -> descriptor.create(initial));
         Counter counter = new Counter(initial, initial);
         StatePatch<Model> noChange = null;
         assertThrows(IllegalStateException.class, () -> counter.setState(noChange));

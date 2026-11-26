@@ -39,14 +39,15 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     private final BiFunction<P,S,StatePatch<S>> derivedState;
     private final Function<Throwable,StatePatch<S>> derivedError;
     private final ContextPolicy<P,S,C> contextUpdate;
+    private final boolean nullableState;
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles) {
-        this(name, props, state, factory, context, pure, lifecycles, null, null, null);
+        this(name, props, state, factory, context, pure, lifecycles, null, null, null, false);
     }
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles,
             BiFunction<P,S,StatePatch<S>> derivedState, Function<Throwable,StatePatch<S>> derivedError,
-            ContextPolicy<P,S,C> contextUpdate) {
+            ContextPolicy<P,S,C> contextUpdate, boolean nullableState) {
         if (Objects.requireNonNull(name).isBlank()) throw new IllegalArgumentException("Empty class component name");
         this.name = name; this.props = Objects.requireNonNull(props); this.state = Objects.requireNonNull(state);
         this.factory = Objects.requireNonNull(factory); this.context = context;
@@ -54,6 +55,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         this.derivedState = derivedState;
         this.derivedError = derivedError;
         this.contextUpdate = contextUpdate;
+        this.nullableState = nullableState;
         if (this.lifecycles.contains(Lifecycle.SNAPSHOT) && !this.lifecycles.contains(Lifecycle.UPDATE))
             throw new IllegalArgumentException("Snapshot lifecycle requires update lifecycle");
     }
@@ -96,6 +98,28 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
                 context, true, lifecycles);
     }
     public String name() { return name; }
+    /** Returns a distinct descriptor permitting null aggregate state. Declare the result
+     * once to keep native component identity stable. Props and the state schema itself
+     * remain non-null contracts; non-null state objects still validate every declared field.
+     * Use optional fields with explicit Presence values when React's first partial merge
+     * may leave fields absent. A required field is never filled with a synthetic default.
+     *
+     * <p>Null initial state reaches constructors, rendering, updaters, derivation and lifecycle
+     * callbacks as Java null. A null patch preserves state; an empty patch merges to an
+     * object, including from null. This does not offer resetting aggregate state to null.
+     * No checkpoint/serialization support or compiler-generated sparse record is implied.
+     * Existing factory, context, lifecycle and derivation settings are preserved. */
+    public ClassComponentType<P,S,C> withNullableState() {
+        return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
+                derivedState, derivedError, contextUpdate, true);
+    }
+    /** Whether null aggregate state is accepted; properties have separate presence rules. */
+    public boolean nullableState() { return nullableState; }
+    /** Renderer validation of aggregate state and all present fields. Null is accepted only
+     * by opt-in; required fields remain strict in every non-null state snapshot. */
+    public void validateState(S value) {
+        if (value != null || !nullableState) state.validate(value);
+    }
     /** Returns a new descriptor with React's static {@code getDerivedStateFromProps}.
      * Declare the result once: descriptors identify native component types, so creating one
      * during render changes component identity. The original descriptor is unchanged.
@@ -116,7 +140,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDerivedStateFromProps(BiFunction<P,S,StatePatch<S>> callback) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                Objects.requireNonNull(callback, "callback"), derivedError, contextUpdate);
+                Objects.requireNonNull(callback, "callback"), derivedError, contextUpdate, nullableState);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasDerivedStateFromProps() { return derivedState != null; }
@@ -127,7 +151,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public StatePatch<S> deriveStateFromProps(P nextProps, S pendingState) {
         if (derivedState == null) throw new IllegalStateException("No derived state callback configured");
-        props.validate(nextProps); state.validate(pendingState);
+        props.validate(nextProps); validateState(pendingState);
         StatePatch<S> patch = derivedState.apply(nextProps, pendingState);
         if (patch != null && patch.schema() != state) throw new IllegalArgumentException("Derived state patch belongs to another class schema");
         return patch;
@@ -146,7 +170,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDerivedStateFromError(Function<Throwable,StatePatch<S>> callback) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                derivedState, Objects.requireNonNull(callback, "callback"), contextUpdate);
+                derivedState, Objects.requireNonNull(callback, "callback"), contextUpdate, nullableState);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasDerivedStateFromError() { return derivedError != null; }
@@ -187,7 +211,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
                 derivedState, derivedError, (peer, nextProps, nextState, nextContext) ->
                     policy.shouldUpdate(peer, nextProps, nextState,
-                            Objects.requireNonNull(nextContext.current(requested), "Missing next context reader").get()));
+                            Objects.requireNonNull(nextContext.current(requested), "Missing next context reader").get()), nullableState);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasContextShouldUpdate() { return contextUpdate != null; }
@@ -197,7 +221,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      * @throws NullPointerException for a null peer or missing required context access
      */
     public boolean shouldUpdate(C peer, P nextProps, S nextState, ContextAccess nextContext) {
-        Objects.requireNonNull(peer, "peer"); props.validate(nextProps); state.validate(nextState);
+        Objects.requireNonNull(peer, "peer"); props.validate(nextProps); validateState(nextState);
         return contextUpdate == null ? peer.shouldUpdate(nextProps, nextState)
                 : contextUpdate.shouldUpdate(peer, nextProps, nextState, Objects.requireNonNull(nextContext, "Missing next context access"));
     }
@@ -221,7 +245,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         if (context != null) Objects.requireNonNull(access, "Missing renderer context access");
         C peer = Objects.requireNonNull(factory.apply(value, access), "Class factory returned null");
         if ((peer instanceof PureComponent<?,?,?>) != pure) throw new IllegalArgumentException("Class peer kind disagrees with its descriptor");
-        state.validate(peer.initialState());
+        validateState(peer.initialState());
         return peer;
     }
 }

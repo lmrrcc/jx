@@ -32,7 +32,7 @@ class ClassSchemaTest {
         assertThrows(IllegalArgumentException.class, () -> MODEL.read(field -> "wrong"));
         ClassSchema.Field<Model,Integer> foreign = ClassSchema.field("count", ClassSchema.INTEGER, Model::count);
         ClassSchema<Model> wrongReader = new ClassSchema<>(List.of(COUNT, NOTE), reader -> new Model(reader.get(foreign), null));
-        assertThrows(IllegalArgumentException.class, () -> wrongReader.read(field -> 1));
+        assertThrows(IllegalArgumentException.class, () -> wrongReader.read(field -> field == COUNT ? 1 : "valid note"));
     }
     @Test void scalarAndReferenceBoundariesKeepTheirActualSemantics() {
         assertEquals(-0.0, ClassSchema.DOUBLE.decode(-0.0));
