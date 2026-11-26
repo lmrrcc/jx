@@ -135,7 +135,7 @@ native editor qualification and class hot checkpoints are still open.
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
 | R-21 hydration | ✅ Done | `React.hydrate` over Node-rendered HTML (M1-25), store server snapshots and matching `useId`, added on 24 November 2026. |
 | G0 foundation proofs | 🟡 Partial | Lazy-module boundary and basic SSR→hydration proofs delivered; component JAR, exact shared contract, authenticated packaged Spring and protected SSR data route remain. |
-| Shared contracts and complete Spring integration | ⬜ To do | Generated clients/codecs, starter/BOM, one packaged UI/API and authenticated development. The existing todo API is the baseline. |
+| Shared contracts and complete Spring integration | 🟡 Partial | Shared Todo record/paths and generated String/bool/int browser codec locally verified with real Spring/Chrome; exact values, generated clients, starter/BOM, packaged UI/API and authenticated development remain. Publication pending. |
 | JX server rendering and hydration | 🟡 Partial | Node rendering, hydration, streaming/resume have bench evidence; request isolation, protected data and the RSC protocol track remain. |
 | IntelliJ and VS Code experience | 🟡 Partial | Existing packages work within documented limits; GA qualification, scale, remaining editing actions and browser debugging are open. |
 | TT-01 Cherry Test orchestration | 🟡 Partial | Unit coverage/CRAP delivered; integration and browser kinds still open. |

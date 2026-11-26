@@ -1,6 +1,6 @@
 # Shared record wire contract
 
-Status: focused implementation in progress; verification pending.
+Status: M1-17/M1-19 locally verified on 26 November 2026; publication pending.
 
 The [shared-contract proposal](../ga-contracts.md) describes the eventual API
 surface. This first implementation proves one portable record through both an
@@ -15,7 +15,7 @@ server domain objects.
   consumers compile the same record. The server retains UUID creation/parsing,
   validation of requests, transactions and optimistic conflict checks. Form
   drafts and private server models may differ from the transport value.
-- A Maven browser-codec goal will inspect explicitly selected compiled public
+- The Maven `record-codecs` goal inspects explicitly selected compiled public
   records through javac symbols, without loading application classes. Generated
   sources belong to the browser module. Unsupported types or serialization
   annotations fail generation instead of guessing a schema. Owned output and
@@ -33,6 +33,11 @@ M1-17 requires existing real Spring tests and the complete browser Todo example.
 M1-19 additionally requires generated-code compilation, unsupported-type and
 ownership tests, and the same real browser requests. M1-18 requires JVM and actual
 browser/Spring vectors; a JVM-only codec test is insufficient.
+
+M1-17/M1-19's [local evidence](../evidence/shared-todo-contract.md) now meets
+those focused checks: 159 JVM tests, actual TeaVM output, and all three unchanged
+Todo Chrome scenarios pass. Exact-value vectors remain separate work; the initial
+generator does not claim support for `long`, decimal, nullable or missing fields.
 
 Java 25 is the first shared artifact baseline. Older server JVMs, arbitrary custom
 Jackson serializers/naming strategies, generated async operations, auth/session
