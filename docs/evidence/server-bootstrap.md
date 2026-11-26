@@ -148,7 +148,12 @@ A final assertion review found that an empty second continuation could satisfy
 the original negative isolation check. The shared spec now also requires the
 second response's script/style nonces and resolved content and compares both
 responses against native React. Both strengthened client checks pass in 6.6 seconds
-on source `ac0a577`; the exact-head publication gate still needs to run. The earlier
+on source `ac0a577`. The earlier
 shared qualification does not claim to have executed these additional assertions.
-No new pair coverage or mutation qualification is
-attributed to the resume case. Publication and Verify remain pending.
+The final 15-step gate passed in 303 seconds on `5cc8079`, including
+933 passed /187 skipped /140 cases with both result tables matching and the same
+54/6328 pair witnesses. Both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45764255030)
+and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45764249693) passed on
+that exact head. [PR 67](https://github.com/lmrrcc/jx/pull/67) merged as `5cb1746`.
+No new pair coverage or mutation qualification is attributed to the resume case;
+the broader host and cross-browser limits above remain open.

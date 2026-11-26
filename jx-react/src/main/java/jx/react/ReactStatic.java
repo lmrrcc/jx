@@ -65,17 +65,20 @@ public final class ReactStatic {
     }
 
     /** React's {@code resumeAndPrerender}: finishes an aborted prerender as static HTML, a web
-     * stream. {@code view} must be the view that was prerendered. */
+     * stream. {@code view} must be the view that was prerendered.
+     * @throws IllegalArgumentException if nonce or initial-only resource header options are supplied */
     public static Prerendering resumeAndPrerender(View view, Postponed postponed, ReactServer.StreamOptions options) {
         return continued(view, postponed, options, false);
     }
 
-    /** React's {@code resumeAndPrerenderToNodeStream}: as {@link #resumeAndPrerender}, a Node stream. */
+    /** React's {@code resumeAndPrerenderToNodeStream}: as {@link #resumeAndPrerender}, a Node stream.
+     * @throws IllegalArgumentException if nonce or initial-only resource header options are supplied */
     public static Prerendering resumeAndPrerenderToNodeStream(View view, Postponed postponed, ReactServer.StreamOptions options) {
         return continued(view, postponed, options, true);
     }
 
     private static Prerendering continued(View view, Postponed postponed, ReactServer.StreamOptions options, boolean node) {
+        ReactServer.validateResumeOptions(options);
         validateStaticOptions(options);
         Hooks.installRuntime(ReactHooks.INSTANCE);
         JSObject state = Objects.requireNonNull(postponed).state;

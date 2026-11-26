@@ -265,7 +265,8 @@ local gate passed in 335 seconds; both
 unchanged 54/6328 pairs. No new pair credit or general CSP/SSR qualification is added.
 See the [bootstrap contract and evidence](evidence/server-bootstrap.md).
 
-R-31-SERVER-RESUME-NONCE, 25 November 2026: 🟡 focused qualification at
+R-31-SERVER-RESUME-NONCE, 26 November 2026: ✅ bounded slice merged through
+[PR 67](https://github.com/lmrrcc/jx/pull/67) as `5cb1746`; original focused qualification at
 `7686627`. Both native resume variants now have a Java/React differential
 consumer exercising fresh script/style nonces after a trusted postponed-state
 JSON round trip, exact output, two-request isolation, bootstrap preservation and
@@ -277,10 +278,31 @@ cases, including this case, with byte-identical consumer/reference files. Its ro
 is retained; the later main integration passes 933 checks/187 skipped/140 cases
 and the 15-step gate in 353 seconds on `df76df8`. The spec has since been strengthened
 to reject an empty second continuation and compare both responses against React;
-both focused client checks pass in 6.6 seconds on `ac0a577`, with a new exact-head
-gate still pending.
-Publication and Verify remain pending, with no added pair or mutant credit.
+both focused client checks pass in 6.6 seconds on `ac0a577`. The final 15-step
+gate passes in 303 seconds on `5cc8079`, with 933 passed/187 skipped/140 cases
+and unchanged 54/6328 pair witnesses. Both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45764255030) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45764249693) passed on
+that exact head. No added pair or mutant credit or general SSR/CSP qualification
+is claimed; the broader R-31 task remains open.
 Details are in the bootstrap evidence record above.
+
+R-31-SERVER-HEADERS, 25 November 2026: 🟡 implementation and focused differential
+consumer pass. Typed immutable Link snapshots normalize Node/Web callbacks;
+an explicit positive UTF-16 header budget is preserved across builders. Initial
+render/prerender supports the options; resume rejects them. Callback failures
+remain observable through onError even when React continues the body. Source
+tests cover four renderers, request isolation, deduplication, budget/empty cases
+and original Java errors. Package passes 47 core/7 React/52 compiler/15 plugin;
+the focused run passes two checks with six inapplicable cells, including all
+eight marked R-27 header/resource witnesses on both sides. Full bench passes
+911 checks, 193 skipped, 138 cases: client 136/135, hydrate 101, static 107, lazy 112.
+All eight new witnesses and the 54 prior ones pass, bringing recorded evidence to
+62/6328 pairs (6266 open). Both header mutants were killed by this case after a
+passing baseline in the five-mutant `eb536cd` campaign, with zero survivors or
+unusable mutants. This is the header quota of two, not a full-catalog run.
+Final gate and Verify remain pending; production HTTP/103 integration is not
+qualified. See the [header contract](evidence/server-resource-headers.md).
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven

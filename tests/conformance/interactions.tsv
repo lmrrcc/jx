@@ -1,4 +1,12 @@
 id	feature-a	feature-b	case	modes	behavior
+headers-readable-preconnect	react-dom/server:renderToReadableStream	react-dom:preconnect	server-resource-headers	client	Concurrent Web streaming renders each emit their own deduplicated preconnect Link header
+headers-readable-preload	react-dom/server:renderToReadableStream	react-dom:preload	server-resource-headers	client	Concurrent Web streaming renders each emit their own font and high-priority image preload headers
+headers-pipeable-preconnect	react-dom/server:renderToPipeableStream	react-dom:preconnect	server-resource-headers	client	Concurrent Node streaming renders each emit their own deduplicated preconnect Link header
+headers-pipeable-preload	react-dom/server:renderToPipeableStream	react-dom:preload	server-resource-headers	client	Concurrent Node streaming renders each emit their own font and high-priority image preload headers
+headers-prerender-preconnect	react-dom/static:prerender	react-dom:preconnect	server-resource-headers	client	Concurrent Web prerenders each emit their own deduplicated preconnect Link header
+headers-prerender-preload	react-dom/static:prerender	react-dom:preload	server-resource-headers	client	Concurrent Web prerenders each emit their own font and high-priority image preload headers
+headers-prerender-node-preconnect	react-dom/static:prerenderToNodeStream	react-dom:preconnect	server-resource-headers	client	Concurrent Node prerenders each emit their own deduplicated preconnect Link header
+headers-prerender-node-preload	react-dom/static:prerenderToNodeStream	react-dom:preload	server-resource-headers	client	Concurrent Node prerenders each emit their own font and high-priority image preload headers
 pure-keyed	jsx:key	react:PureComponent	class-keyed	client,hydrate,lazy	Reordering keyed native PureComponent peers preserves their state and DOM nodes while equal projected fields skip rendering
 pure-instance-ref	react:PureComponent	react:createRef	class-keyed	client,hydrate,lazy	Checked class instance refs retain the original native PureComponent peers through state changes and keyed reorders without remounting
 portal-context	react-dom:createPortal	react:useContext	combined-portal-lifecycle	client,hydrate,lazy	Context updates cross the portal's logical ancestry without replacing its input node or draft

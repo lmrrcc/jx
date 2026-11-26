@@ -141,15 +141,20 @@ the same case earn no pair evidence.
 
 The merged sink-delivery run over the class policies passes 929 checks, with
 175 skipped cells across 138 case IDs: client 136 reference / 135 JX, hydrate 104
-per side, static 110 per side and lazy 115 per side. Fifty-four pairs have complete local
-evidence in their declared modes; 6,274 of the 6,328 current candidates remain
+per side, static 110 per side and lazy 115 per side. That accepted parent has 54
+registered pairs; the current resource-header integration still needs its final gate.
+
+The resource-header run before subsequent class-policy integration passes 911 checks, with 193 skipped cells
+across 138 case IDs: client 136 reference / 135 JX, hydrate 101 per side, static
+107 per side and lazy 112 per side. Sixty-two pairs have complete local
+evidence in their declared modes; 6,266 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate
 pairs, including 575 deferred-feature pairs. **R-27 remains partial.** See the
 [interaction evidence record](../../docs/ga-react-interactions.md) for the two
 initial combined scenarios, children-composition regressions, seven ref pairs,
 six portal pairs, four action pairs, three optimistic/store pairs, three transition
-pairs, four server/resource pairs, two PureComponent key/ref pairs and acceptance
+pairs, four earlier server/resource pairs, eight header/resource pairs, two PureComponent key/ref pairs and acceptance
 status. R-27-02a merged in [PR #39](https://github.com/lmrrcc/jx/pull/39)
 at `413558b636679dd5926f4d7bf1c987ea707ed95c`, after its 755-check bench and green
 Verify. R-27-02b merged in [PR #40](https://github.com/lmrrcc/jx/pull/40) at

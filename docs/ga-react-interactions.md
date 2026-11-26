@@ -44,6 +44,15 @@ qualification is implied by these automated results.
 
 ## Current evidence and remaining scope
 
+The latest local header integration passes **911 checks, 193 skipped, 138 cases**.
+Eight separate assertion steps prove preconnect deduplication or font/image
+preload emission under each of four real server renderers, with two complete
+concurrent responses per step. Together with all prior witnesses this records
+**62/6328 pairs**, leaving **6266** active pairs open. The new rows apply to the
+Node-hosted client-project test only; no browser-mode credit is inferred.
+Header mutation and publication gates remain pending. The earlier slice results
+below are historical.
+
 R-29 adds eight supported/equivalent utility rows without adding pair witnesses.
 The responsive-preload integration keeps all 54 existing witnesses green among
 6,328 active candidates: 113 active features, 6,274 pairs without complete
@@ -86,8 +95,8 @@ This is assertion evidence, not credit earned by registration alone.
 | --- | --- |
 | Currently supported/equivalent feature IDs | 113 |
 | Candidate unordered pairs among those IDs | 6,328 |
-| Pairs with a passing witness in every declared mode, on both React and JX | 54 |
-| Current candidate pairs without complete evidence | 6,274 |
+| Pairs with a passing witness in every declared mode, on both React and JX | 62 |
+| Current candidate pairs without complete evidence | 6,266 |
 | Eventual application-feature IDs | 118 |
 | Eventual candidate pairs | 6,903 |
 | Additional pairs involving the 5 deferred feature IDs | 575 |

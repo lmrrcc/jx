@@ -9,6 +9,7 @@ import { cases } from './cases.jsx';
 import { combinedServer } from './combined-server.jsx';
 import {renderBootstrap} from './bootstrap.jsx';
 import {resumeBootstrap} from './resume-bootstrap.jsx';
+import {resourceHeaders} from './resource-headers.jsx';
 import { Writable } from 'node:stream';
 import {
   renderToPipeableStream, renderToReadableStream, renderToStaticMarkup, renderToString,
@@ -75,6 +76,7 @@ function Streaming() {
 export const server = {
   renderBootstrap,
   resumeBootstrap,
+  resourceHeaders,
   ...combinedServer,
   reactVersion: () => reactVersion,
   domVersion: () => domVersion,

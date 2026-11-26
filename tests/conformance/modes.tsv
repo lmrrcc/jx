@@ -38,3 +38,6 @@ server-bootstrap	lazy	complete server output with CSP is tested as its own brows
 server-resume-nonce	hydrate	complete prerender/resume output is served with its own CSP, not a bench-root hydration or lazy route
 server-resume-nonce	static	complete prerender/resume output is served with its own CSP, not a bench-root hydration or lazy route
 server-resume-nonce	lazy	complete prerender/resume output is served with its own CSP, not a bench-root hydration or lazy route
+server-resource-headers	hydrate	resource hint header callbacks run on the rendering host without a browser root
+server-resource-headers	static	resource hint header callbacks run on the rendering host without a browser root
+server-resource-headers	lazy	resource hint header callbacks run on the rendering host without a browser root
