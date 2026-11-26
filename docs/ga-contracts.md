@@ -137,7 +137,9 @@ the backend remains authoritative even if a notification is lost.
 **Preferred development candidate:** the Spring backend is the browser-visible
 origin, with narrowly configured forwarding of development assets/hot channels.
 Alternative: a constrained local proxy with explicit auth/cookie/redirect rules.
-Choose after an actual session/CSRF/OIDC test; neither is proven today.
+The [M1-21 session proof](evidence/session-csrf-todo.md) implements the constrained
+proxy alternative for the Todo session/CSRF flow. OIDC, backend-fronted hot assets
+and the broader identity-generation/cross-tab owner above remain separate work.
 
 Current `DevelopmentProxy` deliberately drops Cookie, Authorization and Set-Cookie.
 Do not casually turn it into a general-purpose authenticated proxy. Required tests:

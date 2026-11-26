@@ -413,13 +413,17 @@ Concrete gaps that influence sequencing:
 
 - Component metadata is currently derived from the source batch; library JAR
   consumption must work before building a reusable component ecosystem.
-- The Todo DTO and its JSON field/URL knowledge are repeated on the browser and
-  server. The current JSON API exposes exact `int` values, not a certified general
-  numeric wire model.
-- The current development proxy strips authentication/cookie headers. It is not
-  evidence of authenticated Spring development.
-- Spring serves the demo's external build directory. That is not proof of an
-  application JAR deployable independently of the checkout.
+- M1-17–19 now locally qualify the shared Todo record/paths, generated bounded
+  record codecs and explicit exact-value vectors. General protocol generation and
+  wire evolution remain open.
+- M1-21 now locally qualifies Spring native login/CSRF/logout and two private
+  workspaces in both packaged and Maven-dev modes:169 JVM +2 auth Chrome,4 Todo
+  and2 packaged regressions pass on c658cea. The proxy's default remains anonymous;
+  cookie forwarding is explicit and constrained. [Evidence](evidence/session-csrf-todo.md)
+  keeps publication/Verify and OIDC/cross-tab/timed-expiry work separate.
+- M1-20 locally qualifies an executable Boot JAR with attached browser assets,
+  launched from an empty directory. Prefixes, deployment caching/CSP and the
+  independent starter/release acceptance remain open.
 - The current hot loader reconstructs Java values across TeaVM generations.
   Independent chunks cannot simply exchange arbitrary Java instances. This also
   constrains lazy loading, shared libraries, workers and SSR bootstrapping.
