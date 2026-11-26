@@ -101,11 +101,19 @@ public final class JxRenameClassProcessor extends RenamePsiElementProcessor {
             snapshots.put(document, document.getText());
         });
         try {
-            documents.forEach((document, ranges) -> ranges.forEach(range -> document.replaceString(range.getStartOffset(), range.getEndOffset(), name)));
-            manager.commitAllDocuments();
+            // All ranges were validated before this loop. Keep the platform's outstanding
+            // document queue bounded even for a rename across hundreds of closed files;
+            // the surrounding refactoring command still owns atomic undo for every edit.
+            documents.forEach((document, ranges) -> {
+                ranges.forEach(range -> document.replaceString(range.getStartOffset(), range.getEndOffset(), name));
+                manager.commitDocument(document);
+            });
             if (renameFile) sourceFile.setName(name + ".jx");
         } catch (RuntimeException failure) {
-            snapshots.forEach(Document::setText); manager.commitAllDocuments();
+            snapshots.forEach((document, text) -> {
+                document.setText(text);
+                manager.commitDocument(document);
+            });
             if (!sourceFile.getName().equals(oldFileName)) sourceFile.setName(oldFileName);
             throw failure;
         }

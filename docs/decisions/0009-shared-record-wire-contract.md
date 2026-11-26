@@ -1,6 +1,6 @@
 # Shared record wire contract
 
-Status: M1-17/M1-19 accepted in PR77 (`8ea78ba`) on 26 November 2026, after the full local gate and both Verify checks. M1-18 exact values are locally qualified and await their separate publication. The bounded contract below remains explicit.
+Status: M1-17/M1-19 accepted in PR77 (`8ea78ba`) and M1-18 in PR78 (`07290dd`) on 26 November 2026, each after its full local gate and both Verify checks. The bounded contract below remains explicit; exact-value adapters do not expand the generated codec subset.
 
 The [shared-contract proposal](../ga-contracts.md) describes the eventual API
 surface. This first implementation proves one portable record through both an

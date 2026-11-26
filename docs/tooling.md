@@ -286,6 +286,19 @@ compiler/server bytes. ZIP SHA-256:
 
 ## Verification scope
 
+The 2026-11-26 development rebuild adds the [100-component G0 proof](evidence/intellij-editor-scale.md).
+All **96 IntelliJ SDK tests** pass, and the ZIP passes Plugin Verifier on the
+same pinned build with the existing 15 deprecated/18 experimental API warnings.
+The compiler's syntax pass no longer discovers ambient javac plugins or scans
+the IDE classpath. Structural rename validates every edit before mutation and
+commits each closed document without an unbounded pending-document batch.
+The proof checks exact source preservation across 101 files; undo/redo is
+qualified separately at 25 files because a strongly retained 101-file undo
+also trips the stock Java SDK control. These measurements are headless native
+operations, not typing-to-paint or broad IDE parity. Publication/Verify remains
+pending for this source change; the evidence record contains its ZIP hash and
+raw timing samples.
+
 Editor integration tests exercise the actual native Java engines, alongside
 shared JX protocol services. A successful ZIP build alone does not establish
 IDE compatibility. Preserve the
