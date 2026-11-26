@@ -2,6 +2,7 @@ package jx.example.api;
 
 import java.util.List;
 import java.util.UUID;
+import jx.example.contract.Todo;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -10,7 +11,6 @@ import org.springframework.web.server.ResponseStatusException;
 /** Persistent demo-wide todo list. Optimistic versions prevent an older tab overwriting a newer edit. */
 @Repository
 public class TodoRepository {
-    public record Todo(String id, String title, boolean completed, int version) {}
     private final JdbcClient jdbc;
     public TodoRepository(JdbcClient jdbc) { this.jdbc = jdbc; }
 

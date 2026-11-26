@@ -109,7 +109,7 @@ final class GenerationService {
         if (path.isAbsolute() || !path.equals(path.normalize()) || path.startsWith("..") || path.toString().isEmpty())
             throw new IOException("Unsafe generated path " + path);
     }
-    private static Path safe(Path root, Path relative) throws IOException {
+    static Path safe(Path root, Path relative) throws IOException {
         validateRelative(relative);
         if (Files.isSymbolicLink(root)) throw new IOException("Generated root must not be a symlink: " + root);
         Path path = root;
@@ -119,7 +119,7 @@ final class GenerationService {
         }
         return path;
     }
-    private static void deleteClasses(Path directory, List<String> types, String sourceFile) throws IOException {
+    static void deleteClasses(Path directory, List<String> types, String sourceFile) throws IOException {
         for (String type : types) {
             validateType(type);
             Path relative = Path.of(type.replace('.', '/'));
@@ -147,7 +147,7 @@ final class GenerationService {
             }
         }
     }
-    private static void write(Path path, String content) throws IOException {
+    static void write(Path path, String content) throws IOException {
         if (Files.exists(path) && Files.readString(path).equals(content)) return;
         Files.createDirectories(path.getParent());
         Path temporary = Files.createTempFile(path.getParent(), ".jx-", ".tmp");

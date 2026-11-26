@@ -9,6 +9,8 @@ import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import jx.example.contract.Todo;
+import jx.example.contract.TodoApi;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.boot.SpringApplication;
@@ -29,6 +31,10 @@ class TodoApiTest {
             var created = send(client, base, "POST", "/api/todos", "{\"title\":\"Ship Java UI\"}");
             assertEquals(201, created.statusCode(), created.body());
             id = application.getBean(TodoRepository.class).list().getFirst().id();
+            assertEquals(TodoApi.item(id), created.headers().firstValue("Location").orElseThrow());
+            assertEquals(new Todo(id, "Ship Java UI", false, 0),
+                    application.getBean(TodoRepository.class).list().getFirst());
+            assertEquals("{\"id\":\"" + id + "\",\"title\":\"Ship Java UI\",\"completed\":false,\"version\":0}", created.body());
             var updated = send(client, base, "PUT", "/api/todos/" + id, "{\"title\":\"Ship Java UI\",\"completed\":true,\"version\":0}");
             assertEquals(200, updated.statusCode(), updated.body());
             assertTrue(updated.body().contains("\"version\":1"));
