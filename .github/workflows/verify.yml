@@ -38,6 +38,7 @@ jobs:
       - run: npm run test:auth
       - run: npm run test:ssr-protected
       - run: npm run test:hot
+      - run: npm run test:extension
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

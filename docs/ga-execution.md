@@ -7,7 +7,9 @@ does not complete its planned GA qualification work. IDs are stable for future
 issues/PRs and evidence records.
 No GitHub issues, scheduled jobs, deployments or releases were created by this plan.
 
-Latest session/CSRF acceptance: **✅ M1-21 merged in PR81 as `8795b35`**, after all 17 local gate steps passed in 451 seconds and both Verify checks passed on `cb279b0`. The native login, session rotation, CSRF/logout denial and two private workspaces are exercised through the executable JAR and actual Maven development proxy. Integrated **204 JVM, 47 runtime, 975 conformance checks/217 exclusions, four Todo, two packaged, two auth and four hot workflows** pass. OIDC, timed expiry/cross-tab recovery, general identity-generation disposal and deployment hardening remain separate.
+Latest protected-SSR acceptance: **✅ M1-26 merged in PR82 as `968ccf3`**, after all 18 local gate steps passed in 495 seconds and both Verify checks passed on `20e0eaa`. The actual Spring-authenticated route preserves two immutable request snapshots, hydrates retained DOM without refetch and cleans up a disconnected suspended request. Integrated **206 JVM, 47 runtime, 975 conformance checks/217 exclusions, three protected SSR checks and four real hot workflows** pass. Progressive private streaming, backend-fetch abort and production SSR hosting remain open.
+
+Earlier session/CSRF acceptance: **✅ M1-21 merged in PR81 as `8795b35`**, after all 17 local gate steps passed in 451 seconds and both Verify checks passed on `cb279b0`. The native login, session rotation, CSRF/logout denial and two private workspaces are exercised through the executable JAR and actual Maven development proxy. Integrated **204 JVM, 47 runtime, 975 conformance checks/217 exclusions, four Todo, two packaged, two auth and four hot workflows** pass. OIDC, timed expiry/cross-tab recovery, general identity-generation disposal and deployment hardening remain separate.
 
 Earlier packaged-Spring acceptance: **✅ M1-20 merged in PR80 as `74eb3d9`**, after all 16 local gate steps passed in 404 seconds and both Verify checks passed on `f07bcd4`. The actual executable Boot JAR serves the Java browser UI and API from an empty directory. Integrated **201 JVM, 47 runtime, 975 conformance checks/217 exclusions, four Todo, two packaged Chrome and four hot workflows** pass. This is the bounded root-context CSR proof; authentication, deployment policy and the starter remain separately tracked.
 
@@ -132,9 +134,9 @@ the historical full campaign of 100. See the
 [class-runtime decision](decisions/0006-java-class-components.md) and the
 [interaction evidence record](ga-react-interactions.md) for the unchanged eventual
 118-feature / 6,903-pair scope and its limits. G0 remains open: the serialized lazy
-boundary and basic Node rendering/hydration proofs are delivered, while component
-JARs, exact shared contracts, authenticated packaging and protected SSR data still
-need their complete evidence. Existing editor packages,
+boundary, bounded shared/exact contracts, authenticated packaging and protected
+SSR proofs are now accepted. Component JAR, MV3, artifact-consumer publication
+and the remaining G0 review are tracked separately. Existing editor packages,
 the todo API and hot updates are useful baselines, not completion of their GA
 qualification packages. The Cherry Test unit/coverage baseline is delivered;
 TT-01–TT-06 in the implementation sequence track the remaining test tooling.
@@ -320,7 +322,7 @@ exists, not when its document or skeleton module lands.
 | GA-04 | Shared contract, codec and exact-value spike / C | GA-03 | M1 / M | One DTO/operation definition; real Spring/browser round trip, decimal/long/null boundaries | 🟡 bounded spike accepted: M1-17/M1-19 merged in PR77 and M1-18 in PR78, each after gate/Verify. Shared response/path contract, generated required String/bool/int codec and explicit long/decimal/presence adapters pass actual Spring/browser tests. Broader generated clients, richer schemas, protocol evolution and G0 review remain open. |
 | GA-05 | Component-library JAR ABI spike / L | GA-01 | M1 / S | Independent producer and consumer, no source copying, metadata version failure tested | ⬜ planned |
 | GA-06 | Lazy-chunk Java identity spike / R | GA-05 | M1 / M | Lazy route absent initially; domain values/context/callbacks cross safely; no duplicate React. M1-22/M1-23 prove the serialized boundary; independent library consumption and automatic application packaging remain | 🟡 partial |
-| GA-07 | React SSR→hydration spike / W | GA-03 | M1 / M | Protected data-dependent route, scoped API/auth, two simultaneous identities, immutable hydration snapshot, abort and no duplicate fetch/mutation. Basic Node rendering/hydration is delivered; protected data isolation remains | 🟡 partial |
+| GA-07 | React SSR→hydration spike / W | GA-03 | M1 / M | Protected data-dependent route, scoped API/auth, two simultaneous identities, immutable hydration snapshot, abort and no duplicate fetch/mutation | ✅ bounded G0 spike accepted through M1-24–26; PR82 adds real Spring-owned snapshots, retained hydration and suspended-request disconnect cleanup after gate/Verify. Progressive streaming, in-flight backend-fetch abort and production hosting remain GA-22 work. |
 | GA-08 | Native editor architecture/performance decision / T | GA-01 | M1 / M | Scale baseline; precise projection limits; source-preserving structural proof or explicit revised design | 🟡 bounded M1-28/M1-29 proofs accepted in PR79: measured SDK100-component baseline, closed rename101 and undo/redo25 with native undo101 limit recorded; original96SDK/ZIP/Verifier and integrated gate/Verify pass. Broader installed-editor qualification and architecture decision remain open. |
 | GA-09 | Artifact identities and clean distribution rehearsal / Q | GA-01 | M1–M3 / M | Namespaces/owners verified; external consumer installs candidate artifacts without workspace caches | ⬜ planned |
 | GA-10 | Contract IR and generators v1 / C | GA-04 | M2–M3 / L | Java authority + generated async client/codecs/server boundary/schema; incompatible wire change fails | ⬜ planned |

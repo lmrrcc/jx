@@ -1,0 +1,32 @@
+package jx.example.extension;
+
+import jx.Component;
+import jx.Hooks;
+import jx.State;
+import jx.View;
+
+@Component
+public final class App {
+    public static View render() {
+        State<Integer> count = Hooks.useState(0);
+        State<BrotliProof.Result> result = Hooks.useState((BrotliProof.Result) null);
+        return (
+            <main>
+                <h1>JX extension</h1>
+                <p>Java components. React rendering. Rust/WASM computation.</p>
+                <button id="round-trip" onClick={event -> {
+                    result.set(BrotliProof.roundTrip("Java → Rust/WASM ✓ ".repeat(64)));
+                    count.update(previous -> previous + 1);
+                }}>Run WASM round trip</button>
+                <output id="count">{count.value()}</output>
+                {result.value() == null ? <p id="result">Ready</p> :
+                    <section>
+                        <p id="result">Round trip verified</p>
+                        <output id="decoded">{result.value().text()}</output>
+                        <output id="input-bytes">{result.value().inputBytes()}</output>
+                        <output id="compressed-bytes">{result.value().compressedBytes()}</output>
+                    </section>}
+            </main>
+        );
+    }
+}

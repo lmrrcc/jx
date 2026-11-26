@@ -1,0 +1,19 @@
+JX MV3 interoperability proof
+
+The application bundle includes React and React DOM 19.3.1, copyright Meta
+Platforms, Inc. and affiliates, under the MIT license. Their esbuild-preserved
+license notices are included in application.js; full licenses accompany them in
+react-LICENSE.txt and react-dom-LICENSE.txt.
+
+The packaged Rust/WASM module and JavaScript binding are brotli-wasm 3.0.1,
+copyright Tim Perry and contributors, under Apache-2.0 (brotli-LICENSE.txt).
+Upstream source: https://github.com/httptoolkit/brotli-wasm
+The npm integrity digest is pinned in the repository package-lock.json.
+The package wraps the Rust Brotli crate; this proof does not replace its ABI
+or claim qualification of arbitrary WASM modules or Gandalf wallet operations.
+
+JX source is covered by JX-LICENSE.txt. TeaVM 0.16.0 and its generated runtime are
+under Apache-2.0 (teavm-LICENSE.txt, from the upstream 0.16.0 tag).
+Upstream source: https://github.com/konsoletyper/teavm/tree/0.16.0
+No source maps, credentials, remote code,
+host permissions or user browser profile are included in this archive.
