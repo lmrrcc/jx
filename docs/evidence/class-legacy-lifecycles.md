@@ -26,9 +26,9 @@ Two runtime mutants were killed in the historical `cc929bb` campaigns; those
 results are not a new mutation campaign on this selected integration.
 
 Logs: `/private/tmp/jx-legacy-runtime-integrated-build.log` and
-`/private/tmp/jx-legacy-journal-composition.log`; the focused reporter output is
-retained in `tests/conformance/target/results/`. No unrelated capability was
-imported to make this slice compile.
+`/private/tmp/jx-legacy-journal-composition.log`. The focused Playwright reporter
+printed the 26/6 result; it does not rewrite aggregate result tables for a partial
+run. No unrelated capability was imported to make this slice compile.
 
 ## Public contract
 
