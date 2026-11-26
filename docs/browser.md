@@ -67,8 +67,13 @@ with dependencies) passes 144 JVM checks and compiles both TeaVM applications in
 including real HTTP cancellation, late Elm replies, owned subscription disposal
 and independent hot generations. A JVM regression additionally covers completion
 before work returns its cancellation handle: the owner releases it once and
-rejects later replies. These are local checks; publication still requires the
-repository gate and Verify.
+rejects later replies. [PR73](https://github.com/lmrrcc/jx/pull/73) was then
+merged as `d9151c0` after the 15-step local gate passed in 313 seconds on
+`0bb3f17`, and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45791829041)
+and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45791655823) passed.
+The integrated conformance run passes 975 checks with 217 mode exclusions across
+149 cases; both examples and the real hot workflow also pass. Resource-hook
+ownership and route-loading integration remain separate G0 tasks.
 
 ## History routing
 
