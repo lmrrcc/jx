@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../tests/packaged/auth-test.js';
 
 test('contract exact values cross actual Spring and Java/TeaVM without numeric coercion', async ({ page, request }) => {
   const errors = [];

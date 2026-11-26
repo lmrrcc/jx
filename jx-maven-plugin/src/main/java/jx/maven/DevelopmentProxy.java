@@ -27,7 +27,8 @@ import java.util.concurrent.TimeoutException;
 /**
  * Optional development-only bridge to one explicitly configured local HTTP API.
  * Owns its HTTP client; the caller owns the exchange and validates its Host header.
- * Cookies, authorization, redirects, and arbitrary headers are never forwarded.
+ * Credentials are stripped by default. Explicit session-cookie opt-in forwards only that
+ * host-only cookie, a bounded CSRF header and validated relative locations; never Authorization.
  */
 final class DevelopmentProxy implements AutoCloseable {
     static final int MAX_REQUEST_BYTES = 1024 * 1024;
@@ -40,13 +41,18 @@ final class DevelopmentProxy implements AutoCloseable {
     private final URI origin;
     private final Duration timeout;
     private final HttpClient client;
+    private final SessionProxyHeaders session;
     private final Semaphore slots = new Semaphore(8);
 
     DevelopmentProxy(String apiOrigin) { this(apiOrigin, Duration.ofSeconds(15)); }
 
     /** Shorter deadlines are available to isolated fixture tests. */
     DevelopmentProxy(String apiOrigin, Duration timeout) {
+        this(apiOrigin, timeout, null);
+    }
+    DevelopmentProxy(String apiOrigin, Duration timeout, String sessionCookie) {
         origin = validateOrigin(apiOrigin);
+        session = sessionCookie == null || sessionCookie.isBlank() ? null : new SessionProxyHeaders(sessionCookie);
         if (timeout == null || timeout.isZero() || timeout.isNegative() || timeout.compareTo(Duration.ofSeconds(15)) > 0)
             throw new IllegalArgumentException("Development proxy timeout must be positive and at most 15 seconds");
         this.timeout = timeout;
@@ -69,6 +75,13 @@ final class DevelopmentProxy implements AutoCloseable {
             error(exchange, 405, "Unsupported API method"); return;
         }
         if (!sameOrigin(exchange, devPort)) { error(exchange, 403, "API requests must come from this development origin"); return; }
+        String cookie = null, csrf = null;
+        if (session != null) {
+            try {
+                cookie = session.requestCookie(exchange.getRequestHeaders().get("Cookie"));
+                csrf = SessionProxyHeaders.csrf(exchange.getRequestHeaders().get("X-CSRF-TOKEN"));
+            } catch (IllegalArgumentException invalid) { error(exchange, 400, invalid.getMessage()); return; }
+        }
         if (!slots.tryAcquire()) { error(exchange, 503, "Too many active API requests"); return; }
         try {
             String length = exchange.getRequestHeaders().getFirst("Content-Length");
@@ -90,6 +103,8 @@ final class DevelopmentProxy implements AutoCloseable {
             URI target = URI.create(origin + requested.getRawPath() + (query == null ? "" : "?" + query));
             var builder = HttpRequest.newBuilder(target).timeout(timeout).header("Accept-Encoding", "identity")
                     .method(method, body.length == 0 ? HttpRequest.BodyPublishers.noBody() : HttpRequest.BodyPublishers.ofByteArray(body));
+            if (cookie != null) builder.header("Cookie", cookie);
+            if (csrf != null) builder.header("X-CSRF-TOKEN", csrf);
             for (String name : REQUEST_HEADERS) {
                 String value = exchange.getRequestHeaders().getFirst(name);
                 if (value != null && value.length() <= 8192) builder.header(name, value);
@@ -99,6 +114,14 @@ final class DevelopmentProxy implements AutoCloseable {
                 HttpResponse<byte[]> response = pending.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
                 if (!response.headers().firstValue("Content-Encoding").orElse("identity").equalsIgnoreCase("identity")) {
                     error(exchange, 502, "API backend ignored the identity encoding request"); return;
+                }
+                if (session != null) {
+                    try {
+                        String setCookie = session.responseCookie(response.headers().allValues("Set-Cookie"));
+                        String location = SessionProxyHeaders.location(response.headers().allValues("Location"));
+                        if (setCookie != null) exchange.getResponseHeaders().set("Set-Cookie", setCookie);
+                        if (location != null) exchange.getResponseHeaders().set("Location", location);
+                    } catch (IllegalArgumentException invalid) { error(exchange, 502, invalid.getMessage()); return; }
                 }
                 for (String name : RESPONSE_HEADERS) response.headers().firstValue(name)
                         .filter(value -> value.length() <= 8192).ifPresent(value -> exchange.getResponseHeaders().set(name, value));

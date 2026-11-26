@@ -16,10 +16,11 @@ public final class TodoProgram implements Program<TodoProgram.Model, TodoProgram
         public Model { todos = List.copyOf(todos); Objects.requireNonNull(phase); Objects.requireNonNull(error); }
         public boolean busy() { return phase == Phase.LOADING || phase == Phase.SAVING; }
     }
-    public sealed interface Message permits Reload, Loaded, Failed, Create, Toggle, Remove, Saved, Removed {}
+    public sealed interface Message permits Reload, Loaded, Failed, SignedOut, Create, Toggle, Remove, Saved, Removed {}
     public record Reload() implements Message {}
     public record Loaded(List<Todo> todos) implements Message { public Loaded { todos = List.copyOf(todos); } }
     public record Failed(String error) implements Message {}
+    public record SignedOut() implements Message {}
     public record Create(String title) implements Message {}
     public record Toggle(Todo todo) implements Message {}
     public record Remove(Todo todo) implements Message {}
@@ -42,6 +43,7 @@ public final class TodoProgram implements Program<TodoProgram.Model, TodoProgram
                     : new Transition<>(new Model(model.todos(), Phase.LOADING, "", model.createdCount()), List.of(gateway.load()));
             case Loaded loaded -> Transition.stay(new Model(loaded.todos(), Phase.READY, "", model.createdCount()));
             case Failed failed -> Transition.stay(new Model(model.todos(), Phase.ERROR, failed.error(), model.createdCount()));
+            case SignedOut ignored -> Transition.stay(new Model(List.of(), Phase.ERROR, "Sign in to open your workspace", 0));
             case Create create -> {
                 String title = create.title().strip();
                 if (model.busy()) yield Transition.stay(model);

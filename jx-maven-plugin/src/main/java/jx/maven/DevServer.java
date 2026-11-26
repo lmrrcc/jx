@@ -35,13 +35,17 @@ final class DevServer implements AutoCloseable {
         this(assets, port, status, null);
     }
     DevServer(Path assets, int port, AtomicReference<Status> status, String apiOrigin) throws IOException {
+        this(assets, port, status, apiOrigin, null);
+    }
+    DevServer(Path assets, int port, AtomicReference<Status> status, String apiOrigin, String sessionCookie) throws IOException {
         this.assets = assets.toAbsolutePath().normalize(); this.status = status;
         try (var input = DevServer.class.getResourceAsStream("/jx-dev-client.js")) {
             if (input == null) throw new IOException("Missing JX development client");
             client = new String(input.readAllBytes(), StandardCharsets.UTF_8);
         }
         if (status.get().state().equals("ready")) publish();
-        proxy = apiOrigin == null || apiOrigin.isBlank() ? null : new DevelopmentProxy(apiOrigin);
+        if ((apiOrigin == null || apiOrigin.isBlank()) && sessionCookie != null && !sessionCookie.isBlank()) throw new IllegalArgumentException("Session proxy requires an explicit API origin");
+        proxy = apiOrigin == null || apiOrigin.isBlank() ? null : new DevelopmentProxy(apiOrigin, java.time.Duration.ofSeconds(15), sessionCookie);
         try { this.server = HttpServer.create(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), port), 32); }
         catch (IOException | RuntimeException failure) { if (proxy != null) proxy.close(); executor.shutdownNow(); throw failure; }
         server.setExecutor(executor);

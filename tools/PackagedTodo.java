@@ -64,6 +64,7 @@ public final class PackagedTodo {
                 }
                 application = new ProcessBuilder(Path.of(System.getProperty("java.home"), "bin", "java").toString(),
                         "-jar", artifact.toString(), "--server.port=" + port, "--spring.datasource.url=jdbc:h2:mem:packaged-todo",
+                        "--jx.demo.password-hash={noop}test-only-password", "--jx.demo.other-password-hash={noop}test-only-password",
                         "--spring.main.banner-mode=off", "--logging.level.root=WARN")
                         .directory(working.toFile()).inheritIO().start();
             } catch (Exception failure) { close(); throw failure; }

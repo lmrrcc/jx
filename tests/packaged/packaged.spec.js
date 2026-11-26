@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './auth-test.js';
 
 test('one executable Boot JAR serves Java UI and API from an empty directory', async ({ page, request }) => {
   const errors = [];

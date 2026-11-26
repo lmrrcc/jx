@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../../tests/packaged/auth-test.js';
 
 test('Java/.jx todo application: validation, persistence, routes, keyboard, loading and errors', async ({ page, request }) => {
   const errors = [];

@@ -36,6 +36,11 @@ class TodoProgramTest {
         assertEquals(1, saved.model().todos().size());
         assertEquals(1, saved.model().createdCount());
         assertTrue(model.todos().isEmpty());
+        var signedOut = program.update(saved.model(), new TodoProgram.SignedOut());
+        assertTrue(signedOut.model().todos().isEmpty());
+        assertEquals(0, signedOut.model().createdCount());
+        assertEquals(TodoProgram.Phase.ERROR, signedOut.model().phase());
+        assertTrue(signedOut.commands().isEmpty());
         try (var store = new Store<>(program)) {
             assertEquals(0, effects.get());
             store.start();
