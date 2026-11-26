@@ -1,6 +1,6 @@
 # ADR 0008: owned resource tasks
 
-Status: M1-15 has local JVM/browser evidence; publication and M1-16 remain open.
+Status: M1-15 and M1-16 have local JVM/browser evidence; publication remains open.
 
 ## Contract
 
@@ -127,7 +127,24 @@ checks. The browser entry retains compiled-runtime attestation while exposing
 the independent native Activity probe. No new mutation or conformance-pair credit
 is claimed from this integration; the publication gate and Verify remain pending.
 
-The G0 router loader will consume the same hook/task/cancellation contract using
-the router's immutable location. That integration and its navigation/late-response
-proof remain M1-16 work. The earlier roadmap reference to ADR 0003 was stale:
-ADR 0003 already covers state-preserving development, so this decision is ADR 0008.
+## Router integration (M1-16)
+
+The compiling `RouteResourceApplication` composes `useSyncExternalStore(router)`
+with `useResource(location, loader)`. The router's immutable, stable location is
+the request identity, avoiding a second data/state owner or a new router API.
+Unchanged locations do not reload; path/query/history changes replace the task.
+Applications with independent authentication, tenant or retry inputs must include
+them in a stable key as well. Hash changes also replace this complete-location
+key. A future cache may choose a narrower explicit key; this proof does not.
+
+Two Chrome checks pass in 1.6 seconds, exercising a real deep link, decoded path
+parameters, query replacement, back/forward, obsolete replies, typed failures,
+not-found, unmount/remount and another still-subscribed router observer. The
+external data task is deliberately controlled; real transport abort is covered by
+M1-15. No server authorization or SSR qualification is inferred. After making
+fixture reporting compatible with TeaVM's JSBody parser, the selected reactor
+passes 80 JVM checks (62 core, 10 React, 8 Elm) and TeaVM in 3.882 seconds, without
+JSBody warnings. The complete runtime suite passes **24/24 in 5.9 seconds**.
+
+The earlier roadmap reference to ADR 0003 was stale: ADR 0003 already covers
+state-preserving development, so this decision is ADR 0008.
