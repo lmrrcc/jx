@@ -1,8 +1,9 @@
 # Exact shared values through Spring and the browser
 
 Source: `9c0a233`, 26 November 2026, on the M1-17/M1-19 shared-record slice.
-M1-18 is locally verified; publication gate and Verify remain pending. No new
-React feature-pair credit or general Java-library certification is claimed.
+M1-18 is accepted in PR78 (`07290dd`) after the complete local gate
+and both Verify checks. No new React feature-pair credit or general Java-library
+certification is claimed.
 
 The dependency-free [ExactValues record](../../examples/todo-contract/src/main/java/jx/example/contract/ExactValues.java)
 and its vectors are compiled by both consumers. Twelve cases include long min/max,
@@ -44,12 +45,15 @@ Its scoped reactor package passes **187 JVM checks in 19.651 seconds** (80 core,
 model), including actual TeaVM compilation and bundling. The unchanged four Todo
 Chrome scenarios pass **4/4 in 4.2 seconds** against that assembly on port4581.
 Both subprocess plugin-discovery regressions and the source-less generated-code
-consumer are included. These are integrated local results; the publication gate,
-remote Verify and merge are still pending, and the earlier 161-check result is
-retained as evidence of the original scoped branch.
+consumer are included. These earlier integrated results precede the publication
+gate below; the 161-check result remains evidence of the original scoped branch.
 
 Limits: the exact-value adapters are explicit, not generated support for these
 types. The first `record-codecs` generator remains required String/bool/int only.
 No universal Jackson policy, arbitrary recursive schema, numeric money convention,
 old/new wire compatibility, authentication, published artifact or browser other
 than Chrome is qualified. See [ADR0009](../decisions/0009-shared-record-wire-contract.md).
+
+## Publication acceptance
+
+[PR78](https://github.com/lmrrcc/jx/pull/78) merged as `07290dd60c80ac2e0556f13ece3f6fb8332f8c22`. Exact head `70a01ee` passed all 15 local gate steps in 385 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45809686534) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45809416530). Maven/TeaVM passes 197 JVM checks in 41.628 seconds; 47 runtime Chrome checks, 975 conformance checks with 217 explicit mode exclusions, four real Spring Todo scenarios and four real hot workflows pass. The 149 cases and 62/6328 pair count are unchanged. These results qualify this integrated source and do not expand the generated record-codec subset.
