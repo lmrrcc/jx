@@ -1,5 +1,10 @@
 # IntelliJ 0.3.1: presentation and repeated-analysis fixes
 
+The following is the historical four-file baseline. The later
+[G0 100-component measurement](evidence/intellij-editor-scale.md) records
+actual native completion/diagnostic timings, closed-file structural rename,
+the syntax-parser isolation fix and the remaining SDK undo qualification limit.
+
 The 2026-11-19 report showed large tinted Java regions, weak markup colors and
 slow editing with plugin 0.3.0. The installed plugin and IDEA build were checked:
 this was 0.3.0 on `IU-261.25134.95`, not an older package accidentally left installed.

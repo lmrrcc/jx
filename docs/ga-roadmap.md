@@ -138,7 +138,7 @@ native editor qualification and class hot checkpoints are still open.
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
 | R-21 hydration | ✅ Done | `React.hydrate` over Node-rendered HTML (M1-25), store server snapshots and matching `useId`, added on 24 November 2026. |
-| G0 foundation proofs | 🟡 Partial | Lazy-module boundary and basic SSR→hydration proofs delivered; component JAR, exact shared contract, authenticated packaged Spring and protected SSR data route remain. |
+| G0 foundation proofs | 🟡 Partial | Lazy-module boundary and basic SSR→hydration proofs delivered; 100-component IntelliJ latency and closed-file structural rename locally qualified with explicit SDK undo limit (M1-28/29, publication pending); component JAR, exact shared contract, authenticated packaged Spring and protected SSR data route remain. |
 | Shared contracts and complete Spring integration | 🟡 Partial | Shared Todo record/paths, generated String/bool/int browser codec and explicit long/decimal/missing/null vectors locally verified with real Spring/Chrome. Generated richer schemas/clients, starter/BOM, packaged UI/API and authenticated development remain. Publication pending. |
 | JX server rendering and hydration | 🟡 Partial | Node rendering, hydration, streaming/resume have bench evidence; request isolation, protected data and the RSC protocol track remain. |
 | IntelliJ and VS Code experience | 🟡 Partial | Existing packages work within documented limits; GA qualification, scale, remaining editing actions and browser debugging are open. |

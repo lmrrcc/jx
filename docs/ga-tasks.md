@@ -856,8 +856,8 @@ as a test, with a recorded decision.
 | M1-25 | 07 | Browser hydrates that HTML without replacing the tree | `npm run test:ssr` | ✅ done |
 | M1-26 | 07 | Protected data route: two simultaneous identities, immutable snapshot, abort, no second fetch | `npm run test:ssr` | ⬜ planned |
 | M1-27 | 37 | Packaged MV3 extension renders a JX popup under its CSP and calls a WASM function; popup close and reopen | `npm run test:extension` | ⬜ planned |
-| M1-28 | 08 | 100-component scale fixture and an editor latency benchmark in the IntelliJ tests | `./gradlew test` in `tooling/intellij` | ⬜ planned |
-| M1-29 | 08 | Source-preserving structural edit proof (component rename across closed files), or the recorded limit | `./gradlew test` in `tooling/intellij` | ⬜ planned |
+| M1-28 | 08 | 100-component scale fixture and an editor latency benchmark in the IntelliJ tests | `./gradlew test` in `tooling/intellij` | 🟡 local proof: 100 components, 30 samples/category, 96 SDK tests and ZIP/Verifier pass; parser isolation regression fixed; [raw timings and scope](evidence/intellij-editor-scale.md); publication gate/Verify pending |
+| M1-29 | 08 | Source-preserving structural edit proof (component rename across closed files), or the recorded limit | `./gradlew test` in `tooling/intellij` | 🟡 local proof: 101 closed-file exact-source rename and collision guard, 25-file undo/redo; bounded commit fix; native Java control reproduces the SDK undo limit at 101 retained files, explicitly recorded; publication gate/Verify pending |
 | M1-30 | 09 | Artifacts installed to a file repository; an outside consumer builds with only that repository | `npm run test:consumer` | ⬜ planned |
 | M1-31 | — | G0 review: ledger updated, go/change/stop recorded per proof, M2–M3 re-cut | read the review record | ⬜ planned |
 
