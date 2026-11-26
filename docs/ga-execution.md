@@ -155,9 +155,9 @@ the historical full campaign of 100. See the
 118-feature / 6,903-pair scope and its limits. G0 remains open: the serialized lazy
 boundary, bounded shared/exact contracts, authenticated packaging and protected
 SSR, MV3/Rust-WASM feasibility and the independent file-repository consumer
-proofs are now accepted. Component JAR source `873179b` passes 197 JVM checks
+proofs are now accepted. Component JAR selected source `8f54ce8` passes 201 JVM checks
 and a standalone Maven/2-Chrome consumer;
-ABI2 preserves current class metadata, with two old-format regressions RED→GREEN.
+ABI2 preserves current class metadata, retaining two old-format regressions originally RED→GREEN.
 Its gate/Verify remain pending ([evidence](evidence/component-library-jar.md)).
 The remaining G0 review is tracked separately. Existing editor packages,
 the todo API and hot updates are useful baselines, not completion of their GA
@@ -346,7 +346,7 @@ exists, not when its document or skeleton module lands.
 | GA-02 | Portfolio routes, owners and pilot selection / M | — | M1 / M | Canonical deployments and required journeys agreed; old-UI behavior/performance captured. **Done 2026-11-21** — [task file](ga-02-portfolio.md) | ✅ done |
 | GA-03 | Browser async ownership design / R | GA-01 | M1 / S | One HTTP/Elm/loader/Suspense cancellation/error model demonstrated in a spike | 🟡 partial: shared cancellation M1-14, effect-owned resources M1-15 and route proof M1-16 are merged; ADR0008 explicitly separates effect loading from Suspense/server ownership. Shared cache and server/Suspense data-owner qualification remain outside these bounded G0 proofs. |
 | GA-04 | Shared contract, codec and exact-value spike / C | GA-03 | M1 / M | One DTO/operation definition; real Spring/browser round trip, decimal/long/null boundaries | 🟡 bounded spike accepted: M1-17/M1-19 merged in PR77 and M1-18 in PR78, each after gate/Verify. Shared response/path contract, generated required String/bool/int codec and explicit long/decimal/presence adapters pass actual Spring/browser tests. Broader generated clients, richer schemas, protocol evolution and G0 review remain open. |
-| GA-05 | Component-library JAR ABI spike / L | GA-01 | M1 / S | Independent producer and consumer, no source copying, metadata version failure tested | 🟡 local proof passes at `873179b`: ABI2/current ClassSpec, 197 JVM checks, standalone Maven package and 2 Chrome journeys; gate/Verify pending |
+| GA-05 | Component-library JAR ABI spike / L | GA-01 | M1 / S | Independent producer and consumer, no source copying, metadata version failure tested | 🟡 selected local proof passes at `8f54ce8`/`655f062`: ABI2/current ClassSpec, 201 JVM checks, standalone Maven package and 2 Chrome journeys; gate/Verify pending |
 | GA-06 | Lazy-chunk Java identity spike / R | GA-05 | M1 / M | Lazy route absent initially; domain values/context/callbacks cross safely; no duplicate React. M1-22/M1-23 prove the serialized boundary; independent library consumption and automatic application packaging remain | 🟡 partial |
 | GA-07 | React SSR→hydration spike / W | GA-03 | M1 / M | Protected data-dependent route, scoped API/auth, two simultaneous identities, immutable hydration snapshot, abort and no duplicate fetch/mutation | ✅ bounded G0 spike accepted through M1-24–26; PR82 adds real Spring-owned snapshots, retained hydration and suspended-request disconnect cleanup after gate/Verify. Progressive streaming, in-flight backend-fetch abort and production hosting remain GA-22 work. |
 | GA-08 | Native editor architecture/performance decision / T | GA-01 | M1 / M | Scale baseline; precise projection limits; source-preserving structural proof or explicit revised design | 🟡 bounded M1-28/M1-29 proofs accepted in PR79: measured SDK100-component baseline, closed rename101 and undo/redo25 with native undo101 limit recorded; original96SDK/ZIP/Verifier and integrated gate/Verify pass. Broader installed-editor qualification and architecture decision remain open. |

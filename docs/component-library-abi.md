@@ -1,6 +1,6 @@
 # Component library ABI 2
 
-Status: the focused local proof passes: 197 JVM tests, a source-independent Maven
+Status: the selected publication stack passes 201 JVM tests, a source-independent Maven
 consumer and two Chrome journeys. The complete current class metadata is retained.
 The full push gate and Verify are pending; see
 [measured evidence](evidence/component-library-jar.md).

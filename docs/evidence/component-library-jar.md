@@ -1,12 +1,41 @@
 # Source-independent component-library proof
 
-This G0 M1-10–M1-13 source slice `873179b` plus lifecycle fix `6ee9434` extends the initial JAR work on the
+## Selected publication integration, 26 November 2026
+
+The current selected ABI2 source `8f54ce8` and lifecycle fix `655f062` build on the
+minimal legacy-runtime → legacy-authoring → sparse-authoring stack above accepted
+main `515f2c2`. Source `d2c4c1e` includes the six component-library commits only;
+the original R30 work and unrelated creator/hot-protocol changes stay separate.
+Accepted nullable/sparse checkpoint support and the separate Pure limitation are
+preserved by the prerequisite integration tests.
+
+| Check | Actual selected-integration result |
+| --- | --- |
+| Private-repository install, including LSP and both examples | 201 JVM tests pass:84 core,11 React,79 compiler,17 plugin,10 LSP;24.180 s |
+| Standalone consumer normal Maven `package` | Pass,7.953 s; only installed producer JAR on TeaVM's classpath |
+| Standalone Chrome | 2/2 pass,1.6 s; saved external site, not reactor output |
+| Producer + consumer reactor `clean compile` | Pass,1.315 s; descriptor is available after producer javac without `package` |
+| Baseline and push-list alignment | Pass;155 registered conformance cases, unchanged62 witnesses;16 matching gate steps |
+
+Logs are `/private/tmp/jx-component-library-selected-install.log` and
+`/private/tmp/jx-component-library-selected-compile.log`. The independent consumer
+is `/var/folders/y9/29rtk6bd2dz_xj36rw2jn6g40000gn/T/jx-component-library-proof-6083276521364800406/consumer`;
+its sibling `maven.log` records the standalone build. The receipt is
+`target/component-library-proof.txt`; producer SHA-256 is
+`ef1cce62e8d14b62c8d866cd4d35ba3050dd7d9425b21ea02d5c03091c5bfd8a`.
+The separate Chrome runner followed `--package-only`, so no repeated package was
+needed after browser approval. The complete conformance bench, mutations, gate,
+Verify and publication have not run on this selected stack.
+
+## Historical complete-class ABI qualification
+
+The earlier G0 M1-10–M1-13 source slice `873179b` plus lifecycle fix `6ee9434` extends the initial JAR work on the
 current class/checkpoint baseline `fce6423`. Its component ABI 2 is independent of
 the Server Function/client-reference protocol. The earlier ABI 1/R30 branch is
 preserved; no general R30 merge was introduced. The full push gate and Verify are
 pending.
 
-## Measured checks
+### Measured checks on the earlier broader baseline
 
 | Check | Result |
 | --- | --- |
