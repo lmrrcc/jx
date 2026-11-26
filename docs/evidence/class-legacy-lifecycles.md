@@ -134,6 +134,25 @@ BENCH_PORT=59191 node_modules/.bin/playwright test -c tests/conformance/playwrig
 
 ## Direct `.jx` authoring — R-28-03h2b
 
+### Selected publication qualification, 26 November 2026
+
+Source `8092a1d` adds only the compiler/consumer slice on the selected legacy
+runtime. The current package passes **183 JVM tests** (84 core, 11 React,
+63 compiler, 15 Maven plugin, 10 language server) in 40.633 seconds, including
+the nullable-checkpoint modifier regression inherited from the runtime branch.
+The new consumer passes **8/8 Chrome projects** in 16.9 seconds: native React
+and JX in client, hydration, static HTML and lazy modes. Expected native legacy
+warnings are asserted; they are not filtered away to make the case pass.
+
+Build log: `/private/tmp/jx-legacy-authoring-integrated-build.log`. The focused
+command uses port 59185 and `-g class-legacy-authoring --workers=1` with the
+shared conformance configuration. Its reporter leaves aggregate result tables
+unchanged. `CheckBaseline` validates all 154 registered cases. The compiler
+mutant, complete integrated bench, publication gate and Verify remain pending;
+no new pair witness or native IDE qualification is claimed.
+
+### Declaration contract and historical qualification
+
 The compiler discovers all six lifecycle declarations on direct normal and Pure
 class components. It validates public/protected instance visibility, `void`,
 concrete bodies, exact declared parameter types and the absence of method type
