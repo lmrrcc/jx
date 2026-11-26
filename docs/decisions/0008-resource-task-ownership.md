@@ -79,8 +79,41 @@ attempted completion after failure. Final selected reactor: 135 JVM checks and
 TeaVM in 10.971 seconds; log `/private/tmp/jx-resource-lifecycle-final-build.log`.
 All six new Chrome checks pass together in 2.8 seconds. The complete runtime suite
 then passes **22/22 in 4.3 seconds**, including the prior HTTP, hook, MVU, interop
-and independent-generation checks. Mutation coverage and publication gates remain
-open; no broader React interaction credit is inferred.
+and independent-generation checks. Two scoped mutants are killed below;
+publication gates remain open. No broader React interaction credit is inferred.
+
+## Scoped mutation evidence
+
+Source `85e9e9d` includes a synchronous-handle assertion before explicit disposal
+and a layout-effect witness for the first committed snapshot after a key change.
+The isolated scratch commit `106bb14` has the identical source tree. Its unmutated
+runtime reactor passes 80 JVM checks and TeaVM in 4.443 seconds; all six resource
+Chrome checks pass in 2.8 seconds. The strengthened six `TaskOwnerTest` checks
+then pass in a separate 1.211-second Maven run.
+
+| Mutation, applied alone | Direct killing observation |
+| --- | --- |
+| Remove `cancel()` from `TaskOwner.complete`, immediately before `recipient.accept(...)` | `TaskOwnerTest` has two assertion failures: synchronous start has released zero handles instead of one before returning, and ordinary completion publishes two results instead of one. Compilation succeeds; there are no test errors. |
+| Replace the last return in `ResourceHook.use` with `return state.value().snapshot();` | Runtime package and all 80 JVM checks still pass. The `resource keys own` Chrome test fails because the layout-effect history contains `C:ready:B`, exposing the previous key's value in the new key's first commit. |
+
+Both mutations were run exclusively, one at a time, with unchanged test sources.
+Result: **2 killed, 0 survived, 0 unusable**. Restore the changed production line
+between runs. After restoration the scratch tree is clean, runtime package again
+passes 80 JVM checks and TeaVM in 4.515 seconds, and all six resource Chrome checks
+pass in 2.8 seconds. Reproduction commands, from an isolated source checkout:
+
+```sh
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -pl tests/runtime-browser -am package
+npm run build:runtime
+npm run test:runtime -- tests/runtime-browser/tests/resource.spec.js --workers=1
+# First mutant: run the six JVM owner checks after applying only that mutation.
+./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository -pl jx-core -Dtest=TaskOwnerTest test
+# Restore it, apply only the second mutation, rebuild the runtime and its bundle,
+# then repeat the resource browser command above. Restore and rerun afterwards.
+```
+
+These are scoped lifecycle/key-isolation checks, not a fresh run of the curated
+React conformance mutation catalog and not a claim of complete mutation coverage.
 
 The G0 router loader will consume the same hook/task/cancellation contract using
 the router's immutable location. That integration and its navigation/late-response
