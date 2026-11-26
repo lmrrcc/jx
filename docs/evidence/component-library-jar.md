@@ -1,6 +1,6 @@
 # Source-independent component-library proof
 
-This G0 M1-10–M1-13 slice is based on `05945b4` so the existing reference-JAR
+This G0 M1-10–M1-13 source slice `2545bf1` is based on `05945b4` so the existing reference-JAR
 metadata/compiler APIs remain available. It adds a separate component ABI 1;
 it does not replace the Server Function/client-reference protocol. Integration
 with the newer class-authoring work, the full push gate and Verify are pending.
