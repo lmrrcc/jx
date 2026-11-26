@@ -27,8 +27,24 @@ record JavaModel(ParsedSource parsed, String packageName, List<String> imports, 
         }
         DiagnosticCollector<JavaFileObject> collector = new DiagnosticCollector<>();
         try (StandardJavaFileManager manager = compiler().getStandardFileManager(collector, null, java.nio.charset.StandardCharsets.UTF_8)) {
-            JavacTask task = (JavacTask) compiler().getTask(null, manager, collector,
-                    List.of("-proc:none", "--release", "25"), null,
+            // This pass reads syntax only. Do not scan the IDE/process classpath, discover
+            // auto-start javac plugins, or reopen ct.sym for every authored component.
+            // The real compiler/IDE performs type attribution with the application's classpath.
+            manager.setLocationFromPaths(StandardLocation.CLASS_PATH, List.of());
+            manager.setLocationFromPaths(StandardLocation.SOURCE_PATH, List.of());
+            manager.setLocationFromPaths(StandardLocation.ANNOTATION_PROCESSOR_PATH, List.of());
+            // An empty path still inherits the host loader in javac. Use its public file-
+            // manager SPI to make plugin/service discovery JDK-only as well.
+            JavaFileManager syntaxManager = new ForwardingJavaFileManager<StandardJavaFileManager>(manager) {
+                @Override public ClassLoader getClassLoader(Location location) {
+                    return ClassLoader.getPlatformClassLoader();
+                }
+                @Override public <S> java.util.ServiceLoader<S> getServiceLoader(Location location, Class<S> service) {
+                    return java.util.ServiceLoader.load(service, ClassLoader.getPlatformClassLoader());
+                }
+            };
+            JavacTask task = (JavacTask) compiler().getTask(null, syntaxManager, collector,
+                    List.of("-proc:none", "--source", "25"), null,
                     List.of(new MemorySource(parsed.source().path().getFileName().toString().replaceFirst("\\.jx$", ".java"), shadow.toString())));
             CompilationUnitTree unit = task.parse().iterator().next();
             SourcePositions positions = Trees.instance(task).getSourcePositions();
