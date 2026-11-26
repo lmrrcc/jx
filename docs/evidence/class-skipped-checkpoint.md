@@ -4,8 +4,9 @@
 real browser RED/GREEN on React 19.3.1. Source `4bd62af` qualifies connected,
 owner-driven props-only updates whose explicit SCU decision skips rendering.
 Hidden own updates, Pure, nullable/sparse codecs, delayed incoming owners and
-complete discarded-work handling remain open. Mutation, full integration gate
-and Verify are pending.
+complete discarded-work handling remain open. Its scoped unmatched-candidate
+mutation is now killed after a passing baseline; publication gate and Verify
+remain pending.
 
 ## Starting evidence and the unresolved distinction
 
@@ -116,7 +117,8 @@ user props or native state values is not an acceptable substitute for its token.
    Their rejection/ownership behavior must not weaken.
 5. Run the prepared scoped hot mutation that clears every candidate after one
    owner attempt commits; the equal-user-props abandoned attempt must kill it.
-   Keep this outside the conformance mutation catalog. This mutation is pending.
+   Keep this outside the conformance mutation catalog. This mutation is now
+   qualified in the [integrated journal campaign](class-journal-mutations.md).
 
 ## Later hidden work, still unresolved
 
@@ -187,6 +189,9 @@ These are local artifacts, not permanent CI evidence or performance measurements
 
 The prepared `class-owner-unmatched-cleared` hot mutation replaces exactly
 `return value !== accepted;` with `return false;`. It must fail the same-user-props
-discarded-attempt test after a baseline pass. It is unexecuted and outside the
-conformance mutation catalog. Broader integration, push gate, Verify and
+discarded-attempt test after a baseline pass. On integrated source `5b2b024`, the
+whole 18-case hot-class baseline passes; the mutated rebuild also passes, then
+this precise test fails because capture no longer reports the abandoned candidate.
+This is one of the [three scoped journal kills](class-journal-mutations.md), with
+zero survivors/unusable, outside the conformance catalog. Push gate, Verify and
 publication remain pending; R-28-04 is partial.

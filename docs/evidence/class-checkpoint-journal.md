@@ -175,15 +175,18 @@ env BENCH_PORT=59191 npm run test:bench
 
 The package and full comparison logs are
 `/private/tmp/jx-class-journal-conformance-package.log` and
-`/private/tmp/jx-class-journal-conformance.log`. No scoped journal mutation,
-publication gate, Verify, new interaction credit or complete R-28-04 support is
-claimed.
+`/private/tmp/jx-class-journal-conformance.log`. That run did not qualify scoped
+journal mutations, publication gates, Verify or complete R-28-04 support. The
+later scoped campaign is recorded below; no new interaction credit is claimed.
 
-### Prepared mutation checks — not yet executed
+### Scoped mutation checks
 
-Two single-target source patches are prepared separately from the
-conformance-only `MutateBench` catalog. Their patch application checks pass; no
-killed/survived result is claimed. Run them only in a clean scratch copy with its
+The original two single-target source patches were prepared separately from the
+conformance-only `MutateBench` catalog. Both are now killed after passing baselines
+on integrated source `5b2b024`, together with the exact-owner unmatched-candidate
+mutation: **three killed, zero survived/unusable**. See the
+[direct failures and reproduction record](class-journal-mutations.md).
+Run them only in a clean scratch copy with its
 own physical Maven repository and an exclusive test window, after the same focused
 commands pass unmutated. A build/infrastructure failure is not a behavioral kill.
 

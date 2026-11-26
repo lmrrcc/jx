@@ -163,8 +163,8 @@ test('compiled runtime drift and a missing attestation reject replacement before
     // Maven/javac/TeaVM rebuild the real JX runtime with its preceding protocol identifier.
     await writeFile(runtime, validRuntime.replace('VERSION = 2', 'VERSION = 1'));
     await expect(page.locator('#__jx_dev_notice')).toContainText('JX hot update failed');
-    expect(errors).toEqual([expect.stringContaining('active 2, candidate 1')]);
     expect(await page.evaluate(() => globalThis.hotProtocolCalls)).toEqual([]);
+    expect(errors).toEqual([expect.stringContaining('active 2, candidate 1')]);
     expect(await first.getByRole('status').evaluate((current, old) => current === old, originalNode)).toBe(true);
     await originalNode.dispose();
     await first.getByRole('button', { name: 'Increment First counter', exact: true }).click();
