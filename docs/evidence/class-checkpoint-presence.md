@@ -1,8 +1,10 @@
 # R-28-04b2 nullable and sparse class checkpoint contract
 
-26 November 2026. Work starts from the qualified bounded owner-attempt journal
-`6acd612` (production `4bd62af`). This document states acceptance criteria before
-implementation. Only the RED results explicitly recorded below have executed.
+26 November 2026. Implemented and locally qualified on production `6dd30ab`, with
+the strengthened consumer in `1e589e7`, extending
+the bounded owner-attempt journal `6acd612` (production `4bd62af`). The contract
+below was recorded before implementation. Complete integration, mutation, push
+gate and Verify remain pending; R-28-04 remains partial.
 
 The existing explicit `StateCodec<S>` remains the serialization boundary. The
 framework does not infer a serializer from arbitrary objects or encode Java
@@ -41,7 +43,7 @@ isolation proof and malformed/new-decoder regression. Readiness failure and
 retained-checkpoint recovery are useful here but are not equivalent to that
 preflight guarantee.
 
-## Production change plan
+## Implemented production boundary
 
 There is no new implicit serializer and no second update queue. The existing
 `withStateCheckpoint(signature, StateCodec<S>)` already declares the typed codec;
@@ -80,7 +82,7 @@ These application-specific codecs are examples, not a new universal wire format.
 Neither optional properties nor null aggregate state imply permission to copy
 resources, callbacks or opaque references across generations.
 
-## Planned qualification
+## Qualification scope
 
 - Narrow JVM descriptor tests: explicit codec, both modifier orders, exact
   nullable/Presence roundtrip, strict required fields and Pure rejection.
@@ -91,7 +93,7 @@ resources, callbacks or opaque references across generations.
 - Existing 34 runtime checks and metadata checks; no conformance interaction
   credit from coexistence and no full R-28-04 completion claim.
 
-## Preparation and RED status
+## Actual RED/GREEN results
 
 `ClassCheckpointPresenceTest` compiled and ran against the unchanged runtime:
 both tests errored at the intended descriptor guards (`nullable aggregate state`
@@ -99,9 +101,69 @@ and `optional state fields ... note`). Maven exit1, two tests, 1.538 s; log
 `/private/tmp/jx-class-checkpoint-presence-red-core.log`. This establishes the
 current admission rejection, not browser behavior.
 
-The five browser tests and `HotClassPresenceApplication` consumer are prepared.
-Their first package attempt, using `-DskipTests` solely to build the intentionally
-RED consumer, found a fixture overload mistake: the keyed class component call
-needs the fourth ref argument. The source is corrected; compilation and browser
-RED are pending the next coordinated window. That compile failure is not counted
-as a behavioral reproduction. No production fix has been applied.
+The first consumer package found a fixture overload mistake: the keyed class
+component call needs the fourth ref argument. After correcting the fixture,
+the old-production package passed with `-DskipTests` solely to obtain the
+intentionally RED browser artifact. This compile correction is not counted as a
+behavioral reproduction, and that package is not credited as a passing test run.
+
+The actual browser RED then showed `presence-status` as
+`rejected: Class checkpoints with nullable aggregate state are not qualified`
+instead of `ready`. Production was changed only after this observable rejection.
+
+| Check | Actual result |
+| --- | --- |
+| Original descriptor acceptance regression | 2 JVM tests errored at nullable/optional admission; 1.538 s |
+| Original real browser consumer | 1 failed at the explicit nullable admission message; 5.2 s test time |
+| Fixed focused JVM contracts | 8 passed; 1.604 s |
+| Fixed reactor package and actual TeaVM compilation | 84 core + 17 React + 7 Elm tests passed; 5.002 s |
+| New independent-generation browser consumer | 5 passed; 6.2 s |
+| All preceding runtime-browser cases | 34 passed; 14.3 s |
+| Strengthened constructor-vs-restored-state consumer | Same108 JVM checks/TeaVM passed in5.841 s; all5 new browser cases passed in4.0 s |
+
+The two disjoint Chrome groups cover all 39 runtime tests. The new consumer
+restores null aggregate state, a separate zero-field record, absent and
+own-undefined fields, explicit null, and a Unicode string into independent TeaVM
+modules. It verifies a new DOM node and generation for each replacement, then
+edits the restored state. Every candidate Java constructor deliberately starts
+from `value:constructor`, and its execution is observed before the saved value
+replaces it. Thus null-to-null restoration cannot pass merely by silently
+discarding the checkpoint and reusing the original initial null. Production was
+unchanged for this strengthened final consumer run. Native SCU-false own callbacks and props-only derivation
+also preserve state while the old DOM stays unchanged until replacement.
+
+The pinned React runtime warns for `getDerivedStateFromProps` with initial null
+state. The first run had all state/recovery assertions pass but correctly failed
+its empty-console assertion. The final tests assert the exact warning text and
+the expected count: initial mount plus null restoration in the roundtrip test,
+initial mount only in the skipped-render test. Other errors are not filtered.
+
+Three negative paths prove no success fallback: a changed candidate decoder
+throws, a candidate returns a record with invalid field presence, and a declared
+codec receives an unknown payload. Each rejects readiness with the specific
+expected error, leaves no successful class output, and permits a corrected
+generation to restore the retained string checkpoint and continue editing.
+They explicitly verify that the old DOM has already been disposed in this
+failure path. **Candidate decoder preflight before teardown is not implemented.**
+
+The earlier admission test now verifies that Pure checkpoints, strict null
+state and invalid metadata still reject without capture/dispose or replacing
+the live DOM. The other 34 regressions retain hidden-update rejection, owner
+correlation, incoming-owner readiness, portals, external roots, codec failures,
+runtime attestation, hook/Elm state, scalar identities and Promise observers.
+
+Commands used Maven Wrapper with the private `.cache/maven-repository`, then
+`npm run build:runtime` and the configured runtime Playwright suite on
+`RUNTIME_PORT=59192`. Logs are under
+`/private/tmp/jx-class-checkpoint-presence-{red-core,red-build,green-core,green-build,final-build}.log`;
+browser artifacts use the `red-results`, `green-results`, `runtime-results` and `final-results`
+directories with the same prefix. These local durations are not performance
+claims. No conformance table, feature denominator or interaction witness changes.
+
+Production review of `ClassComponentType`, `ClassCheckpoints` and `ReactClasses`
+found no concrete blocker. This does not extend the proof to hidden own updates,
+Pure checkpointing, arbitrary codecs or candidate preflight. The prepared
+`class-null-checkpoint-reset` mutation substitutes constructor state when the
+decoded state is null. The first independent-generation case must kill that
+silent reset. This scoped hot mutant is outside the conformance catalog and is
+unexecuted; full integration/release checks also remain pending.

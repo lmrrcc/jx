@@ -646,6 +646,21 @@ abandoned work. A native control and 34 runtime Chrome checks pass locally on
 complete incoming/discarded ownership remain unqualified. Its scoped mutation,
 integration gate and Verify are still pending.
 
+Explicit [nullable and sparse class codecs](evidence/class-checkpoint-presence.md)
+are qualified locally on `6dd30ab` with the strengthened consumer `1e589e7`.
+`withNullableState` permits a decoded null
+aggregate; every non-null result still passes the descriptor's exact state
+schema. A declared `StateCodec<S>` must distinguish absence, own undefined,
+explicit null and values itself; no serializer or default value is inferred.
+The complete 39-case runtime suite passes in two disjoint Chrome groups, with
+independent TeaVM generations and post-restore edits. Pure and hidden own-update
+checkpoint behavior remains unqualified. The current loader calls a candidate
+decoder after disposing the old root: exceptions or invalid returned state fail
+readiness, and a corrected generation can recover the retained checkpoint.
+Typed candidate decoder validation before teardown is separate planned work.
+The candidate constructors start with a deliberately different value, so restored
+null is distinguished from resetting to a constructor default.
+
 ## Runtime metadata and test scopes
 
 The R-29 APIs below have compiling consumers and differential evidence:
