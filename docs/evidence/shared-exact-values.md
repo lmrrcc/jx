@@ -37,6 +37,17 @@ Executed on this source:
   `npm run test:contract` is a convenient selector for that same new scenario;
   the existing Verify `test:todo` step already includes it.
 
+Publication assembly `b71d26f` also includes the accepted class journal, prepared
+resource/route slices and the record-codec plugin-discovery fix `c6e110e`.
+Its scoped reactor package passes **187 JVM checks in 19.651 seconds** (80 core,
+11 React, 8 Elm, 64 compiler, 18 plugin, 2 contract, 3 real Spring HTTP and 1 Todo
+model), including actual TeaVM compilation and bundling. The unchanged four Todo
+Chrome scenarios pass **4/4 in 4.2 seconds** against that assembly on port4581.
+Both subprocess plugin-discovery regressions and the source-less generated-code
+consumer are included. These are integrated local results; the publication gate,
+remote Verify and merge are still pending, and the earlier 161-check result is
+retained as evidence of the original scoped branch.
+
 Limits: the exact-value adapters are explicit, not generated support for these
 types. The first `record-codecs` generator remains required String/bool/int only.
 No universal Jackson policy, arbitrary recursive schema, numeric money convention,
