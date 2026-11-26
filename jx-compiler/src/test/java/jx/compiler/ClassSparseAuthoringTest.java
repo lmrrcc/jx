@@ -61,20 +61,32 @@ class ClassSparseAuthoringTest {
                                 public String encode(Panel.Model state) { throw new AssertionError("admission must not encode"); }
                                 public Panel.Model decode(String text) { throw new AssertionError("admission must not decode"); }
                             };
-                            var checkpoint = Panel.JX.withStateCheckpoint("sparse", codec);
-                            checkpoint.validateState(null);
-                            checkpoint.validateState(absent);
-                            checkpoint.validateState(undefined);
-                            checkpoint.validateState(definedNull);
+                            boolean checkpointContract;
+                            if (Panel.JX.pure()) {
+                                try {
+                                    Panel.JX.withStateCheckpoint("sparse", codec);
+                                    checkpointContract = false;
+                                } catch (IllegalArgumentException unsupportedPure) {
+                                    checkpointContract = unsupportedPure.getMessage().equals("Pure class checkpoints are not qualified")
+                                        && Panel.JX.checkpoint() == null;
+                                }
+                            } else {
+                                var checkpoint = Panel.JX.withStateCheckpoint("sparse", codec);
+                                checkpoint.validateState(null);
+                                checkpoint.validateState(absent);
+                                checkpoint.validateState(undefined);
+                                checkpoint.validateState(definedNull);
+                                checkpointContract = checkpoint != Panel.JX && Panel.JX.checkpoint() == null
+                                    && checkpoint.nullableState() && checkpoint.stateSchema() == Panel.JX.stateSchema()
+                                    && checkpoint.propsSchema() == Panel.JX.propsSchema() && checkpoint.checkpoint().codec() == codec;
+                            }
                             return peer.state() == null && absent.count() instanceof Presence.Absent<Integer>
                                 && undefined.note() instanceof Presence.Undefined<String>
                                 && definedNull.note() instanceof Presence.Present<String> present && present.value() == null
                                 && empty.build().entries().isEmpty() && first.build().entries().size() == 1
                                 && next.entries().getFirst().value().equals(7) && next.entries().getLast().undefined()
                                 && !Panel.statePatch().withNote(null).build().entries().getFirst().undefined()
-                                && duplicate && required && checkpoint != Panel.JX && Panel.JX.checkpoint() == null
-                                && checkpoint.nullableState() && checkpoint.stateSchema() == Panel.JX.stateSchema()
-                                && checkpoint.propsSchema() == Panel.JX.propsSchema() && checkpoint.checkpoint().codec() == codec;
+                                && duplicate && required && checkpointContract;
                         }
                     }
                     """);

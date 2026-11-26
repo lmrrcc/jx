@@ -129,9 +129,10 @@ The generated `withCount(Integer)` sets a defined value. `undefinedNote()`
 assigns own undefined; omitting a setter leaves the existing property unchanged.
 There is no generated deletion operation or setter for a null aggregate.
 Ordinary fields and required props retain their checks. Generated builder
-collisions fail before Java generation. The descriptor's existing admission
-guard rejects checkpoints for either nullable aggregates or optional state fields;
-the annotation does not grant portable hot-state support.
+collisions fail before Java generation. An explicit typed `StateCodec` can preserve
+nullable aggregate and sparse state through the existing conservative checkpoint
+journal. The annotation does not generate a codec or relax commit/owner checks;
+complete hidden/Pure/preflight behavior remains separate R-28-04 work.
 See [the source contract and qualification](evidence/class-sparse-authoring.md)
 and the authored [normal](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredSparse.jx)
 and [Pure](../tests/conformance/src/main/jx/jx/conformance/cases/AuthoredSparsePure.jx) consumers.

@@ -6,6 +6,23 @@ qualification and publication remain pending.** The runtime contracts are alread
 `ClassSchema.optionalField` and `Presence`. This slice compiles explicit `.jx`
 declarations to those APIs; it does not change native React state merging.
 
+## Selected publication integration
+
+The selected branch preserves accepted main's explicit nullable/sparse checkpoint
+codec contract and imports only legacy runtime, legacy authoring and sparse
+compiler changes. It does not import creator changes or hot protocols 4/5.
+The test-only `acedb6d` admission update exposed one further dependency: its
+normal/Pure loop presumed Pure checkpoint support from the broader historical
+branch. The current integration reproduces the mismatch (one error in five sparse
+compiler tests), then distinguishes the contracts explicitly: normal descriptors
+must admit the supplied codec and preserve schema/nullability; Pure descriptors
+must still reject checkpoint admission. All schema, builder, source-mapping and
+normal/Pure compiler assertions remain enabled. No runtime guard is relaxed.
+The RED log is `/private/tmp/jx-sparse-authoring-integration-red.log`.
+
+Current selected package and browser qualification are pending. Historical
+numbers below remain evidence for their named source only.
+
 ## Scope fixed before implementation
 
 - A source-retained `@jx.NullableState` marker opts a direct `@Component` class
@@ -29,9 +46,10 @@ declarations to those APIs; it does not change native React state merging.
   derive the strict state layout. New record components change record patterns
   and enumeration before GA; this compatibility boundary is documented.
 - Descriptor composition preserves context, derived/error/legacy methods, Pure
-  behavior and native defaults. The existing checkpoint admission guard still
-  rejects nullable aggregate or sparse state before acquisition/teardown. No
-  presence-aware checkpoint codec is added.
+  behavior and native defaults. The accepted journal admits explicit typed
+  codecs preserving nullable aggregate and sparse presence; generated descriptors
+  retain that contract. No automatic checkpoint codec or relaxed commit guard is
+  added.
 
 ## Required evidence
 
@@ -46,7 +64,7 @@ declarations to those APIs; it does not change native React state merging.
    defined values, own undefined and defined null. Compare native own-property
    shape, callback order, Pure shallow decisions, retained class refs/DOM and
    nullable previous-state lifecycle inputs. Static mode compares initial HTML.
-4. Exercise the checkpoint guard on generated descriptors and keep required
+4. Exercise explicit-codec checkpoint admission on generated descriptors and keep required
    props strict. No source annotation may bypass that guard.
 5. Run the focused browser/compiler checks after the coordinated mutation
    window. Full integration, a scoped compiler mutant, push gate and Verify
@@ -54,7 +72,7 @@ declarations to those APIs; it does not change native React state merging.
 
 Source/test implementation and any results must be added below with actual
 commands and outcomes. Native IDE qualification, arbitrary generic schemas,
-nullable props, general state deletion and portable hot codecs remain open.
+nullable props, general state deletion and automatic portable hot codecs remain open.
 
 ## Prepared implementation and checks
 
@@ -70,8 +88,10 @@ The real-core compiler test prepares executable/editor checks for normal/Pure
 classes, fully qualified annotations and Presence arrays/references, source
 shadowing, invalid placement/types, builder collisions, mapped argument errors,
 nullable previous-state signatures and strict required props. It also checks the
-generated descriptor's checkpoint rejection for nullable and non-null sparse
-models without invoking either codec. All five compiler tests passed.
+generated descriptor's explicit-codec admission for nullable and non-null sparse
+models without invoking either codec. This assertion was updated by the test-only
+`acedb6d` after the journal integration; the five original compiler tests passed
+on their earlier source, and the selected integration is qualified separately below.
 
 The `class-sparse-authoring` differential case uses actual authored normal/Pure
 classes and the native React reference. Its native-ref observer only reads the
