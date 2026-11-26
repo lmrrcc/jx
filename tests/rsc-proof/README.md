@@ -23,8 +23,16 @@ npm run test:rsc
 
 `test:rsc` builds the framework host and the official webpack client manifest,
 runs twenty-eight Node checks, and runs four Chrome checks (two against ordinary React
-and two against JX). The loopback browser host defaults to port **59182**;
+and two against JX). The loopback browser host defaults to port **4873**;
 `RSC_PORT` can override it. It does not accept remote function calls.
+
+The default is below Linux's [default automatic client-port range](https://docs.kernel.org/networking/ip-sysctl.html#ip-variables)
+(32768–60999). PR71 Verify attempt 1 completed all 28 Node checks but its browser
+host could not bind the old default 59182 (`EADDRINUSE`); no browser assertion ran.
+An automatic client-port collision is a plausible explanation, not an identified
+owner of that failed CI socket. Port 4873 avoids that default range while keeping
+explicit port overrides and normal bind failures visible. No existing server is
+reused and no check is skipped or retried by the fixture.
 
 The tests establish:
 
