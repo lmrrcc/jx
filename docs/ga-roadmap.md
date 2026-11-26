@@ -313,9 +313,10 @@ and 133 inapplicable cells; revision `eb5a18a` passed
 [Verify](https://github.com/lmrrcc/jx/actions/runs/45372691183), completing R-26.
 See the [task and try-it command](ga-tasks.md#react-parity-track).
 M1-22/M1-23 proved the serialized lazy-module boundary; automatic chunk packaging
-in the Maven plugin is still open. Component JAR source `2545bf1` passes 178 scoped
-JVM checks, a separate source-independent Maven consumer and its Chrome journey;
-integration/gate/Verify remain pending ([evidence](evidence/component-library-jar.md)).
+in the Maven plugin is still open. Component JAR source `873179b` passes 197 scoped
+JVM checks, a separate source-independent Maven consumer and two Chrome journeys;
+ABI2 preserves current class defaults/context/nullable/Presence metadata and
+rejects the earlier prototype. Gate/Verify remain pending ([evidence](evidence/component-library-jar.md)).
 G0 also needs exact shared contracts, authenticated packaged Spring and the
 protected SSR data route (M1-26).
 Milestone dates have not been advanced or declared complete

@@ -1,7 +1,8 @@
-# Component library ABI 1
+# Component library ABI 2
 
-Status: the focused local proof passes: 178 JVM tests, a source-independent Maven
-consumer and its Chrome journey. Integration and release gates are pending; see
+Status: the focused local proof passes: 197 JVM tests, a source-independent Maven
+consumer and two Chrome journeys. The complete current class metadata is retained.
+The full push gate and Verify are pending; see
 [measured evidence](evidence/component-library-jar.md).
 
 An application imports a library component using ordinary Java imports and `.jx`
@@ -12,16 +13,25 @@ sources. The generated code calls the producer's public `JX` field and public
 ## Producer
 
 Bind `jx:generate` and `jx:check` as usual, then bind `jx:library` to its default
-`process-classes` phase. The library goal runs after javac and writes
+`compile` phase. For JAR packaging Maven runs its bound `compiler:compile` before
+goals configured in the POM, so the library goal runs after javac and writes
 `META-INF/jx/components.idx` into the module's ordinary class output. Maven's JAR
-packaging includes that resource; a separate sources JAR is unnecessary.
+packaging includes that resource; a separate sources JAR is unnecessary. The index
+is already available to the next module during a reactor `compile`, without
+requiring `package`. See the [Maven lifecycle ordering](https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html).
 
 The descriptor contains a format version, component identity/kind, Props fields
 in constructor order, optional/default-value semantics, generic arity and the
-current compiler's class metadata. SHA-256 digests bind each entry to the exact
+current compiler's class metadata, including native defaults, typed context
+lifecycles, nullable aggregate state and ordered Presence fields. SHA-256 digests bind each entry to the exact
 owner and nested Props class bytes. No source text, filesystem path, timestamp,
 runtime state or environment configuration is serialized. Digests detect stale
 or modified inputs; they do not authenticate downloaded artifacts.
+
+ABI 2 rejects the unpublished ABI 1 prototype explicitly. Its shorter class
+record lost native defaults and sparse-state metadata; those fields must not be
+inferred as false/absent. Rebuild that producer with the current `library` goal.
+The importing tag receives `JX120` for an unsupported version.
 
 `ComponentLibrary.create/encode` are the compiler APIs behind publication. The
 Maven goal owns only its descriptor and ownership marker, preserves timestamps
@@ -61,14 +71,18 @@ metadata that changes lowering must receive an explicit compatibility decision.
 
 `examples/component-library` publishes a functional counter with optional props,
 children, callbacks and a DOM ref, plus a native class component with a checked
-class ref. `examples/library-consumer` imports both through the normal Maven
+class ref. A third native class starts with null state and uses omitted native
+default props plus sparse Presence fields. `examples/library-consumer` imports
+all three through the normal Maven
 dependency. Its application behavior is Java-only; no handwritten application
 JavaScript or producer source copying is required.
 
 The focused checks are compiler real-javac/JAR contracts, Maven output ownership
 and original-tag diagnostics, then the packaged consumer in Chrome. The browser
 journey checks local state, callback delivery, child content, focus, ref detach,
-remount reset, retained DOM and operation after the page goes offline.
+remount reset, retained DOM and operation after the page goes offline. The second
+journey proves native defaults and null aggregate → empty object → partial state →
+own undefined → present null while preserving another field and mounted DOM.
 
 The standalone proof uses an explicitly supplied Maven repository containing the
 installed framework/plugin and producer. For example, after preparing a private
@@ -85,9 +99,10 @@ runs ordinary `package` followed by the browser journey. It verifies that the
 producer JAR contains its index and no `.java`/`.jx` sources, and that TeaVM's
 classpath uses that JAR. The temporary project and Maven log remain available;
 `target/component-library-proof.txt` records the JAR digest, paths and actual
-browser result. `LIBRARY_PORT` selects the browser port (default 59198). The recorded
-run passed the Maven portion through this tool and, after resolving a sandbox
-launch restriction, resumed the same browser check directly against its saved site.
+browser result. `LIBRARY_PORT` selects the browser port (default 59198).
+`--package-only` prepares the standalone consumer and records browser status as
+pending, allowing a separately authorized runner to test the saved site. The
+recorded ABI 2 run used that split workflow; its two Chrome tests passed.
 Verify and the local push gate invoke this standalone proof after reactor install;
 `npm run test:library` can also test the already-built in-repository consumer.
 
