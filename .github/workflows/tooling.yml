@@ -45,3 +45,4 @@ jobs:
           path: |
             tooling/intellij/build/reports/tests/
             tooling/intellij/build/reports/pluginVerifier/
+            tooling/intellij/build/reports/editor-scale/
