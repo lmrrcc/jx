@@ -27,11 +27,13 @@ public final class HotClassPresenceApplication {
         public String schema() { return "fixture:class-presence:1"; }
         public String encode(Model value) {
             if (value == null) return "null";
-            return switch (value.note()) {
+            String payload = switch (value.note()) {
                 case Presence.Absent<String> ignored -> "absent";
                 case Presence.Undefined<String> ignored -> "undefined";
                 case Presence.Present<String> present -> present.value() == null ? "present-null" : "value:" + present.value();
             };
+            if (payload.length() > 128) throw new IllegalArgumentException("Presence checkpoint exceeds fixture bound");
+            return payload;
         }
         public Model decode(String payload) {
             if (DECODER.equals("throw")) throw new IllegalArgumentException("Candidate presence decoder rejected payload");

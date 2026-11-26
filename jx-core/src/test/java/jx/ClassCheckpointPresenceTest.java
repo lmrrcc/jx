@@ -17,11 +17,13 @@ class ClassCheckpointPresenceTest {
         public String schema() { return "test:presence:1"; }
         public String encode(Model value) {
             if (value == null) return "null";
-            return switch (value.note()) {
+            String payload = switch (value.note()) {
                 case Presence.Absent<String> ignored -> "absent";
                 case Presence.Undefined<String> ignored -> "undefined";
                 case Presence.Present<String> present -> present.value() == null ? "present-null" : "value:" + present.value();
             };
+            if (payload.length() > 128) throw new IllegalArgumentException("Presence payload exceeds test bound");
+            return payload;
         }
         public Model decode(String payload) {
             return switch (payload) {
@@ -73,6 +75,7 @@ class ClassCheckpointPresenceTest {
         assertThrows(NullPointerException.class, () -> strict.validateState(new Model(null)));
         assertThrows(IllegalArgumentException.class, () -> CODEC.decode("unknown"));
         assertThrows(IllegalArgumentException.class, () -> CODEC.decode("value:" + "x".repeat(129)));
+        assertThrows(IllegalArgumentException.class, () -> CODEC.encode(new Model(Presence.present("x".repeat(129)))));
         class PurePeer extends PureComponent<Props,Model,Void> {
             PurePeer(Props props) { super(props, null); }
             public View render() { return null; }

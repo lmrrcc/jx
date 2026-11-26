@@ -94,11 +94,13 @@ for (const mode of ['throw', 'invalid']) {
     const old = await page.locator('#presence-value').elementHandle();
     const failed = await replace(page, {mode});
     expect(failed.status).toBe('failed');
-    expect(failed.error).toBeTruthy();
+    const expectedError = mode === 'throw' ? 'Candidate presence decoder rejected payload' : 'Field presence must be non-null';
+    expect(failed.error).toContain(expectedError);
     expect(presence(failed.checkpoint).payload).toBe('value:edited:π');
     expect(await old.evaluate(node => node.isConnected)).toBe(false);
     await old.dispose();
-    expect(errors.length).toBeGreaterThan(0);
+    await expect.poll(() => errors.join('\n')).toContain(expectedError);
+    await expect(page.locator('#presence-value')).toHaveCount(0);
     const recovered = await replace(page, {snapshot: failed.checkpoint});
     expect(recovered).toMatchObject({independent: true, status: 'ready'});
     await expect(page.locator('#presence-value')).toHaveText('value:edited:π');
@@ -115,7 +117,9 @@ test('malformed declared codec payload fails instead of silently restoring null 
   presence(invalid).payload = 'unrecognized-payload';
   const result = await replace(page, {snapshot: invalid});
   expect(result.status).toBe('failed');
-  expect(errors.length).toBeGreaterThan(0);
+  expect(result.error).toContain('Malformed presence checkpoint');
+  await expect.poll(() => errors.join('\n')).toContain('Malformed presence checkpoint');
+  await expect(page.locator('#presence-value')).toHaveCount(0);
   expect((await replace(page, {snapshot: saved})).status).toBe('ready');
   await expect(page.locator('#presence-value')).toHaveText('null');
 });

@@ -41,6 +41,45 @@ isolation proof and malformed/new-decoder regression. Readiness failure and
 retained-checkpoint recovery are useful here but are not equivalent to that
 preflight guarantee.
 
+## Production change plan
+
+There is no new implicit serializer and no second update queue. The existing
+`withStateCheckpoint(signature, StateCodec<S>)` already declares the typed codec;
+the implementation extends its qualified state shapes after the recorded RED:
+
+1. Remove only the constructor's blanket nullable/optional-state exclusion after
+   qualifying those shapes. Retain Pure rejection, exact schema ownership,
+   metadata bounds and every connected/pending/candidate journal admission rule.
+   A plain descriptor remains strict about null; `withNullableState` is required.
+   Both modifier orders must preserve all other descriptor options.
+2. Pass the complete typed class descriptor into `ClassCheckpoints.restore`.
+   Decode once in the receiving TeaVM generation and call
+   `ClassComponentType.validateState` on the result. Calling only
+   `ClassSchema.validate` incorrectly rejects legitimate null aggregate state;
+   skipping validation would admit invalid non-null records. No codec exception
+   becomes an initial-state fallback.
+3. Preserve the existing nullable-aware native snapshot decoder introduced by
+   `4bd62af`. It distinguishes a null native state from a non-null object and uses
+   schema presence readers for the latter. The journal still serializes only
+   the selected committed snapshot and transfers strings, not Java peers.
+4. Update the earlier admission regressions to retain the now-relevant negative
+   boundaries: Pure checkpoints, strict null state and invalid metadata must
+   reject without capture/disposal. Replace their intentionally superseded
+   blanket nullable/optional assertions with the new positive vertical proof;
+   do not simply delete the old browser safety check.
+5. Document that a candidate decoder error currently rejects readiness after
+   teardown. Keep the retained checkpoint for corrected-generation recovery;
+   require the separate candidate registry/export before claiming pre-disposal
+   validation. The browser tests deliberately perform a real replacement when
+   observing this failure, rather than calling `main` as a speculative validator.
+
+The test codecs use a closed bounded representation: `null`, `absent`,
+`undefined`, `present-null`, and `value:` followed by a string. The separate
+zero-field record uses its own signature/schema and `empty-record` payload.
+These application-specific codecs are examples, not a new universal wire format.
+Neither optional properties nor null aggregate state imply permission to copy
+resources, callbacks or opaque references across generations.
+
 ## Planned qualification
 
 - Narrow JVM descriptor tests: explicit codec, both modifier orders, exact
