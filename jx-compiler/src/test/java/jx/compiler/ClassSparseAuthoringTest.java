@@ -56,23 +56,25 @@ class ClassSparseAuthoringTest {
                             boolean required = false;
                             try { Panel.JX.propsSchema().readPresence(field -> Presence.absent()); }
                             catch (IllegalArgumentException expected) { required = true; }
-                            boolean checkpoint = false;
-                            try {
-                                Panel.JX.withStateCheckpoint("sparse", new StateCodec<Panel.Model>() {
-                                    public String schema() { return "sparse:1"; }
-                                    public String encode(Panel.Model state) { throw new AssertionError("must reject before encode"); }
-                                    public Panel.Model decode(String text) { throw new AssertionError("must reject before decode"); }
-                                });
-                            } catch (IllegalArgumentException expected) {
-                                checkpoint = expected.getMessage().contains("not qualified");
-                            }
+                            StateCodec<Panel.Model> codec = new StateCodec<>() {
+                                public String schema() { return "sparse:1"; }
+                                public String encode(Panel.Model state) { throw new AssertionError("admission must not encode"); }
+                                public Panel.Model decode(String text) { throw new AssertionError("admission must not decode"); }
+                            };
+                            var checkpoint = Panel.JX.withStateCheckpoint("sparse", codec);
+                            checkpoint.validateState(null);
+                            checkpoint.validateState(absent);
+                            checkpoint.validateState(undefined);
+                            checkpoint.validateState(definedNull);
                             return peer.state() == null && absent.count() instanceof Presence.Absent<Integer>
                                 && undefined.note() instanceof Presence.Undefined<String>
                                 && definedNull.note() instanceof Presence.Present<String> present && present.value() == null
                                 && empty.build().entries().isEmpty() && first.build().entries().size() == 1
                                 && next.entries().getFirst().value().equals(7) && next.entries().getLast().undefined()
                                 && !Panel.statePatch().withNote(null).build().entries().getFirst().undefined()
-                                && duplicate && required && checkpoint;
+                                && duplicate && required && checkpoint != Panel.JX && Panel.JX.checkpoint() == null
+                                && checkpoint.nullableState() && checkpoint.stateSchema() == Panel.JX.stateSchema()
+                                && checkpoint.propsSchema() == Panel.JX.propsSchema() && checkpoint.checkpoint().codec() == codec;
                         }
                     }
                     """);
@@ -112,16 +114,19 @@ class ClassSparseAuthoringTest {
                         catch (IllegalArgumentException expected) {
                             try { Panel.JX.validateState(null); return false; }
                             catch (NullPointerException rejected) {
-                                try {
-                                    Panel.JX.withStateCheckpoint("strict-sparse", new StateCodec<Panel.Model>() {
-                                        public String schema() { return "strict-sparse:1"; }
-                                        public String encode(Panel.Model value) { throw new AssertionError("must reject before encode"); }
-                                        public Panel.Model decode(String value) { throw new AssertionError("must reject before decode"); }
-                                    });
-                                    return false;
-                                } catch (IllegalArgumentException checkpoint) {
-                                    return checkpoint.getMessage().contains("optional state fields")
-                                        && Panel.JX.create(new Panel.Props("required")).state().count() == 1;
+                                StateCodec<Panel.Model> codec = new StateCodec<>() {
+                                    public String schema() { return "strict-sparse:1"; }
+                                    public String encode(Panel.Model value) { throw new AssertionError("admission must not encode"); }
+                                    public Panel.Model decode(String value) { throw new AssertionError("admission must not decode"); }
+                                };
+                                var checkpoint = Panel.JX.withStateCheckpoint("strict-sparse", codec);
+                                try { checkpoint.validateState(null); return false; }
+                                catch (NullPointerException strictState) {
+                                    Panel.Model state = checkpoint.create(new Panel.Props("required")).state();
+                                    checkpoint.validateState(state);
+                                    return state.count() == 1 && state.note() instanceof Presence.Absent<String>
+                                        && !checkpoint.nullableState() && checkpoint.stateSchema() == Panel.JX.stateSchema()
+                                        && checkpoint.propsSchema() == Panel.JX.propsSchema() && checkpoint.checkpoint().codec() == codec;
                                 }
                             }
                         }
