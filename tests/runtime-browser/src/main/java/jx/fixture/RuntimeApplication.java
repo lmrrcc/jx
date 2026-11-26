@@ -163,6 +163,7 @@ public final class RuntimeApplication {
         if (hotFixture()) { HotApplication.main(); return; }
         if (scalarBoundaryFixture()) { ScalarBoundaryFixture.main(); return; }
         if (resourceFixture()) { React.mountStrict("root", ResourceApplication.APP, null); return; }
+        if (routeResourceFixture()) { React.mountStrict("root", RouteResourceApplication.APP, null); return; }
         if (promiseObserverFixture()) React.mountStrict("root", PromiseObserverFixture.COMPONENT, null);
         else React.mountStrict("root", APP, null);
         exported(React.exportComponent(COUNTER, props -> new CounterProps("Export", initial(props))));
@@ -179,6 +180,8 @@ public final class RuntimeApplication {
     private static native boolean promiseObserverFixture();
     @JSBody(script = "return new URLSearchParams(location.search).get('fixture') === 'resource';")
     private static native boolean resourceFixture();
+    @JSBody(script = "return !!globalThis.routeResourceFixture || new URLSearchParams(location.search).get('fixture') === 'route-resource';")
+    private static native boolean routeResourceFixture();
     @JSBody(params = {"task", "delay"}, script = "setTimeout(task, delay);") private static native void delayed(Task task, int delay);
     @JSBody(params = {"kind", "label", "value"}, script = "if (!globalThis.runtimeEvents) globalThis.runtimeEvents = []; globalThis.runtimeEvents.push({kind: kind, label: label, value: value});") private static native void report(String kind, String label, int value);
     @JSBody(script = "return globalThis.ForeignBadge;") private static native JSObject foreign();

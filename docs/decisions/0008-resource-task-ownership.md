@@ -1,6 +1,6 @@
 # ADR 0008: owned resource tasks
 
-Status: M1-15 has local JVM/browser evidence; publication and M1-16 remain open.
+Status: M1-15 is accepted in PR75 (`f4b87ba`); M1-16 has local JVM/browser evidence and awaits publication.
 
 ## Contract
 
@@ -127,7 +127,35 @@ checks. The browser entry retains compiled-runtime attestation while exposing
 the independent native Activity probe. No new mutation or conformance-pair credit
 is claimed from this integration; the publication gate and Verify remain pending.
 
-The G0 router loader will consume the same hook/task/cancellation contract using
-the router's immutable location. That integration and its navigation/late-response
-proof remain M1-16 work. The earlier roadmap reference to ADR 0003 was stale:
-ADR 0003 already covers state-preserving development, so this decision is ADR 0008.
+## Router integration (M1-16)
+
+The compiling `RouteResourceApplication` composes `useSyncExternalStore(router)`
+with `useResource(location, loader)`. The router's immutable, stable location is
+the request identity, avoiding a second data/state owner or a new router API.
+Unchanged locations do not reload; path/query/history changes replace the task.
+Applications with independent authentication, tenant or retry inputs must include
+them in a stable key as well. Hash changes also replace this complete-location
+key. A future cache may choose a narrower explicit key; this proof does not.
+
+Two Chrome checks pass in 1.6 seconds, exercising a real deep link, decoded path
+parameters, query replacement, back/forward, obsolete replies, typed failures,
+not-found, unmount/remount and another still-subscribed router observer. The
+external data task is deliberately controlled; real transport abort is covered by
+M1-15. No server authorization or SSR qualification is inferred. After making
+fixture reporting compatible with TeaVM's JSBody parser, the selected reactor
+passes 80 JVM checks (62 core, 10 React, 8 Elm) and TeaVM in 3.882 seconds, without
+JSBody warnings. The complete runtime suite passes **24/24 in 5.9 seconds**.
+
+The later publication assembly `05e26a6`, including the journal and resource
+integration above, passes **174 JVM checks and TeaVM in 16.667 seconds** and
+**all 47 runtime Chrome checks in 12.0 seconds**. Its route consumer and shared
+spec remain byte-identical to `feb7318`; both new route checks and the existing
+45 runtime checks pass together. Publication gate/Verify remain pending, and
+this integration adds no conformance or mutation-catalog credit.
+
+The earlier roadmap reference to ADR 0003 was stale: ADR 0003 already covers
+state-preserving development, so this decision is ADR 0008.
+
+## M1-15 publication acceptance, 26 November
+
+[PR75](https://github.com/lmrrcc/jx/pull/75) merged as `f4b87ba2bbab14f6beea01f1a5b31ea873cd8a76` after the exact head `74ee92e` passed the mandatory 15-step gate in 366 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45798321752) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45798178568). The final integrated gate passes 187 JVM checks, 45 runtime Chrome checks, 975 conformance checks with 217 mode exclusions across 149 cases, both complete examples and four real hot-reload workflows. The 62/6328 interaction count is unchanged. This accepts the bounded task/owner/resource API above; the route proof, general data caching, server fetching and retry policies remain separately qualified work. Earlier scoped results and the two mutation observations retain their original scope.

@@ -136,3 +136,34 @@ requests. Routing does not authorize any backend operation.
 The runtime browser fixture contains compiling consumers and contract tests for
 HTTP results and errors, limits, timeout/cancellation, push/replace, route and query
 parameters, and browser back/forward. See [runtime verification](runtime.md).
+
+## Route-owned data
+
+A route loader is an ordinary custom hook over the same resource contract:
+
+```java
+private static Resource<Page, Problem> useRouteData(Router router) {
+    Location location = Hooks.useSyncExternalStore(router);
+    return Hooks.useResource(location, Application::loadPage);
+}
+```
+
+`loadPage(Location)` returns a cold `Task<Page, Problem>`. It can match a route,
+decode path/query parameters and return `Http.task(...)` for a repeatable read.
+An unmatched route can return a task that completes synchronously with a typed
+not-found result. Keep any authorization decision on the server.
+
+The router retains the same location object while path, query and hash are
+unchanged, so an unrelated parent render does not reload. Changing any of those
+parts replaces the operation; back/forward navigation also starts a new owned
+read. If authentication or another input can change independently of location,
+include its generation in a stable, memoized request key. Do not allocate a new
+opaque key object on every render or omit reactive inputs from the key.
+
+The compiling [route resource consumer](../tests/runtime-browser/src/main/java/jx/fixture/RouteResourceApplication.java)
+and its [browser checks](../tests/runtime-browser/tests/route-resource.spec.js)
+exercise decoded parameters, query replacement, history navigation, stale replies,
+typed failures, unmount/remount and a second observer that keeps using the router.
+The task source is controlled test data; the existing resource HTTP check proves
+real transport abort separately. This G0 composition does not add route actions,
+prefetching, shared caching, SSR loading or production server rewrite rules.

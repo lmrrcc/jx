@@ -20,7 +20,9 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
-Latest published journal integration: **975 checks pass, 217 skipped,
+Latest resource acceptance: **✅ M1-15 merged in PR75 as `f4b87ba`**, after the 15-step gate passed in 366 seconds and both Verify checks passed on `74ee92e`. The final integration passes **187 JVM, 45 runtime Chrome, 975 conformance checks with 217 mode exclusions and four real hot workflows**. The 149 cases and 62/6328 interaction count are unchanged. Cancellation remains accepted in PR73 and the bounded class journal in PR74; route loading is prepared separately.
+
+Earlier published journal integration: **975 checks pass, 217 skipped,
 149 cases**, with 180 JVM checks, 39 runtime Chrome checks and four real hot
 workflow checks. All **62/6328** registered interaction pairs pass; **6266**
 remain without complete evidence. Broader class/hot/editor qualification keeps
