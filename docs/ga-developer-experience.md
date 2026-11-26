@@ -4,6 +4,13 @@
 proposed technical approach, not delivered commands or measured performance.
 Implementation tasks are tracked in the [GA task list](ga-tasks.md).
 
+The functional-first amendment was accepted in [PR #88](https://github.com/lmrrcc/jx/pull/88)
+as `99bb84c`, on tested head `25a36c7`. The local 20-step gate passed in 464 seconds;
+both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45872302417) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45872200338) passed.
+This publishes the requirements and ordering; ST/HR implementation and latency
+qualification remain planned.
+
 JX must let a developer create a complete Java React and Spring application in
 minutes, see a small working example immediately, and edit it with rapid browser
 feedback. The first experience must exercise the same build and runtime that a

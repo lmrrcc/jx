@@ -2,6 +2,12 @@
 
 ## Publication candidate requalification, 26 November 2026
 
+The final publication branch is rebased onto accepted sparse authoring PR87
+(`4e41b15`) and the functional-first plan PR88 (`99bb84c`). That rebase changes
+documentation and ancestry only relative to the qualified candidate below;
+the ABI implementation, tests and gate wiring are unchanged. The final 21-step
+gate still qualifies the exact combined commit before publication.
+
 Candidate `b89db24` preserves the seven selected ABI commits on the sparse
 authoring candidate, based on accepted PR86. The seven ABI-specific commits are
 retained; the current parent also includes previously qualified compiler/plugin
