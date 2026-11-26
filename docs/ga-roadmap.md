@@ -20,21 +20,18 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
-Latest published native destination integration: **943 checks pass, 217 skipped,
-145 cases**, with 56 core/10 React/54 compiler/15 Maven package tests passing.
-This integrates the class-policy, sink, act, bootstrap, resume, resource-header
-and import-map slices, plus native Writable and real HTTP delivery consumers.
-All **62/6328** registered interaction pairs pass; **6266**
-remain without complete evidence. Its scoped mutants are killed; remaining
-capabilities and broader qualification keep the work **🟡 partial**.
-The measurements below describe earlier slices, not additional passing tests.
+Latest published nullable class-state integration: **959 checks pass, 217 skipped,
+147 cases**, with 63 core/10 React/54 compiler/15 Maven package tests passing.
+The published native Writable and server-option consumers remain included. All
+**62/6328** registered interaction pairs pass; **6266** remain without complete
+evidence. Broader class/hot/editor qualification keeps R-28 **🟡 partial**.
 
-**✅ PR70 merged as `8da61ba`** after the 15-step gate passed in 368 seconds
-and both Verify checks passed on `02d2ddf`. The eight header/resource witnesses
-from PR68 remain published evidence; production HTTP/103 adapters and the broader
-R-31 gate remain open. Nullable class state and explicit absent/undefined/null
-properties are prepared as R-28-03h1, with focused and scoped mutation evidence;
-that separate publication still requires its integrated gate and Verify checks.
+**✅ PR71 merged as `30742a6`** after the 15-step gate passed in 414 seconds
+and both Verify checks passed on `d735157`. Its two scoped mutants were killed
+after a passing baseline. One CI attempt failed to bind the Flight host before
+browser assertions; an unchanged-head rerun passed. Typed defaults are prepared
+separately and still require their final integrated gate and Verify checks.
+The measurements below describe earlier slices, not additional passing tests.
 
 Responsive image preload options (R-31-01) pass the integrated bench over
 merged lifecycle authoring `338872c`: **903 checks, 169 skipped, 134 cases**,

@@ -4,6 +4,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import jx.ClassComponent;
 import jx.ClassComponentType;
+import jx.ClassProps;
 import jx.ClassRef;
 import jx.ClassSchema;
 import jx.Context;
@@ -91,7 +92,16 @@ final class ReactClasses {
 
 
     static <P,S,C extends ClassComponent<P,S,?>> JSObject element(View.ClassComponentView<P,S,C> view, String path, String key) {
-        ClassComponentType<P,S,C> type = view.component();
+        return element(view.component(), encode(view.component().propsSchema(), view.props()), view.ref(), path, key, null);
+    }
+
+    static <P,S,C extends ClassComponent<P,S,?>> JSObject element(View.ClassPropsView<P,S,C> view, String path, String key) {
+        return element(view.component(), encode(view.input()), view.ref(), path, key,
+                view.overrides() == null ? null : encode(view.overrides()));
+    }
+
+    private static <P,S,C extends ClassComponent<P,S,?>> JSObject element(ClassComponentType<P,S,C> type,
+            JSObject encodedProps, ClassRef<C> javaRef, String path, String key, JSObject overrides) {
         Factory create = (instance, props) -> create(type, instance, props);
         DerivedState derive = !type.hasDerivedStateFromProps() ? null : (props, state) -> patch(type.stateSchema(),
                 type.deriveStateFromProps(decode(type.propsSchema(), props), decode(type.stateSchema(), state, type.nullableState())));
@@ -99,15 +109,14 @@ final class ReactClasses {
                 patch(type.stateSchema(), type.deriveStateFromError(ReactError.fromNative(error)));
         JSObject constructor = constructor(TYPES, type, create, type.name(), type.pure(),
                 type.contextType() == null ? null : React.context(type.contextType()),
+                type.defaultProps() == null ? null : encode(type.defaultProps()),
                 derive, deriveError, type.lifecycle(ClassComponentType.Lifecycle.CATCH),
                 type.lifecycle(ClassComponentType.Lifecycle.MOUNT), type.lifecycle(ClassComponentType.Lifecycle.UPDATE),
                 type.lifecycle(ClassComponentType.Lifecycle.SNAPSHOT),
                 type.lifecycle(ClassComponentType.Lifecycle.SHOULD_UPDATE));
-        JSObject props = encode(type.propsSchema(), view.props());
-        ClassRef<C> javaRef = view.ref();
         JSObject ref = javaRef == null ? null : ref(REFS, javaRef, instance ->
                 javaRef.attach(instance == null ? null : peer(instance)));
-        return element(constructor, props, key, path, ref);
+        return element(constructor, encodedProps, key, path, ref, overrides);
     }
 
     private static <P,S,C extends ClassComponent<P,S,?>> JSObject create(ClassComponentType<P,S,C> type,
@@ -159,6 +168,14 @@ final class ReactClasses {
                 updated, unmount, snapshot, should, caught);
     }
 
+    private static JSObject encode(ClassProps<?> props) {
+        JSObject object = dictionary();
+        for (ClassProps.Entry<?,?> entry : props.entries()) {
+            if (entry.undefined()) setUndefined(object, entry.field().name());
+            else set(object, entry.field().name(), nativeValue(entry.field().type(), entry.value()));
+        }
+        return object;
+    }
     private static <T> JSObject encode(ClassSchema<T> schema, T value) {
         schema.validate(value);
         JSObject object = object();
@@ -211,6 +228,7 @@ final class ReactClasses {
 
     @JSBody(script = "return new WeakMap();") private static native JSObject weakMap();
     @JSBody(script = "return {};") private static native JSObject object();
+    @JSBody(script = "return Object.create(null);") private static native JSObject dictionary();
     @JSBody(params = {"object", "field", "value"}, script = "object[field] = value;") private static native void set(JSObject object, String field, JSObject value);
     @JSBody(params = {"object", "field"}, script = "object[field] = undefined;") private static native void setUndefined(JSObject object, String field);
     @JSBody(params = "value", script = "return value === null;") private static native boolean isNullValue(JSObject value);
@@ -234,9 +252,9 @@ final class ReactClasses {
     private static native JSObject callbacks(Object peer, JSObject initial, Render render, Done mount, Updated update, Done unmount, Snapshot snapshot, ShouldUpdate should, Caught caught);
     @JSBody(params = {"cache", "ref", "attach"}, script = "var fn = cache.get(ref); if (!fn) { fn = function(instance) { attach(instance); }; cache.set(ref, fn); } return fn;")
     private static native JSObject ref(JSObject cache, Object ref, Attach attach);
-    @JSBody(params = {"constructor", "props", "key", "path", "ref"}, script = "props.__jxPath = path; if (key !== null) props.key = key; if (ref !== null) props.ref = ref; return React.createElement(constructor, props);", imports = @JSBodyImport(alias = "React", fromModule = "react"))
-    private static native JSObject element(JSObject constructor, JSObject props, String key, String path, JSObject ref);
-    @JSBody(params = {"cache", "descriptor", "create", "name", "pure", "context", "derive", "deriveError", "caught", "mount", "update", "snapshot", "should"}, script = """
+    @JSBody(params = {"constructor", "props", "key", "path", "ref", "overrides"}, script = "props.__jxPath = path; if (key !== null) props.key = key; if (ref !== null) props.ref = ref; var element = React.createElement(constructor, props); return overrides === null ? element : React.cloneElement(element, overrides);", imports = @JSBodyImport(alias = "React", fromModule = "react"))
+    private static native JSObject element(JSObject constructor, JSObject props, String key, String path, JSObject ref, JSObject overrides);
+    @JSBody(params = {"cache", "descriptor", "create", "name", "pure", "context", "defaults", "derive", "deriveError", "caught", "mount", "update", "snapshot", "should"}, script = """
         var Type = cache.get(descriptor);
         if (Type) return Type;
         var Base = pure ? React.PureComponent : React.Component;
@@ -249,6 +267,7 @@ final class ReactClasses {
         Type.prototype = Object.create(Base.prototype);
         Type.prototype.constructor = Type;
         Type.displayName = name;
+        if (defaults !== null) Type.defaultProps = Object.freeze(defaults);
         if (context !== null) Type.contextType = context;
         if (derive !== null) Type.getDerivedStateFromProps = function(props, state) { return derive(props, state); };
         if (deriveError !== null) Type.getDerivedStateFromError = function(error) { return deriveError(error); };
@@ -265,6 +284,6 @@ final class ReactClasses {
         return Type;
         """, imports = @JSBodyImport(alias = "React", fromModule = "react"))
     private static native JSObject constructor(JSObject cache, Object descriptor, Factory create, String name, boolean pure,
-            JSObject context, DerivedState derive, DerivedError deriveError, boolean caught,
+            JSObject context, JSObject defaults, DerivedState derive, DerivedError deriveError, boolean caught,
             boolean mount, boolean update, boolean snapshot, boolean should);
 }

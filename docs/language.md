@@ -206,7 +206,8 @@ signatures. Attributes can appear in any order. Boolean shorthand means `true`.
 
 ### Optional props and defaults
 
-A Props field marked `@jx.OptionalProp` may be omitted in markup. An omitted field
+A Props field marked `@jx.OptionalProp` may be omitted in markup. For functional
+components and classes without native `defaultProps`, an omitted field
 receives Java's default for its type (null, zero or false); the record's compact
 constructor supplies any other default:
 
@@ -216,9 +217,19 @@ public record Props(@OptionalProp String label, @OptionalProp String tone) {
 }
 ```
 
-`<Badge />` then renders with the default label. As with a default parameter in
-JavaScript, the default also replaces an explicit null. A null attribute value,
+`<Badge />` then renders with the default label. This Java constructor also replaces
+an explicit null; JavaScript's undefined defaulting is a different operation. A null attribute value,
 such as `data-tone={props.tone()}` here, adds no attribute.
+
+A native class may instead declare `public static final ClassProps<Props> defaultProps`
+using its generated `propsInput()` builder. In that form, omitted `@OptionalProp`
+fields remain absent until React resolves the constructor's native defaults;
+explicit null, zero, false and empty strings are retained. Every optional field
+must have a defined default (including null for a nullable type), validated when
+the descriptor initializes. Unmarked fields still produce a missing-prop diagnostic.
+The builder is safe during static initialization and also supports typed raw
+input through `Views.classPropsView`. The [native default-props contract](evidence/class-default-props.md)
+contains the complete example, schema ownership, cloning semantics and current scope.
 
 ### Spread
 

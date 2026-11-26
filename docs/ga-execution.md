@@ -7,16 +7,16 @@ does not complete its planned GA qualification work. IDs are stable for future
 issues/PRs and evidence records.
 No GitHub issues, scheduled jobs, deployments or releases were created by this plan.
 
-Latest published native Writable slice: **943 passed /217 skipped /
-145 cases**, with package 56 core/10 React/54 compiler/15 plugin/10 LSP. The full run
-preserves **62/6328 pairs** (6266 active pairs open), including the eight published
-header/resource witnesses. The bounded native destination slice is **✅ merged
-in PR70 as `8da61ba`**, after the 15-step gate passed in 368 seconds and both Verify
-checks passed on `02d2ddf`. Its scoped destination mutant was killed after a passing
-baseline in the five-mutant `eb536cd` campaign. Nullable-state publication is
-prepared separately and still awaits its integrated gate and Verify checks.
-Production HTTP/103 and broader R-31 qualification remain open. Earlier figures
-below record their respective slices rather than this published integration.
+Latest published nullable class-state slice: **959 passed /217 skipped /
+147 cases**, with package 63 core/10 React/54 compiler/15 plugin/10 LSP. The full
+run preserves **62/6328 pairs** (6266 active pairs open), including the eight
+published header/resource witnesses. R-28-03h1 is **✅ merged in PR71 as
+`30742a6`**, after the 15-step gate passed in 414 seconds and both Verify checks passed on
+`d735157`. Its two scoped mutants were killed after a passing baseline.
+The first PR Verify host-bind failure and unchanged-head green rerun are recorded
+in the nullable-state evidence; no validation was skipped. Typed defaults and
+class checkpoint publication follow separately. Broader R-28/R-31 remain open.
+Earlier figures below record their respective slices.
 
 Progress: **GA-01 and GA-02 are complete**. GA-14, GA-15 and GA-18 have substantial
 partial implementations through the React parity tasks; their broader acceptance

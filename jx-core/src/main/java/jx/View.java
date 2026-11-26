@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 /** An immutable description of elements. Descriptions do not invoke child components. */
-public sealed interface View permits View.Element, View.Text, View.Fragment, View.ComponentView, View.ClassComponentView, View.Provider, View.Empty, View.Items, View.Keyed, View.Extension {
+public sealed interface View permits View.Element, View.Text, View.Fragment, View.ComponentView, View.ClassComponentView, View.ClassPropsView, View.Provider, View.Empty, View.Items, View.Keyed, View.Extension {
     /** Renderer-specific, explicitly typed extension boundary; unsupported implementations fail explicitly. */
     non-sealed interface Extension extends View {
         /** The native node's explicit reconciliation key, or null when absent. An extension is
@@ -43,6 +43,25 @@ public sealed interface View permits View.Element, View.Text, View.Fragment, Vie
     record ClassComponentView<P,S,C extends ClassComponent<P,S,?>>(ClassComponentType<P,S,C> component,
             P props, String key, ClassRef<C> ref) implements View {
         public ClassComponentView { Objects.requireNonNull(component).propsSchema().validate(props); }
+    }
+    /** Raw schema-owned class input, resolved by native defaults before Java props decoding.
+     * Null overrides creates an element; non-null overrides copies it using cloneElement.
+     * Keeping original input separate preserves native resolution: createElement applies
+     * defaults before explicit clone overrides, which can reintroduce own-undefined until
+     * the class renders. No class peer is copied. Repeated copies flatten their overrides. */
+    record ClassPropsView<P,S,C extends ClassComponent<P,S,?>>(ClassComponentType<P,S,C> component,
+            ClassProps<P> input, String key, ClassRef<C> ref, ClassProps<P> overrides) implements View {
+        public ClassPropsView {
+            ClassSchema<P> schema = Objects.requireNonNull(component, "component").propsSchema();
+            if (Objects.requireNonNull(input, "input").schema() != schema || overrides != null && overrides.schema() != schema)
+                throw new IllegalArgumentException("Class input props belong to another descriptor schema");
+        }
+        public ClassPropsView(ClassComponentType<P,S,C> component, ClassProps<P> props, String key, ClassRef<C> ref) {
+            this(component, props, key, ref, null);
+        }
+        /** Combined author input before native default resolution; this is not native
+         * element.props. Use input/overrides for the two distinct construction phases. */
+        public ClassProps<P> props() { return overrides == null ? input : input.overlay(overrides); }
     }
     /** A child position that renders nothing: what a null or boolean child becomes. It keeps its
      * place among its siblings, so a sibling after it keeps its identity when it is replaced. */

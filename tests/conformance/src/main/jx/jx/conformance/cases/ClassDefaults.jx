@@ -1,0 +1,31 @@
+package jx.conformance.cases;
+
+import jx.*;
+
+/** Complete Java author input, native constructor defaults, typed class peer and state. */
+@Component
+public final class ClassDefaults {
+    public static View render() {
+        State<Integer> mode = Hooks.useState(0);
+        State<Boolean> reset = Hooks.useState(false);
+        State<String> inspection = Hooks.useState("none");
+        ClassRef<ClassDefaultsFixture.Peer> ref = Hooks.useMemo(ClassDefaultsFixture::ref, Dependencies.none());
+        Ref<ClassDefaultsFixture.Peer> remembered = Hooks.useRef(null);
+        var child = ClassDefaultsFixture.view(mode.value(),reset.value(),ref);
+        return <main>
+            <button onClick={event -> mode.set(0)}>Use missing default inputs</button>
+            <button onClick={event -> mode.set(1)}>Use undefined default inputs</button>
+            <button onClick={event -> mode.set(2)}>Use explicit empty values</button>
+            <button onClick={event -> mode.set(3)}>Use explicit defined values</button>
+            <button onClick={event -> mode.set(4)}>Clone without overrides</button>
+            <button onClick={event -> mode.set(5)}>Clone with undefined label</button>
+            <button onClick={event -> mode.set(6)}>Clone undefined again</button>
+            <button onClick={event -> inspection.set(ClassDefaultsFixture.inspect(child))}>Inspect native default props</button>
+            <button onClick={event -> { remembered.set(ref.current()); inspection.set("remembered"); }}>Remember default peer</button>
+            <button onClick={event -> inspection.set(Boolean.toString(remembered.current() == ref.current()))}>Compare default peer</button>
+            <button onClick={event -> reset.set(true)}>Reset default key</button>
+            <p data-testid="default-inspection">{inspection.value()}</p>
+            {child}
+        </main>;
+    }
+}

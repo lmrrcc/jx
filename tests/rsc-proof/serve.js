@@ -12,7 +12,7 @@ import {validateManifest} from './manifest.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const site = resolve(here, 'target/site');
-const port = Number(process.env.RSC_PORT || 59182);
+const port = Number(process.env.RSC_PORT || 4873);
 const origin = 'http://127.0.0.1:' + port;
 const modules = ['jx', 'reference'].map(side => pathToFileURL(resolve(here, side + '-client.js')).href);
 const manifestPath = resolve(site, 'react-client-manifest.json');

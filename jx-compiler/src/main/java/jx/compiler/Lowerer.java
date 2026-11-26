@@ -185,8 +185,23 @@ final class Lowerer {
             error("JX102", component.simpleName() + " does not declare a children property", element.nameSpan());
         if (!children.isEmpty() && attributes.containsKey("children"))
             error("JX101", "Children are specified both as a property and nested content", attributes.get("children").nameSpan());
-        out.synthetic("jx.Views.component(" + element.name() + ".JX, ", anchor);
-        if (!component.hasProps()) out.synthetic("null", anchor);
+        boolean nativeDefaults = component.classSpec() != null && component.classSpec().defaultProps();
+        out.synthetic((nativeDefaults ? "jx.Views.classPropsView(" : "jx.Views.component(") + element.name() + ".JX, ", anchor);
+        if (nativeDefaults) {
+            out.synthetic(element.name() + ".propsInput()",anchor);
+            for (ComponentMetadata.Prop prop : component.props()) {
+                Attribute attribute = attributes.get(prop.name());
+                boolean nested = prop.name().equals("children") && !children.isEmpty();
+                if (attribute == null && !nested) {
+                    if (!prop.optional()) error("JX103", "Missing required property '" + prop.name() + "' on " + component.simpleName(), element.nameSpan());
+                    continue;
+                }
+                out.synthetic(".with" + Character.toUpperCase(prop.name().charAt(0)) + prop.name().substring(1) + "(",anchor);
+                if (attribute != null) value(attribute); else componentChildren(children,anchor);
+                out.synthetic(")",anchor);
+            }
+            out.synthetic(".build()",anchor);
+        } else if (!component.hasProps()) out.synthetic("null", anchor);
         else {
             out.synthetic("new " + element.name() + ".Props" + (component.propsTypeParameters() == 0 ? "" : "<>") + "(", anchor);
             boolean first = true;

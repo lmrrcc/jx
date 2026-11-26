@@ -40,14 +40,15 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
     private final Function<Throwable,StatePatch<S>> derivedError;
     private final ContextPolicy<P,S,C> contextUpdate;
     private final boolean nullableState;
+    private final ClassProps<P> defaultProps;
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles) {
-        this(name, props, state, factory, context, pure, lifecycles, null, null, null, false);
+        this(name, props, state, factory, context, pure, lifecycles, null, null, null, false, null);
     }
     private ClassComponentType(String name, ClassSchema<P> props, ClassSchema<S> state,
             BiFunction<P,ContextAccess,C> factory, Context<?> context, boolean pure, Set<Lifecycle> lifecycles,
             BiFunction<P,S,StatePatch<S>> derivedState, Function<Throwable,StatePatch<S>> derivedError,
-            ContextPolicy<P,S,C> contextUpdate, boolean nullableState) {
+            ContextPolicy<P,S,C> contextUpdate, boolean nullableState, ClassProps<P> defaultProps) {
         if (Objects.requireNonNull(name).isBlank()) throw new IllegalArgumentException("Empty class component name");
         this.name = name; this.props = Objects.requireNonNull(props); this.state = Objects.requireNonNull(state);
         this.factory = Objects.requireNonNull(factory); this.context = context;
@@ -56,6 +57,9 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         this.derivedError = derivedError;
         this.contextUpdate = contextUpdate;
         this.nullableState = nullableState;
+        if (defaultProps != null && defaultProps.schema() != props)
+            throw new IllegalArgumentException("Default props belong to another class schema");
+        this.defaultProps = defaultProps;
         if (this.lifecycles.contains(Lifecycle.SNAPSHOT) && !this.lifecycles.contains(Lifecycle.UPDATE))
             throw new IllegalArgumentException("Snapshot lifecycle requires update lifecycle");
     }
@@ -98,6 +102,28 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
                 context, true, lifecycles);
     }
     public String name() { return name; }
+    /** Returns a distinct descriptor with native React class default properties. Declare
+     * it once: descriptor identity controls reconciliation. The immutable input must belong
+     * to this descriptor's exact props schema. Null removes defaults in the returned copy.
+     *
+     * <p>React supplies defaults only for absent or undefined input properties; explicit null,
+     * false, zero and empty strings remain values. Reference defaults retain their identity.
+     * Inputs and defaults are never merged into Java records by this API: the renderer sets
+     * the native constructor's defaultProps before element creation, and the strict props
+     * schema validates the resolved record before Java construction/lifecycle dispatch.
+     * Undefined defaults may still leave required fields unresolved and therefore invalid.
+     *
+     * <p>Use {@link Views#classPropsView(ClassComponentType, ClassProps)} for input that
+     * intentionally omits required fields. The original descriptor remains unchanged;
+     * factory, context, lifecycle, derivation settings are retained. This
+     * immutable contract does not expose native defaultProps mutation or reassignment.
+     */
+    public ClassComponentType<P,S,C> withDefaultProps(ClassProps<P> defaults) {
+        return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
+                derivedState, derivedError, contextUpdate, nullableState, defaults);
+    }
+    /** Native default-property input, or null when no defaults are declared. */
+    public ClassProps<P> defaultProps() { return defaultProps; }
     /** Returns a distinct descriptor permitting null aggregate state. Declare the result
      * once to keep native component identity stable. Props and the state schema itself
      * remain non-null contracts; non-null state objects still validate every declared field.
@@ -111,7 +137,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      * Existing factory, context, lifecycle and derivation settings are preserved. */
     public ClassComponentType<P,S,C> withNullableState() {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                derivedState, derivedError, contextUpdate, true);
+                derivedState, derivedError, contextUpdate, true, defaultProps);
     }
     /** Whether null aggregate state is accepted; properties have separate presence rules. */
     public boolean nullableState() { return nullableState; }
@@ -140,7 +166,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDerivedStateFromProps(BiFunction<P,S,StatePatch<S>> callback) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                Objects.requireNonNull(callback, "callback"), derivedError, contextUpdate, nullableState);
+                Objects.requireNonNull(callback, "callback"), derivedError, contextUpdate, nullableState, defaultProps);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasDerivedStateFromProps() { return derivedState != null; }
@@ -170,7 +196,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
      */
     public ClassComponentType<P,S,C> withDerivedStateFromError(Function<Throwable,StatePatch<S>> callback) {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
-                derivedState, Objects.requireNonNull(callback, "callback"), contextUpdate, nullableState);
+                derivedState, Objects.requireNonNull(callback, "callback"), contextUpdate, nullableState, defaultProps);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasDerivedStateFromError() { return derivedError != null; }
@@ -211,7 +237,7 @@ public final class ClassComponentType<P,S,C extends ClassComponent<P,S,?>> {
         return new ClassComponentType<>(name, props, state, factory, context, pure, lifecycles,
                 derivedState, derivedError, (peer, nextProps, nextState, nextContext) ->
                     policy.shouldUpdate(peer, nextProps, nextState,
-                            Objects.requireNonNull(nextContext.current(requested), "Missing next context reader").get()), nullableState);
+                            Objects.requireNonNull(nextContext.current(requested), "Missing next context reader").get()), nullableState, defaultProps);
     }
     /** Renderer capability check; no callback is executed. */
     public boolean hasContextShouldUpdate() { return contextUpdate != null; }

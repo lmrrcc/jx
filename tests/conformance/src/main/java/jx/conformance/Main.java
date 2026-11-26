@@ -32,6 +32,8 @@ import jx.conformance.cases.ClassLifecycleAuthoring;
 import jx.conformance.cases.ClassNextContext;
 import jx.conformance.cases.ClassNullPatch;
 import jx.conformance.cases.ClassNullableState;
+import jx.conformance.cases.ClassDefaults;
+import jx.conformance.cases.ClassDefaultsAuthoring;
 import jx.conformance.cases.ClassPurePolicy;
 import jx.conformance.cases.ContextNested;
 import jx.conformance.cases.ControlledInput;
@@ -243,6 +245,8 @@ public final class Main {
             case "class-null-patch" -> ClassNullPatch.JX;
             case "class-nullable-state" -> ClassNullableState.JX;
             case "class-nullable-derived" -> ClassNullableState.DERIVED_JX;
+            case "class-defaults" -> ClassDefaults.JX;
+            case "class-defaults-authoring" -> ClassDefaultsAuthoring.JX;
             case "class-pure-policy" -> ClassPurePolicy.JX;
             default -> null;
         };

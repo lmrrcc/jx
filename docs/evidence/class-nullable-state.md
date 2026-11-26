@@ -1,7 +1,7 @@
 # Nullable class state and property presence
 
 R-28-03h1, 25 November 2026. Sources `50fde0a` and `1ff6ac6` on `36aa9dd`; package and focused
-class regressions pass. Integration, full bench, mutations and Verify are pending.
+class regressions pass. These original source-branch results precede the publication evidence below.
 This extends the manual typed class runtime. Compiler-generated sparse `.jx`
 records, nullable props and committed hot checkpoints remain separate work.
 
@@ -144,3 +144,21 @@ in `react-dom-client.development.js` (`getStateFromUpdate`,
 [Component reference](https://react.dev/reference/react/Component). Null initial
 state with `getDerivedStateFromProps` emits React's warning; the fixture checks
 that warning rather than suppressing it or changing the initial state shape.
+
+## Publication acceptance, 26 November 2026
+
+[PR71](https://github.com/lmrrcc/jx/pull/71) merged as `30742a606e5f8e7111871a95d9962e124016195b`.
+The 15-step local push gate passed in 414 seconds on `d735157`; both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45780444858) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45780160517) passed.
+The integrated bench passes 959 checks with 217 mode exclusions across 147 cases:
+client 145/144, hydration 106, static 112 and lazy 117 per side. Both result tables
+match; all 62/6328 registered pairs are unchanged. Package 63 core/10 React/7 Elm/
+54 compiler/15 Maven/10 LSP, 16 runtime, 28 Flight Node plus 4 Flight browser, and
+complete counter/Todo/hot workflows pass.
+
+PR Verify attempt 1 passed the bench and 28 Flight Node checks but could not bind
+127.0.0.1:59182 (EADDRINUSE); no Flight browser assertion ran in that attempt.
+The same head passed on one rerun. The separate defaults follow-up moves the
+proof host default below the automatic client-port range, retaining overrides
+and explicit bind failures. This infrastructure retry is not new feature proof.

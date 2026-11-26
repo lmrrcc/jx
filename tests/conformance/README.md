@@ -139,13 +139,14 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The published native Writable integration (PR70) is the parent baseline below.
-The separate nullable-state publication carries two all-mode expected result rows
-from the executed `e296d4a` integration; its new combined gate is still pending.
+The published nullable-state integration (PR71) passes **959 checks**, with
+**217 skipped cells across 147 case IDs**: client 145 reference /144 JX, hydrate 106
+per side, static 112 and lazy 117 per side. Its 15-step gate and both Verify checks
+passed on `d735157`, after one documented CI Flight-host bind failure and a green
+unchanged-head rerun. The two upcoming default-props rows are inherited from
+previously executed source `7195939`; their new integrated gate remains pending.
 
-The published class-policy, server options and native Writable run passes 943 checks, with
-217 skipped cells across 145 case IDs: client 143 reference / 142 JX, hydrate
-104 per side, static 110 per side and lazy 115 per side. Sixty-two pairs have complete local
+Sixty-two pairs have complete local
 evidence in their declared modes; 6,266 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become
 available. The eventual universe still includes 118 features and 6,903 candidate

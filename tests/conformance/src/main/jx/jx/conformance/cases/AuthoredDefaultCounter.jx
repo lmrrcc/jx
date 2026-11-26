@@ -1,0 +1,19 @@
+package jx.conformance.cases;
+
+import jx.*;
+
+@Component
+public final class AuthoredDefaultCounter extends ClassComponent<AuthoredDefaultCounter.Props,AuthoredDefaultCounter.Model,Void> {
+    public record Props(String required, @OptionalProp String label, @OptionalProp int initial, @OptionalProp View children) {}
+    public record Model(int count) {}
+    public static final ClassProps<Props> defaultProps = propsInput()
+            .withLabel("generated-default").withInitial(4).withChildren(null).build();
+    public AuthoredDefaultCounter(Props props) { super(props,new Model(props.initial())); }
+    @Override public View render() {
+        return <section data-testid="authored-default">
+            <output>{props().required()+":"+props().label()+":"+props().initial()+":"+state().count()}</output>
+            {props().children()}
+            <button onClick={event -> setState((pending,next) -> statePatch().withCount(pending.count()+1).build())}>Increment authored default</button>
+        </section>;
+    }
+}
