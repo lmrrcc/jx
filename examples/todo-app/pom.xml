@@ -13,17 +13,17 @@
     <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.13.4</version><scope>test</scope></dependency>
   </dependencies>
   <build><plugins>
-    <plugin><groupId>dev.jx</groupId><artifactId>jx-maven-plugin</artifactId><version>${project.version}</version><executions>
-      <execution><id>todo-contract</id><goals><goal>record-codecs</goal></goals><configuration>
-        <contractTypes><contractType>jx.example.contract.Todo</contractType></contractTypes>
-      </configuration></execution>
-      <execution><id>jx-sources</id><goals><goal>generate</goal><goal>check</goal></goals></execution>
-      <execution><id>jx-browser</id><phase>prepare-package</phase><goals><goal>browser</goal></goals></execution>
-    </executions></plugin>
     <plugin><groupId>org.teavm</groupId><artifactId>teavm-maven-plugin</artifactId><version>${teavm.version}</version><executions><execution><phase>process-classes</phase><goals><goal>compile</goal></goals></execution></executions><configuration>
       <mainClass>jx.example.todo.BrowserMain</mainClass><targetType>JAVASCRIPT</targetType><jsModuleType>ES2015</jsModuleType>
       <targetDirectory>${project.build.directory}/browser</targetDirectory><targetFileName>application.js</targetFileName>
       <minifying>false</minifying><sourceMapsGenerated>true</sourceMapsGenerated><sourceFilesCopied>true</sourceFilesCopied>
     </configuration></plugin>
+    <plugin><groupId>dev.jx</groupId><artifactId>jx-maven-plugin</artifactId><version>${project.version}</version><executions>
+      <execution><id>todo-contract</id><goals><goal>record-codecs</goal></goals><configuration>
+        <contractTypes><contractType>jx.example.contract.Todo</contractType></contractTypes>
+      </configuration></execution>
+      <execution><id>jx-sources</id><goals><goal>generate</goal><goal>check</goal></goals></execution>
+      <execution><id>jx-browser</id><phase>process-classes</phase><goals><goal>browser</goal><goal>web-jar</goal></goals></execution>
+    </executions></plugin>
   </plugins></build>
 </project>

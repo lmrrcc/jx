@@ -52,7 +52,9 @@ the complete SDK suite passed **96/96**, with no skips.
 and 18 experimental API warnings. The embedded compiler and server match this
 checkout's artifacts byte-for-byte. ZIP SHA-256:
 `e4634a7208f722e534a112a48659fcd727b9602745d14030484b86a4f9c99e26`.
-This is a local development rebuild of 0.3.2; publication gate and Verify are pending.
+This is the original local development rebuild of 0.3.2. The later PR79
+publication gate and both Verify checks pass as recorded below; the ZIP hash and
+SDK measurements remain evidence of this original source-specific execution.
 
 The following measurements are from the complete SDK run on Luca's Apple M5
 workstation, 10 reported processors and 16 GiB RAM, macOS 26.5.1/aarch64. The SDK
@@ -157,3 +159,7 @@ qualification, VS Code closed-file rename, or an installed-IDE manual walkthroug
 The separate [native editing decision](../decisions/0002-native-java-editor-services.md)
 and [tooling capability matrix](../tooling.md) retain those boundaries. The future
 HR edit-to-browser-frame benchmark remains distinct.
+
+## Publication acceptance
+
+[PR79](https://github.com/lmrrcc/jx/pull/79) merged as `c533d9906162c1ee76c91bac88f2fae15b0a674a`. Exact head `c96e945` passed all 15 local gate steps in 368 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45812869867) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45812731127). The integrated gate passes 198 JVM checks, the runtime suite, 975 conformance checks with 217 explicit mode exclusions, four Spring Todo scenarios and four real hot workflows. The 149-case inventory and 62/6328 pair count are unchanged. The JavaModel/parser regression, IntelliJ implementation and SDK proof sources match the qualified originals; no additional SDK run or rebuilt ZIP is claimed for this publication assembly. The 101-retained-file undo limit above remains explicit.
