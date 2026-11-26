@@ -311,8 +311,8 @@ on `426cc08`, followed by both
 Production HTTP/103 integration and the broader R-31 gate remain unqualified.
 See the [header contract](evidence/server-resource-headers.md).
 
-R-31-SERVER-IMPORT-MAP, 25 November 2026: 🟡 implementation and focused differential
-consumer pass. A copied, bounded schema supplies imports, nested scopes and
+R-31-SERVER-IMPORT-MAP, 26 November 2026: ✅ bounded slice merged in PR69 as
+`b9d8f67`; broader R-31 remains partial. A copied, bounded schema supplies imports, nested scopes and
 integrity metadata; native dictionaries preserve special keys and blocked
 targets. Four initial renderers accept it, resume rejects it. The browser case
 verifies real module resolution, SRI denial, script escaping and nonce propagation.
@@ -323,9 +323,28 @@ passes 56 core/10 React/54 compiler/15 Maven package tests and the complete benc
 static 110, lazy 115 per side. All 62/6328 existing interaction pairs pass.
 Both scope-dropping and integrity-dropping mutations were killed by this case
 after a passing baseline in the five-mutant `eb536cd` campaign, with zero
-survivors or unusable mutants. This slice's quota is two; publication checks
-remain pending and no new pair credit is claimed. See the
+survivors or unusable mutants. This slice's quota is two. Final integration preserves
+the same 937/199/142 result and 62/6328 pair witnesses; the 15-step gate passed in
+377 seconds on `00d4828`, followed by both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45771288979) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45771188348).
+No new pair credit or cross-browser qualification is claimed. See the
 [import-map contract](evidence/server-import-map.md).
+
+R-31-NATIVE-WRITABLE, 25 November 2026: 🟡 focused qualification of the existing
+borrowed Node destination API. Package passes 56 core/10 React/54 compiler/15
+Maven checks and compiles two additional `.jx` consumers; three differential
+cases pass 6 Node checks, with 18 inapplicable cells. Multiple ready Suspense
+boundaries pause output until drain, asynchronous write/final errors preserve the
+native Error, and a real HTTP client disconnect aborts only its owned render while
+another response completes. The host explicitly observes terminal delivery and
+owns disconnect cancellation; no hard buffering limit is inferred from a
+high-water mark. Integrated source `5643be9` passes the full bench: 943 checks,
+217 skipped, 145 cases; client 143/142, hydrate 104, static 110 and lazy 115 per
+side. All 62/6328 registered pairs stay green. The native-destination mutant is
+killed by four cases after an unmodified full baseline; publication gates remain pending.
+No pair credit or production HTTP qualification is added. See the
+[native destination evidence](evidence/server-native-writable.md).
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven

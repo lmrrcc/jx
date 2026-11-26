@@ -25,7 +25,28 @@ function Streaming({request, data}) {
   </RequestContext>;
 }
 
+function PressureResult({index, data}) {
+  return <section data-testid={'segment-' + index}>{'pressure:' + use(data)}</section>;
+}
+
+function PressurePage({data}) {
+  return <main>{[0, 1, 2, 3, 4].map(index =>
+    <Suspense key={index} fallback={<p>{'waiting-pressure-' + index}</p>}>
+      <PressureResult index={index} data={data} />
+    </Suspense>)}</main>;
+}
+
 export const combinedServer = {
+  startNativePressure() {
+    const data = Promise.withResolvers(), shell = Promise.withResolvers(), all = Promise.withResolvers();
+    let errors = 0;
+    const stream = renderToPipeableStream(<PressurePage data={data.promise} />, {
+      identifierPrefix: 'pressure-', onShellReady: shell.resolve, onShellError: shell.reject,
+      onAllReady: all.resolve, onError() { errors++; }
+    });
+    return {shellReady: shell.promise, allReady: all.promise, pipe: writable => stream.pipe(writable),
+      release: data.resolve, abort: () => stream.abort(), errors: () => errors};
+  },
   startSinkCompletion(mode) {
     const data = Promise.withResolvers();
     const shell = Promise.withResolvers();

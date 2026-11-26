@@ -4,6 +4,7 @@ import jx.Promise;
 import jx.ComponentType;
 import jx.Views;
 import jx.conformance.cases.CombinedServerStream;
+import jx.conformance.cases.NativePressurePage;
 import jx.react.React;
 import jx.react.ReactServer;
 import org.teavm.jso.JSBody;
@@ -23,6 +24,7 @@ final class CombinedServerExports {
 
     static void install() {
         register(request -> new Request(request).export());
+        registerPressure(() -> new Request("pressure", true).export());
         registerFatal(() -> new FatalRequest().export());
     }
 
@@ -48,9 +50,12 @@ final class CombinedServerExports {
         private final ReactServer.PipeableStream stream;
         private int errors;
 
-        Request(String request) {
+        Request(String request) { this(request, false); }
+
+        Request(String request, boolean pressure) {
             stream = ReactServer.renderToPipeableStream(
-                    Views.component(CombinedServerStream.JX, new CombinedServerStream.Props(request, data)),
+                    pressure ? Views.component(NativePressurePage.JX, new NativePressurePage.Props(data))
+                            : Views.component(CombinedServerStream.JX, new CombinedServerStream.Props(request, data)),
                     ReactServer.StreamOptions.defaults().withIdentifierPrefix(request + "-")
                             .withError(error -> errors++));
         }
@@ -67,6 +72,9 @@ final class CombinedServerExports {
 
     @JSBody(params = "start", script = "globalThis.__jxBenchServer.startFatalStream = start;")
     private static native void registerFatal(Fatal start);
+
+    @JSBody(params = "start", script = "globalThis.__jxBenchServer.startNativePressure = start;")
+    private static native void registerPressure(Fatal start);
 
     @JSBody(params = {"shell", "all", "abort", "errors"},
             script = "return {shellReady: shell, allReady: all, abort: abort, errors: errors};")

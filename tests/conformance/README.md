@@ -139,13 +139,13 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The merged sink-delivery run over the class policies passes 929 checks, with
-175 skipped cells across 138 case IDs: client 136 reference / 135 JX, hydrate 104
-per side, static 110 per side and lazy 115 per side. That accepted parent has 54
-registered pairs; the current import-map integration still needs its final gate.
+The published import-map integration (PR69) passes 937 checks, with 199 skipped
+cells across 142 case IDs: client 140 reference / 139 JX, hydrate 104 per side,
+static 110 per side and lazy 115 per side. That parent has 62 registered pairs;
+the current native Writable integration still needs its final gate.
 
-The combined class-policy and server import-map run passes 937 checks, with
-199 skipped cells across 142 case IDs: client 140 reference / 139 JX, hydrate
+The combined class-policy, server options and native Writable run passes 943 checks, with
+217 skipped cells across 145 case IDs: client 143 reference / 142 JX, hydrate
 104 per side, static 110 per side and lazy 115 per side. Sixty-two pairs have complete local
 evidence in their declared modes; 6,266 of the 6,328 current candidates remain
 open. The active universe includes 113 features after eight utility rows become

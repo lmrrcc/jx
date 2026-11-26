@@ -1,0 +1,16 @@
+package jx.conformance.cases;
+
+import jx.Component;
+import jx.Hooks;
+import jx.Promise;
+import jx.View;
+
+@Component
+public final class NativePressureResult {
+    public record Props(int index, Promise<String> data) {}
+
+    public static View render(Props props) {
+        String value = Hooks.use(props.data());
+        return <section data-testid={"segment-" + props.index()}>{"pressure:" + value}</section>;
+    }
+}

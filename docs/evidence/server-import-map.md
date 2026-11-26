@@ -5,8 +5,13 @@ package checks (56 core, 10 React, 54 compiler and 15 Maven tests) and the compl
 bench: **937 passed, 199 skipped, 142 cases**. Client mode passes 140 reference /
 139 JX checks; hydration 104, static HTML 110 and lazy mode 115 per side. All
 62/6328 registered interaction pairs remain green; this option adds no pair credit.
-Both scoped mutants are killed; publication gates remain pending. This is not
-completed parity.
+Both scoped mutants are killed. PR [#69](https://github.com/lmrrcc/jx/pull/69)
+merged as `b9d8f6756eeca0fed96d2572810556e319510573` after the 15-step gate
+passed in 377 seconds and both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45771288979) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45771188348) passed on
+`00d4828`. That final integration preserves the counts above and also passes all
+ten language-server tests. This bounded slice does not complete R-31 parity.
 
 `ReactServer.StreamOptions.withImportMap` accepts a typed immutable `ImportMap`
 containing imports, scopes and integrity metadata. It preserves null versus
@@ -84,3 +89,11 @@ scope and integrity keys on both native React and JX; the Java schema and fixtur
 were corrected rather than suppressing the unexpected warning. Primary references:
 [React streaming options](https://react.dev/reference/react-dom/server/renderToPipeableStream)
 and the [HTML import-map processing model](https://html.spec.whatwg.org/multipage/webappapis.html#import-maps).
+
+The isolated five-mutant server-option campaign on source `5643be9` first passes
+the unmodified full bench. Dropping scopes and dropping integrity metadata each
+fail `server-import-map`: **2 killed, 0 survived, 0 unusable** for this boundary.
+The tested import-map implementation and consumer are unchanged from source
+`8c5c337`. The other three campaign mutants concern headers and native Writable
+delivery; this is not full-catalog qualification. Command and retained log are
+recorded in [native destination evidence](server-native-writable.md#scoped-mutation-evidence).
