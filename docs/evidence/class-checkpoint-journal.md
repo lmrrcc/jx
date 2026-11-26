@@ -17,14 +17,16 @@ default-props publication. The later sections below retain their original
 qualification dates; the two linked follow-ups supersede only their stated
 skipped-commit and nullable-state restrictions.
 
-The assembled source passes **74 core and 11 React JVM checks**. Its
+The assembled source passes **166 JVM checks and 39 runtime Chrome checks**
+(74 core, 11 React, seven Elm, 59 compiler and 15 Maven). Its
 `ClassCheckpoints.java` matches the qualified nullable-codec source `7a4fafc`;
-this is source comparison, not browser qualification of the new integration.
-Current browser/package qualification, the final push gate and Verify remain
-pending. The [three earlier journal mutations](class-journal-mutations.md)
-remain scoped to their recorded source and assertions. A fourth planned mutant
-replaces a successfully decoded null checkpoint with the constructor state;
-it has not run and earns no mutation credit.
+this source comparison is independent of the actual runtime checks just recorded.
+The final full push gate and Verify remain pending. The
+[three earlier journal mutations](class-journal-mutations.md) remain scoped to
+their recorded source and assertions. A separate one-mutant follow-up now kills
+the substitution of constructor state for a successfully decoded null checkpoint:
+the existing browser assertion observes `value:constructor` instead of `null`.
+Restoring and rebuilding the original line makes the same test pass again.
 
 Pure checkpoints, hidden commits, complete incoming ownership and pre-teardown
 candidate-codec validation remain separate requirements. This publication does

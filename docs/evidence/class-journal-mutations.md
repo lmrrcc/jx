@@ -65,3 +65,42 @@ The scratch's private generated artifacts must be rebuilt before reuse because
 the final installed plugin was deliberately mutated. Only the test assertion
 order and this evidence are intended for integration. Publication gates and
 broader hidden/Pure/nullable checkpoint qualification remain separate work.
+
+## Nullable checkpoint follow-up, 26 November
+
+This is a separate **one-mutant campaign**, not a rerun of the three checks
+above or of the conformance catalog. The isolated publication source `31bca85`
+(production assembled at `0782e20`) includes typed defaults and the explicit
+nullable/sparse codec follow-up. Its private scratch is
+`/private/tmp/jx-class-null-checkpoint-mutation`.
+
+The unmodified baseline passed **166 JVM checks** (74 core, 11 React, seven Elm,
+59 compiler, 15 Maven) and compiled the real runtime TeaVM application in
+50.430 seconds. After bundling, all **39 runtime Chrome checks passed in 8.9
+seconds**. The first browser request had been stopped at tool approval without
+starting a process; that attempt provides no browser evidence. The actual
+campaign ran only after all other local suites explicitly released their slots.
+
+`class-null-checkpoint-reset` changes only `ClassCheckpoints.restore` from
+returning the decoded value to substituting the Java constructor's initial state
+whenever decoding returns null. The mutant rebuilt successfully in 13.942
+seconds. The existing independent-generation test failed at
+`hot-class-presence.spec.js:62`: **expected `null`, received `value:constructor`**.
+The preceding assertion had already confirmed an independent module and completed
+readiness. This is a visible state reset, not a compilation, startup or transport
+failure. No test assertion was modified to obtain the kill.
+
+Result: **one killed, zero survived, zero unusable**. The production line was
+restored, rebuilt in 13.884 seconds and rebundled; the exact same focused check
+then passed in 1.5 seconds. The scratch is clean and its final artifacts contain
+unmodified production. All campaign processes have stopped.
+
+Reproduction uses the same Maven install command above, `npm run build:runtime`,
+and the configured browser runner with `RUNTIME_PORT=59191`. The mutated and final
+focused runs select `tests/runtime-browser/tests/hot-class-presence.spec.js`
+with `-g 'explicit class codecs preserve null aggregate empty record'`.
+Local artifacts are `/private/tmp/jx-null-checkpoint-baseline-results`,
+`/private/tmp/jx-null-checkpoint-mutant-results` and
+`/private/tmp/jx-null-checkpoint-restored-results`. They are local qualification
+evidence, not permanent CI or performance measurements. The final publication
+gate/Verify and broader hidden/Pure/preflight requirements remain separate.

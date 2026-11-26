@@ -3,8 +3,10 @@
 26 November 2026. Implemented and locally qualified on production `6dd30ab`, with
 the strengthened consumer in `1e589e7`, extending
 the bounded owner-attempt journal `6acd612` (production `4bd62af`). The contract
-below was recorded before implementation. Complete integration, mutation, push
-gate and Verify remain pending; R-28-04 remains partial.
+below was recorded before implementation. The later publication assembly
+`31bca85` passes 166 JVM and 39 runtime Chrome checks, with the scoped nullable
+mutation killed as recorded below. The final push gate and Verify remain pending;
+R-28-04 remains partial.
 
 The existing explicit `StateCodec<S>` remains the serialization boundary. The
 framework does not infer a serializer from arbitrary objects or encode Java
@@ -162,8 +164,11 @@ claims. No conformance table, feature denominator or interaction witness changes
 
 Production review of `ClassComponentType`, `ClassCheckpoints` and `ReactClasses`
 found no concrete blocker. This does not extend the proof to hidden own updates,
-Pure checkpointing, arbitrary codecs or candidate preflight. The prepared
-`class-null-checkpoint-reset` mutation substitutes constructor state when the
-decoded state is null. The first independent-generation case must kill that
-silent reset. This scoped hot mutant is outside the conformance catalog and is
-unexecuted; full integration/release checks also remain pending.
+Pure checkpointing, arbitrary codecs or candidate preflight. In the assembled
+publication at `31bca85`, the separate `class-null-checkpoint-reset` campaign
+passed its 39-check browser baseline, rebuilt the mutant successfully, and
+observed the intended first independent-generation failure: `null` became
+`value:constructor` at the existing assertion. The restored source rebuilt and
+passed the same check. See [the exact campaign](class-journal-mutations.md#nullable-checkpoint-follow-up-26-november)
+for the separate one-kill result, commands and limitations. This remains outside
+the conformance catalog; final publication gate/Verify are pending.
