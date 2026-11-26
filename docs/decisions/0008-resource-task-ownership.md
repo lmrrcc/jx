@@ -115,6 +115,18 @@ npm run test:runtime -- tests/runtime-browser/tests/resource.spec.js --workers=1
 These are scoped lifecycle/key-isolation checks, not a fresh run of the curated
 React conformance mutation catalog and not a claim of complete mutation coverage.
 
+## Integration with the class journal, 26 November
+
+Publication assembly `f1cb11a`, on journal candidate `4c02583` and the merged
+Cancellation PR73, preserves the resource capability and consumer files from
+`4324d62`. Its selected package passes **174 JVM checks** (80 core, 11 React,
+eight Elm, 60 compiler and 15 Maven-plugin tests) and actual TeaVM compilation
+in 14.637 seconds. The complete integrated runtime passes **45/45 Chrome checks
+in 10.3 seconds**: the six resource checks plus all 39 journal/previous runtime
+checks. The browser entry retains compiled-runtime attestation while exposing
+the independent native Activity probe. No new mutation or conformance-pair credit
+is claimed from this integration; the publication gate and Verify remain pending.
+
 The G0 router loader will consume the same hook/task/cancellation contract using
 the router's immutable location. That integration and its navigation/late-response
 proof remain M1-16 work. The earlier roadmap reference to ADR 0003 was stale:
