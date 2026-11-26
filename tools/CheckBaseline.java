@@ -64,7 +64,7 @@ public final class CheckBaseline {
             "tooling/vscode: npm test");
     private static final Pattern ID = Pattern.compile("[a-z0-9]+(?:[.-][a-z0-9]+)*");
     private static final Pattern REVISION = Pattern.compile("[0-9a-f]{7,40}\\+?");
-    private static final Pattern NPM_SCRIPT = Pattern.compile("(?m)^\\s*\"([a-z:]+)\":\\s*\"");
+    private static final Pattern NPM_SCRIPT = Pattern.compile("(?m)^\\s*\"([a-z][a-z0-9:_-]*)\":\\s*\"");
     private static final String V = "([0-9]+(?:\\.[0-9]+)*(?:-SNAPSHOT)?)";
 
     /** A version declared once in a build file; group 1 of the first match is its value. */

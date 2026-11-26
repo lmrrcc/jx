@@ -29,6 +29,9 @@
     <module>tests/rsc-proof/server</module>
     <module>tests/rsc-proof/client</module>
     <module>examples/todo-contract</module>
+    <module>tests/protected-ssr/view</module>
+    <module>tests/protected-ssr/server</module>
+    <module>tests/protected-ssr/client</module>
     <module>examples/todo-api</module>
     <module>examples/counter-app</module>
     <module>examples/todo-app</module>

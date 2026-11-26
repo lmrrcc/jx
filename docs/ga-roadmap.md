@@ -20,7 +20,9 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
-Latest packaged-Spring acceptance: **✅ M1-20 merged in PR80 as `74eb3d9`**, after all 16 local gate steps passed in 404 seconds and both Verify checks passed on `f07bcd4`. The actual executable Boot JAR serves the Java browser UI and API from an empty directory. Integrated **201 JVM, 47 runtime, 975 conformance checks/217 exclusions, four Todo, two packaged Chrome and four hot workflows** pass. This is the bounded root-context CSR proof; authentication, deployment policy and the starter remain separately tracked.
+Latest session/CSRF acceptance: **✅ M1-21 merged in PR81 as `8795b35`**, after all 17 local gate steps passed in 451 seconds and both Verify checks passed on `cb279b0`. The native login, session rotation, CSRF/logout denial and two private workspaces are exercised through the executable JAR and actual Maven development proxy. Integrated **204 JVM, 47 runtime, 975 conformance checks/217 exclusions, four Todo, two packaged, two auth and four hot workflows** pass. OIDC, timed expiry/cross-tab recovery, general identity-generation disposal and deployment hardening remain separate.
+
+Earlier packaged-Spring acceptance: **✅ M1-20 merged in PR80 as `74eb3d9`**, after all 16 local gate steps passed in 404 seconds and both Verify checks passed on `f07bcd4`. The actual executable Boot JAR serves the Java browser UI and API from an empty directory. Integrated **201 JVM, 47 runtime, 975 conformance checks/217 exclusions, four Todo, two packaged Chrome and four hot workflows** pass. This is the bounded root-context CSR proof; authentication, deployment policy and the starter remain separately tracked.
 
 Earlier editor acceptance: **✅ M1-28/M1-29 merged in PR79 as `c533d99`**, after all 15 local gate steps passed in 368 seconds and both Verify checks passed on `c96e945`. The integration passes **198 JVM, 975 conformance checks with 217 exclusions, four Spring Todo scenarios and four hot workflows**. Original 96-test IntelliJ SDK/ZIP/Verifier evidence includes the 100-component timing fixture, exact-source rename on 101 closed files and undo/redo on 25 files. The native SDK undo limit at 101 retained files remains explicit; there is no blanket IDE-parity or new development-service claim.
 
@@ -144,9 +146,9 @@ native editor qualification and class hot checkpoints are still open.
 | R-19 root options | ✅ Done | Error callbacks and identifier prefix, added on 23 November 2026. |
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
 | R-21 hydration | ✅ Done | `React.hydrate` over Node-rendered HTML (M1-25), store server snapshots and matching `useId`, added on 24 November 2026. |
-| G0 foundation proofs | 🟡 Partial | Lazy-module boundary, basic SSR→hydration, bounded shared Spring contract/exact-value proof and M1-28/29 editor measurements/structural rename are accepted. The native SDK undo limit at 101 retained files remains explicit. Component JAR, authenticated packaged Spring and protected SSR data route remain. |
-| Shared contracts and complete Spring integration | 🟡 Partial | Shared Todo record/paths, generated String/bool/int codec, exact-value vectors and one executable UI/API JAR locally verified; the JAR runs from an empty directory. Generated richer schemas/clients, starter/BOM, context prefixes and authenticated development remain. Publication pending. |
-| JX server rendering and hydration | 🟡 Partial | Node rendering, hydration, streaming/resume have bench evidence; request isolation, protected data and the RSC protocol track remain. |
+| G0 foundation proofs | 🟡 Partial | Lazy-module boundary, basic SSR→hydration, bounded shared/exact-value contracts, packaged Spring/session-CSRF and M1-28/29 editor proofs are accepted. The native SDK undo limit at 101 retained files remains explicit. Component JAR, protected SSR and the remaining G0 proof/review tasks remain separately tracked. |
+| Shared contracts and complete Spring integration | 🟡 Partial | Shared Todo record/paths, generated String/bool/int codec, explicit exact-value vectors, empty-directory executable UI/API JAR and native session/CSRF in packaged/Maven-dev modes are accepted. Richer generated schemas/clients, starter/BOM, context prefixes, broader identity lifecycle and deployment policy remain open. |
+| JX server rendering and hydration | 🟡 Partial | Node rendering, hydration and streaming/resume have bench evidence. M1-26 now has local real-Spring proof of two authenticated immutable snapshots, retained hydration nodes, no browser refetch and disconnect cleanup: 171 JVM and 3 Chrome checks. [Protected SSR evidence](evidence/protected-ssr.md); publication and production hosting/streaming qualification remain, as does the RSC protocol track. |
 | IntelliJ and VS Code experience | 🟡 Partial | Existing packages work within documented limits; GA qualification, scale, remaining editing actions and browser debugging are open. |
 | TT-01 Cherry Test orchestration | 🟡 Partial | Unit coverage/CRAP delivered; integration and browser kinds still open. |
 | TT-04 PIT through Cherry Test | ⛔ Blocked | Installed Cherry Test update and first verified PIT run. |
@@ -398,7 +400,7 @@ browser. It is an executable foundation, not a production framework yet.
 | Components/compiler | Typed record props, hooks, keyed children, fragments, source diagnostics | Published component libraries, generics/defaults/forwarding, complete grammar/recovery and cross-module ABI |
 | React lifecycle | Actual React hooks, cleanup, external stores, error boundaries and two-way interop fixtures | Advanced concurrency/rendering APIs, broader events/refs, real ecosystem bindings |
 | Applications | Counter and routed Todo with Elm, forms, HTTP and Spring persistence | Identity, permissions, complex workflows, streaming/media, offline policy and operations |
-| Shared contracts | Explicit manually written JSON codecs | One canonical contract, generated clients/codecs/schema, differential serialization and evolution tests |
+| Shared contracts | Shared Todo record/paths; generated required String/bool/int codecs; explicit exact-value adapters | One canonical contract, generated clients/codecs/schema, differential serialization and evolution tests |
 | Spring | Working example API | Optional supported starter/BOM, secure development, self-contained packaged application and deployment matrix |
 | Browser Java | Classes reached by the current fixtures execute under TeaVM | Method-level library certification, transitive dependency checks and size/correctness budgets |
 | Hot updates | Typed checkpoints, conservative resets, cancellation | Large application latency, generated codecs, foreign component/reset behavior and long-session qualification |
@@ -415,15 +417,15 @@ Concrete gaps that influence sequencing:
 
 - Component metadata is currently derived from the source batch; library JAR
   consumption must work before building a reusable component ecosystem.
-- M1-17–19 now locally qualify the shared Todo record/paths, generated bounded
+- Accepted M1-17–19 proofs cover the shared Todo record/paths, generated bounded
   record codecs and explicit exact-value vectors. General protocol generation and
   wire evolution remain open.
-- M1-21 now locally qualifies Spring native login/CSRF/logout and two private
+- Accepted M1-21 proves Spring native login/CSRF/logout and two private
   workspaces in both packaged and Maven-dev modes:169 JVM +2 auth Chrome,4 Todo
   and2 packaged regressions pass on c658cea. The proxy's default remains anonymous;
   cookie forwarding is explicit and constrained. [Evidence](evidence/session-csrf-todo.md)
-  keeps publication/Verify and OIDC/cross-tab/timed-expiry work separate.
-- M1-20 locally qualifies an executable Boot JAR with attached browser assets,
+  records gate/Verify acceptance while keeping OIDC/cross-tab/timed-expiry work open.
+- Accepted M1-20 proves an executable Boot JAR with attached browser assets,
   launched from an empty directory. Prefixes, deployment caching/CSP and the
   independent starter/release acceptance remain open.
 - The current hot loader reconstructs Java values across TeaVM generations.

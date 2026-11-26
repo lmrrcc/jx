@@ -47,6 +47,7 @@ public final class PrePush {
             "npm run test:todo",
             "npm run test:packaged",
             "npm run test:auth",
+            "npm run test:ssr-protected",
             "npm run test:hot");
 
     private PrePush() {}

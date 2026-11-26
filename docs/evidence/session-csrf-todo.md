@@ -1,7 +1,7 @@
 # Spring session, CSRF and private Todo workspaces
 
-Source `c658cea`, M1-21, 26 November 2026. This is a bounded example integration with optional
-Spring dependencies. Publication gate and Verify remain pending.
+Original source `c658cea`, M1-21, 26 November 2026. This is a bounded example
+integration with optional Spring dependencies. PR81 acceptance is recorded below.
 
 `todo-contract` owns `SessionApi` paths/cookie/header names and the immutable
 `SessionInfo(username, csrfToken)` response. Its generated browser codec is the
@@ -83,3 +83,7 @@ management, rate/session-count policy, timed expiry/BFCache/cross-tab recovery,
 identity-generation cancellation of all caches/streams, context prefixes, distributed
 sessions and deployment TLS/proxy configuration remain later tasks. M2-10 remains
 partial/planned beyond the login/logout/CSRF journeys demonstrated here.
+
+## Publication acceptance
+
+[PR81](https://github.com/lmrrcc/jx/pull/81) merged as `8795b35d8d7c81c7dc495bab67bda0833d4534d5`. Exact head `cb279b0` passed all 17 local gate steps in 451 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45819857426) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45819628862). The integrated reactor passes 204 JVM checks and builds TeaVM in 43.189 seconds. Browser verification passes 47 runtime checks, 975 conformance checks with 217 explicit exclusions, four Todo scenarios, two packaged scenarios, two authentication hosting modes (10.6 seconds) and four real source-save hot workflows. The inventory remains 149 cases and 62/6328 registered pairs. These results supplement the original source qualification; they do not broaden the authentication/hosting limits above.
