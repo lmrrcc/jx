@@ -48,10 +48,19 @@ one minute and eight MiB. Request encoding and streamed response reads both enfo
 the byte limit. There is no automatic retry. The server still owns authentication,
 authorization, CSRF policy, validation, and concurrency controls.
 
+Use `request.withHeader("X-CSRF-TOKEN", maskedToken)` for a session-bound CSRF
+header. `Http.Header` validates token names and bounded printable ASCII values,
+rejects browser-controlled and JSON media headers, and redacts values in its string
+form. Requests defensively copy at most 16 distinct case-insensitive headers,
+with at most 8 KiB per value and 32 KiB total. No global credential store is added.
+The previous three- and five-argument request constructors still create requests
+without extra headers; recompile consumers for the expanded pre-GA record shape.
+
 HTTP, Elm commands and subscriptions share `jx.Cancellation` from `jx-core`.
-Return `Http.send(...)` directly from command work, as the compiling
+Return the owned cancellation handle from command work, as the compiling
 [`TodoGateway`](../examples/todo-app/src/main/java/jx/example/todo/TodoGateway.java)
-does. Store replacement additionally guards late results from transports that
+does. Its mutation command first obtains a fresh session token and owns both HTTP
+stages; it never retries the mutation. Store replacement additionally guards late results from transports that
 ignore abort. Use `Cancellation.NONE` when no resource needs releasing.
 
 This pre-GA API consolidation replaces `jx.browser.Cancellation` and

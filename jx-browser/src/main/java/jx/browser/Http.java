@@ -3,6 +3,10 @@ package jx.browser;
 import jx.Cancellation;
 import jx.Task;
 import java.util.Objects;
+import java.util.List;
+import java.util.Locale;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.teavm.jso.*;
@@ -19,14 +23,47 @@ public final class Http {
     public record Failure<T>(FailureKind kind, int status, String message, Json body) implements Result<T> {}
     /** Only same-origin absolute paths are accepted. Body is null for an absent request body.
      * Default limits are ten seconds and one MiB; custom limits may not exceed one minute/eight MiB. */
-    public record Request(Method method, String url, Json body, int timeoutMillis, int maxBytes) {
+    /** Bounded application header. Browser-controlled headers and JSON media headers cannot
+     * be overridden. Values are never included in diagnostics or the record's string form. */
+    public record Header(String name, String value) {
+        public Header {
+            Objects.requireNonNull(name); Objects.requireNonNull(value);
+            if (name.isEmpty() || name.length() > 64 || !name.matches("[!#$%&'*+.^_`|~0-9A-Za-z-]+")) throw new IllegalArgumentException("Invalid HTTP header name");
+            String lower = name.toLowerCase(Locale.ROOT);
+            if (lower.startsWith("sec-") || lower.startsWith("proxy-") || switch (lower) {
+                case "accept", "content-type", "cookie", "cookie2", "host", "origin", "referer", "content-length",
+                     "accept-charset", "accept-encoding", "access-control-request-headers", "access-control-request-method",
+                     "connection", "date", "dnt", "expect", "keep-alive", "permissions-policy", "set-cookie",
+                     "te", "trailer", "transfer-encoding", "upgrade", "via", "x-http-method", "x-http-method-override", "x-method-override" -> true;
+                default -> false;
+            }) throw new IllegalArgumentException("Header is controlled by the browser or JSON transport");
+            if (value.length() > 8192 || value.chars().anyMatch(c -> c < 32 || c > 126)) throw new IllegalArgumentException("Invalid HTTP header value");
+        }
+        @Override public String toString() { return "Header[name=" + name + ", value=<redacted>]"; }
+    }
+    public record Request(Method method, String url, Json body, int timeoutMillis, int maxBytes, List<Header> headers) {
         public Request {
             Objects.requireNonNull(method); Objects.requireNonNull(url);
             if (!url.startsWith("/") || url.startsWith("//") || url.contains("\\") || url.length() > 8192) throw new IllegalArgumentException("HTTP requires a bounded same-origin absolute path");
             if (method == Method.GET && body != null) throw new IllegalArgumentException("GET cannot have a body");
             if (timeoutMillis < 1 || timeoutMillis > 60_000 || maxBytes < 1 || maxBytes > 8_388_608) throw new IllegalArgumentException("Invalid HTTP limits");
+            headers = List.copyOf(headers);
+            if (headers.size() > 16) throw new IllegalArgumentException("Too many HTTP headers");
+            var names = new HashSet<String>();
+            int bytes = 0;
+            for (Header header : headers) {
+                if (!names.add(header.name().toLowerCase(Locale.ROOT))) throw new IllegalArgumentException("Duplicate HTTP header");
+                bytes += header.name().length() + header.value().length();
+            }
+            if (bytes > 32768) throw new IllegalArgumentException("HTTP headers exceed limit");
         }
+        public Request(Method method, String url, Json body, int timeoutMillis, int maxBytes) { this(method, url, body, timeoutMillis, maxBytes, List.of()); }
         public Request(Method method, String url, Json body) { this(method, url, body, 10_000, 1_048_576); }
+        /** Returns a new request; duplicates are rejected instead of silently replacing credentials. */
+        public Request withHeader(String name, String value) {
+            var next = new ArrayList<>(headers); next.add(new Header(name, value));
+            return new Request(method, url, body, timeoutMillis, maxBytes, next);
+        }
         public static Request get(String url) { return new Request(Method.GET, url, null); }
         public static Request post(String url, Json body) { return new Request(Method.POST, url, Objects.requireNonNull(body)); }
         public static Request put(String url, Json body) { return new Request(Method.PUT, url, Objects.requireNonNull(body)); }
@@ -51,7 +88,9 @@ public final class Http {
     }
     public static <T> Cancellation send(Request request, Function<Json, T> decoder, Consumer<Result<T>> completion) {
         Objects.requireNonNull(request); Objects.requireNonNull(decoder); Objects.requireNonNull(completion);
-        JSObject handle = fetch(request.url(), request.method().name(), request.body() == null ? null : request.body().stringify(), request.timeoutMillis(), request.maxBytes(), (status, kind, body) -> {
+        JSObject headers = headers(request.body() != null);
+        for (Header header : request.headers()) addHeader(headers, header.name(), header.value());
+        JSObject handle = fetch(request.url(), request.method().name(), request.body() == null ? null : request.body().stringify(), headers, request.timeoutMillis(), request.maxBytes(), (status, kind, body) -> {
             Json json = new Json(body);
             if (!kind.isEmpty()) {
                 FailureKind failure = FailureKind.valueOf(kind);
@@ -66,7 +105,11 @@ public final class Http {
         return () -> cancel(handle);
     }
     @JSFunctor interface Completed extends JSObject { void complete(int status, String failureKind, JSObject body); }
-    @JSBody(params = {"url", "method", "body", "timeout", "limit", "done"}, script = """
+    @JSBody(params = "body", script = "var h = new Headers(); h.set('Accept', 'application/json'); if (body) h.set('Content-Type', 'application/json'); return h;")
+    private static native JSObject headers(boolean body);
+    @JSBody(params = {"headers", "name", "value"}, script = "headers.set(name, value);")
+    private static native void addHeader(JSObject headers, String name, String value);
+    @JSBody(params = {"url", "method", "body", "headers", "timeout", "limit", "done"}, script = """
         var controller = new AbortController();
         var finished = false;
         var timedOut = false;
@@ -80,7 +123,7 @@ public final class Http {
             if (target.origin !== location.origin) throw {kind: 'NETWORK'};
             if (body !== null && new TextEncoder().encode(body).length > limit) throw {kind: 'PAYLOAD_LIMIT'};
             return fetch(target.href, {method: method, body: body === null ? undefined : body,
-                headers: body === null ? {Accept: 'application/json'} : {Accept: 'application/json', 'Content-Type': 'application/json'},
+                headers: headers,
                 credentials: 'same-origin', redirect: 'error', signal: controller.signal});
         }).then(function(response) {
             if (Number(response.headers.get('Content-Length') || 0) > limit) { controller.abort(); throw {kind: 'PAYLOAD_LIMIT'}; }
@@ -112,6 +155,6 @@ public final class Http {
         });
         return {cancel: function() { if (!finished) { finished = true; clearTimeout(timer); controller.abort(); } }};
         """)
-    private static native JSObject fetch(String url, String method, String body, int timeout, int limit, Completed done);
+    private static native JSObject fetch(String url, String method, String body, JSObject headers, int timeout, int limit, Completed done);
     @JSBody(params = "handle", script = "handle.cancel();") private static native void cancel(JSObject handle);
 }

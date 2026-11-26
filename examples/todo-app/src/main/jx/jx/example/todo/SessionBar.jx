@@ -1,0 +1,34 @@
+package jx.example.todo;
+
+import jx.*;
+import jx.browser.Http;
+import jx.example.contract.SessionApi;
+import jx.example.contract.SessionInfo;
+import jx.example.contract.SessionInfoJson;
+
+/** Identity display only. Spring remains authoritative for every request. */
+@Component
+public final class SessionBar {
+    public static View render() {
+        State<String> username = Hooks.useState("");
+        State<String> csrf = Hooks.useState("");
+        State<String> error = Hooks.useState("");
+        Hooks.useEffect(() -> Http.get(SessionApi.CURRENT, SessionInfoJson::decode, result -> {
+            switch (result) {
+                case Http.Success<SessionInfo> success -> {
+                    username.set(success.value().username()); csrf.set(success.value().csrfToken());
+                }
+                case Http.Failure<SessionInfo> failure -> error.set("Session unavailable");
+            }
+        })::cancel, Dependencies.none());
+        return <div className="session">
+            {error.value().isEmpty() ? null : <span role="alert">{error.value()}</span>}
+            {username.value().isEmpty() ? <a href={SessionApi.LOGIN}>Sign in</a> :
+                <form method="post" action={SessionApi.LOGOUT}>
+                    <span data-testid="session-user">{username.value()}</span>
+                    <input type="hidden" name="_csrf" value={csrf.value()} />
+                    <button type="submit" disabled={csrf.value().isEmpty()}>Sign out</button>
+                </form>}
+        </div>;
+    }
+}

@@ -20,7 +20,9 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
-Latest editor acceptance: **✅ M1-28/M1-29 merged in PR79 as `c533d99`**, after all 15 local gate steps passed in 368 seconds and both Verify checks passed on `c96e945`. The integration passes **198 JVM, 975 conformance checks with 217 exclusions, four Spring Todo scenarios and four hot workflows**. Original 96-test IntelliJ SDK/ZIP/Verifier evidence includes the 100-component timing fixture, exact-source rename on 101 closed files and undo/redo on 25 files. The native SDK undo limit at 101 retained files remains explicit; there is no blanket IDE-parity or new development-service claim.
+Latest packaged-Spring acceptance: **✅ M1-20 merged in PR80 as `74eb3d9`**, after all 16 local gate steps passed in 404 seconds and both Verify checks passed on `f07bcd4`. The actual executable Boot JAR serves the Java browser UI and API from an empty directory. Integrated **201 JVM, 47 runtime, 975 conformance checks/217 exclusions, four Todo, two packaged Chrome and four hot workflows** pass. This is the bounded root-context CSR proof; authentication, deployment policy and the starter remain separately tracked.
+
+Earlier editor acceptance: **✅ M1-28/M1-29 merged in PR79 as `c533d99`**, after all 15 local gate steps passed in 368 seconds and both Verify checks passed on `c96e945`. The integration passes **198 JVM, 975 conformance checks with 217 exclusions, four Spring Todo scenarios and four hot workflows**. Original 96-test IntelliJ SDK/ZIP/Verifier evidence includes the 100-component timing fixture, exact-source rename on 101 closed files and undo/redo on 25 files. The native SDK undo limit at 101 retained files remains explicit; there is no blanket IDE-parity or new development-service claim.
 
 Earlier exact-value acceptance: **✅ M1-18 merged in PR78 as `07290dd`**, after all 15 local gate steps passed in 385 seconds and both Verify checks passed on `70a01ee`. The final integration passes **197 JVM, 47 runtime Chrome, 975 conformance checks with 217 mode exclusions, four real Spring Todo scenarios and four hot workflows**. Twelve shared vectors preserve long/decimal precision and missing versus null through the real HTTP boundary. The explicit adapters remain separate from the bounded generated codec; richer schemas, generated clients and protocol evolution remain open.
 
@@ -413,13 +415,17 @@ Concrete gaps that influence sequencing:
 
 - Component metadata is currently derived from the source batch; library JAR
   consumption must work before building a reusable component ecosystem.
-- The Todo DTO and its JSON field/URL knowledge are repeated on the browser and
-  server. The current JSON API exposes exact `int` values, not a certified general
-  numeric wire model.
-- The current development proxy strips authentication/cookie headers. It is not
-  evidence of authenticated Spring development.
-- Spring serves the demo's external build directory. That is not proof of an
-  application JAR deployable independently of the checkout.
+- M1-17–19 now locally qualify the shared Todo record/paths, generated bounded
+  record codecs and explicit exact-value vectors. General protocol generation and
+  wire evolution remain open.
+- M1-21 now locally qualifies Spring native login/CSRF/logout and two private
+  workspaces in both packaged and Maven-dev modes:169 JVM +2 auth Chrome,4 Todo
+  and2 packaged regressions pass on c658cea. The proxy's default remains anonymous;
+  cookie forwarding is explicit and constrained. [Evidence](evidence/session-csrf-todo.md)
+  keeps publication/Verify and OIDC/cross-tab/timed-expiry work separate.
+- M1-20 locally qualifies an executable Boot JAR with attached browser assets,
+  launched from an empty directory. Prefixes, deployment caching/CSP and the
+  independent starter/release acceptance remain open.
 - The current hot loader reconstructs Java values across TeaVM generations.
   Independent chunks cannot simply exchange arbitrary Java instances. This also
   constrains lazy loading, shared libraries, workers and SSR bootstrapping.

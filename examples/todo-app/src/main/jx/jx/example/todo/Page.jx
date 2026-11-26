@@ -27,7 +27,7 @@ public final class Page {
         if ("/about".equals(location.path())) {
             content = <section className="about"><h2>A little room to think.</h2>
                 <p>Keep the next step simple. Add a task, finish it, and carry on.</p>
-                <p>Your tasks are saved on this device's local workspace server.</p></section>;
+                <p>Your tasks belong to your signed-in account on the workspace server.</p></section>;
         } else if (DETAILS.match(location).isPresent()) {
             String id = DETAILS.match(location).orElseThrow().parameter("id");
             Todo selected = model.todos().stream().filter(todo -> todo.id().equals(id)).findFirst().orElse(null);
@@ -51,6 +51,7 @@ public final class Page {
                     <a href="/todos" onClick={event -> { event.preventDefault(); services.router().navigate("/todos"); }}>Workspace</a>
                     <a href="/about" onClick={event -> { event.preventDefault(); services.router().navigate("/about"); }}>About</a>
                 </nav>
+                <SessionBar />
             </header>
             <div className="hero">
                 <p className="eyebrow">A little room to think</p>

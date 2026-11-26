@@ -36,6 +36,9 @@ public final class DevMojo extends AbstractMojo {
     /** Optional loopback API backend. Only /api/ requests are forwarded. */
     @Parameter(property = "jx.apiOrigin")
     private String apiOrigin;
+    /** Explicit local session cookie forwarding; anonymous proxy behavior remains the default. */
+    @Parameter(property = "jx.apiSessionCookie")
+    private String apiSessionCookie;
 
     @Parameter(defaultValue = "package", property = "jx.buildGoal")
     private String buildGoal;
@@ -70,7 +73,7 @@ public final class DevMojo extends AbstractMojo {
             stopProcess();
         }, "jx-dev-shutdown");
         Runtime.getRuntime().addShutdownHook(shutdown);
-        try (DevServer server = new DevServer(browserDirectory.toPath(), port, status, apiOrigin)) {
+        try (DevServer server = new DevServer(browserDirectory.toPath(), port, status, apiOrigin, apiSessionCookie)) {
             Path wrapper = mavenExecutable == null ? findWrapper(basedir) : mavenExecutable.toPath().toAbsolutePath();
             getLog().info("JX development server: http://127.0.0.1:" + server.port() + " (Ctrl+C stops the server and build)");
             String observed = fingerprint(watched);

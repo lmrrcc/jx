@@ -207,6 +207,7 @@ test('real Todo .jx save keeps unsaved form/focus, URL and typed Elm model witho
   await development('todo-app', todoPort, async ({ project, url }) => {
     const errors = []; page.on('pageerror', error => errors.push(error.message));
     let reads = 0;
+    await page.route(url + '/api/session', route => route.fulfill({ json: { username: 'demo', csrfToken: 'hot-fixture-token' } }));
     const todos = [{ id: 'hot-fixture', title: 'Preserved Java record', completed: false, version: 0 }];
     await page.route(url + '/api/todos', async route => {
       if (route.request().method() === 'GET') { reads++; await route.fulfill({ json: todos }); }

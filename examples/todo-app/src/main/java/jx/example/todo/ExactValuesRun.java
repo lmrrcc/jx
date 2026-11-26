@@ -7,6 +7,9 @@ import jx.Cancellation;
 import jx.browser.Http;
 import jx.browser.Json;
 import jx.example.contract.ExactValues;
+import jx.example.contract.SessionApi;
+import jx.example.contract.SessionInfo;
+import jx.example.contract.SessionInfoJson;
 
 /** One committed proof owner; cleanup cancels the outstanding real HTTP request. */
 final class ExactValuesRun {
@@ -15,6 +18,7 @@ final class ExactValuesRun {
     private final List<String> rows = new ArrayList<>();
     private Cancellation current = Cancellation.NONE;
     private boolean closed;
+    private String csrf;
     ExactValuesRun(Consumer<String> report) { this.report = report; }
     void start() {
         // Native JSON types are strict even for small values. Missing required nullable
@@ -26,13 +30,19 @@ final class ExactValuesRun {
             catch (IllegalArgumentException expected) { rejected = true; }
             if (!rejected) { report.accept("FAIL: invalid browser input accepted"); return; }
         }
-        next(0);
+        current = Http.get(SessionApi.CURRENT, SessionInfoJson::decode, result -> {
+            if (closed) return;
+            switch (result) {
+                case Http.Success<SessionInfo> success -> { csrf = success.value().csrfToken(); next(0); }
+                case Http.Failure<SessionInfo> failure -> report.accept("FAIL: session " + failure.kind());
+            }
+        });
     }
     private void next(int index) {
         if (closed) return;
         if (index == vectors.size()) { report.accept("PASS " + rows.size() + "\n" + String.join("\n", rows)); return; }
         ExactValues expected = vectors.get(index);
-        current = Http.send(Http.Request.post(ExactValues.PATH, ExactValuesJson.encode(expected)), ExactValuesJson::decode, result -> {
+        current = Http.send(Http.Request.post(ExactValues.PATH, ExactValuesJson.encode(expected)).withHeader(SessionApi.CSRF_HEADER, csrf), ExactValuesJson::decode, result -> {
             if (closed) return;
             switch (result) {
                 case Http.Success<ExactValues> success -> {

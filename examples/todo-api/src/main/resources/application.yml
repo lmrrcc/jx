@@ -3,6 +3,15 @@ server:
   port: 8181
   error:
     include-stacktrace: never
+  servlet:
+    session:
+      timeout: 15m
+      cookie:
+        name: JXSESSION
+        http-only: true
+        same-site: lax
+        path: /
+        secure: ${JX_SESSION_SECURE:false}
 spring:
   datasource:
     url: jdbc:h2:file:./.local/jx-todos;DB_CLOSE_ON_EXIT=FALSE
@@ -14,3 +23,7 @@ spring:
   jackson:
     deserialization:
       fail-on-unknown-properties: true
+jx:
+  demo:
+    password-hash: ${JX_DEMO_PASSWORD_HASH:}
+    other-password-hash: ${JX_OTHER_PASSWORD_HASH:}

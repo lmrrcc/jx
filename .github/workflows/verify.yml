@@ -35,6 +35,7 @@ jobs:
       - run: npm run test:counter
       - run: npm run test:todo
       - run: npm run test:packaged
+      - run: npm run test:auth
       - run: npm run test:hot
       - uses: actions/upload-artifact@v4
         if: failure()

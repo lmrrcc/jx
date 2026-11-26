@@ -141,6 +141,44 @@ final class DevelopmentProxyTest {
         if (exchange.getRequestMethod().equals("HEAD") || body.length == 0) exchange.sendResponseHeaders(status, -1);
         else { exchange.sendResponseHeaders(status, body.length); exchange.getResponseBody().write(body); }
     }
+    @Test void sessionOptInForwardsOnlyOneCookieAndCsrfWithSafeResponseAttributes() throws Exception {
+        var calls = new AtomicInteger();
+        var output = new AtomicReference<>("JXSESSION=next; Path=/; HttpOnly; SameSite=Lax; Secure");
+        var location = new AtomicReference<>("/todos");
+        try (var fixture = new Fixture(exchange -> {
+            calls.incrementAndGet();
+            assertEquals("JXSESSION=owned", exchange.getRequestHeaders().getFirst("Cookie"));
+            assertEquals("masked", exchange.getRequestHeaders().getFirst("X-CSRF-TOKEN"));
+            assertNull(exchange.getRequestHeaders().getFirst("Authorization"));
+            exchange.getResponseHeaders().add("Set-Cookie", "other=secret; Domain=example.com");
+            exchange.getResponseHeaders().add("Set-Cookie", output.get());
+            exchange.getResponseHeaders().set("Location", location.get());
+            reply(exchange, 303, new byte[0]);
+        }, Duration.ofSeconds(15), "JXSESSION")) {
+            var request = fixture.request("/api/session/login", "POST", new byte[0]).header("Origin", fixture.origin())
+                    .header("Cookie", "other=private; JXSESSION=owned").header("X-CSRF-TOKEN", "masked")
+                    .header("Authorization", "Bearer private");
+            var response = fixture.send(request);
+            assertEquals(303, response.statusCode());
+            assertEquals(List.of(output.get()), response.headers().allValues("Set-Cookie"));
+            assertEquals("/todos", response.headers().firstValue("Location").orElseThrow());
+            for (String invalid : List.of("JXSESSION=x; Path=/; HttpOnly; SameSite=None", "JXSESSION=x; Path=/; SameSite=Lax",
+                    "JXSESSION=x; Path=/api; HttpOnly; SameSite=Lax", "JXSESSION=x; Path=/; HttpOnly; SameSite=Lax; Domain=localhost")) {
+                output.set(invalid); var rejected = fixture.send(request);
+                assertEquals(502, rejected.statusCode()); assertTrue(rejected.headers().allValues("Set-Cookie").isEmpty());
+            }
+            output.set("JXSESSION=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax");
+            assertEquals(303, fixture.send(request).statusCode());
+            for (String invalid : List.of("https://external.invalid/steal", "//external.invalid/steal", "/%2e%2e/private")) {
+                location.set(invalid);
+                assertEquals(502, fixture.send(request).statusCode());
+            }
+            int before = calls.get();
+            assertEquals(400, fixture.send(request.copy().header("Cookie", "JXSESSION=second")).statusCode());
+            assertEquals(403, fixture.send(fixture.request("/api/session/login", "POST", new byte[0]).header("Origin", "http://evil.example")).statusCode());
+            assertEquals(before, calls.get());
+        }
+    }
     private static final class Fixture implements AutoCloseable {
         private final HttpServer backend;
         private final HttpServer server;
@@ -149,6 +187,9 @@ final class DevelopmentProxyTest {
         private final DevelopmentProxy proxy;
         private Fixture(HttpHandler handler) throws IOException { this(handler, Duration.ofSeconds(15)); }
         private Fixture(HttpHandler handler, Duration timeout) throws IOException {
+            this(handler, timeout, null);
+        }
+        private Fixture(HttpHandler handler, Duration timeout, String sessionCookie) throws IOException {
             backend = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 8);
             backend.setExecutor(executor);
             backend.createContext("/", exchange -> {
@@ -156,7 +197,7 @@ final class DevelopmentProxyTest {
                 catch (IOException ignored) { /* The proxy deliberately cancels oversized/stalled responses. */ }
             });
             backend.start();
-            proxy = new DevelopmentProxy("http://localhost:" + backend.getAddress().getPort(), timeout);
+            proxy = new DevelopmentProxy("http://localhost:" + backend.getAddress().getPort(), timeout, sessionCookie);
             server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 8);
             server.setExecutor(executor);
             server.createContext("/", exchange -> { try (exchange) { proxy.handle(exchange, port()); } });

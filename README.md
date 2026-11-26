@@ -136,6 +136,10 @@ The [Todo example](examples/todo-app) combines controlled forms, validation,
 filters, route parameters, browser history, context, a custom hook, an Elm store,
 and cancellable HTTP. Its [Spring Boot API](examples/todo-api) persists tasks in H2
 under `.local/`, with Flyway managing schema changes.
+Tasks are private to the authenticated account. Configure `JX_DEMO_PASSWORD_HASH`
+with a Spring encoded password (for example a `{bcrypt}` hash); no default password
+is supplied. The example account is `demo`; optional `JX_OTHER_PASSWORD_HASH`
+enables the separate `other` account. Keep these values in server configuration.
 
 Stop the counter server first; these development commands also use port 4180.
 
@@ -151,7 +155,8 @@ java -jar examples/todo-api/target/todo-api-0.1.0-SNAPSHOT.jar
 ./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository \
   -f examples/todo-app/pom.xml \
   dev.jx:jx-maven-plugin:0.1.0-SNAPSHOT:dev \
-  -Djx.port=4180 -Djx.apiOrigin=http://127.0.0.1:8181
+  -Djx.port=4180 -Djx.apiOrigin=http://127.0.0.1:8181 \
+  -Djx.apiSessionCookie=JXSESSION
 ```
 
 Open [127.0.0.1:4180/todos](http://127.0.0.1:4180/todos). The development server
@@ -159,9 +164,11 @@ proxies `/api/` requests to the backend on port 8181 and applies frontend update
 as you save. The backend also serves the normally packaged application at
 [127.0.0.1:8181/todos](http://127.0.0.1:8181/todos).
 
-The example is a local, single-workspace application bound to loopback, without
-accounts or multi-user authorization. See the [Maven guide](docs/maven.md) for
-the proxy's behavior, limits, and configuration.
+Use **Sign in** to open the native Spring form. The example remains bound to
+loopback; authentication and CSRF are enforced by Spring in both hosting modes.
+See the [session contract and limits](docs/evidence/session-csrf-todo.md) and
+[Maven guide](docs/maven.md). A TLS deployment must set `JX_SESSION_SECURE=true`
+and supply its own identity, rate and session-management policy.
 
 ## Development
 

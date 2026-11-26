@@ -214,6 +214,7 @@ Useful properties:
 | --- | --- |
 | jx.port | 4173; loopback binding only |
 | jx.apiOrigin | Optional loopback HTTP backend, e.g. http://127.0.0.1:8181; forwards /api/ only |
+| jx.apiSessionCookie | Optional single session cookie name; requires apiOrigin; enables bounded CSRF header and validated relative Location forwarding |
 | jx.browserDirectory | target/jx/dev-site for dev; target/site for package |
 | jx.buildGoal | package; verify is also accepted |
 | jx.buildTimeoutSeconds | 180, allowed range 10–1800 |
@@ -241,12 +242,21 @@ frontend separately:
 ./mvnw -B -ntp -Dmaven.repo.local=.cache/maven-repository \
   -f examples/todo-app/pom.xml \
   dev.jx:jx-maven-plugin:0.1.0-SNAPSHOT:dev \
-  -Djx.port=4180 -Djx.apiOrigin=http://127.0.0.1:8181
+  -Djx.port=4180 -Djx.apiOrigin=http://127.0.0.1:8181 \
+  -Djx.apiSessionCookie=JXSESSION
 ```
 
 Open http://127.0.0.1:4180/todos for hot updates. The development proxy forwards
 only `/api/` to that loopback backend, with bounded bodies and timeouts. It rejects
-cross-origin mutations and does not forward cookies or authorization headers.
+cross-origin mutations. By default it strips cookies and authorization headers.
+The explicit session option forwards only the selected cookie and `X-CSRF-TOKEN`,
+never `Authorization` or other cookies. Backend session cookies must be host-only,
+`Path=/`, `HttpOnly`, and `SameSite=Lax` or `Strict`; `Secure` is preserved, never
+removed. Invalid/duplicate session cookies or external/non-normalized locations
+fail before response headers are published. The proxy never follows redirects.
+Cookies are scoped by host, not port; the two loopback origins deliberately share
+one backend session. This is not isolation between unrelated apps on the same host.
+Configure the Todo password hash as described in the [session proof](evidence/session-csrf-todo.md).
 The page served directly by the backend on 8181 is the normal packaged app.
 
 `npm run test:hot` copies the Counter and Todo sources into isolated cache

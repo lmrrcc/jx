@@ -8,38 +8,38 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 
-/** Persistent demo-wide todo list. Optimistic versions prevent an older tab overwriting a newer edit. */
+/** Persistent per-principal todos. Both ownership and optimistic version are checked in SQL. */
 @Repository
 public class TodoRepository {
     private final JdbcClient jdbc;
     public TodoRepository(JdbcClient jdbc) { this.jdbc = jdbc; }
 
-    public List<Todo> list() {
-        return jdbc.sql("select id, title, completed, version from todos order by created_at, id limit 500")
-                .query(Todo.class).list();
+    public List<Todo> list(String owner) {
+        return jdbc.sql("select id, title, completed, version from todos where owner=:owner order by created_at, id limit 500")
+                .param("owner", owner).query(Todo.class).list();
     }
 
     @org.springframework.transaction.annotation.Transactional
-    public Todo create(String title) {
+    public Todo create(String owner, String title) {
         jdbc.sql("select id from todo_workspace where id = 1 for update").query(Integer.class).single();
-        if (jdbc.sql("select count(*) from todos").query(Integer.class).single() >= 500) {
+        if (jdbc.sql("select count(*) from todos where owner=:owner").param("owner", owner).query(Integer.class).single() >= 500) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Workspace holds 500 tasks; remove a task before adding another");
         }
         String id = UUID.randomUUID().toString();
-        jdbc.sql("insert into todos(id, title, completed, version) values (:id, :title, false, 0)")
-                .param("id", id).param("title", title).update();
+        jdbc.sql("insert into todos(id, title, completed, version, owner) values (:id, :title, false, 0, :owner)")
+                .param("id", id).param("title", title).param("owner", owner).update();
         return new Todo(id, title, false, 0);
     }
 
-    public Todo update(UUID id, String title, boolean completed, int version) {
-        int changed = jdbc.sql("update todos set title=:title, completed=:completed, version=version+1 where id=:id and version=:version")
-                .param("title", title).param("completed", completed).param("id", id.toString()).param("version", version).update();
+    public Todo update(String owner, UUID id, String title, boolean completed, int version) {
+        int changed = jdbc.sql("update todos set title=:title, completed=:completed, version=version+1 where id=:id and version=:version and owner=:owner")
+                .param("title", title).param("completed", completed).param("id", id.toString()).param("version", version).param("owner", owner).update();
         if (changed == 0) throw new ResponseStatusException(HttpStatus.CONFLICT, "Todo changed or was removed; reload before retrying");
         return new Todo(id.toString(), title, completed, version + 1);
     }
 
-    public void delete(UUID id, int version) {
-        int changed = jdbc.sql("delete from todos where id=:id and version=:version").param("id", id.toString()).param("version", version).update();
+    public void delete(String owner, UUID id, int version) {
+        int changed = jdbc.sql("delete from todos where id=:id and version=:version and owner=:owner").param("id", id.toString()).param("version", version).param("owner", owner).update();
         if (changed == 0) throw new ResponseStatusException(HttpStatus.CONFLICT, "Todo changed or was removed; reload before retrying");
     }
 }
