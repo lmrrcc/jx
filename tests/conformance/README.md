@@ -139,12 +139,11 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The published nullable-state integration (PR71) passes **959 checks**, with
-**217 skipped cells across 147 case IDs**: client 145 reference /144 JX, hydrate 106
-per side, static 112 and lazy 117 per side. Its 15-step gate and both Verify checks
-passed on `d735157`, after one documented CI Flight-host bind failure and a green
-unchanged-head rerun. The two upcoming default-props rows are inherited from
-previously executed source `7195939`; their new integrated gate remains pending.
+The published defaults integration (PR72) passes **975 checks**, with
+**217 skipped cells across 149 case IDs**: client 147 reference /146 JX,
+hydrate 108, static 114 and lazy 119 per side. Both recorded result tables
+match. Its 15-step gate passed in 332 seconds and both Verify checks passed
+on `8372309`. The runtime and authored defaults cases add no pair credit.
 
 Sixty-two pairs have complete local
 evidence in their declared modes; 6,266 of the 6,328 current candidates remain

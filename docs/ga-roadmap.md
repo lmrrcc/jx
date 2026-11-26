@@ -20,18 +20,19 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
-Latest published nullable class-state integration: **959 checks pass, 217 skipped,
-147 cases**, with 63 core/10 React/54 compiler/15 Maven package tests passing.
-The published native Writable and server-option consumers remain included. All
-**62/6328** registered interaction pairs pass; **6266** remain without complete
-evidence. Broader class/hot/editor qualification keeps R-28 **🟡 partial**.
+Latest published class-defaults integration: **975 checks pass, 217 skipped,
+149 cases**, with 66 core/10 React/59 compiler/15 Maven package tests passing.
+Nullable class state and the published server consumers remain included.
+All **62/6328** registered interaction pairs pass; **6266** remain without
+complete evidence. Broader class/hot/editor qualification keeps R-28 **🟡 partial**.
 
-**✅ PR71 merged as `30742a6`** after the 15-step gate passed in 414 seconds
-and both Verify checks passed on `d735157`. Its two scoped mutants were killed
-after a passing baseline. One CI attempt failed to bind the Flight host before
-browser assertions; an unchanged-head rerun passed. Typed defaults are prepared
-separately and still require their final integrated gate and Verify checks.
-The measurements below describe earlier slices, not additional passing tests.
+**✅ PR72 merged as `1717215`** after the 15-step gate passed in 332 seconds
+and both Verify checks passed on `8372309`. Three scoped defaults mutants
+were killed in the historical campaign after a passing baseline. The native
+target regions and consumers were compared with that qualified source;
+checkpoint adapter changes remain for the journal publication.
+Shared cancellation is prepared as a separate G0 slice and still needs its
+integrated gate and Verify. Earlier measurements below describe their own slices.
 
 Responsive image preload options (R-31-01) pass the integrated bench over
 merged lifecycle authoring `338872c`: **903 checks, 169 skipped, 134 cases**,

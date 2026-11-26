@@ -1,5 +1,6 @@
 package jx.elm;
 
+import jx.Cancellation;
 import java.util.Objects;
 
 /** Description of a one-result effect. Work starts only after the model is committed.

@@ -7,15 +7,14 @@ does not complete its planned GA qualification work. IDs are stable for future
 issues/PRs and evidence records.
 No GitHub issues, scheduled jobs, deployments or releases were created by this plan.
 
-Latest published nullable class-state slice: **959 passed /217 skipped /
-147 cases**, with package 63 core/10 React/54 compiler/15 plugin/10 LSP. The full
-run preserves **62/6328 pairs** (6266 active pairs open), including the eight
-published header/resource witnesses. R-28-03h1 is **✅ merged in PR71 as
-`30742a6`**, after the 15-step gate passed in 414 seconds and both Verify checks passed on
-`d735157`. Its two scoped mutants were killed after a passing baseline.
-The first PR Verify host-bind failure and unchanged-head green rerun are recorded
-in the nullable-state evidence; no validation was skipped. Typed defaults and
-class checkpoint publication follow separately. Broader R-28/R-31 remain open.
+Latest published class-defaults slice: **975 passed /217 skipped /149 cases**,
+with package 66 core/10 React/59 compiler/15 plugin/10 LSP. The full run
+preserves **62/6328 pairs** (6266 active pairs open), including the published
+resource-header witnesses. R-28-03h3 is **✅ merged in PR72 as `1717215`** after
+the 15-step gate passed in 332 seconds and both Verify checks passed on
+`8372309`. Its three scoped mutation results belong to the recorded earlier
+campaign. Shared cancellation and the class checkpoint journal follow in
+separate publications; broader R-28/R-31 and G0 remain open.
 Earlier figures below record their respective slices.
 
 Progress: **GA-01 and GA-02 are complete**. GA-14, GA-15 and GA-18 have substantial

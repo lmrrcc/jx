@@ -23,7 +23,7 @@ public final class TodoGateway implements TodoProgram.Gateway {
     }
     private static Command<TodoProgram.Message> request(String key, Http.Request request, Function<Json, TodoProgram.Message> decoder) {
         return new Command<>(key, reply -> {
-            var cancellation = Http.send(request, decoder, result -> {
+            return Http.send(request, decoder, result -> {
                 switch (result) {
                     case Http.Success<TodoProgram.Message> success -> reply.send(success.value());
                     case Http.Failure<TodoProgram.Message> failure -> {
@@ -40,7 +40,6 @@ public final class TodoGateway implements TodoProgram.Gateway {
                     }
                 }
             });
-            return cancellation::cancel;
         });
     }
     private static Todo todo(Json json) {

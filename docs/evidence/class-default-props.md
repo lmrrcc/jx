@@ -36,8 +36,7 @@ This slice owns three of those eight kills, with zero survivors or unusable
 mutants. These are historical scoped mutation results, not a new campaign on the
 isolated source. The unchanged native target regions and consumers were compared
 explicitly. The isolated source passes **66 core, 10 React and 59 compiler JVM
-checks**, including the five real-javac defaults tests. The final integrated
-package, full push gate and Verify remain pending.
+checks**, including the five real-javac defaults tests. Those targeted checks precede the completed publication qualification below.
 No new interaction-pair credit is claimed.
 
 ## Authoring
@@ -161,3 +160,23 @@ Primary contracts: [React class defaultProps](https://react.dev/reference/react/
 and [React cloneElement](https://react.dev/reference/react/cloneElement). The
 element-level undefined distinction is verified against the pinned React 19.3.1
 runtime; it is not implemented with private React fields.
+
+## Publication acceptance, 26 November 2026
+
+[PR72](https://github.com/lmrrcc/jx/pull/72) merged as `171721583876c152d6856c3c1eaf14e3973a50f5`.
+The exact head `8372309` passed the 15-step local gate in **332 seconds**,
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45786182125) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45786090706).
+Maven passes 66 core/10 React/7 Elm/59 compiler/15 plugin/10 LSP checks,
+plus the configured backend and Todo model checks. The full bench passes
+**975 checks with 217 exclusions across 149 cases**: client 147/146,
+hydrate 108, static 114 and lazy 119 per side. Both result tables match;
+all 62/6328 registered pairs remain unchanged. The bridge proof, 16 runtime
+checks, four lazy checks, 28 Flight Node plus four Flight browser checks,
+and complete counter/Todo/hot workflows also pass.
+
+The proof host now defaults to port 4873 with its existing RSC_PORT override;
+no retry, server reuse or assertion filtering was added. This follow-up
+records the PR71 infrastructure bind failure without attributing an
+unverified socket owner. The journal and broader class qualification remain
+separate work, as described above.
