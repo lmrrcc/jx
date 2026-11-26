@@ -69,6 +69,16 @@ public abstract class ClassComponent<P,S,X> {
     protected void componentDidMount() {}
     protected void componentDidUpdate(P previousProps, S previousState, X snapshot) {}
     protected void componentWillUnmount() {}
+    /** Deprecated native render-phase callbacks. Declare each matching descriptor capability;
+     * React controls ordering, warnings, retries and suppression by modern lifecycles.
+     * They do not prove a commit and may run for discarded work. Prefer committed callbacks
+     * for effects. Queued will-mount/receive-props updates still use native setState. */
+    protected void componentWillMount() {}
+    protected void UNSAFE_componentWillMount() {}
+    protected void componentWillReceiveProps(P nextProps) {}
+    protected void UNSAFE_componentWillReceiveProps(P nextProps) {}
+    protected void componentWillUpdate(P nextProps, S nextState) {}
+    protected void UNSAFE_componentWillUpdate(P nextProps, S nextState) {}
     /** Committed report of a descendant failure caught by this native boundary. The descriptor
      * must declare CATCH. Java failures retain their original Throwable identity; renderers
      * explicitly project foreign failures. This callback may perform reporting effects.
@@ -80,6 +90,27 @@ public abstract class ClassComponent<P,S,X> {
     /** Renderer lifecycle dispatch. Register the corresponding descriptor capability. */
     public final void mounted() { componentDidMount(); }
     public final void unmounting() { componentWillUnmount(); }
+    /** Renderer dispatch of one distinct native legacy spelling, never a commit signal. */
+    public final void beforeMount(ClassComponentType.LegacyVariant variant) {
+        switch (variant) {
+            case DEPRECATED -> componentWillMount();
+            case UNSAFE -> UNSAFE_componentWillMount();
+        }
+    }
+    /** Renderer dispatch; current accessors remain current while arguments are pending. */
+    public final void beforeReceiveProps(ClassComponentType.LegacyVariant variant, P nextProps) {
+        switch (variant) {
+            case DEPRECATED -> componentWillReceiveProps(nextProps);
+            case UNSAFE -> UNSAFE_componentWillReceiveProps(nextProps);
+        }
+    }
+    /** Renderer dispatch; React may suppress this callback or discard its work. */
+    public final void beforeUpdate(ClassComponentType.LegacyVariant variant, P nextProps, S nextState) {
+        switch (variant) {
+            case DEPRECATED -> componentWillUpdate(nextProps, nextState);
+            case UNSAFE -> UNSAFE_componentWillUpdate(nextProps, nextState);
+        }
+    }
     /** Renderer dispatch of committed error reporting. */
     public final void caught(Throwable error, ComponentErrorInfo info) {
         componentDidCatch(Objects.requireNonNull(error), Objects.requireNonNull(info));

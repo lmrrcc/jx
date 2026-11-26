@@ -139,7 +139,13 @@ only after that assertion step succeeds; a later case failure cancels its credit
 The reporter rejects missing or misplaced markers. Features merely appearing in
 the same case earn no pair evidence.
 
-The published defaults integration (PR72) passes **975 checks**, with
+The selected legacy runtime integration passes **1,001 checks**, with **223
+declared exclusions across 153 case IDs**: client 151 reference /150 JX,
+hydrate 111, static 117 and lazy 122 per side. The conformance table adds only
+the four legacy cases, and the interaction table is unchanged. Publication gate
+and Verify remain pending; this run supplies no new pair credit.
+
+The earlier published defaults integration (PR72) passes **975 checks**, with
 **217 skipped cells across 149 case IDs**: client 147 reference /146 JX,
 hydrate 108, static 114 and lazy 119 per side. Both recorded result tables
 match. Its 15-step gate passed in 332 seconds and both Verify checks passed

@@ -35,6 +35,7 @@ final class Server {
         ResumeNonceExports.install();
         ResourceHeadersExports.install();
         ImportMapExports.install();
+        LegacyLifecycleExports.install();
         register("reactVersion", React::version);
         register("domVersion", React::domVersion);
         register("clientVersion", React::clientVersion);

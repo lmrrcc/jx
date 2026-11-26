@@ -2,7 +2,7 @@
 
 The local proof at source commit `daa4345`, based on merged `main` `f4b87ba`,
 passes on 26 November 2026. It has no dependency on the queued component-library
-ABI or RSC metadata work. Publication gate and CI Verify remain pending.
+ABI or RSC metadata work. The bounded proof is accepted in PR84 after the publication gate and both Verify checks; see the integrated receipt below.
 
 ## Exact boundary
 
@@ -69,8 +69,7 @@ missing managed clean plugin. With explicit publisher preparation, the new
 isolated proof passes both `clean package` runs (5.771 s and 4.302 s) and Chrome
 1/1 (1.8 s). It stages 966 artifacts and resolves 429; all initial hashes and
 file-origin checks pass, including the clean plugin. These figures describe
-this seed; the historical table above remains unchanged. The complete gate
-must run again on the correction before publication.
+this seed; the historical table above remains unchanged. The corrected candidate subsequently passes the complete publication gate and both Verify checks, as recorded below.
 
 The browser asserts two independent component states, queued functional updates,
 keyboard activation and preservation of the actual output DOM node. After assets
@@ -120,3 +119,9 @@ second browser, provide a Spring starter, or exercise development hot reload.
 The standalone consumer intentionally uses already merged functional
 component APIs; source-less third-party component metadata is the separate
 M1-10–M1-13 proof.
+
+## Publication acceptance
+
+[PR84](https://github.com/lmrrcc/jx/pull/84) merged as `20267ab0d94d6dc4579f09f8b49b4ad10151af32`. Exact head `1551e80` passed all 20 local gate steps in 503 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45852805256) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45852684431). Integrated 206 JVM checks plus TeaVM, 47 runtime checks, 975 conformance checks with 217 exclusions, four real hot workflows and all packaged/auth/SSR/MV3 examples pass. The 149-case inventory and 62/6328 interaction count remain unchanged.
+
+The final isolated consumer stages 966 Maven artifacts and resolves 429. Missing-plugin rejection, exact inventory/hashes and file-origin checks pass; the first file-only clean build takes 3.612 s and the offline clean rebuild 4.599 s. Chrome passes 1/1 in 897 ms. Publisher clean-plugin preparation is explicit and occurs before the frozen repository is constructed. The first gate's missing-seed failure remains recorded above; no consumer network fallback was introduced. All release and provisioning limits above remain.

@@ -209,6 +209,35 @@ Its focused evidence is recorded in the
 [class decision](decisions/0006-java-class-components.md#r-28-03e-typed-next-context-update-policy--25-november-2026);
 the integrated gate and native IDE qualification remain separate checks.
 
+### Native deprecated and UNSAFE class lifecycles
+
+Manual descriptors can declare the six native callbacks independently with
+`Lifecycle.WILL_MOUNT`, `UNSAFE_WILL_MOUNT`, `WILL_RECEIVE_PROPS`,
+`UNSAFE_WILL_RECEIVE_PROPS`, `WILL_UPDATE` and `UNSAFE_WILL_UPDATE`. Override
+the corresponding protected Java methods on `ClassComponent`. The deprecated
+and `UNSAFE_` spellings are distinct: when both are present, React may invoke both.
+
+For typed pending context, compose `withContextWillReceiveProps(context, variant,
+callback)` or `withContextWillUpdate(context, variant, callback)`, choosing
+`LegacyVariant.DEPRECATED` or `UNSAFE`. The context must be the exact instance
+declared by the descriptor. A policy replaces only the selected peer callback;
+the other spelling and all descriptor settings survive. Keep the immutable
+descriptor stable across renders. Current props, state and context remain on
+the peer while callback arguments describe pending values.
+
+React owns scheduling, state queues, warnings and suppression by modern
+derived-props/snapshot methods. These callbacks are render-phase work, may be
+repeated or discarded, and are not places to acquire external resources.
+`componentWillUpdate` must not schedule state updates. Use committed lifecycle
+methods for effects. React 19's removed legacy context API is not introduced.
+
+The compiling [ClassLegacy consumer](../tests/conformance/src/main/java/jx/conformance/cases/ClassLegacy.java)
+and [evidence contract](evidence/class-legacy-lifecycles.md) cover both spellings,
+queued updates, Pure/SCU decisions, modern suppression, abandoned suspended
+mounts and server traces. Automatic `.jx` class declarations for these callbacks
+remain a separate compiler task; this runtime slice uses explicit typed Java
+descriptors and adds no checkpoint guarantee.
+
 ### State derived from class props
 
 `descriptor.withDerivedStateFromProps((nextProps, pendingState) -> patch)` adds

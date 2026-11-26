@@ -21,6 +21,10 @@ class-defaults-authoring	pass	pass	pass	pass	pass	pass	pass	pass
 class-derived-props	pass	pass	pass	pass	pass	pass	pass	pass
 class-error-lifecycle	pass	pass	pass	pass	pass	pass	pass	pass
 class-keyed	pass	pass	pass	pass	pass	pass	pass	pass
+class-legacy	pass	pass	pass	pass	pass	pass	pass	pass
+class-legacy-interrupted	pass	pass	pass	pass	pass	pass	pass	pass
+class-legacy-server	pass	pass	n/a	n/a	n/a	n/a	n/a	n/a
+class-legacy-suppression	pass	pass	pass	pass	pass	pass	pass	pass
 class-lifecycle-authoring	pass	pass	pass	pass	pass	pass	pass	pass
 class-next-context	pass	pass	pass	pass	pass	pass	pass	pass
 class-null-patch	pass	pass	pass	pass	pass	pass	pass	pass

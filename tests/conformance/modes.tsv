@@ -44,3 +44,6 @@ server-resource-headers	lazy	resource hint header callbacks run on the rendering
 server-import-map	hydrate	complete import-map documents execute their own modules without a bench root
 server-import-map	static	complete import-map documents execute their own modules without a bench root
 server-import-map	lazy	complete import-map documents execute their own modules without a bench root
+class-legacy-server	hydrate	server lifecycle traces execute in Node without a browser root; client hydration is covered by the three class-legacy browser cases
+class-legacy-server	static	server lifecycle traces execute in Node without a browser root; initial static HTML is compared by the three class-legacy browser cases
+class-legacy-server	lazy	server lifecycle traces execute in Node without a browser root; lazy mounting is covered by the three class-legacy browser cases
