@@ -1,0 +1,17 @@
+package example.distribution;
+
+import jx.Component;
+import jx.View;
+
+@Component
+public final class App {
+    public static View render() {
+        return (
+            <main>
+                <h1>Built outside the JX checkout</h1>
+                <Counter initial={2} label="First" />
+                <Counter initial={10} label="Second" />
+            </main>
+        );
+    }
+}
