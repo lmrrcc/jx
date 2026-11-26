@@ -1,6 +1,6 @@
 # Shared record wire contract
 
-Status: M1-17/M1-18/M1-19 locally verified on 26 November 2026; publication pending.
+Status: M1-17/M1-19 accepted in PR77 (`8ea78ba`) on 26 November 2026, after the full local gate and both Verify checks. M1-18 exact values are locally qualified and await their separate publication. The bounded contract below remains explicit.
 
 The [shared-contract proposal](../ga-contracts.md) describes the eventual API
 surface. This first implementation proves one portable record through both an
