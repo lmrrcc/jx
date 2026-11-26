@@ -287,8 +287,9 @@ that exact head. No added pair or mutant credit or general SSR/CSP qualification
 is claimed; the broader R-31 task remains open.
 Details are in the bootstrap evidence record above.
 
-R-31-SERVER-HEADERS, 25 November 2026: 🟡 implementation and focused differential
-consumer pass. Typed immutable Link snapshots normalize Node/Web callbacks;
+R-31-SERVER-HEADERS, 26 November 2026: ✅ bounded slice merged through
+[PR 68](https://github.com/lmrrcc/jx/pull/68) as `ef7e9d3`.
+Typed immutable Link snapshots normalize Node/Web callbacks;
 an explicit positive UTF-16 header budget is preserved across builders. Initial
 render/prerender supports the options; resume rejects them. Callback failures
 remain observable through onError even when React continues the body. Source
@@ -301,8 +302,30 @@ All eight new witnesses and the 54 prior ones pass, bringing recorded evidence t
 62/6328 pairs (6266 open). Both header mutants were killed by this case after a
 passing baseline in the five-mutant `eb536cd` campaign, with zero survivors or
 unusable mutants. This is the header quota of two, not a full-catalog run.
-Final gate and Verify remain pending; production HTTP/103 integration is not
-qualified. See the [header contract](evidence/server-resource-headers.md).
+Final integration over resume PR67 passes 935 checks/193 skipped/141 cases,
+client 139/138, hydrate 104/static 110/lazy 115, with both result tables matching and
+all 62/6328 pair witnesses passing. The 15-step local gate passed in 346 seconds
+on `426cc08`, followed by both
+[PR Verify](https://github.com/lmrrcc/jx/actions/runs/45767190940) and
+[push Verify](https://github.com/lmrrcc/jx/actions/runs/45766891658).
+Production HTTP/103 integration and the broader R-31 gate remain unqualified.
+See the [header contract](evidence/server-resource-headers.md).
+
+R-31-SERVER-IMPORT-MAP, 25 November 2026: 🟡 implementation and focused differential
+consumer pass. A copied, bounded schema supplies imports, nested scopes and
+integrity metadata; native dictionaries preserve special keys and blocked
+targets. Four initial renderers accept it, resume rejects it. The browser case
+verifies real module resolution, SRI denial, script escaping and nonce propagation.
+The focused comparison passes 2 checks (6 inapplicable cells), including strict
+integrity-error accounting after independent review. Integrated source `8c5c337`
+passes 56 core/10 React/54 compiler/15 Maven package tests and the complete bench:
+937 passed, 199 skipped, 142 cases; client 140 reference/139 JX, hydrate 104,
+static 110, lazy 115 per side. All 62/6328 existing interaction pairs pass.
+Both scope-dropping and integrity-dropping mutations were killed by this case
+after a passing baseline in the five-mutant `eb536cd` campaign, with zero
+survivors or unusable mutants. This slice's quota is two; publication checks
+remain pending and no new pair credit is claimed. See the
+[import-map contract](evidence/server-import-map.md).
 
 Final integration over PR53 (`198c0b8`) preserves the tested functional source
 and consumers byte for byte. The package passes 40 core, 48 compiler and 15 Maven

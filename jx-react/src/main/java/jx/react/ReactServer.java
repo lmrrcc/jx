@@ -49,12 +49,19 @@ public final class ReactServer {
      * {@code React.suspense} boundary absorbs by sending its fallback; it runs outside rendering. */
     public record StreamOptions(String identifierPrefix, List<String> bootstrapScripts, List<String> bootstrapModules,
             Consumer<Throwable> onError, String bootstrapScriptContent, Nonce nonce,
-            Consumer<ResourceHeaders> onHeaders, Integer maxHeadersLength) {
+            Consumer<ResourceHeaders> onHeaders, Integer maxHeadersLength, ImportMap importMap) {
         public StreamOptions {
             bootstrapScripts = bootstrapScripts == null ? null : List.copyOf(bootstrapScripts);
             bootstrapModules = bootstrapModules == null ? null : List.copyOf(bootstrapModules);
             if (maxHeadersLength != null && maxHeadersLength <= 0)
                 throw new IllegalArgumentException("Header hint limit must be positive");
+        }
+        /** Retains the constructor introduced with resource headers; import map is absent. */
+        public StreamOptions(String identifierPrefix, List<String> bootstrapScripts, List<String> bootstrapModules,
+                Consumer<Throwable> onError, String bootstrapScriptContent, Nonce nonce,
+                Consumer<ResourceHeaders> onHeaders, Integer maxHeadersLength) {
+            this(identifierPrefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, nonce,
+                    onHeaders, maxHeadersLength, null);
         }
         /** Retains the constructor introduced with nonce/bootstrap support; no header callback. */
         public StreamOptions(String identifierPrefix, List<String> bootstrapScripts, List<String> bootstrapModules,
@@ -67,29 +74,29 @@ public final class ReactServer {
             this(identifierPrefix, bootstrapScripts, bootstrapModules, onError, null, null);
         }
         public static StreamOptions defaults() { return new StreamOptions(null, null, null, null); }
-        public StreamOptions withIdentifierPrefix(String prefix) { return new StreamOptions(prefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength); }
-        public StreamOptions withBootstrapScripts(List<String> urls) { return new StreamOptions(identifierPrefix, urls, bootstrapModules, onError, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength); }
-        public StreamOptions withBootstrapModules(List<String> urls) { return new StreamOptions(identifierPrefix, bootstrapScripts, urls, onError, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength); }
-        public StreamOptions withError(Consumer<Throwable> callback) { return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, callback, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength); }
+        public StreamOptions withIdentifierPrefix(String prefix) { return new StreamOptions(prefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength, importMap); }
+        public StreamOptions withBootstrapScripts(List<String> urls) { return new StreamOptions(identifierPrefix, urls, bootstrapModules, onError, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength, importMap); }
+        public StreamOptions withBootstrapModules(List<String> urls) { return new StreamOptions(identifierPrefix, bootstrapScripts, urls, onError, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength, importMap); }
+        public StreamOptions withError(Consumer<Throwable> callback) { return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, callback, bootstrapScriptContent, nonce, onHeaders, maxHeadersLength, importMap); }
         /** Trusted JavaScript source emitted by React in an inline bootstrap script. Null omits it;
          * an empty string is retained. React escapes HTML script terminators, but does not sanitize
          * executable code or serialize application data: never concatenate untrusted input here.
          * Set this on the initial render/prerender; resume does not replace that bootstrap
          * configuration or retroactively authorize scripts already emitted in static output. */
         public StreamOptions withBootstrapScriptContent(String source) {
-            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError, source, nonce, onHeaders, maxHeadersLength);
+            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError, source, nonce, onHeaders, maxHeadersLength, importMap);
         }
         /** React's string nonce contract: scripts only, without a style nonce. Null clears both.
          * The host must generate a fresh unpredictable nonce per response and send a matching CSP
          * header. JX does not generate nonces or configure headers. Not valid for static prerendering. */
         public StreamOptions withNonce(String value) {
             return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError,
-                    bootstrapScriptContent, value == null ? null : new ScriptNonce(value), onHeaders, maxHeadersLength);
+                    bootstrapScriptContent, value == null ? null : new ScriptNonce(value), onHeaders, maxHeadersLength, importMap);
         }
         /** Separate script/style nonces for request-time streaming and resume. Null clears both.
          * These values authorize React-managed resources; they do not change explicit element props. */
         public StreamOptions withNonces(Nonces value) {
-            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, value, onHeaders, maxHeadersLength);
+            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError, bootstrapScriptContent, value, onHeaders, maxHeadersLength, importMap);
         }
         /** Receives React's resource hint headers, including an empty snapshot when there are
          * none. Runs on the rendering host's thread when React has determined the initial hints;
@@ -100,7 +107,7 @@ public final class ReactServer {
          * Supported on initial render/prerender only; resume rejects these options. */
         public StreamOptions withHeaders(Consumer<ResourceHeaders> callback) {
             return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError,
-                    bootstrapScriptContent, nonce, callback, maxHeadersLength);
+                    bootstrapScriptContent, nonce, callback, maxHeadersLength, importMap);
         }
         /** Maximum hint-header content in UTF-16 code units, not network bytes. Null uses React's
          * default. A supplied limit must be positive. React omits hints that do not fit and may
@@ -108,7 +115,15 @@ public final class ReactServer {
          * Applies when a header callback is supplied, on initial render/prerender only. */
         public StreamOptions withMaxHeadersLength(Integer limit) {
             return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError,
-                    bootstrapScriptContent, nonce, onHeaders, limit);
+                    bootstrapScriptContent, nonce, onHeaders, limit, importMap);
+        }
+        /** Trusted module-resolution configuration emitted before bootstrap modules. Null omits
+         * the import-map script. React serializes and HTML-escapes its contents; the browser owns
+         * URL resolution, scopes, blocked mappings and integrity checks. Only initial renders and
+         * prerenders accept this option; all resume APIs reject it. */
+        public StreamOptions withImportMap(ImportMap value) {
+            return new StreamOptions(identifierPrefix, bootstrapScripts, bootstrapModules, onError,
+                    bootstrapScriptContent, nonce, onHeaders, maxHeadersLength, value);
         }
     }
 
@@ -199,14 +214,14 @@ public final class ReactServer {
 
     /** React's {@code resumeToPipeableStream}: continues a prerender that was aborted, sending
      * what {@code postponed} left out. {@code view} must be the view that was prerendered.
-     * @throws IllegalArgumentException if initial-only resource header options are supplied */
+     * @throws IllegalArgumentException if initial-only resource header or import-map options are supplied */
     public static PipeableStream resumeToPipeableStream(View view, ReactStatic.Postponed postponed, StreamOptions options) {
         validateResumeOptions(options);
         return pipeable(view, options, Objects.requireNonNull(postponed));
     }
 
     /** React's {@code resume}: as {@link #resumeToPipeableStream}, to a web stream.
-     * @throws IllegalArgumentException if initial-only resource header options are supplied */
+     * @throws IllegalArgumentException if initial-only resource header or import-map options are supplied */
     public static Promise<ReadableStream> resume(View view, ReactStatic.Postponed postponed, StreamOptions options) {
         validateResumeOptions(options);
         return readable(view, options, Objects.requireNonNull(postponed));
@@ -214,8 +229,8 @@ public final class ReactServer {
 
     static void validateResumeOptions(StreamOptions options) {
         Objects.requireNonNull(options);
-        if (options.onHeaders() != null || options.maxHeadersLength() != null)
-            throw new IllegalArgumentException("Resource hint headers are available only on initial render/prerender");
+        if (options.onHeaders() != null || options.maxHeadersLength() != null || options.importMap() != null)
+            throw new IllegalArgumentException("Resource hint headers and import maps are available only on initial render/prerender");
     }
 
     private static PipeableStream pipeable(View view, StreamOptions options, ReactStatic.Postponed postponed) {
@@ -289,8 +304,12 @@ public final class ReactServer {
         Consumer<ResourceHeaders> onHeaders = options.onHeaders();
         if (onHeaders != null) setHeaders(settings, link -> onHeaders.accept(new ResourceHeaders(link)));
         if (options.maxHeadersLength() != null) setHeaderLimit(settings, options.maxHeadersLength());
+        if (options.importMap() != null) setImportMap(settings, ImportMaps.nativeMap(options.importMap()));
         return settings;
     }
+
+    @JSBody(params = {"settings", "map"}, script = "settings.importMap = map;")
+    private static native void setImportMap(JSObject settings, JSObject map);
 
     @JSBody(script = "return {};") private static native JSObject object();
     @JSBody(params = {"settings", "script", "style"}, script = "var nonce = {}; if (script !== null) nonce.script = script; if (style !== null) nonce.style = style; settings.nonce = nonce;")

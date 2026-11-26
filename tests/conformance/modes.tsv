@@ -41,3 +41,6 @@ server-resume-nonce	lazy	complete prerender/resume output is served with its own
 server-resource-headers	hydrate	resource hint header callbacks run on the rendering host without a browser root
 server-resource-headers	static	resource hint header callbacks run on the rendering host without a browser root
 server-resource-headers	lazy	resource hint header callbacks run on the rendering host without a browser root
+server-import-map	hydrate	complete import-map documents execute their own modules without a bench root
+server-import-map	static	complete import-map documents execute their own modules without a bench root
+server-import-map	lazy	complete import-map documents execute their own modules without a bench root

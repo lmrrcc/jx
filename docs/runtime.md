@@ -31,6 +31,11 @@ host owns sending headers and handling failures: a thrown callback reaches
 `onError` while React may continue the body. Resume rejects these initial-only
 options. See the [contract and qualification status](evidence/server-resource-headers.md).
 
+Initial render/prerender can also emit a typed `ImportMap` before bootstrap
+modules using `withImportMap`. Imports, scopes and integrity metadata are copied
+and bounded; the browser owns resolution and integrity enforcement. Resume
+rejects a replacement map. See the [contract and pending qualification](evidence/server-import-map.md).
+
 ## Components and ownership
 
 Declare a `ComponentType<Props>` once, normally as a static final descriptor. Compose
