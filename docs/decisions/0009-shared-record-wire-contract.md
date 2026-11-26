@@ -1,6 +1,6 @@
 # Shared record wire contract
 
-Status: M1-17/M1-19 locally verified on 26 November 2026; publication pending.
+Status: M1-17/M1-19 accepted in PR77 (`8ea78ba`) on 26 November 2026, after the full local gate and both Verify checks. M1-18 exact values are locally qualified and await their separate publication. The bounded contract below remains explicit.
 
 The [shared-contract proposal](../ga-contracts.md) describes the eventual API
 surface. This first implementation proves one portable record through both an
@@ -24,9 +24,10 @@ server domain objects.
   `int`, matching Todo's actual Jackson wire contract. Generated read and write
   code invokes the canonical record constructor; record invariants remain active.
   JSON property names come from record components once, in declaration order.
-- Separate exact-value vectors will establish `long` and decimal strings and
+- Separate exact-value vectors establish `long` and decimal strings and
   explicit missing/null behavior against the real Spring endpoint and TeaVM in
-  Chrome. Todo UUID identifiers remain strings. No exact value may pass through
+  Chrome through explicit adapters under the `contract-proof` server profile.
+  Todo UUID identifiers remain strings. No exact value may pass through
   JavaScript Number as an intermediate representation.
 
 M1-17 requires existing real Spring tests and the complete browser Todo example.
@@ -36,8 +37,18 @@ browser/Spring vectors; a JVM-only codec test is insufficient.
 
 M1-17/M1-19's [local evidence](../evidence/shared-todo-contract.md) now meets
 those focused checks: 159 JVM tests, actual TeaVM output, and all three unchanged
-Todo Chrome scenarios pass. Exact-value vectors remain separate work; the initial
-generator does not claim support for `long`, decimal, nullable or missing fields.
+Todo Chrome scenarios pass. The [exact-value slice](../evidence/shared-exact-values.md)
+additionally passes 161 JVM checks and four Chrome scenarios including twelve
+real Spring/TeaVM round trips. The initial generator still does not claim support
+for `long`, decimal, nullable or missing fields; these use explicit proof adapters.
+
+The proof's field policy is canonical `Long.toString` and `BigDecimal.toString`,
+including small values. Decimal precision and scale are bounded to 128; scale is
+preserved and no currency/rounding policy is inferred. Required nullable text and
+optional text use distinct fields: missing optional, present null and present
+value remain distinct; JSON has no `undefined` representation. The server rejects
+numeric JSON tokens for textual numeric fields and noncanonical strings. These
+bounded choices demonstrate the primitive boundary, not a universal serializer.
 
 Java 25 is the first shared artifact baseline. Older server JVMs, arbitrary custom
 Jackson serializers/naming strategies, generated async operations, auth/session

@@ -18,8 +18,10 @@ Current evidence: [todo-contract](../examples/todo-contract/src/main/java/jx/exa
 now supplies the same response record and operation paths to Spring and the browser.
 The Maven `record-codecs` goal generates its browser read/write codec from javac
 record symbols; the actual Spring/TeaVM Todo flow passes all three Chrome scenarios.
-Request DTO generation, richer wire policies, typed async operations and server
-adapters remain open. The [browser contract](browser.md) supplies bounded
+Separate [exact-value vectors](evidence/shared-exact-values.md) now qualify twelve
+long/decimal/missing/null values through actual Java/TeaVM and Spring using explicit
+adapters. Request DTO generation, generated richer wire policies, typed async
+operations and general server adapters remain open. The [browser contract](browser.md) supplies bounded
 cancellable JSON requests; this first record codec is not a complete protocol.
 
 ## Module and dependency model
@@ -170,6 +172,11 @@ field/type change must fail compatibility checks. A negative fixture must reject
 an entity or dependency pulling JDBC/server credentials into the browser closure.
 Later: external Boot/Kotlin and schema-first Rust consumers; two-tenant auth;
 streaming/upload; old-tab and rollback tests; clean published-artifact onboarding.
+
+The first local Todo/codec/exact-value proofs now pass. This does not close the
+broader evolution, dependency-closure or published-artifact requirements above:
+the generator rejects an unsupported JDBC field, but is not a general browser
+dependency scanner, and no old-client/new-server skew gate is claimed.
 
 Review references: [Spring mappings](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-requestmapping.html),
 [Spring CSRF](https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html),
