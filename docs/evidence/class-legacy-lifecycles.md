@@ -6,6 +6,22 @@ sugar is R-28-03h2b.
 
 ## Selected publication integration, 26 November 2026
 
+The final selected source `7ab6a2f` is rebased above consumer candidate `1551e80`.
+The reactor package passes **182 JVM tests** (84 core, 11 React, 65 compiler,
+22 Maven plugin) and compiles the TeaVM consumers in **35.405 seconds**. The
+complete matrix passes **1,001 checks / 223 declared exclusions / 153 cases** in
+**4.5 minutes**: client 151 reference / 150 JX, hydration 111, static 117 and lazy
+122 per implementation. The recorded conformance table adds exactly the four
+legacy cases below; all previous rows are unchanged. The interaction table is
+unchanged at **62 / 6,328** pairs. The publication gate and remote Verify remain
+pending. These local results do not count as a new mutation campaign.
+
+The source, native reference and shared spec retain the previously qualified
+selected runtime semantics. Compiler discovery and advanced hot protocols are
+separate candidates.
+
+### Earlier selected focused qualification
+
 Sources `b0fbead`/`a4aaa64` select only the legacy runtime on accepted main
 `515f2c2`. The existing nullable/sparse checkpoint admission and committed
 journal are preserved; the historical blanket rejection is not reinstated.
@@ -20,8 +36,8 @@ admission/composition evidence, not a new browser checkpoint-restoration claim.
 
 All four differential cases pass **26 Chrome checks / 6 declared mode exclusions**
 in 48.0 seconds on port 59185. Initial static HTML, hydration and lazy mounting
-remain explicit mode contracts. The full result tables are unchanged; a complete
-integrated bench, publication gate and Verify have not run on this branch.
+remain explicit mode contracts. This earlier focused run left the full result
+tables unchanged; the subsequent complete integration is recorded above.
 Two runtime mutants were killed in the historical `cc929bb` campaigns; those
 results are not a new mutation campaign on this selected integration.
 

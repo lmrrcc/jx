@@ -20,6 +20,12 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
+Next selected class slice: **🟡 R-28-03h2a legacy runtime** passes 182 JVM/TeaVM
+checks and the complete **1,001-pass /223-exclusion /153-case** matrix. Its four
+new legacy cases preserve the existing **62/6,328** interaction result. Publication
+gate and Verify remain pending; compiler declaration discovery and broader hot
+ownership are separate slices. See the [contract and evidence](evidence/class-legacy-lifecycles.md).
+
 Latest MV3/WASM acceptance: **✅ M1-27 merged in PR83 as `c13bfd8`**, after all 19 local gate steps passed in 461 seconds and both Verify checks passed on `c1432dc`. The ZIP-extracted Java popup runs the pinned Rust/Brotli WASM module under actual MV3 CSP, opens and closes through Chrome's action API and rejects initialization under the negative CSP. Integrated **206 JVM, 47 runtime, 975 conformance checks/217 exclusions, three extension checks and four real hot workflows** pass. Full service-worker/storage/message, wallet and marketplace qualification remains separate.
 
 Earlier protected-SSR acceptance: **✅ M1-26 merged in PR82 as `968ccf3`**, after all 18 local gate steps passed in 495 seconds and both Verify checks passed on `20e0eaa`. The actual Spring-authenticated route preserves two immutable request snapshots, hydrates retained DOM without refetch and cleans up a disconnected suspended request. Integrated **206 JVM, 47 runtime, 975 conformance checks/217 exclusions, three protected SSR checks and four real hot workflows** pass. Progressive private streaming, backend-fetch abort and production SSR hosting remain open.
