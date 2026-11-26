@@ -35,7 +35,9 @@ detected by both default-props cases; the last was detected by `class-defaults`.
 This slice owns three of those eight kills, with zero survivors or unusable
 mutants. These are historical scoped mutation results, not a new campaign on the
 isolated source. The unchanged native target regions and consumers were compared
-explicitly; the final integrated package, full push gate and Verify remain pending.
+explicitly. The isolated source passes **66 core, 10 React and 59 compiler JVM
+checks**, including the five real-javac defaults tests. The final integrated
+package, full push gate and Verify remain pending.
 No new interaction-pair credit is claimed.
 
 ## Authoring
