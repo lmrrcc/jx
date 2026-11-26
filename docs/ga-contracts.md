@@ -1,7 +1,10 @@
 # GA proposal: shared Java contracts and Spring integration
 
-Status: design proposal, 19 November 2026. This is an appendix to the
-[GA roadmap](ga-roadmap.md), not an implemented API or accepted replacement ADR.
+Status: design proposal, 19 November 2026, with a bounded locally verified
+Todo-record slice added on 26 November. This is an appendix to the
+[GA roadmap](ga-roadmap.md). Only the scope in
+[ADR0009](decisions/0009-shared-record-wire-contract.md) is implemented;
+the broader generated-protocol design below remains proposed.
 
 ## Consumer promise
 
@@ -11,12 +14,13 @@ a typed asynchronous client, correct codecs and safe errors without hand-copying
 record fields, endpoint strings or JSON property names. Pure reusable domain
 calculations can run on both sides. Network calls remain visibly asynchronous.
 
-Current evidence: backend `TodoRepository.Todo` in
-[TodoRepository.java](../examples/todo-api/src/main/java/jx/example/api/TodoRepository.java)
-and the frontend Todo model represent the same payload independently. Browser
-`TodoGateway` repeats controller URL and JSON details. The current
-[browser contract](browser.md) supplies bounded cancellable JSON requests, not
-a generated protocol. Remove this duplication in the first reference migration.
+Current evidence: [todo-contract](../examples/todo-contract/src/main/java/jx/example/contract/Todo.java)
+now supplies the same response record and operation paths to Spring and the browser.
+The Maven `record-codecs` goal generates its browser read/write codec from javac
+record symbols; the actual Spring/TeaVM Todo flow passes all three Chrome scenarios.
+Request DTO generation, richer wire policies, typed async operations and server
+adapters remain open. The [browser contract](browser.md) supplies bounded
+cancellable JSON requests; this first record codec is not a complete protocol.
 
 ## Module and dependency model
 

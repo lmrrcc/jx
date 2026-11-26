@@ -28,6 +28,7 @@
     <module>tests/rsc-proof/contract</module>
     <module>tests/rsc-proof/server</module>
     <module>tests/rsc-proof/client</module>
+    <module>examples/todo-contract</module>
     <module>examples/todo-api</module>
     <module>examples/counter-app</module>
     <module>examples/todo-app</module>

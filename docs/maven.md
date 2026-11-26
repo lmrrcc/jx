@@ -30,6 +30,7 @@ consumer configuration. It explicitly binds these plugin goals:
 | check | process-sources | javac validation with original-source diagnostics |
 | generate-test | generate-test-sources | Compile src/test/jx using production component metadata |
 | check-test | process-test-sources | Validate production/test Java with test classpath |
+| record-codecs | generate-sources | Generate browser JSON codecs from selected compiled dependency records |
 | browser | prepare-package | Bundle TeaVM's ES module and copy web assets |
 | dev | Explicit command only | Rebuild, serve loopback assets, and preserve compatible browser state |
 
@@ -57,6 +58,36 @@ Normal Maven compilation compiles the generated Java. Configure TeaVM 0.16.0
 `targetFileName=application.js`. The browser goal generates the framework's
 small main-function bootstrap and bundles it with the locked React runtime.
 Application behavior requires no authored JavaScript.
+
+## Shared record codecs
+
+Put portable response records in a dependency JAR and select them in the browser
+module. The shared artifact needs no JX, browser, Spring or Jackson dependency:
+
+```xml
+<execution>
+  <id>todo-contract</id>
+  <goals><goal>record-codecs</goal></goals>
+  <configuration><contractTypes>
+    <contractType>jx.example.contract.Todo</contractType>
+  </contractTypes></configuration>
+</execution>
+```
+
+`TodoJson.decode(Json)` and `TodoJson.encode(Todo)` are generated beside the
+record's package in `target/generated-sources/jx-contracts`. javac reads dependency
+class symbols without loading the application or running processors. The initial
+subset is public top-level non-generic records with required `String`, `boolean`
+and `int` fields, using exact component names. Unknown fields in incoming JSON
+are ignored; missing/null/wrong-type required fields fail. Custom retained
+annotations and other types fail generation rather than being interpreted as
+Jackson policy. Actual server serialization must match this subset, as the
+[Todo proof](evidence/shared-todo-contract.md) verifies through real HTTP.
+
+The bounded, hashed ownership manifest is stored under `target/jx/contracts`.
+Removing a selected type deletes only owned generated sources/classes. Unknown
+or manually edited output is preserved with an explicit failure. This goal does
+not generate request DTOs, server endpoints, async clients or compatibility rules.
 
 ## Files and incremental behavior
 

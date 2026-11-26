@@ -1,5 +1,7 @@
 package jx.example.todo;
 
+import jx.example.contract.Todo;
+
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;

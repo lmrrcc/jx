@@ -1,6 +1,6 @@
 # ADR 0008: owned resource tasks
 
-Status: M1-15 is accepted in PR75 (`f4b87ba`); M1-16 has local JVM/browser evidence and awaits publication.
+Status: M1-15 is accepted in PR75 (`f4b87ba`); M1-16 is accepted in PR76 (`515f2c2`) within the bounded effect-owned route contract below.
 
 ## Contract
 
@@ -159,3 +159,7 @@ state-preserving development, so this decision is ADR 0008.
 ## M1-15 publication acceptance, 26 November
 
 [PR75](https://github.com/lmrrcc/jx/pull/75) merged as `f4b87ba2bbab14f6beea01f1a5b31ea873cd8a76` after the exact head `74ee92e` passed the mandatory 15-step gate in 366 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45798321752) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45798178568). The final integrated gate passes 187 JVM checks, 45 runtime Chrome checks, 975 conformance checks with 217 mode exclusions across 149 cases, both complete examples and four real hot-reload workflows. The 62/6328 interaction count is unchanged. This accepts the bounded task/owner/resource API above; the route proof, general data caching, server fetching and retry policies remain separately qualified work. Earlier scoped results and the two mutation observations retain their original scope.
+
+## M1-16 publication acceptance, 26 November
+
+[PR76](https://github.com/lmrrcc/jx/pull/76) merged as `515f2c2c55303ea1e36a91dc9a588e1d8e365434` after exact head `226f1b4` passed the mandatory 15-step gate in 339 seconds and both [PR Verify](https://github.com/lmrrcc/jx/actions/runs/45801829871) and [push Verify](https://github.com/lmrrcc/jx/actions/runs/45801736225). The final integration passes 187 JVM checks, all 47 runtime Chrome checks, 975 conformance checks with 217 mode exclusions across 149 cases, both complete examples and four real hot workflows. The 62/6328 interaction count is unchanged. The two route witnesses exercise controlled external tasks and real browser navigation; no new production API or mutation credit is introduced. Shared caching, actions, prefetch, server fetching and protected SSR remain separately scoped.

@@ -1,0 +1,161 @@
+package jx.compiler;
+
+import com.sun.source.util.JavacTask;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.RecordComponentElement;
+import javax.lang.model.element.TypeElement;
+import javax.tools.DiagnosticCollector;
+import javax.tools.ForwardingJavaFileManager;
+import javax.tools.JavaFileManager;
+import javax.tools.JavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.StandardLocation;
+
+/** Generates browser JSON codecs from explicitly selected compiled record symbols.
+ * No application classes or annotation processors are loaded. The first wire subset
+ * is required String, boolean and int with component names as JSON property names. */
+public final class RecordCodecGenerator {
+    public record Source(Path relativePath, String qualifiedName, String content) {}
+
+    /** Resolves at most 64 public top-level records from the dependency class path.
+     * Unsupported types and custom annotations are errors, not serializer guesses. */
+    public List<Source> generate(List<String> names, List<Path> classPath) throws IOException {
+        names = List.copyOf(names);
+        if (names.size() > 64 || new HashSet<>(names).size() != names.size()) {
+            throw new IllegalArgumentException("Select at most 64 distinct contract record types");
+        }
+        if (names.isEmpty()) return List.of();
+        var diagnostics = new DiagnosticCollector<JavaFileObject>();
+        try (var files = JavaModel.compiler().getStandardFileManager(diagnostics, Locale.ROOT, StandardCharsets.UTF_8)) {
+            files.setLocationFromPaths(StandardLocation.CLASS_PATH, List.copyOf(classPath));
+            files.setLocationFromPaths(StandardLocation.SOURCE_PATH, List.of());
+            files.setLocationFromPaths(StandardLocation.ANNOTATION_PROCESSOR_PATH, List.of());
+            // Reading binary symbols needs the contract path, but must never execute its
+            // auto-start javac plugins (which -proc:none does not disable). The public
+            // file-manager SPI isolates service/class loading from both dependency and host paths.
+            JavaFileManager symbols = new ForwardingJavaFileManager<StandardJavaFileManager>(files) {
+                @Override public ClassLoader getClassLoader(Location location) {
+                    return ClassLoader.getPlatformClassLoader();
+                }
+                @Override public <S> java.util.ServiceLoader<S> getServiceLoader(Location location, Class<S> service) {
+                    return java.util.ServiceLoader.load(service, ClassLoader.getPlatformClassLoader());
+                }
+            };
+            // A source-less dependency JAR is sufficient. A probe initializes javac's Elements
+            // environment without compiling or initializing any authored application class.
+            JavacTask task = (JavacTask) JavaModel.compiler().getTask(null, symbols, diagnostics,
+                    List.of("-proc:none", "--release", "25"), null,
+                    List.of(new JavaModel.MemorySource("JxContractProbe.java", "final class JxContractProbe {}")));
+            task.parse();
+            task.analyze();
+            var result = new ArrayList<Source>();
+            for (String name : names.stream().sorted().toList()) {
+                if (name == null || !javax.lang.model.SourceVersion.isName(name)) {
+                    throw new IllegalArgumentException("Invalid contract type name: " + name);
+                }
+                TypeElement type = task.getElements().getTypeElement(name);
+                if (type == null) throw new IllegalArgumentException("Contract type is not on the compile class path: " + name);
+                result.add(generate(type));
+            }
+            for (var diagnostic : diagnostics.getDiagnostics()) {
+                if (diagnostic.getKind() == javax.tools.Diagnostic.Kind.ERROR) {
+                    throw new IllegalArgumentException("Cannot resolve contract records: " + diagnostic.getMessage(Locale.ROOT));
+                }
+            }
+            return List.copyOf(result);
+        }
+    }
+
+    private Source generate(TypeElement type) {
+        String name = type.getQualifiedName().toString();
+        if (type.getKind() != ElementKind.RECORD || !type.getModifiers().contains(Modifier.PUBLIC)
+                || type.getNestingKind() != javax.lang.model.element.NestingKind.TOP_LEVEL
+                || !type.getTypeParameters().isEmpty()) {
+            throw invalid(type, "requires a public, non-generic, top-level record");
+        }
+        if (type.getRecordComponents().isEmpty() || type.getRecordComponents().size() > 128) {
+            throw invalid(type, "requires between 1 and 128 record components");
+        }
+        rejectAnnotations(type);
+        for (Element member : type.getEnclosedElements()) {
+            rejectAnnotations(member);
+            if (member instanceof ExecutableElement executable) {
+                for (var parameter : executable.getParameters()) rejectAnnotations(parameter);
+            }
+        }
+        for (var field : type.getRecordComponents()) {
+            rejectAnnotations(field);
+            if (!field.asType().getAnnotationMirrors().isEmpty()) {
+                throw invalid(field, "type-use annotations are outside the supported wire subset");
+            }
+            if (field.getSimpleName().contentEquals("__proto__")) throw invalid(field, "reserved JSON property");
+            accessor(field);
+        }
+        String packageName = name.substring(0, Math.max(0, name.lastIndexOf('.')));
+        String simple = type.getSimpleName() + "Json";
+        String qualified = packageName.isEmpty() ? simple : packageName + "." + simple;
+        var source = new StringBuilder("// Generated by JX record-codecs v1; edit the contract record instead.\n");
+        if (!packageName.isEmpty()) source.append("package ").append(packageName).append(";\n\n");
+        source.append("public final class ").append(simple).append(" {\n")
+                .append("    private ").append(simple).append("() {}\n")
+                .append("    public static ").append(name).append(" decode(jx.browser.Json json) {\n")
+                .append("        java.util.Objects.requireNonNull(json, \"json\");\n")
+                .append("        return new ").append(name).append("(\n");
+        var fields = type.getRecordComponents();
+        for (int index = 0; index < fields.size(); index++) {
+            var field = fields.get(index);
+            source.append("                json.get(\"").append(field.getSimpleName()).append("\").")
+                    .append(accessor(field)).append("()")
+                    .append(index == fields.size() - 1 ? ");\n" : ",\n");
+        }
+        source.append("    }\n    public static jx.browser.Json encode(").append(name).append(" value) {\n")
+                .append("        java.util.Objects.requireNonNull(value, \"value\");\n")
+                .append("        return jx.browser.Json.object()\n");
+        for (int index = 0; index < fields.size(); index++) {
+            var field = fields.get(index);
+            source.append("                .put(\"").append(field.getSimpleName()).append("\", jx.browser.Json.")
+                    .append(factory(field)).append("(value.").append(field.getSimpleName()).append("()))")
+                    .append(index == fields.size() - 1 ? ";\n" : "\n");
+        }
+        source.append("    }\n}\n");
+        return new Source(Path.of(qualified.replace('.', '/') + ".java"), qualified, source.toString());
+    }
+
+    private static String accessor(RecordComponentElement field) {
+        return switch (field.asType().toString()) {
+            case "java.lang.String" -> "stringValue";
+            case "boolean" -> "booleanValue";
+            case "int" -> "intValue";
+            default -> throw invalid(field, "unsupported wire type " + field.asType()
+                    + "; supported types are required String, boolean and int");
+        };
+    }
+    private static String factory(RecordComponentElement field) {
+        return switch (accessor(field)) {
+            case "stringValue" -> "string";
+            case "booleanValue" -> "bool";
+            default -> "number";
+        };
+    }
+    private static void rejectAnnotations(Element element) {
+        for (var annotation : element.getAnnotationMirrors()) {
+            String name = annotation.getAnnotationType().toString();
+            if (!name.equals("java.lang.Deprecated") && !name.equals("java.lang.SuppressWarnings")) {
+                throw invalid(element, "annotation " + name + " has no declared wire mapping");
+            }
+        }
+    }
+    private static IllegalArgumentException invalid(Element element, String message) {
+        return new IllegalArgumentException("Contract " + element.getEnclosingElement() + "." + element.getSimpleName() + ": " + message);
+    }
+}

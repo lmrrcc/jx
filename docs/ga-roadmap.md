@@ -20,7 +20,9 @@ Flags apply to the stated acceptance scope, not merely to the existence of code.
 Every task in the [implementation sequence](ga-tasks.md) and every work package
 in the [execution register](ga-execution.md) has an explicit status.
 
-Latest resource acceptance: **✅ M1-15 merged in PR75 as `f4b87ba`**, after the 15-step gate passed in 366 seconds and both Verify checks passed on `74ee92e`. The final integration passes **187 JVM, 45 runtime Chrome, 975 conformance checks with 217 mode exclusions and four real hot workflows**. The 149 cases and 62/6328 interaction count are unchanged. Cancellation remains accepted in PR73 and the bounded class journal in PR74; route loading is prepared separately.
+Latest route acceptance: **✅ M1-16 merged in PR76 as `515f2c2`**, after the 15-step gate passed in 339 seconds and both Verify checks passed on `226f1b4`. The final integration passes **187 JVM, 47 runtime Chrome, 975 conformance checks with 217 mode exclusions and four real hot workflows**. The 149 cases and 62/6328 pair count are unchanged. Shared cancellation and owned resources remain accepted in PR73/75; shared Spring contracts are the next prepared slice.
+
+Earlier resource acceptance: **✅ M1-15 merged in PR75 as `f4b87ba`**, after the 15-step gate passed in 366 seconds and both Verify checks passed on `74ee92e`. The final integration passes **187 JVM, 45 runtime Chrome, 975 conformance checks with 217 mode exclusions and four real hot workflows**. The 149 cases and 62/6328 interaction count are unchanged. Cancellation remains accepted in PR73 and the bounded class journal in PR74; route loading is prepared separately.
 
 Earlier published journal integration: **975 checks pass, 217 skipped,
 149 cases**, with 180 JVM checks, 39 runtime Chrome checks and four real hot
@@ -135,7 +137,7 @@ native editor qualification and class hot checkpoints are still open.
 | R-20 server rendering to a string | ✅ Done | `ReactServer.renderToString` and `renderToStaticMarkup` in a Node host (M1-24), added on 24 November 2026. |
 | R-21 hydration | ✅ Done | `React.hydrate` over Node-rendered HTML (M1-25), store server snapshots and matching `useId`, added on 24 November 2026. |
 | G0 foundation proofs | 🟡 Partial | Lazy-module boundary and basic SSR→hydration proofs delivered; component JAR, exact shared contract, authenticated packaged Spring and protected SSR data route remain. |
-| Shared contracts and complete Spring integration | ⬜ To do | Generated clients/codecs, starter/BOM, one packaged UI/API and authenticated development. The existing todo API is the baseline. |
+| Shared contracts and complete Spring integration | 🟡 Partial | Shared Todo record/paths and generated String/bool/int browser codec locally verified with real Spring/Chrome; exact values, generated clients, starter/BOM, packaged UI/API and authenticated development remain. Publication pending. |
 | JX server rendering and hydration | 🟡 Partial | Node rendering, hydration, streaming/resume have bench evidence; request isolation, protected data and the RSC protocol track remain. |
 | IntelliJ and VS Code experience | 🟡 Partial | Existing packages work within documented limits; GA qualification, scale, remaining editing actions and browser debugging are open. |
 | TT-01 Cherry Test orchestration | 🟡 Partial | Unit coverage/CRAP delivered; integration and browser kinds still open. |

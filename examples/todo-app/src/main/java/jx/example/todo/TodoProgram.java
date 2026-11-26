@@ -1,5 +1,7 @@
 package jx.example.todo;
 
+import jx.example.contract.Todo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
