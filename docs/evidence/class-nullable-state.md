@@ -96,9 +96,21 @@ foreign-field membership assertions with otherwise valid source values. The
 derived consumer requires exactly one child-error report beyond its two expected
 initial warnings, as well as exactly one committed catch callback.
 
-The two new curated mutants, `class-null-state-emptified` and
-`class-own-undefined-deleted`, remain unrun. No full bench, push gate, Verify,
-interaction-pair or aggregate result-table credit has been added. Real React
+The two curated mutants, `class-null-state-emptified` and
+`class-own-undefined-deleted`, were subsequently killed after a passing baseline
+in the first eight-mutant campaign on `e296d4a` (production `cc929bb`), with zero
+survivors or unusable mutations. Both new nullable cases detect both mutations;
+`class-defaults` additionally detects loss of own undefined in that larger
+integration. This is the nullable slice's quota of two, not a full-catalog run.
+Log: `/private/tmp/jx-react-options-mutations-first.log`; retained scratch suffix
+`jx-mutation-3306759765052529558`.
+
+Publication preparation on 26 November retains the same eleven nullable
+core/runtime/consumer/spec files as `80f2e57`, rebased onto the native Writable
+candidate `02d2ddf` as source `266b05f`. The two all-mode result rows are carried
+from the already executed `e296d4a` integration as expected results for the
+publication gate; a new combined run on this exact publication tree is still
+pending. No new interaction pairs, gate or Verify completion is claimed. Real React
 development mode may repeat pure evaluation; assertions distinguish committed
 callbacks and observable skipped rendering from an exact speculative render count.
 
